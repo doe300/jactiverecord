@@ -1,0 +1,6 @@
+/test/testdb.tmp/
+/test/testdb.log
+/test/testdb.properties
+/test/testdb.script
+/.jacocoverage/
+/nbproject/
