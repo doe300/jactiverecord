@@ -1,15 +1,12 @@
 package de.doe300.activerecord.store;
 
 import de.doe300.activerecord.RecordBase;
-import de.doe300.activerecord.record.ActiveRecord;
 import de.doe300.activerecord.record.TimestampedRecord;
 import de.doe300.activerecord.dsl.Condition;
-import java.util.HashMap;
 import java.util.Map;
 import java.util.Set;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
-import javax.management.openmbean.KeyAlreadyExistsException;
 
 /**
  * NOTE: all column-arrays are minimum data, the implementing store can choose to return more than the requested data
@@ -48,21 +45,9 @@ public interface RecordStore extends AutoCloseable
 	
 	public void setValue(RecordBase<?> base, int primaryKey, String name, Object value) throws IllegalArgumentException;
 	
-	public default void setValues(RecordBase<?> base, int primaryKey, String[] names, Object[] values) throws IllegalArgumentException
-	{
-		for(int i=0;i<names.length;i++)
-		{
-			setValue(base, primaryKey, names[i], values[i]);
-		}
-	}
+	public void setValues(RecordBase<?> base, int primaryKey, String[] names, Object[] values) throws IllegalArgumentException;
 	
-	public default void setValues(RecordBase<?> base, int primaryKey, Map<String,Object> values) throws IllegalArgumentException
-	{
-		for(Map.Entry<String,Object> e:values.entrySet())
-		{
-			setValue(base, primaryKey, e.getKey(), e.getValue());
-		}
-	}
+	public void setValues(RecordBase<?> base, int primaryKey, Map<String,Object> values) throws IllegalArgumentException;
 	
 	/**
 	 * @param base
@@ -80,15 +65,7 @@ public interface RecordStore extends AutoCloseable
 	 * @return the values or an empty map, if the <code>primaryKey</code> was not found
 	 * @throws IllegalArgumentException 
 	 */
-	public default Map<String,Object> getValues(RecordBase<?> base, int primaryKey, String[] columns) throws IllegalArgumentException
-	{
-		Map<String,Object> map = new HashMap<>(columns.length);
-		for(String column:columns)
-		{
-			map.put( column, getValue(base, primaryKey, column));
-		}
-		return map;
-	}
+	public Map<String,Object> getValues(RecordBase<?> base, int primaryKey, String[] columns) throws IllegalArgumentException;
 	
 	/**
 	 * This method is for usage only if the table has no mapped model, i.e. for association-tables.
@@ -121,25 +98,16 @@ public interface RecordStore extends AutoCloseable
 	 * @param primaryKey  
 	 * @return whether data was updated
 	 */
-	public default boolean save(RecordBase<?> base, int primaryKey)
-	{
-		return false;
-	}
+	public boolean save(RecordBase<?> base, int primaryKey);
 	
 	/**
 	 * This method is only necessary for caching RecordStores
 	 * @param base
 	 * @return whether any data was updated
 	 */
-	public default boolean saveAll(RecordBase<?> base)
-	{
-		return false;
-	}
+	public boolean saveAll(RecordBase<?> base);
 	
-	public default void clearCache(RecordBase<?> base, int primaryKey)
-	{
-		
-	}
+	public void clearCache(RecordBase<?> base, int primaryKey);
 	
 	/**
 	 * @return whether this store maintains some kind of cache
@@ -162,20 +130,6 @@ public interface RecordStore extends AutoCloseable
 	 * @return the ID of the new record
 	 */
 	public int insertNewRecord(RecordBase<?> base);
-	
-	/**
-	 * Called upon the creation of a new proxy instance
-	 * @param proxy 
-	 * @param primaryKey the primary key, <code>null</code> if no key is set
-	 * @param createNew whether to create a new Record
-	 * @return whether the initialization was successful
-	 * @throws KeyAlreadyExistsException if the primary key is already is use
-	 */
-	@Deprecated
-	public default boolean initProxy(ActiveRecord proxy, Integer primaryKey, boolean createNew) throws KeyAlreadyExistsException
-	{
-		return true;
-	}
 	
 	/**
 	 * A record may be non-synchronized if the record-store uses caches or the record was not yet saved to the underlying resource

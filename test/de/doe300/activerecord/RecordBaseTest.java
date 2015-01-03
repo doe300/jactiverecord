@@ -279,4 +279,36 @@ public class RecordBaseTest<T extends TestInterface> extends Assert
 		t.setName( null );
 		t.validate();
 	}
+	
+	@Test
+	//Tests FinderMethods#findFor(String,Object)
+	public void testFindForColumn()
+	{
+		T t = base.createRecord();
+		assertTrue( base.findFor(base.getPrimaryColumn(), t.getPrimaryKey()).count() == 1);
+	}
+	
+	@Test
+	//Tests FinderMethods#findFirstFor(String,Object)
+	public void testFindFirstForColumn()
+	{
+		T t = base.createRecord();
+		assertSame(t, base.findFirstFor(base.getPrimaryColumn(), (Integer)t.getPrimaryKey()));
+	}
+	
+	@Test
+	//Tests FinderMethods#findFor(Map)
+	public void testFindForMap()
+	{
+		T t = base.createRecord();
+		assertTrue( base.findFor(Collections.singletonMap( base.getPrimaryColumn(), t.getPrimaryKey())).count() == 1);
+	}
+	
+	@Test
+	//Tests FinderMethods#findFirstFor(Map)
+	public void testFindFirstForMap()
+	{
+		T t = base.createRecord();
+		assertSame(t, base.findFirstFor(Collections.singletonMap( base.getPrimaryColumn(), t.getPrimaryKey())));
+	}
 }

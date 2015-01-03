@@ -1,6 +1,5 @@
 package de.doe300.activerecord.proxy.handlers;
 
-import de.doe300.activerecord.RecordBase;
 import de.doe300.activerecord.proxy.RecordHandler;
 import de.doe300.activerecord.record.ActiveRecord;
 import java.lang.reflect.InvocationTargetException;
@@ -12,7 +11,7 @@ import java.util.Arrays;
  * @author doe300
  * @param <T>
  */
-public abstract class InterfaceProxyHandler<T> implements ProxyHandler
+public abstract class InterfaceProxyHandler<T extends ActiveRecord> implements ProxyHandler
 {
 	private final Class<T> type;
 
@@ -49,14 +48,13 @@ public abstract class InterfaceProxyHandler<T> implements ProxyHandler
 	
 	private static Class<?>[] getArgumentsTypes(Object... args)
 	{
-		Class<?>[] array = new Class<?>[args.length+3];
+		Class<?>[] array = new Class<?>[args.length+2];
 		array[0] = ActiveRecord.class;
 		array[1] = RecordHandler.class;
-		array[2] = RecordBase.class;
 		
 		for(int i=0;i<args.length;i++)
 		{
-			array[i+3] = args.getClass();
+			array[i+2] = args.getClass();
 		}
 		
 		return array;

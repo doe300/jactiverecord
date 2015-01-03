@@ -517,4 +517,21 @@ public class SimpleJDBCRecordStore implements RecordStore
 	{
 		return false;
 	}
+
+	@Override
+	public boolean save(RecordBase<?> base, int primaryKey )
+	{
+		return false;
+	}
+
+	@Override
+	public boolean saveAll(RecordBase<?> base )
+	{
+		return false;
+	}
+
+	@Override
+	public void clearCache(RecordBase<?> base, int primaryKey )
+	{
+	}
 }

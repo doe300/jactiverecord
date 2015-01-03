@@ -165,4 +165,40 @@ public class MapRecordStore implements RecordStore
 	{
 		return false;
 	}
+
+	@Override
+	public void setValues(RecordBase<?> base, int primaryKey, String[] names, Object[] values ) throws IllegalArgumentException
+	{
+		for(int i=0;i<names.length;i++)
+		{
+			setValue( base, primaryKey, names[i], values[i]);
+		}
+	}
+
+	@Override
+	public void setValues(RecordBase<?> base, int primaryKey, Map<String, Object> values ) throws IllegalArgumentException
+	{
+		getRow( base, primaryKey ).putAll(values );
+		if(base.isTimestamped())
+		{
+			getRow( base, primaryKey ).put( COLUMN_UPDATED_AT, System.currentTimeMillis());
+		}
+	}
+
+	@Override
+	public boolean save(RecordBase<?> base, int primaryKey )
+	{
+		return false;
+	}
+
+	@Override
+	public boolean saveAll(RecordBase<?> base )
+	{
+		return false;
+	}
+
+	@Override
+	public void clearCache(RecordBase<?> base, int primaryKey )
+	{
+	}
 }

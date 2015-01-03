@@ -4,3 +4,4 @@
 /test/testdb.script
 /.jacocoverage/
 /nbproject/
+/test/testdb.lck

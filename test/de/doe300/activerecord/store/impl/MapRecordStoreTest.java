@@ -8,6 +8,7 @@ package de.doe300.activerecord.store.impl;
 import de.doe300.activerecord.RecordBase;
 import de.doe300.activerecord.RecordCore;
 import de.doe300.activerecord.TestInterface;
+import java.util.Collections;
 import org.junit.Assert;
 import org.junit.BeforeClass;
 import org.junit.Test;
@@ -112,5 +113,38 @@ public class MapRecordStoreTest extends Assert
 	public void testGetValues_4args()
 	{
 	}
-	
+
+	@Test
+	public void testIsCached()
+	{
+		assertFalse( store.isCached());
+	}
+
+	@Test
+	public void testSetValues_4args()
+	{
+		store.setValues( base, primaryKey, new String[]{"name","age"}, new Object[]{"Johnny", 13});
+		assertEquals( 13, store.getValue( base, primaryKey, "age"));
+		assertEquals( "Johnny", store.getValue( base, primaryKey, "name"));
+	}
+
+	@Test
+	public void testSetValues_3args()
+	{
+		store.setValues( base, primaryKey, Collections.singletonMap("name", "Johnny2"));
+		assertEquals( "Johnny2", store.getValue( base, primaryKey, "name"));
+	}
+
+	@Test
+	public void testSave()
+	{
+		assertFalse( store.save( base, primaryKey));
+	}
+
+	@Test
+	public void testSaveAll()
+	{
+		assertFalse( store.saveAll( base));
+	}
+
 }

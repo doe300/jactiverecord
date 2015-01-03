@@ -61,6 +61,10 @@ public interface FinderMethods<T extends ActiveRecord>
 		{
 			conds.add( new SimpleCondition(e.getKey(), e.getValue(), Comparison.IS));
 		}
+		if(conds.size()==1)
+		{
+			return find( conds.get( 0));
+		}
 		return find( new AndCondition( new Condition[conds.size()]) );
 	}
 	
@@ -74,6 +78,10 @@ public interface FinderMethods<T extends ActiveRecord>
 		for(Map.Entry<String,Object> e :data.entrySet())
 		{
 			conds.add( new SimpleCondition(e.getKey(), e.getValue(), Comparison.IS));
+		}
+		if(conds.size()==1)
+		{
+			return findFirst( conds.get( 0));
 		}
 		return findFirst( new AndCondition(new Condition[conds.size()]) );
 	}

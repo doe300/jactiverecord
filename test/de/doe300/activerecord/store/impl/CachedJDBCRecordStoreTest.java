@@ -148,6 +148,12 @@ public class CachedJDBCRecordStoreTest extends Assert
 		assertFalse( Objects.equals( store.getValue( base, primaryKey, "age"), -112));
 		assertEquals( 112, store.getValue( base, primaryKey, "age"));
 	}
+
+	@Test
+	public void testIsCached()
+	{
+		assertTrue( store.isCached());
+	}
 	
 }
 

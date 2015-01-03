@@ -140,5 +140,23 @@ public class SimpleJDBCRecordStoreTest extends Assert
 		store.setValue( base, primaryKey, "name", "Heinz");
 		assertEquals("Heinz", store.getValues( base.getTableName(), "name", base.getPrimaryColumn(), primaryKey).findFirst().get());
 	}
-	
+
+
+	@Test
+	public void testIsCached()
+	{
+		assertFalse( store.isCached());
+	}
+
+	@Test
+	public void testSave()
+	{
+		assertFalse( store.save( base, primaryKey));
+	}
+
+	@Test
+	public void testSaveAll()
+	{
+		assertFalse( store.saveAll( base));
+	}
 }
