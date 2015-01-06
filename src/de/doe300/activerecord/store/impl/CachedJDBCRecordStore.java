@@ -224,7 +224,9 @@ public class CachedJDBCRecordStore extends SimpleJDBCRecordStore implements Reco
 	@Override
 	public Stream<Map<String, Object>> streamAllWithData( RecordBase<?> base, String[] columns, Condition condition )
 	{
-		//need to combine results from cache and DB -> too expensive, so just grab all and store in cache
+		//need to combine results from cache and DB -> too expensive, so just grab from DB and store in cache
+		//fails if correct value is in cache but not in DB -> save all cache
+		saveAll( base );
 		return super.streamAllWithData( base, columns, condition ).peek( (Map<String,Object> map )-> 
 		{
 			getCache(base, ( Integer ) map.get( base.getPrimaryColumn())).update( map, false );

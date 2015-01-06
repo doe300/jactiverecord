@@ -130,6 +130,10 @@ public class CachedJDBCRecordStoreTest extends Assert
 	public void testStreamAllWithData()
 	{
 		assertTrue( store.streamAllWithData( base, new String[]{base.getPrimaryColumn()}, new SimpleCondition(base.getPrimaryColumn(), primaryKey, Comparison.IS)).count() == 1);
+		//Tests streaming with data in cache but not in store
+		TestInterface i = base.createRecord();
+		i.setName( "Failes");
+		assertTrue( store.streamAllWithData( base, new String[]{base.getPrimaryColumn()}, new SimpleCondition("name", "Failes", Comparison.IS)).anyMatch( (Map<String,Object> m) -> ((Integer)i.getPrimaryKey()).equals(m.get( base.getPrimaryColumn()))));
 	}
 
 	@Test
