@@ -151,35 +151,32 @@ public class SimpleJDBCRecordStore implements RecordStore
 	@Override
 	public void setValues(RecordBase<?> base, int primaryKey, Map<String,Object> data) throws IllegalArgumentException
 	{
-		try
+		//1. get updated columns
+		Map<String,Object> tmp = new HashMap<>(data.size());
+		//make all column names lower case
+		data.forEach( (String s,Object obj) -> tmp.put( s.toLowerCase(), obj));
+		//add timestamp if not present
+		if(base.isTimestamped() && !data.containsKey( COLUMN_UPDATED_AT))
 		{
-			//1. get updated columns
-			Map<String,Object> tmp = new HashMap<>(data.size());
-			//make all column names lower case
-			data.forEach( (String s,Object obj) -> tmp.put( s.toLowerCase(), obj));
-			//add timestamp if not present
-			if(base.isTimestamped() && !data.containsKey( COLUMN_UPDATED_AT))
-			{
-				tmp.put( COLUMN_UPDATED_AT, new Timestamp(System.currentTimeMillis()));
-			}
-			//Don't update ID
-			tmp.remove( base.getPrimaryColumn());
-			Iterator<Map.Entry<String,Object>> entries = tmp.entrySet().iterator();
-			String[] columns = new String[tmp.size()];
-			Object[] values = new Object[tmp.size()];
-			for(int i=0;i<columns.length && entries.hasNext();i++)
-			{
-				Map.Entry<String,Object> e = entries.next();
-				columns[i] = e.getKey();
-				values[i] = e.getValue();
-			}
-			//2. create statement
-			String sql = "UPDATE "+base.getTableName()+" SET ";
-			sql+= Arrays.stream( columns).map( (String s)-> s+ " = ? ").collect( Collectors.joining(", "));
-			sql += " WHERE "+base.getPrimaryColumn()+" = "+primaryKey;
-			
-			PreparedStatement stm = con.prepareStatement( sql );
-			
+			tmp.put( COLUMN_UPDATED_AT, new Timestamp(System.currentTimeMillis()));
+		}
+		//Don't update ID
+		tmp.remove( base.getPrimaryColumn());
+		Iterator<Map.Entry<String,Object>> entries = tmp.entrySet().iterator();
+		String[] columns = new String[tmp.size()];
+		Object[] values = new Object[tmp.size()];
+		for(int i=0;i<columns.length && entries.hasNext();i++)
+		{
+			Map.Entry<String,Object> e = entries.next();
+			columns[i] = e.getKey();
+			values[i] = e.getValue();
+		}
+		//2. create statement
+		String sql = "UPDATE "+base.getTableName()+" SET ";
+		sql+= Arrays.stream( columns).map( (String s)-> s+ " = ? ").collect( Collectors.joining(", "));
+		sql += " WHERE "+base.getPrimaryColumn()+" = "+primaryKey;
+		try(PreparedStatement stm = con.prepareStatement( sql ))
+		{
 			for(int i=0;i<values.length;i++)
 			{
 				stm.setObject( i+1, values[i]);
@@ -196,9 +193,9 @@ public class SimpleJDBCRecordStore implements RecordStore
 	@Override
 	public Object getValue(RecordBase<?> base, int primaryKey, String name ) throws IllegalArgumentException
 	{
-		try
+		try(Statement stm = con.createStatement())
 		{
-			ResultSet res = con.createStatement().executeQuery( "SELECT "+name+" FROM "+base.getTableName()+" WHERE "+base.getPrimaryColumn()+" = "+primaryKey);
+			ResultSet res = stm.executeQuery( "SELECT "+name+" FROM "+base.getTableName()+" WHERE "+base.getPrimaryColumn()+" = "+primaryKey);
 			if(res.next())
 			{
 				return res.getObject( name );
@@ -214,9 +211,9 @@ public class SimpleJDBCRecordStore implements RecordStore
 	@Override
 	public Map<String, Object> getValues( RecordBase<?> base, int primaryKey, String[] columns ) throws IllegalArgumentException
 	{
-		try
+		try(Statement stm = con.createStatement())
 		{
-			ResultSet res = con.createStatement().executeQuery("SELECT "+toColumnsList(columns, base.getPrimaryColumn() )+" FROM "+base.getTableName()+" WHERE "+base.getPrimaryColumn()+" = "+primaryKey);
+			ResultSet res = stm.executeQuery("SELECT "+toColumnsList(columns, base.getPrimaryColumn() )+" FROM "+base.getTableName()+" WHERE "+base.getPrimaryColumn()+" = "+primaryKey);
 			if(res.next())
 			{
 				Map<String,Object> values=new HashMap<>(columns.length);
@@ -243,9 +240,10 @@ public class SimpleJDBCRecordStore implements RecordStore
 	@Override
 	public boolean containsRecord( RecordBase<?> base, Integer primaryKey )
 	{
-		try
+		String sql = "SELECT "+base.getPrimaryColumn()+" FROM "+base.getTableName()+" WHERE "+base.getPrimaryColumn()+" = "+primaryKey;
+		try(PreparedStatement stmt = con.prepareStatement( sql ))
 		{
-			return con.prepareStatement( "SELECT "+base.getPrimaryColumn()+" FROM "+base.getTableName()+" WHERE "+base.getPrimaryColumn()+" = "+primaryKey).executeQuery().next();
+			return stmt.executeQuery().next();
 		}
 		catch ( SQLException ex )
 		{
@@ -256,9 +254,9 @@ public class SimpleJDBCRecordStore implements RecordStore
 	@Override
 	public void destroy( RecordBase<?> base, int primaryKey )
 	{
-		try
+		try(Statement stm = con.createStatement())
 		{
-			con.createStatement().executeUpdate( "DELETE FROM "+base.getTableName()+" WHERE "+base.getPrimaryColumn()+" = "+primaryKey);
+			stm.executeUpdate( "DELETE FROM "+base.getTableName()+" WHERE "+base.getPrimaryColumn()+" = "+primaryKey);
 		}
 		catch ( SQLException ex )
 		{
@@ -269,9 +267,9 @@ public class SimpleJDBCRecordStore implements RecordStore
 	@Override
 	public Map<String, Object> findFirstWithData( RecordBase<?> base, String[] columns, Condition condition )
 	{
-		try
+		String sql = "SELECT "+toColumnsList( columns, base.getPrimaryColumn() )+" FROM "+base.getTableName()+" "+toWhereClause( condition )+" ORDER BY "+base.getDefaultOrder().toSQL()+" LIMIT 1";
+		try(PreparedStatement stm = con.prepareStatement(sql))
 		{
-			PreparedStatement stm = con.prepareStatement("SELECT "+toColumnsList( columns, base.getPrimaryColumn() )+" FROM "+base.getTableName()+" "+toWhereClause( condition )+" ORDER BY "+base.getDefaultOrder().toSQL()+" LIMIT 1");
 			if(condition!=null)
 			{
 				fillStatement( stm, condition );
@@ -297,10 +295,10 @@ public class SimpleJDBCRecordStore implements RecordStore
 	@Override
 	public int count( RecordBase<?> base, Condition condition )
 	{
-		try
+		String sql = "SELECT COUNT(1) as size FROM "+base.getTableName()+" "+toWhereClause( condition );
+		//column name can't be count, because its a keyword
+		try(PreparedStatement stm = con.prepareStatement(sql))
 		{
-			//column name can't be count, because its a keyword
-			PreparedStatement stm = con.prepareStatement("SELECT COUNT(1) as size FROM "+base.getTableName()+" "+toWhereClause( condition ));
 			if(condition!=null)
 			{
 				fillStatement( stm, condition );
@@ -321,9 +319,9 @@ public class SimpleJDBCRecordStore implements RecordStore
 	@Override
 	public Stream<Map<String, Object>> streamAllWithData( RecordBase<?> base, String[] columns, Condition condition )
 	{
-		try
+		String sql = "SELECT "+toColumnsList( columns, base.getPrimaryColumn() )+" FROM "+base.getTableName()+" "+toWhereClause( condition )+" ORDER BY "+base.getDefaultOrder().toSQL();
+		try(PreparedStatement stm = con.prepareStatement(sql))
 		{
-			PreparedStatement stm = con.prepareStatement("SELECT "+toColumnsList( columns, base.getPrimaryColumn() )+" FROM "+base.getTableName()+" "+toWhereClause( condition )+" ORDER BY "+base.getDefaultOrder().toSQL());
 			if(condition!=null)
 			{
 				fillStatement( stm, condition );
@@ -383,9 +381,8 @@ public class SimpleJDBCRecordStore implements RecordStore
 	@Override
 	public boolean exists(String tableName)
 	{
-		try
+		try(ResultSet set = con.getMetaData().getTables(null, null, null, null ))
 		{
-			ResultSet set = con.getMetaData().getTables(null, null, null, null );
 			while(set.next())
 			{
 				if(set.getString( "TABLE_NAME").equalsIgnoreCase(tableName))
@@ -404,9 +401,8 @@ public class SimpleJDBCRecordStore implements RecordStore
 	@Override
 	public String[] getAllColumnNames( String tableName )
 	{
-		try
+		try(ResultSet set = con.getMetaData().getColumns( null, null, tableName, null))
 		{
-			ResultSet set = con.getMetaData().getColumns( null, null, tableName, null);
 			List<String> columns = new ArrayList<>(10);
 			while(set.next())
 			{
@@ -462,9 +458,9 @@ public class SimpleJDBCRecordStore implements RecordStore
 	public Stream<Object> getValues( String tableName, String column, String condColumn, Object condValue ) throws
 			IllegalArgumentException
 	{
-		try
+		String sql = "SELECT "+column+" FROM " +tableName+ " WHERE "+condColumn+" = ?";
+		try(PreparedStatement stmt = con.prepareStatement( sql))
 		{
-			PreparedStatement stmt = con.prepareStatement( "SELECT "+column+" FROM " +tableName+ " WHERE "+condColumn+" = ?");
 			stmt.setObject( 1, condValue);
 			ResultSet res = stmt.executeQuery();
 			return StreamSupport.stream( new Spliterator<Object>()

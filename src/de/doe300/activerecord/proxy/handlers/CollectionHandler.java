@@ -1,9 +1,5 @@
 package de.doe300.activerecord.proxy.handlers;
 
-import de.doe300.activerecord.RecordBase;
-import de.doe300.activerecord.proxy.RecordHandler;
-import de.doe300.activerecord.record.ActiveRecord;
-import de.doe300.activerecord.store.RecordStore;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.util.Arrays;
@@ -15,6 +11,11 @@ import java.util.Set;
 import java.util.Spliterator;
 import java.util.Spliterators;
 import java.util.TreeMap;
+
+import de.doe300.activerecord.RecordBase;
+import de.doe300.activerecord.proxy.RecordHandler;
+import de.doe300.activerecord.record.ActiveRecord;
+import de.doe300.activerecord.store.RecordStore;
 
 /**
  *
@@ -30,13 +31,13 @@ public class CollectionHandler implements ProxyHandler
 	}
 
 	@Override
-	public boolean handlesMethod( ActiveRecord record, Method method, Object[] args ) throws IllegalArgumentException
+	public boolean handlesMethod( final ActiveRecord record, final Method method, final Object[] args ) throws IllegalArgumentException
 	{
 		return method.getDeclaringClass().isAssignableFrom( Set.class);
 	}
 
 	@Override
-	public <T extends ActiveRecord> Object invoke( ActiveRecord record, RecordHandler<T> handler,Method method, Object[] args ) throws IllegalArgumentException
+	public <T extends ActiveRecord> Object invoke( final ActiveRecord record, final RecordHandler<T> handler,final Method method, final Object[] args ) throws IllegalArgumentException
 	{
 		HandlerCollection col = collections.get( record);
 		if(col == null)
@@ -53,15 +54,15 @@ public class CollectionHandler implements ProxyHandler
 			throw new RuntimeException("Failed to proxy collection-call",ex);
 		}
 	}
-	
-	private class HandlerCollection implements Collection<Object>
+
+	private static class HandlerCollection implements Collection<Object>
 	{
 		private final RecordBase<?> base;
 		private final RecordStore store;
 		private final int primaryKey;
 		private final String[] columnNames;
-		
-		HandlerCollection(RecordBase<?> base, int primaryKey, RecordStore store)
+
+		HandlerCollection(final RecordBase<?> base, final int primaryKey, final RecordStore store)
 		{
 			this.base = base;
 			this.primaryKey = primaryKey;
@@ -85,7 +86,7 @@ public class CollectionHandler implements ProxyHandler
 		public Iterator<Object> iterator()
 		{
 			return new Iterator<Object>()
-			{
+				{
 				private int index = -1;
 
 				@Override
@@ -100,7 +101,7 @@ public class CollectionHandler implements ProxyHandler
 				{
 					return store.getValue(base, primaryKey, columnNames[index]);
 				}
-			};
+				};
 		}
 
 		@Override
@@ -110,9 +111,9 @@ public class CollectionHandler implements ProxyHandler
 		}
 
 		@Override
-		public boolean contains( Object o )
+		public boolean contains( final Object o )
 		{
-			for(String column:columnNames)
+			for(final String column:columnNames)
 			{
 				if(Objects.equals( store.getValue( base, primaryKey, column ), o))
 				{
@@ -125,7 +126,7 @@ public class CollectionHandler implements ProxyHandler
 		@Override
 		public Object[] toArray()
 		{
-			Object[] arr = new Object[ columnNames.length];
+			final Object[] arr = new Object[ columnNames.length];
 			for(int i=0;i<columnNames.length;i++)
 			{
 				arr[i] = store.getValue( base, primaryKey, columnNames[i]);
@@ -134,9 +135,9 @@ public class CollectionHandler implements ProxyHandler
 		}
 
 		@Override
-		public <T> T[] toArray( T[] a )
+		public <T> T[] toArray( final T[] a )
 		{
-			T[] res = a.length >= columnNames.length ? a : Arrays.copyOf( a, columnNames.length);
+			final T[] res = a.length >= columnNames.length ? a : Arrays.copyOf( a, columnNames.length);
 			for(int i=0;i<columnNames.length;i++)
 			{
 				res[i] = ( T ) store.getValue( base, primaryKey, columnNames[i]);
@@ -145,37 +146,37 @@ public class CollectionHandler implements ProxyHandler
 		}
 
 		@Override
-		public boolean add( Object e )
+		public boolean add( final Object e )
 		{
 			throw new UnsupportedOperationException( "Can't add column to DB." );
 		}
 
 		@Override
-		public boolean remove( Object o )
+		public boolean remove( final Object o )
 		{
 			throw new UnsupportedOperationException( "Can't remove column from DB." );
 		}
 
 		@Override
-		public boolean containsAll(Collection<?> c )
+		public boolean containsAll(final Collection<?> c )
 		{
-			return c.stream().allMatch( (Object o) -> contains( o));
+			return c.stream().allMatch( (final Object o) -> contains( o));
 		}
 
 		@Override
-		public boolean addAll(Collection<? extends Object> c )
+		public boolean addAll(final Collection<? extends Object> c )
 		{
 			throw new UnsupportedOperationException( "Can't add colums to DB." );
 		}
 
 		@Override
-		public boolean retainAll(Collection<?> c )
+		public boolean retainAll(final Collection<?> c )
 		{
 			throw new UnsupportedOperationException( "Can't remove columns from DB." );
 		}
 
 		@Override
-		public boolean removeAll(Collection<?> c )
+		public boolean removeAll(final Collection<?> c )
 		{
 			throw new UnsupportedOperationException( "Can't remove columns from DB." );
 		}

@@ -1,9 +1,5 @@
 package de.doe300.activerecord.proxy.handlers;
 
-import de.doe300.activerecord.RecordBase;
-import de.doe300.activerecord.proxy.RecordHandler;
-import de.doe300.activerecord.record.ActiveRecord;
-import de.doe300.activerecord.store.RecordStore;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.util.Arrays;
@@ -14,6 +10,11 @@ import java.util.Map;
 import java.util.Set;
 import java.util.TreeMap;
 import java.util.stream.Collectors;
+
+import de.doe300.activerecord.RecordBase;
+import de.doe300.activerecord.proxy.RecordHandler;
+import de.doe300.activerecord.record.ActiveRecord;
+import de.doe300.activerecord.store.RecordStore;
 
 /**
  *
@@ -29,14 +30,14 @@ public class MapHandler implements ProxyHandler
 	}
 
 	@Override
-	public boolean handlesMethod( ActiveRecord record, Method method, Object[] args ) throws IllegalArgumentException
+	public boolean handlesMethod( final ActiveRecord record, final Method method, final Object[] args ) throws IllegalArgumentException
 	{
 		return record instanceof Map && method.getDeclaringClass().equals( Map.class);
 	}
 
 	@Override
-	public <T extends ActiveRecord> Object invoke( ActiveRecord record, RecordHandler<T> handler,
-			Method method, Object[] args ) throws IllegalArgumentException
+	public <T extends ActiveRecord> Object invoke( final ActiveRecord record, final RecordHandler<T> handler,
+		final Method method, final Object[] args ) throws IllegalArgumentException
 	{
 		HandlerMap map = maps.get( record);
 		if(map == null)
@@ -54,14 +55,14 @@ public class MapHandler implements ProxyHandler
 		}
 	}
 
-	private class HandlerMap implements Map<String, Object>
+	private static class HandlerMap implements Map<String, Object>
 	{
 		private final RecordStore store;
 		private final RecordBase<?> base;
 		private final int primaryKey;
 		private final String[] columnNames;
-		
-		HandlerMap(RecordBase<?> base, int primaryKey, RecordStore store)
+
+		HandlerMap(final RecordBase<?> base, final int primaryKey, final RecordStore store)
 		{
 			this.base = base;
 			this.primaryKey = primaryKey;
@@ -72,10 +73,10 @@ public class MapHandler implements ProxyHandler
 		@Override
 		public Set<Entry<String, Object>> entrySet()
 		{
-			return Arrays.stream( columnNames).map( (String s)->
+			return Arrays.stream( columnNames).map( (final String s)->
 			{
 				return new Entry<String, Object>()
-				{
+					{
 					@Override
 					public String getKey()
 					{
@@ -89,32 +90,32 @@ public class MapHandler implements ProxyHandler
 					}
 
 					@Override
-					public Object setValue( Object value )
+					public Object setValue( final Object value )
 					{
-						Object old = getValue();
+						final Object old = getValue();
 						store.setValue(base, primaryKey, s, value);
 						return old;
 					}
-				};
+					};
 			}).collect( Collectors.toSet());
 		}
 
 		@Override
-		public Object put( String key, Object value )
+		public Object put( final String key, final Object value )
 		{
 			if(key.equalsIgnoreCase(base.getPrimaryColumn()))
 			{
 				return primaryKey;
 			}
-			Object old = store.getValue( base, primaryKey, key );
+			final Object old = store.getValue( base, primaryKey, key );
 			store.setValue( base, primaryKey, key, value );
 			return old;
 		}
 
 		@Override
-		public void putAll(Map<? extends String, ? extends Object> m )
+		public void putAll(final Map<? extends String, ? extends Object> m )
 		{
-			for(Entry<? extends String, ? extends Object> e: m.entrySet())
+			for(final Entry<? extends String, ? extends Object> e: m.entrySet())
 			{
 				if(e.getKey().equalsIgnoreCase(base.getPrimaryColumn()))
 				{
@@ -137,25 +138,25 @@ public class MapHandler implements ProxyHandler
 		}
 
 		@Override
-		public boolean containsKey( Object key )
+		public boolean containsKey( final Object key )
 		{
 			return Arrays.asList( columnNames).contains( key );
 		}
 
 		@Override
-		public boolean containsValue( Object value )
+		public boolean containsValue( final Object value )
 		{
 			return values().contains( value );
 		}
 
 		@Override
-		public Object get( Object key )
+		public Object get( final Object key )
 		{
 			return store.getValue( base, primaryKey, key.toString());
 		}
 
 		@Override
-		public Object remove( Object key )
+		public Object remove( final Object key )
 		{
 			throw new UnsupportedOperationException("Can't remove from mapped table");
 		}
@@ -175,7 +176,7 @@ public class MapHandler implements ProxyHandler
 		@Override
 		public Collection<Object> values()
 		{
-			return keySet().stream().map( (String s) -> store.getValue( base, primaryKey, s)).collect( Collectors.toList());
+			return keySet().stream().map( (final String s) -> store.getValue( base, primaryKey, s)).collect( Collectors.toList());
 		}
 	}
 }

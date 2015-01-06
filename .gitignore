@@ -5,3 +5,5 @@
 /.jacocoverage/
 /nbproject/
 /test/testdb.lck
+/dist/
+/build.xml

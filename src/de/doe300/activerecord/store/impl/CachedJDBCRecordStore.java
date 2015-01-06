@@ -4,9 +4,11 @@ import de.doe300.activerecord.RecordBase;
 import de.doe300.activerecord.store.RowCache;
 import de.doe300.activerecord.store.RecordStore;
 import de.doe300.activerecord.dsl.Condition;
+
 import java.sql.Connection;
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.sql.Statement;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.TreeMap;
@@ -118,10 +120,10 @@ public class CachedJDBCRecordStore extends SimpleJDBCRecordStore implements Reco
 	/* Loads the whole row into cache at once */
 	private Object getDBValue(RecordBase<?> base, int primaryKey, String name) throws IllegalArgumentException
 	{
-		try
+		try(Statement stmt = con.createStatement())
 		{
 			//XXX only load default columns + requested column??
-			ResultSet res = con.createStatement().executeQuery( "SELECT * FROM "+base.getTableName()+" WHERE "+base.getPrimaryColumn()+" = "+primaryKey);
+			ResultSet res = stmt.executeQuery( "SELECT * FROM "+base.getTableName()+" WHERE "+base.getPrimaryColumn()+" = "+primaryKey);
 			if(res.next())
 			{
 				RowCache c = getCache( base,primaryKey );
