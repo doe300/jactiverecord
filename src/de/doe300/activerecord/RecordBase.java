@@ -7,7 +7,7 @@ import de.doe300.activerecord.dsl.Order;
 import de.doe300.activerecord.dsl.QueryResult;
 import de.doe300.activerecord.dsl.SimpleCondition;
 import de.doe300.activerecord.record.ActiveRecord;
-import de.doe300.activerecord.record.DataSet;
+import de.doe300.activerecord.record.RecordType;
 import de.doe300.activerecord.record.RecordCallbacks;
 import de.doe300.activerecord.record.Searchable;
 import de.doe300.activerecord.record.TimestampedRecord;
@@ -76,9 +76,9 @@ public abstract class RecordBase<T extends ActiveRecord> implements FinderMethod
 	{
 		if(tableName == null)
 		{
-			if(recordType.isAnnotationPresent( DataSet.class))
+			if(recordType.isAnnotationPresent(RecordType.class))
 			{
-				tableName = recordType.getAnnotation( DataSet.class).dataSet();
+				tableName = recordType.getAnnotation(RecordType.class).typeName();
 			}
 			else
 			{
@@ -95,9 +95,9 @@ public abstract class RecordBase<T extends ActiveRecord> implements FinderMethod
 	{
 		if(primaryColumn==null)
 		{
-			if(recordType.isAnnotationPresent( DataSet.class))
+			if(recordType.isAnnotationPresent(RecordType.class))
 			{
-				primaryColumn =  recordType.getAnnotation( DataSet.class).primaryKey();
+				primaryColumn =  recordType.getAnnotation(RecordType.class).primaryKey();
 			}
 			else
 			{
@@ -114,9 +114,9 @@ public abstract class RecordBase<T extends ActiveRecord> implements FinderMethod
 	{
 		if(defaultColumns==null)
 		{
-			if(recordType.isAnnotationPresent( DataSet.class))
+			if(recordType.isAnnotationPresent(RecordType.class))
 			{
-				defaultColumns =  recordType.getAnnotation( DataSet.class).defaultColumns();
+				defaultColumns =  recordType.getAnnotation(RecordType.class).defaultColumns();
 			}
 			else
 			{
@@ -130,9 +130,9 @@ public abstract class RecordBase<T extends ActiveRecord> implements FinderMethod
 	{
 		if(defaultOrder == null)
 		{
-			if(recordType.isAnnotationPresent( DataSet.class))
+			if(recordType.isAnnotationPresent(RecordType.class))
 			{
-				defaultOrder = Order.fromSQLString( recordType.getAnnotation( DataSet.class).defaultOrder());
+				defaultOrder = Order.fromSQLString(recordType.getAnnotation(RecordType.class).defaultOrder());
 			}
 			if(defaultOrder == null)
 			{

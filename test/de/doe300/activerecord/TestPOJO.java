@@ -2,7 +2,7 @@ package de.doe300.activerecord;
 
 import de.doe300.activerecord.pojo.POJOBase;
 import de.doe300.activerecord.record.ActiveRecord;
-import de.doe300.activerecord.record.DataSet;
+import de.doe300.activerecord.record.RecordType;
 import de.doe300.activerecord.record.Searchable;
 import de.doe300.activerecord.store.RecordStore;
 
@@ -11,7 +11,7 @@ import de.doe300.activerecord.store.RecordStore;
  * @author doe300
  */
 @Searchable(searchableColumns = {"name","age"})
-@DataSet(dataSet = "TESTTABLE", primaryKey = "id", defaultColumns = {"id", "name", "age"})
+@RecordType(typeName = "TESTTABLE", primaryKey = "id", defaultColumns = {"id", "name", "age"})
 public class TestPOJO implements ActiveRecord, TestInterface
 {
 	private final int primaryKey;

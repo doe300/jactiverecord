@@ -4,7 +4,7 @@ import de.doe300.activerecord.proxy.handlers.CollectionHandler;
 import de.doe300.activerecord.RecordBase;
 import de.doe300.activerecord.RecordCore;
 import de.doe300.activerecord.TestInterface;
-import de.doe300.activerecord.record.DataSet;
+import de.doe300.activerecord.record.RecordType;
 import java.sql.SQLException;
 import java.util.Arrays;
 import java.util.Collection;
@@ -120,7 +120,7 @@ public class CollectionHandlerTest extends Assert
 		record.clear();
 	}
 	
-	@DataSet(dataSet = "TESTTABLE", primaryKey = "id", defaultColumns = {"id", "name", "age"})
+	@RecordType(typeName = "TESTTABLE", primaryKey = "id", defaultColumns = {"id", "name", "age"})
 	public static interface TestCollectionInterface extends TestInterface, Collection<Object>
 	{
 		

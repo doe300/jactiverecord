@@ -35,66 +35,6 @@ public class SimpleJDBCRecordStore implements RecordStore
 		this.con=con;
 	}
 	
-	/**
-	 * 
-	 * @param type
-	 * @return the mapped JDBC-type
-	 * @see http://www.cis.upenn.edu/~bcpierce/courses/629/jdkdocs/guide/jdbc/getstart/mapping.doc.html
-	 */
-	@Deprecated
-	public static String getJDBCType(Class<?> type)
-	{
-		if(type.equals( String.class))
-		{
-			return "LONGVARCHAR";
-		}
-		if(type.equals( java.math.BigDecimal.class))
-		{
-			return "NUMERIC";
-		}
-		if(type.equals( Boolean.class) || type.equals( Boolean.TYPE))
-		{
-			return "BIT";
-		}
-		if(type.equals( Byte.class) || type.equals( Byte.TYPE))
-		{
-			return "TINYINT";
-		}
-		if(type.equals( Short.class) || type.equals( Short.TYPE))
-		{
-			return "SHORTINT";
-		}
-		if(type.equals( Integer.class) || type.equals( Integer.TYPE))
-		{
-			return "INTEGER";
-		}
-		if(type.equals( Long.class) || type.equals( Long.TYPE))
-		{
-			return "BIGINT";
-		}
-		if(type.equals( Float.class) || type.equals( Float.TYPE))
-		{
-			return "REAL";
-		}
-		if(type.equals( Double.class) || type.equals( Double.TYPE))
-		{
-			return "DOUBLE";
-		}
-		if(type.equals( java.sql.Date.class))
-		{
-			return "DATE";
-		}
-		if(type.equals( java.sql.Time.class))
-		{
-			return "TIME";
-		}
-		if(type.equals( java.sql.Timestamp.class))
-		{
-			return "TIMESTAMP";
-		}
-		throw new IllegalArgumentException("Type not mapped: "+type);
-	}
-	
 	protected String toWhereClause(Condition condition)
 	{
 		if(condition==null)

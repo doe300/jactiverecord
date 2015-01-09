@@ -4,7 +4,6 @@ import de.doe300.activerecord.record.ActiveRecord;
 import java.sql.Connection;
 import java.sql.ResultSet;
 import java.sql.SQLException;
-import java.sql.Types;
 
 /**
  *
@@ -53,18 +52,5 @@ public interface Migration
 		{
 			return false;
 		}
-	}
-	
-	/**
-	 * Returns the mapped sql-type
-	 * @param type
-	 * @return the mapped sql type
-	 * @see Types
-	 */
-	public default String getSQLType(Class<?> type)
-	{
-		//TODO how to map??
-		//copy JDBC-defaults
-		return null;
 	}
 }

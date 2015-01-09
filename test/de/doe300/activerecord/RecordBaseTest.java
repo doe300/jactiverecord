@@ -3,7 +3,7 @@ package de.doe300.activerecord;
 import de.doe300.activerecord.dsl.Comparison;
 import de.doe300.activerecord.dsl.QueryResult;
 import de.doe300.activerecord.dsl.SimpleCondition;
-import de.doe300.activerecord.record.DataSet;
+import de.doe300.activerecord.record.RecordType;
 import de.doe300.activerecord.validation.ValidationFailed;
 import java.sql.SQLException;
 import java.util.Arrays;
@@ -61,13 +61,13 @@ public class RecordBaseTest<T extends TestInterface> extends Assert
 	@Test
 	public void testGetTableName()
 	{
-		assertEquals( type.getAnnotation( DataSet.class).dataSet(), base.getTableName());
+		assertEquals(type.getAnnotation(RecordType.class).typeName(), base.getTableName());
 	}
 
 	@Test
 	public void testGetPrimaryColumn()
 	{
-		assertEquals( type.getAnnotation( DataSet.class).primaryKey(), base.getPrimaryColumn());
+		assertEquals(type.getAnnotation(RecordType.class).primaryKey(), base.getPrimaryColumn());
 	}
 
 	@Test
@@ -118,7 +118,7 @@ public class RecordBaseTest<T extends TestInterface> extends Assert
 	@Test
 	public void testGetDefaultColumns()
 	{
-		assertTrue(Arrays.equals( type.getAnnotation( DataSet.class).defaultColumns(), base.getDefaultColumns()));
+		assertTrue(Arrays.equals(type.getAnnotation(RecordType.class).defaultColumns(), base.getDefaultColumns()));
 	}
 
 	@Test

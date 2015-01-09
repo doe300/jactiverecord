@@ -3,7 +3,7 @@ package de.doe300.activerecord.proxy.handlers;
 import de.doe300.activerecord.RecordBase;
 import de.doe300.activerecord.RecordCore;
 import de.doe300.activerecord.TestInterface;
-import de.doe300.activerecord.record.DataSet;
+import de.doe300.activerecord.record.RecordType;
 import java.sql.SQLException;
 import java.util.Arrays;
 import java.util.HashMap;
@@ -125,7 +125,7 @@ public class MapHandlerTest extends Assert
 	}
 	
 	
-	@DataSet(dataSet = "TESTTABLE", primaryKey = "id", defaultColumns = {"id", "name", "age"})
+	@RecordType(typeName = "TESTTABLE", primaryKey = "id", defaultColumns = {"id", "name", "age"})
 	public static interface TestMapInterface extends TestInterface, Map<String, Object>
 	{
 		

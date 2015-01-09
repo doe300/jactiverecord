@@ -12,13 +12,13 @@ import java.lang.annotation.Target;
  */
 @Target(ElementType.TYPE)
 @Retention(RetentionPolicy.RUNTIME)
-public @interface DataSet
+public @interface RecordType
 {
 	/**
 	 * If the value is empty, the name of the class will be used
 	 * @return the name of the data-set
 	 */
-	public String dataSet() default "";
+	public String typeName() default "";
 	
 	/**
 	 * The primaryKey-column MUST be an integer and auto-increment

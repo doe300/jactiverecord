@@ -1,6 +1,6 @@
 package de.doe300.activerecord;
 
-import de.doe300.activerecord.record.DataSet;
+import de.doe300.activerecord.record.RecordType;
 import de.doe300.activerecord.record.RecordCallbacks;
 import de.doe300.activerecord.record.Searchable;
 import de.doe300.activerecord.record.TimestampedRecord;
@@ -19,7 +19,7 @@ import java.util.stream.Stream;
  * @author doe300
  */
 @Searchable(searchableColumns = {"name", "age"})
-@DataSet(dataSet = "TESTTABLE", primaryKey = "id", defaultColumns = {"id", "name", "age"})
+@RecordType(typeName = "TESTTABLE", primaryKey = "id", defaultColumns = {"id", "name", "age"})
 public interface TestInterface extends TimestampedRecord, ValidatedRecord, RecordCallbacks
 {
 	public String getName();

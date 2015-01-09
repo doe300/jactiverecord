@@ -86,5 +86,13 @@ public interface FinderMethods<T extends ActiveRecord>
 		return findFirst( new AndCondition(new Condition[conds.size()]) );
 	}
 	
+	/**
+	 * @return all records
+	 */
+	public default Stream<T> findAll()
+	{
+		return find( new SimpleCondition(null, null, Comparison.TRUE));
+	}
+	
 	//TODO public Stream<ActiveRecord> findBySQL(String sql)
 }

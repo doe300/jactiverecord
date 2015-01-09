@@ -19,44 +19,32 @@ public class AssociationHelperTest extends Assert
 		base = RecordCore.fromDatabase( TestInterface.createTestConnection(), false).buildBase( TestInterface.class);
 	}
 
-	/**
-	 * Test of getBelongsTo method, of class AssociationHelper.
-	 */
 	@Test
-	public void testGetBelongsTo() throws Exception
+	public void testGetBelongsTo()
 	{
 		TestInterface i = base.createRecord();
 		base.getStore().setValue( base, i.getPrimaryKey(), "fk_test_id", i.getPrimaryKey());
 		assertEquals( i, AssociationHelper.getBelongsTo( i, TestInterface.class, "fk_test_id"));
 	}
 
-	/**
-	 * Test of getHasOne method, of class AssociationHelper.
-	 */
 	@Test
-	public void testGetHasOne_3args_1() throws Exception
+	public void testGetHasOne_3args_1()
 	{
 		TestInterface i = base.createRecord();
 		base.getStore().setValue( base, i.getPrimaryKey(), "fk_test_id", i.getPrimaryKey());
 		assertEquals( i, AssociationHelper.getHasOne(i, TestInterface.class, "fk_test_id"));
 	}
 
-	/**
-	 * Test of getHasOne method, of class AssociationHelper.
-	 */
 	@Test
-	public void testGetHasOne_3args_2() throws Exception
+	public void testGetHasOne_3args_2()
 	{
 		TestInterface i = base.createRecord();
 		base.getStore().setValue( base, i.getPrimaryKey(), "fk_test_id", i.getPrimaryKey());
 		assertEquals( i, AssociationHelper.getHasOne(i, TestInterface.class, new SimpleCondition("fk_test_id", i.getPrimaryKey(), Comparison.IS)));
 	}
 
-	/**
-	 * Test of getHasMany method, of class AssociationHelper.
-	 */
 	@Test
-	public void testGetHasMany_3args_1() throws Exception
+	public void testGetHasMany_3args_1()
 	{
 		TestInterface i = base.createRecord(), m1 = base.createRecord(), m2 = base.createRecord();
 		base.getStore().setValue( base, m1.getPrimaryKey(), "fk_test_id", i.getPrimaryKey());
@@ -64,21 +52,15 @@ public class AssociationHelperTest extends Assert
 		assertTrue( AssociationHelper.getHasMany( i, TestInterface.class, "fk_test_id").count() == 2);
 	}
 
-	/**
-	 * Test of getHasMany method, of class AssociationHelper.
-	 */
 	@Test
-	public void testGetHasMany_3args_2() throws Exception
+	public void testGetHasMany_3args_2()
 	{
 		TestInterface i = base.createRecord(), m1 = base.createRecord(), m2 = base.createRecord();
 		m1.setName( "Appoloo");
 		m2.setName( "Appl");
-		assertTrue( AssociationHelper.getHasMany( i, TestInterface.class, new SimpleCondition("name", "Appl%", Comparison.LIKE)).count() >= 2);
+		assertTrue( AssociationHelper.getHasMany( i, TestInterface.class, new SimpleCondition("name", "App%l%", Comparison.LIKE)).count() >= 2);
 	}
-
-	/**
-	 * Test of getHasManyThrough method, of class AssociationHelper.
-	 */
+	
 	@Test
 	public void testGetHasManyThrough()
 	{
