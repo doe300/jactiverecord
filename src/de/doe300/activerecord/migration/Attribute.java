@@ -47,4 +47,9 @@ public @interface Attribute
 	 * @return whether this column may be NULL
 	 */
 	public boolean mayBeNull() default true;
+	
+	/**
+	 * @return the default value, as SQL text
+	 */
+	public String defaultValue() default "";
 }

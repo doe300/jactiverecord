@@ -2,31 +2,66 @@ package de.doe300.activerecord.migration;
 
 import de.doe300.activerecord.record.ActiveRecord;
 import de.doe300.activerecord.record.RecordType;
+import de.doe300.activerecord.record.TimestampedRecord;
 import de.doe300.activerecord.record.attributes.AttributeGetter;
 import de.doe300.activerecord.record.attributes.AttributeSetter;
 import de.doe300.activerecord.record.attributes.Attributes;
+import de.doe300.activerecord.store.RecordStore;
+import java.lang.reflect.Field;
 import java.lang.reflect.Method;
 import java.lang.reflect.Modifier;
 import java.sql.Connection;
+import java.sql.PreparedStatement;
+import java.sql.ResultSet;
+import java.sql.SQLException;
+import java.sql.Statement;
 import java.sql.Types;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.stream.Collectors;
 
 /**
- *
+ * This migration is used to automatically create a table from a given record-type.
+ * It supports {@link TimestampedRecord}.
+ * 
+ * This migration walks through all methods of the given type
+ * (ignoring all <code>static</code> or <code>default</code> methods) and tries to determine the columns. 
+ * Column-names for the attributes are retrieved in this order:
+ * <ol>
+ *	<li>If the method is annotated by {@link Attribute}, the {@link Attribute#name() } is used as name:
+ *		<ol>
+ *			<li>Use the {@link Attribute#typeName() } as type, if set, and finish</li>
+ *			<li>Use the {@link Attribute#type() }, map it via {@link #getSQLType(int) } and finish</li>
+ *		</ol>
+ *	</li>
+ *	<li>If the method is annotated by {@link AttributeGetter}, use {@link AttributeGetter#name() } as column-name<br>
+ *		Use the methods return-type, map it via {@link #getSQLType(int) } and finish
+ *	</li>
+ *	<li>If the method is annotated by {@link AttributeSetter}, use {@link AttributeSetter#name() } as column-name<br>
+ *		Use the methods only parameter, map it via {@link #getSQLType(int) } and finish
+ *	</li>
+ *	<li>Use the methods property-name as column-name and its return-type (or only parameter) as data-type, map it via {@link #getSQLType(int) } and finish</li>
+ * </ol>
+ * 
+ * NOTE: The resulting columns may be inaccurate due to type discrepancies in mapping java-types to SQL-types.
+ * Also, this migration is optimized for interface based records and may yield some unexpected results on POJO records.
+ * 
+ * 
  * @author doe300
  */
 public class AutomaticMigration implements Migration
 {
 	private final Class<? extends ActiveRecord> recordType;
+	private final boolean dropColumnsOnUpdate;
 
-	public AutomaticMigration(Class<? extends ActiveRecord> recordType )
+	public AutomaticMigration(Class<? extends ActiveRecord> recordType, boolean dropColumnsOnUpdate )
 	{
 		this.recordType = recordType;
+		this.dropColumnsOnUpdate = dropColumnsOnUpdate;
 	}
 
 	@Override
-	public <T extends ActiveRecord> boolean apply( Connection con ) throws Exception
+	public boolean apply( Connection con ) throws Exception
 	{
 		String tableName = getTableName( recordType );
 		//1. check if table exists
@@ -35,162 +70,261 @@ public class AutomaticMigration implements Migration
 			return false;
 		}
 		//2. get desired columns and types
-		Map<String,String> columns = new HashMap<>(10);
+		Map<String,String> columns = getColumnsFromModel( recordType );
+		//3. execute statement
+		String sql = "CREATE TABLE "+tableName+" ("
+				+columns.entrySet().stream().map( (Map.Entry<String,String> e) -> e.getKey()+" "+e.getValue())
+						.collect( Collectors.joining(", "))
+				+" )";
+		try(PreparedStatement stm = con.prepareStatement( sql ))
+		{
+			stm.execute();
+		}
+		catch(SQLException e)
+		{
+			throw e;
+		}
+		return true;
+	}
+	
+	/**
+	 * Updates the table for the given record-type.
+	 * More precisely, adds and removes columns to fit the current methods of the record-type.
+	 * For more information on how columns are generated from the type's methods, see the documentation of this class.
+	 * 
+	 * NOTE: If <code>dropColumnsOnUpdate</code> is set to <code>true</code>, this method will drop all columns it deems not used anymore!
+	 * @param con
+	 * @return whether the table was updated
+	 * @throws Exception 
+	 */
+	@Override
+	public boolean update( Connection con) throws Exception
+	{
+		//TODO
+		String tableName = getTableName( recordType );
+		//1. check if table exists
+		if(structureExists( con, tableName))
+		{
+			return false;
+		}
+		//2. get existing columns
+		Map<String,String> hasColumns = new HashMap<>(10);
+		try(ResultSet set = con.getMetaData().getColumns( con.getCatalog(), con.getSchema(), tableName, null))
+		{
+			while(set.next())
+			{
+				hasColumns.put( set.getString( "COLUMN_NAME").toLowerCase(), set.getString( "TYPE_NAME"));
+			}
+		}
+		//3. get desired columns
+		Map<String,String> desiredColumns = getColumnsFromModel( recordType );
+		//4. calculate difference
+		Map<String,String> removeColumns = hasColumns.entrySet().stream().
+				filter( (Map.Entry<String,String> e) -> desiredColumns.containsKey( e.getKey())).collect( Collectors.toMap( Map.Entry::getKey, Map.Entry::getValue));
+		Map<String,String> addColumns = desiredColumns.entrySet().stream().
+				filter( (Map.Entry<String,String> e) -> hasColumns.containsKey( e.getKey())).collect( Collectors.toMap( Map.Entry::getKey, Map.Entry::getValue));
+		//TODO also modify columns?!?
+		//5. execute updates
+		boolean changed = false;
+		//SQL needs extra statements for add and drop columns
+		if(dropColumnsOnUpdate && !removeColumns.isEmpty())
+		{
+			String sql = "ALTER TABLE "+tableName+" ("+
+					"DROP COLUMN "+
+					removeColumns.entrySet().stream().map( (Map.Entry<String,String> e) -> e.getKey()).collect( Collectors.joining( ", "))+
+					")";
+			try(Statement stm = con.createStatement())
+			{
+				stm.execute( sql );
+				changed = true;
+			}
+		}
+		if(!addColumns.isEmpty())
+		{
+			String sql = "ALTER TABLE "+tableName+" ("+
+					"ADD "+
+					addColumns.entrySet().stream().map( (Map.Entry<String,String> e) -> e.getKey()+" "+e.getValue()).collect( Collectors.joining( ", "))+
+					")";
+			try(Statement stm = con.createStatement())
+			{
+				stm.execute( sql );
+				changed = true;
+			}
+		}
+		return changed;
+	}
+
+	/**
+	 * This method drops the created table, if it exists
+	 * @param con
+	 * @return whether the table existed and was dropped
+	 * @throws SQLException 
+	 */
+	@Override
+	public boolean revert( Connection con ) throws SQLException
+	{
+		String tableName = getTableName( recordType );
+		//1. check if table exists
+		if(!structureExists( con, tableName))
+		{
+			return false;
+		}
+		//2. drop table
+		String sql = "DROP TABLE "+tableName;
+		try(PreparedStatement stm = con.prepareStatement( sql ))
+		{
+			stm.execute();
+		}
+		catch(SQLException e)
+		{
+			throw e;
+		}
+		return true;
+	}
+
+	private static String getTableName(Class<? extends ActiveRecord> type)
+	{
+		if(type.isAnnotationPresent(RecordType.class))
+		{
+			return type.getAnnotation(RecordType.class).typeName();
+		}
+		return type.getSimpleName();
+	}
+	
+	private static String getPrimaryColumn(Class<? extends ActiveRecord> type)
+	{
+		if(type.isAnnotationPresent(RecordType.class))
+		{
+			return type.getAnnotation(RecordType.class).primaryKey();
+		}
+		return RecordStore.DEFAULT_COLUMN_ID;
+	}
+	
+	/**
+	 * The column-names are all in lower case
+	 * @param recordType
+	 * @return the columns
+	 */
+	private static Map<String,String> getColumnsFromModel(Class<? extends ActiveRecord> recordType)
+	{
+		HashMap<String,String> columns = new HashMap<>(10);
 		Method[] methods = recordType.getMethods();
 		for(Method method:methods)
 		{
+			//skip default or static methods
 			if(method.isDefault() || (method.getModifiers() & Modifier.STATIC) == Modifier.STATIC || (method.getModifiers() & Modifier.PUBLIC) != Modifier.PUBLIC)
 			{
 				continue;
 			}
-			//2.1 get attributes
+			//skip methods from ActiveRecord (#getPrimaryKey() and #getBase())
+			if(method.getDeclaringClass().equals( ActiveRecord.class))
+			{
+				continue;
+			}
+			//1. get attributes
 			if(method.isAnnotationPresent( Attribute.class))
 			{
 				Attribute att = method.getAnnotation( Attribute.class);
-				if(!"".equals( att.typeName() ))
+				String name = att.name().toLowerCase();
+				if(!"".equals( name ))
 				{
-					columns.put( att.name(), att.typeName());
+					columns.put( name, att.typeName());
 				}
 				else
 				{
-					columns.put( att.name(), getSQLType( att.type()));
+					columns.put( name, getSQLType( att.type()));
 				}
+				columns.put( name, columns.get( name) 
+						+(att.mayBeNull()?" NULL": " NOT NULL")
+						+(!"".equals( att.defaultValue() )?" DEFAULT "+att.defaultValue(): ""));
+				continue;
 			}
-			//2.2 get attribute-accessors
-			else if(method.isAnnotationPresent( AttributeGetter.class))
+			String columnName = null;
+			Class<?> attType = null;
+			//2. get attribute-accessors
+			if(method.isAnnotationPresent( AttributeGetter.class))
 			{
 				AttributeGetter acc = method.getAnnotation( AttributeGetter.class);
-				Method converter = Attributes.getConverterMethod( method);
-				Class<?> attType = null;
-				if(converter != null)
-				{
-					attType = converter.getParameterTypes()[0];
-				}
-				else
-				{
-					attType = method.getReturnType();
-				}
+				columnName = acc.name().toLowerCase();
+				attType = method.getReturnType();
 			}
 			else if(method.isAnnotationPresent( AttributeSetter.class))
 			{
 				AttributeSetter acc = method.getAnnotation( AttributeSetter.class);
-				Method converter = Attributes.getConverterMethod( method);
-				Class<?> attType = null;
-				if(converter != null)
-				{
-					attType = converter.getReturnType();
-				}
-				else
-				{
-					attType = method.getParameterTypes()[0];
-				}
+				columnName = acc.name().toLowerCase();
+				attType = method.getParameterTypes()[0];
 			}
-			//2.3 get bean accessors
-			else
+			//3. get bean accessors
+			else if(Attributes.isGetter( method, false))
 			{
-				
+				columnName = Attributes.getPropertyName( method ).toLowerCase();
+				attType = method.getReturnType();
+			}
+			else if(Attributes.isSetter( method, null, false))
+			{
+				columnName = Attributes.getPropertyName( method ).toLowerCase();
+				attType = method.getParameterTypes()[0];
+			}
+			//convert type (for 2. and 3.)
+			if(columnName!=null && attType!=null)
+			{
+				columns.putIfAbsent(columnName, getSQLType( attType));
 			}
 		}
-		
-		
-		//2.4 add timestamps, other features
-		//3. mark primary key, add constraints
-		//4. execute statement
-		throw new Exception();
-	}
-
-	@Override
-	public <T extends ActiveRecord> boolean revert( Connection con ) throws Exception
-	{
-		//TODO drop table
-		throw new Exception();
-	}
-
-	private String getTableName(Class<? extends ActiveRecord> type)
-	{
-		if(type.getClass().isAnnotationPresent(RecordType.class))
+		//4. add timestamps, other features
+		if(TimestampedRecord.class.isAssignableFrom( recordType))
 		{
-			return type.getClass().getAnnotation(RecordType.class).typeName();
+			//forces the timestamps to be overriden, because they need to be of type Timestamp
+			columns.put(RecordStore.COLUMN_CREATED_AT, getSQLType( java.sql.Timestamp.class));
+			columns.put(RecordStore.COLUMN_UPDATED_AT, getSQLType( java.sql.Timestamp.class));
 		}
-		return type.getClass().getSimpleName();
+		//5. mark or add primary key, add constraints
+		String primaryColumn = getPrimaryColumn( recordType).toLowerCase();
+		columns.putIfAbsent( primaryColumn, getSQLType( Integer.class));
+		columns.put( primaryColumn, columns.get( primaryColumn)+" PRIMARY KEY");
+		return columns;
 	}
 	
 	/**
 	 * Note: The result of this method may be inaccurate
 	 * @param jdbcType
 	 * @return the mapped SQL-type
-	 * @see http://www.cis.upenn.edu/~bcpierce/courses/629/jdkdocs/guide/jdbc/getstart/mapping.doc.html
 	 * @see java.sql.Types
 	 */
 	public static String getSQLType(int jdbcType)
 	{
-		switch(jdbcType)
+		if(jdbcType == Types.SQLXML)
 		{
-			case Types.ARRAY:
-			case Types.BIGINT:
-			case Types.BINARY:
-			case Types.BIT:
-			case Types.BLOB
+			return "XML";
 		}
-		if(type.equals( String.class))
+		for(Field f: Types.class.getFields())
 		{
-			return "LONGVARCHAR";
+			if(f.getType()==Integer.TYPE)
+			{
+				try
+				{
+					int val = f.getInt( null);
+					if( val == jdbcType)
+					{
+						return f.getName().replaceAll( "_", " ");
+					}
+				}
+				catch ( IllegalArgumentException | IllegalAccessException ex )
+				{
+				}
+			}
 		}
-		if(type.equals( java.math.BigDecimal.class))
-		{
-			return "NUMERIC";
-		}
-		if(type.equals( Boolean.class) || type.equals( Boolean.TYPE))
-		{
-			return "BIT";
-		}
-		if(type.equals( Byte.class) || type.equals( Byte.TYPE))
-		{
-			return "TINYINT";
-		}
-		if(type.equals( Short.class) || type.equals( Short.TYPE))
-		{
-			return "SHORTINT";
-		}
-		if(type.equals( Integer.class) || type.equals( Integer.TYPE))
-		{
-			return "INTEGER";
-		}
-		if(type.equals( Long.class) || type.equals( Long.TYPE))
-		{
-			return "BIGINT";
-		}
-		if(type.equals( Float.class) || type.equals( Float.TYPE))
-		{
-			return "REAL";
-		}
-		if(type.equals( Double.class) || type.equals( Double.TYPE))
-		{
-			return "DOUBLE";
-		}
-		if(type.equals( java.sql.Date.class))
-		{
-			return "DATE";
-		}
-		if(type.equals( java.sql.Time.class))
-		{
-			return "TIME";
-		}
-		if(type.equals( java.sql.Timestamp.class))
-		{
-			return "TIMESTAMP";
-		}
-		throw new IllegalArgumentException("Type not mapped: "+type);
+		throw new IllegalArgumentException("Unknown Type: "+jdbcType);
 	}
 	
 	/**
 	 * Note: The result of this method may be inaccurate
 	 * @param javaType
-	 * @return the mapped JDBC-type
+	 * @return the mapped SQL-type
 	 * @see http://www.cis.upenn.edu/~bcpierce/courses/629/jdkdocs/guide/jdbc/getstart/mapping.doc.html
 	 * @see java.sql.Types
 	 */
-	public static String getJDBCType(Class<?> javaType)
+	public static String getSQLType(Class<?> javaType)
 	{
 		if(javaType.equals( String.class))
 		{
@@ -239,6 +373,11 @@ public class AutomaticMigration implements Migration
 		if(javaType.equals( java.sql.Timestamp.class))
 		{
 			return "TIMESTAMP";
+		}
+		if(ActiveRecord.class.isAssignableFrom( javaType ))
+		{
+			//for foreign key
+			return "INTEGER";
 		}
 		throw new IllegalArgumentException("Type not mapped: "+javaType);
 	}

@@ -1,6 +1,5 @@
 package de.doe300.activerecord.migration;
 
-import de.doe300.activerecord.record.ActiveRecord;
 import java.sql.Connection;
 import java.sql.ResultSet;
 import java.sql.SQLException;
@@ -13,21 +12,27 @@ public interface Migration
 {
 	/**
 	 * Applies this migration to the given connection
-	 * @param <T>
 	 * @param con
 	 * @return whether the migration was applied
 	 * @throws Exception 
 	 */
-	public <T extends ActiveRecord> boolean apply(Connection con) throws Exception;
+	public boolean apply(Connection con) throws Exception;
 	
 	/**
 	 * Reverts the changes from this migration
-	 * @param <T>
 	 * @param con
 	 * @return whether the migration was reverted
 	 * @throws Exception 
 	 */
-	public <T extends ActiveRecord> boolean revert(Connection con) throws Exception;
+	public boolean revert(Connection con) throws Exception;
+	
+	/**
+	 * Update the data-structure or executes the <code>update</code>statement, depending on the type of migration
+	 * @param con
+	 * @return whether the update was successful
+	 * @throws Exception 
+	 */
+	public boolean update(Connection con) throws Exception;
 	
 	/**
 	 * @param con
