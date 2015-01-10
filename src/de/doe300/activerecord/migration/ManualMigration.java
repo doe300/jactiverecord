@@ -21,8 +21,7 @@ public class ManualMigration implements Migration
 	@Override
 	public boolean apply( Connection con ) throws Exception
 	{
-		con.createStatement().execute( command );
-		return true;
+		return con.createStatement().executeUpdate(command ) >= 0;
 	}
 
 	@Override
@@ -32,8 +31,7 @@ public class ManualMigration implements Migration
 		{
 			return false;
 		}
-		con.createStatement().execute( revertedCommand);
-		return true;
+		return con.createStatement().executeUpdate(revertedCommand) >= 0;
 	}
 
 	@Override
@@ -43,7 +41,6 @@ public class ManualMigration implements Migration
 		{
 			return false;
 		}
-		con.createStatement().execute( updateCommand);
-		return true;
+		return con.createStatement().executeUpdate(updateCommand) >= 0;
 	}
 }

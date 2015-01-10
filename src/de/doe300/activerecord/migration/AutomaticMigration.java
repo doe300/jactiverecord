@@ -11,7 +11,6 @@ import java.lang.reflect.Field;
 import java.lang.reflect.Method;
 import java.lang.reflect.Modifier;
 import java.sql.Connection;
-import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
@@ -24,8 +23,7 @@ import java.util.stream.Collectors;
  * This migration is used to automatically create a table from a given record-type.
  * It supports {@link TimestampedRecord}.
  * 
- * This migration walks through all methods of the given type
- * (ignoring all <code>static</code> or <code>default</code> methods) and tries to determine the columns. 
+ * This migration walks through all methods of the given type and tries to determine the columns. 
  * Column-names for the attributes are retrieved in this order:
  * <ol>
  *	<li>If the method is annotated by {@link Attribute}, the {@link Attribute#name() } is used as name:
@@ -34,6 +32,7 @@ import java.util.stream.Collectors;
  *			<li>Use the {@link Attribute#type() }, map it via {@link #getSQLType(int) } and finish</li>
  *		</ol>
  *	</li>
+ *	<li>Ignore method, if it is <code>static</code> or <code>default</code>.</li>
  *	<li>If the method is annotated by {@link AttributeGetter}, use {@link AttributeGetter#name() } as column-name<br>
  *		Use the methods return-type, map it via {@link #getSQLType(int) } and finish
  *	</li>
@@ -76,9 +75,12 @@ public class AutomaticMigration implements Migration
 				+columns.entrySet().stream().map( (Map.Entry<String,String> e) -> e.getKey()+" "+e.getValue())
 						.collect( Collectors.joining(", "))
 				+" )";
-		try(PreparedStatement stm = con.prepareStatement( sql ))
+		try(Statement stm = con.createStatement())
 		{
-			stm.execute();
+			if(stm.executeUpdate(sql)<0)
+			{
+				return false;
+			}
 		}
 		catch(SQLException e)
 		{
@@ -135,8 +137,7 @@ public class AutomaticMigration implements Migration
 					")";
 			try(Statement stm = con.createStatement())
 			{
-				stm.execute( sql );
-				changed = true;
+				changed = (stm.executeUpdate(sql) >= 0);
 			}
 		}
 		if(!addColumns.isEmpty())
@@ -147,8 +148,7 @@ public class AutomaticMigration implements Migration
 					")";
 			try(Statement stm = con.createStatement())
 			{
-				stm.execute( sql );
-				changed = true;
+				changed = changed || (stm.executeUpdate(sql) >= 0);
 			}
 		}
 		return changed;
@@ -171,9 +171,12 @@ public class AutomaticMigration implements Migration
 		}
 		//2. drop table
 		String sql = "DROP TABLE "+tableName;
-		try(PreparedStatement stm = con.prepareStatement( sql ))
+		try(Statement stm = con.createStatement( ))
 		{
-			stm.execute();
+			if(stm.executeUpdate(sql) < 0)
+			{
+				return false;
+			}
 		}
 		catch(SQLException e)
 		{
@@ -211,6 +214,25 @@ public class AutomaticMigration implements Migration
 		Method[] methods = recordType.getMethods();
 		for(Method method:methods)
 		{
+			//1. get attributes
+			//this is priorized before skipping of default methods, so columns for assoziations are created correctly
+			if(method.isAnnotationPresent( Attribute.class))
+			{
+				Attribute att = method.getAnnotation( Attribute.class);
+				String name = att.name().toLowerCase();
+				if(!"".equals( att.typeName() ))
+				{
+					columns.put(name, att.typeName());
+				}
+				else
+				{
+					columns.putIfAbsent(name, getSQLType( att.type()));
+				}
+				columns.put( name, columns.get( name) 
+						+(att.mayBeNull()?" NULL": " NOT NULL")
+						+(!"".equals( att.defaultValue() )?" DEFAULT "+att.defaultValue(): ""));
+				continue;
+			}
 			//skip default or static methods
 			if(method.isDefault() || (method.getModifiers() & Modifier.STATIC) == Modifier.STATIC || (method.getModifiers() & Modifier.PUBLIC) != Modifier.PUBLIC)
 			{
@@ -219,24 +241,6 @@ public class AutomaticMigration implements Migration
 			//skip methods from ActiveRecord (#getPrimaryKey() and #getBase())
 			if(method.getDeclaringClass().equals( ActiveRecord.class))
 			{
-				continue;
-			}
-			//1. get attributes
-			if(method.isAnnotationPresent( Attribute.class))
-			{
-				Attribute att = method.getAnnotation( Attribute.class);
-				String name = att.name().toLowerCase();
-				if(!"".equals( name ))
-				{
-					columns.put( name, att.typeName());
-				}
-				else
-				{
-					columns.put( name, getSQLType( att.type()));
-				}
-				columns.put( name, columns.get( name) 
-						+(att.mayBeNull()?" NULL": " NOT NULL")
-						+(!"".equals( att.defaultValue() )?" DEFAULT "+att.defaultValue(): ""));
 				continue;
 			}
 			String columnName = null;
@@ -281,7 +285,7 @@ public class AutomaticMigration implements Migration
 		//5. mark or add primary key, add constraints
 		String primaryColumn = getPrimaryColumn( recordType).toLowerCase();
 		columns.putIfAbsent( primaryColumn, getSQLType( Integer.class));
-		columns.put( primaryColumn, columns.get( primaryColumn)+" PRIMARY KEY");
+		columns.put( primaryColumn, columns.get( primaryColumn)+" IDENTITY PRIMARY KEY");
 		return columns;
 	}
 	

@@ -1,5 +1,6 @@
 package de.doe300.activerecord;
 
+import de.doe300.activerecord.migration.Attribute;
 import de.doe300.activerecord.record.RecordType;
 import de.doe300.activerecord.record.RecordCallbacks;
 import de.doe300.activerecord.record.Searchable;
@@ -12,6 +13,7 @@ import java.sql.Connection;
 import java.sql.DriverManager;
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.sql.Types;
 import java.util.stream.Stream;
 
 /**
@@ -30,7 +32,8 @@ public interface TestInterface extends TimestampedRecord, ValidatedRecord, Recor
 	public int getAge();
 	
 	public void setAge(int age);
-	
+
+	@Attribute(name = "fk_test_id", type = Types.INTEGER)
 	public default TestInterface getDirectionOne()
 	{
 		return AssociationHelper.getBelongsTo(this, TestInterface.class, "fk_test_id" );
@@ -94,7 +97,7 @@ public interface TestInterface extends TimestampedRecord, ValidatedRecord, Recor
 
 	public static Connection createTestConnection() throws SQLException
 	{
-		return DriverManager.getConnection( "jdbc:hsqldb:file:~/workspace/ActiveRecord/test/testdb", "test", "test" );
+		return DriverManager.getConnection( "jdbc:hsqldb:hsql://localhost:9999/test", "sa", "" );
 	}
 	
 	public static void printTestDB() throws SQLException

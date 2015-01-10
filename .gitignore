@@ -7,3 +7,8 @@
 /test/testdb.lck
 /dist/
 /build.xml
+/test/test.tmp/
+/test/test.properties
+/test/test.script
+/test/test.lck
+/test/test.log
