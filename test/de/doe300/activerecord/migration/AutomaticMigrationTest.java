@@ -1,6 +1,7 @@
 package de.doe300.activerecord.migration;
 
 import de.doe300.activerecord.TestInterface;
+import de.doe300.activerecord.TestServer;
 import java.sql.Connection;
 import java.sql.SQLException;
 import org.junit.Assert;
@@ -18,30 +19,29 @@ public class AutomaticMigrationTest
 	
 	public AutomaticMigrationTest()
 	{
-		//FIXME Create table does not work, but SQL is correct
 	}
 	
 	@BeforeClass
 	public static void init() throws SQLException
 	{
 		mig = new AutomaticMigration(TestInterface.class, true);
-		con = TestInterface.createTestConnection();
+		con = TestServer.getTestConnection();
 	}
 
 	@Test
-	public void testApply() throws Exception
+	public void testApply() throws SQLException
 	{
 		Assert.assertTrue(mig.apply( con ));
 	}
 	
 	@Test
-	public void testUpdate() throws Exception
+	public void testUpdate() throws SQLException
 	{
 		Assert.assertFalse(mig.update(con ));
 	}
 
 	@Test
-	public void testRevert() throws Exception
+	public void testRevert() throws SQLException
 	{
 		Assert.assertTrue(mig.revert( con ));
 	}

@@ -24,6 +24,7 @@ import org.junit.runners.Parameterized;
  * @author doe300
  */
 @RunWith(Parameterized.class)
+@Deprecated
 public class TestRecordStore
 {
 	//TODO move to recordstore-impls tests
@@ -46,12 +47,11 @@ public class TestRecordStore
 	@Parameterized.Parameters
 	public static Collection<Object[]> getParams() throws SQLException
 	{
-		TestInterface.printTestDB();
 		final Object[][] params=new Object[][]
 		{
 			{new MapRecordStore()},
-			{new SimpleJDBCRecordStore(TestInterface.createTestConnection())},
-			{new CachedJDBCRecordStore(TestInterface.createTestConnection())},
+			{new SimpleJDBCRecordStore(TestServer.getTestConnection())},
+			{new CachedJDBCRecordStore(TestServer.getTestConnection())},
 		};
 		return Arrays.asList( params );
 	}
@@ -59,7 +59,7 @@ public class TestRecordStore
 	@AfterClass
 	public static void printTable() throws SQLException
 	{
-		TestInterface.printTestTable();
+		TestServer.printTestTable();
 	}
 	
 	@Test

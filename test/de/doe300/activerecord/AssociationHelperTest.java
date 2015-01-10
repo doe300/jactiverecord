@@ -3,7 +3,9 @@ package de.doe300.activerecord;
 import de.doe300.activerecord.dsl.Comparison;
 import de.doe300.activerecord.dsl.SimpleCondition;
 import java.sql.SQLException;
+import org.junit.AfterClass;
 import org.junit.Assert;
+import org.junit.BeforeClass;
 import org.junit.Test;
 
 /**
@@ -16,7 +18,19 @@ public class AssociationHelperTest extends Assert
 	
 	public AssociationHelperTest() throws SQLException
 	{
-		base = RecordCore.fromDatabase( TestInterface.createTestConnection(), false).buildBase( TestInterface.class);
+		base = RecordCore.fromDatabase( TestServer.getTestConnection(), false).buildBase( TestInterface.class);
+	}
+	
+	@BeforeClass
+	public static void createTables() throws Exception
+	{
+		TestServer.buildTestTables();
+	}
+	
+	@AfterClass
+	public static void destroyTables() throws Exception
+	{
+		TestServer.destroyTestTables();
 	}
 
 	@Test
@@ -58,7 +72,7 @@ public class AssociationHelperTest extends Assert
 		TestInterface i = base.createRecord(), m1 = base.createRecord(), m2 = base.createRecord();
 		m1.setName( "Appoloo");
 		m2.setName( "Appl");
-		assertTrue( AssociationHelper.getHasMany( i, TestInterface.class, new SimpleCondition("name", "App%l%", Comparison.LIKE)).count() >= 2);
+		assertTrue( AssociationHelper.getHasMany( i, TestInterface.class, new SimpleCondition("name", "App%l%", Comparison.LIKE)).count() == 2);
 	}
 	
 	@Test

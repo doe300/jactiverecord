@@ -3,11 +3,12 @@ package de.doe300.activerecord.proxy.handlers;
 import de.doe300.activerecord.RecordBase;
 import de.doe300.activerecord.RecordCore;
 import de.doe300.activerecord.TestInterface;
+import de.doe300.activerecord.TestServer;
 import de.doe300.activerecord.record.RecordType;
-import java.sql.SQLException;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Map;
+import org.junit.AfterClass;
 import org.junit.Assert;
 import org.junit.BeforeClass;
 import org.junit.Test;
@@ -27,13 +28,20 @@ public class MapHandlerTest extends Assert
 	}
 	
 	@BeforeClass
-	public static void init() throws SQLException, Exception
+	public static void createTables() throws Exception
 	{
+		TestServer.buildTestTables();
 		handler = new MapHandler();
-		base = RecordCore.fromDatabase( TestInterface.createTestConnection(), false).buildBase( TestMapInterface.class, handler);
+		base = RecordCore.fromDatabase( TestServer.getTestConnection(), false).buildBase( TestMapInterface.class, handler);
 		record = base.createRecord();
 	}
-
+	
+	@AfterClass
+	public static void destroyTables() throws Exception
+	{
+		TestServer.destroyTestTables();
+	}
+	
 	@Test
 	public void testSize()
 	{
@@ -64,14 +72,14 @@ public class MapHandlerTest extends Assert
 	public void testGet()
 	{
 		record.setName( "Klaus");
-		assertSame( record.getName(), record.get( "name"));
+		assertEquals(record.getName(), record.get( "name"));
 	}
 
 	@Test(expected = RuntimeException.class)
 	public void testPut()
 	{
 		record.put( "age", 112);
-		assertSame( record.getAge(), record.get( "age"));
+		assertEquals(record.getAge(), record.get( "age"));
 		int key = record.getPrimaryKey();
 		record.put( base.getPrimaryColumn(), 01);
 		assertEquals(key, record.getPrimaryKey());
@@ -91,8 +99,8 @@ public class MapHandlerTest extends Assert
 		m.put( "name", "Adam");
 		m.put( "age", 0);
 		record.putAll( m );
-		assertSame( m.get( "name"), record.get( "name"));
-		assertSame( m.get( "age"), record.getAge());
+		assertEquals(m.get( "name"), record.get( "name"));
+		assertEquals(m.get( "age"), record.getAge());
 	}
 
 	@Test(expected = RuntimeException.class)

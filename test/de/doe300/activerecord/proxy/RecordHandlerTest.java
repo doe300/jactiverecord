@@ -3,12 +3,12 @@ package de.doe300.activerecord.proxy;
 import de.doe300.activerecord.RecordBase;
 import de.doe300.activerecord.RecordCore;
 import de.doe300.activerecord.TestInterface;
-import de.doe300.activerecord.proxy.RecordHandler;
+import de.doe300.activerecord.TestServer;
 import de.doe300.activerecord.record.ActiveRecord;
 import de.doe300.activerecord.validation.ValidatedRecord;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
-import java.sql.SQLException;
+import org.junit.AfterClass;
 import org.junit.Assert;
 import org.junit.BeforeClass;
 import org.junit.Test;
@@ -28,11 +28,18 @@ public class RecordHandlerTest extends Assert
 	}
 	
 	@BeforeClass
-	public static void setUpClass() throws SQLException, Exception
+	public static void createTables() throws Exception
 	{
-		base = RecordCore.fromDatabase( TestInterface.createTestConnection(), true).buildBase( TestInterface.class);
+		TestServer.buildTestTables();
+		base = RecordCore.fromDatabase( TestServer.getTestConnection(), true).buildBase( TestInterface.class);
 		testI = base.createRecord();
 		handler = new RecordHandler<TestInterface>(testI.getPrimaryKey(), base);
+	}
+	
+	@AfterClass
+	public static void destroyTables() throws Exception
+	{
+		TestServer.destroyTestTables();
 	}
 	
 	@Test

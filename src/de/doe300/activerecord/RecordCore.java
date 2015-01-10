@@ -141,17 +141,20 @@ public final class RecordCore implements AutoCloseable
 	public <T extends ActiveRecord> RecordBase<T> getBase(Class<T> type)
 	{
 		RecordBase<T> base = ( RecordBase<T> ) bases.get( type );
-		if(base==null && handlers!=null)
+		if(base==null)
 		{
-			if(type.isInterface())
+			if(type.isInterface() && handlers!=null)
 			{
 				base = new ProxyBase<T>(( Class<? extends T> ) Proxy.getProxyClass( type.getClassLoader(), type), type, mergeHandlers( type, null ), store, this);
 			}
-			else
+			else if(!type.isInterface())
 			{
 				base = new POJOBase<T>(type, this, store );
 			}
-			bases.put( type, base );
+			if(base != null)
+			{
+				bases.put( type, base );
+			}
 		}
 		return base;
 	}

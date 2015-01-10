@@ -3,7 +3,7 @@ package de.doe300.activerecord.dsl;
 import de.doe300.activerecord.RecordBase;
 import de.doe300.activerecord.RecordCore;
 import de.doe300.activerecord.TestInterface;
-import java.sql.SQLException;
+import de.doe300.activerecord.TestServer;
 import org.junit.AfterClass;
 import org.junit.Assert;
 import org.junit.BeforeClass;
@@ -20,30 +20,26 @@ public class ConditionsTest extends Assert
 	private static TestInterface t1, t2,t3;
 	
 	@BeforeClass
-	public static void init() throws SQLException
+	public static void createTables() throws Exception
 	{
-		base = RecordCore.fromDatabase( TestInterface.createTestConnection(), false).buildBase( TestInterface.class);
+		TestServer.buildTestTables();
+		
+		base = RecordCore.fromDatabase( TestServer.getTestConnection(), false).buildBase( TestInterface.class);
 		t1 = base.createRecord();
 		t1.setName( "123Name1");
 		t1.setAge( -912);
-//		t1.save();
 		t2 = base.createRecord();
 		t2.setName( "123Name1");
 		t2.setAge( -913);
-//		t2.save();
 		t3 = base.createRecord();
 		t3.setName( "123Name4");
 		t3.setAge( -913);
-//		t3.save();
-		
 	}
 	
 	@AfterClass
-	public static void tearDown()
+	public static void destroyTables() throws Exception
 	{
-		t1.destroy();
-		t2.destroy();
-		t3.destroy();
+		TestServer.destroyTestTables();
 	}
 	
 	@Test

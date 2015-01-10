@@ -2,7 +2,6 @@ package de.doe300.activerecord;
 
 import de.doe300.activerecord.proxy.handlers.MapHandler;
 import de.doe300.activerecord.store.impl.MapRecordStore;
-import java.sql.SQLException;
 import org.junit.AfterClass;
 import org.junit.Assert;
 import org.junit.BeforeClass;
@@ -21,33 +20,35 @@ public class RecordCoreTest extends Assert
 	}
 	
 	@BeforeClass
-	public static void init() throws SQLException
+	public static void createTables() throws Exception
 	{
-		core = RecordCore.fromDatabase( TestInterface.createTestConnection(), true);
+		TestServer.buildTestTables();
+		core = RecordCore.fromDatabase( TestServer.getTestConnection(), true);
 	}
 	
 	@AfterClass
-	public static void tearDown() throws Exception
+	public static void destroyTables() throws Exception
 	{
+		TestServer.destroyTestTables();
 		core.close();
 	}
 	
 	@Test
 	public void testFromDatabase() throws Exception
 	{
-		RecordCore.fromDatabase( TestInterface.createTestConnection(), false).close();
+		assertNotNull( RecordCore.fromDatabase( TestServer.getTestConnection(), false));
 	}
 
 	@Test
 	public void testNewMemoryStore() throws Exception
 	{
-		RecordCore.newMemoryStore( "test1").close();
+		assertNotNull( RecordCore.newMemoryStore( "test1"));
 	}
 
 	@Test
 	public void testFromStore() throws Exception
 	{
-		RecordCore.fromStore( "test2", new MapRecordStore()).close();
+		assertNotNull( RecordCore.fromStore( "test2", new MapRecordStore()));
 	}
 
 	@Test
@@ -60,12 +61,12 @@ public class RecordCoreTest extends Assert
 	public void testBuildBase()
 	{
 		assertNotNull( core.buildBase( TestInterface.class, new MapHandler()) );
-		assertSame( core.buildBase( TestInterface.class), core.getBase( TestInterface.class));
+		assertEquals(core.buildBase( TestInterface.class), core.getBase( TestInterface.class));
 	}
 
 	@Test
 	public void testGetBase()
 	{
-		assertNotNull( core.getBase( TestInterface.class));
+		assertNotNull( core.getBase( TestPOJO.class));
 	}
 }

@@ -9,7 +9,9 @@ import java.sql.SQLException;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
+import org.junit.AfterClass;
 import org.junit.Assert;
+import org.junit.BeforeClass;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.junit.runners.Parameterized;
@@ -35,9 +37,21 @@ public class RecordBaseTest<T extends TestInterface> extends Assert
 	public static Collection<Object[]> getParameters() throws SQLException
 	{
 		return Arrays.asList(
-			new Object[]{TestInterface.class, RecordCore.fromDatabase( TestInterface.createTestConnection(), true).buildBase( TestInterface.class )},
-				new Object[]{TestPOJO.class, RecordCore.fromDatabase( TestInterface.createTestConnection(), true).buildBase( TestPOJO.class )}
+			new Object[]{TestInterface.class, RecordCore.fromDatabase( TestServer.getTestConnection(), true).buildBase( TestInterface.class )},
+				new Object[]{TestPOJO.class, RecordCore.fromDatabase( TestServer.getTestConnection(), true).buildBase( TestPOJO.class )}
 		);
+	}
+	
+	@BeforeClass
+	public static void createTables() throws Exception
+	{
+		TestServer.buildTestTables();
+	}
+	
+	@AfterClass
+	public static void destroyTables() throws Exception
+	{
+		TestServer.destroyTestTables();
 	}
 	
 	@Test

@@ -3,7 +3,8 @@ package de.doe300.activerecord.dsl;
 import de.doe300.activerecord.RecordBase;
 import de.doe300.activerecord.RecordCore;
 import de.doe300.activerecord.TestInterface;
-import java.sql.SQLException;
+import de.doe300.activerecord.TestServer;
+import org.junit.AfterClass;
 import org.junit.Assert;
 import org.junit.BeforeClass;
 import org.junit.Test;
@@ -21,22 +22,34 @@ public class QueryResultTest extends Assert
 	}
 	
 	@BeforeClass
-	public static void build() throws SQLException
+	public static void createTables() throws Exception
 	{
-		base = RecordCore.fromDatabase( TestInterface.createTestConnection(), false).buildBase( TestInterface.class);
+		TestServer.buildTestTables();
+		base = RecordCore.fromDatabase( TestServer.getTestConnection(), false).buildBase( TestInterface.class);
+		TestInterface i = base.createRecord();
+		i.setName( "Alfons");
+		i.setAge( 20);
+		base.createRecord().setName( "Johhny");
+		base.createRecord().setName( "Adam");
 	}
-
+	
+	@AfterClass
+	public static void destroyTables() throws Exception
+	{
+		TestServer.destroyTestTables();
+	}
+	
 	@Test
 	public void testStream()
 	{
-		assertTrue( base.where( new SimpleCondition("name", base, Comparison.IS_NOT_NULL)).stream().count() > 2);
+		assertTrue( base.where( new SimpleCondition("name", base, Comparison.IS_NOT_NULL)).stream().count() == 3);
 	}
 
 	@Test
 	public void testWhere()
 	{
 		assertTrue( base.where( new SimpleCondition("age", base, Comparison.IS_NOT_NULL)).where( new SimpleCondition("age", 20,
-				Comparison.SMALLER_EQUALS)).stream().count() > 1);
+				Comparison.SMALLER_EQUALS)).stream().count() == 1);
 	}
 
 	@Test
@@ -48,19 +61,19 @@ public class QueryResultTest extends Assert
 	@Test
 	public void testSize()
 	{
-		assertTrue( base.where( new SimpleCondition("name", base, Comparison.IS_NOT_NULL)).size() == base.find( new SimpleCondition("name", base, Comparison.IS_NOT_NULL)).count());
+		assertTrue( base.where( new SimpleCondition("name", base, Comparison.IS_NOT_NULL)).size() == 3);
 	}
 
 	@Test
 	public void testGroupBy_String()
 	{
-		assertTrue( base.where( new SimpleCondition("name", base, Comparison.IS_NOT_NULL)).groupBy( "name").count() > 1);
+		assertTrue( base.where( new SimpleCondition("name", base, Comparison.IS_NOT_NULL)).groupBy( "name").count() == 3);
 	}
 
 	@Test
 	public void testGroupBy_Function()
 	{
-		assertTrue( base.where( new SimpleCondition("name", base, Comparison.IS_NOT_NULL)).groupBy( (TestInterface i )-> i.getName()).count() > 2);
+		assertTrue( base.where( new SimpleCondition("name", base, Comparison.IS_NOT_NULL)).groupBy( (TestInterface i )-> i.getName()).count() == 3);
 	}
 
 	@Test

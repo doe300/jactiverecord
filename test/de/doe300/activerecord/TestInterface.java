@@ -9,10 +9,6 @@ import de.doe300.activerecord.record.attributes.AttributeGetter;
 import de.doe300.activerecord.record.attributes.AttributeSetter;
 import de.doe300.activerecord.validation.ValidatedRecord;
 import de.doe300.activerecord.validation.ValidationFailed;
-import java.sql.Connection;
-import java.sql.DriverManager;
-import java.sql.ResultSet;
-import java.sql.SQLException;
 import java.sql.Types;
 import java.util.stream.Stream;
 
@@ -48,6 +44,7 @@ public interface TestInterface extends TimestampedRecord, ValidatedRecord, Recor
 	{
 		return AssociationHelper.getHasOne(this, TestInterface.class, "fk_test_id" );
 	}
+	
 	public default void setDirectionOther(TestInterface i)
 	{
 		AssociationHelper.setHasOne( this, i, "fk_test_id" );
@@ -93,42 +90,5 @@ public interface TestInterface extends TimestampedRecord, ValidatedRecord, Recor
 	public default void validate() throws ValidationFailed
 	{
 		checkName( getName());
-	}
-
-	public static Connection createTestConnection() throws SQLException
-	{
-		return DriverManager.getConnection( "jdbc:hsqldb:hsql://localhost:9999/test", "sa", "" );
-	}
-	
-	public static void printTestDB() throws SQLException
-	{
-		Connection con = createTestConnection();
-		System.out.println( con.getCatalog() );
-		ResultSet set = con.getMetaData().getTables( "PUBLIC", "PUBLIC", null, null );
-		while(set.next())
-		{
-			System.out.println( set.getString( "TABLE_CAT")+", "+set.getString( "TABLE_SCHEM")+","+set.getString( "TABLE_NAME" ));
-		}
-		set = con.getMetaData().getColumns( "PUBLIC", "PUBLIC", "TESTTABLE", null);
-		while(set.next())
-		{
-			System.out.println( set.getString( "COLUMN_NAME" )+": "+set.getString( "TYPE_NAME" ) );
-		}
-		
-		set = con.getMetaData().getTypeInfo();
-		while(set.next())
-		{
-			System.out.println( set.getString( "TYPE_NAME")+" "+set.getInt( "DATA_TYPE")+" "+set.getString( "SQL_DATA_TYPE") );
-		}
-	}
-	
-	public static void printTestTable() throws SQLException
-	{
-		Connection con = createTestConnection();
-		ResultSet set = con.prepareCall( "SELECT * FROM TESTTABLE").executeQuery();
-		while(set.next())
-		{
-			System.out.println( set.getInt( 1)+", "+set.getString( 2)+", "+set.getInt( 3)+", "+set.getTimestamp( "created_at")+", "+set.getTimestamp( "updated_at") );
-		}
 	}
 }

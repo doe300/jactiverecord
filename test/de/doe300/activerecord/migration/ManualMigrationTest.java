@@ -1,6 +1,6 @@
 package de.doe300.activerecord.migration;
 
-import de.doe300.activerecord.TestInterface;
+import de.doe300.activerecord.TestServer;
 import java.sql.Connection;
 import java.sql.SQLException;
 import org.junit.Assert;
@@ -28,7 +28,7 @@ public class ManualMigrationTest
 		String update = "ALTER TABLE mappingTable ADD info varchar(255)";
 		String crash = "DROP TABLE mappingTable";
 		mig = new ManualMigration(build, update, crash);
-		con = TestInterface.createTestConnection();
+		con = TestServer.getTestConnection();
 	}
 
 	@Test

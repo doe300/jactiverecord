@@ -1,7 +1,9 @@
 package de.doe300.activerecord.proxy.handlers;
 
 import de.doe300.activerecord.TestInterface;
+import de.doe300.activerecord.TestServer;
 import de.doe300.activerecord.proxy.RecordHandler;
+import org.junit.AfterClass;
 import org.junit.Assert;
 import org.junit.BeforeClass;
 import org.junit.Test;
@@ -18,11 +20,18 @@ public class InterfaceProxyHandlerTest extends Assert
 	{
 	}
 	
+	
 	@BeforeClass
-	public static void init()
+	public static void createTables() throws Exception
 	{
-
+		TestServer.buildTestTables();
 		handler = new DummyInterfaceProxyHandler();
+	}
+	
+	@AfterClass
+	public static void destroyTables() throws Exception
+	{
+		TestServer.destroyTestTables();
 	}
 
 	@Test

@@ -3,7 +3,8 @@ package de.doe300.activerecord.dsl;
 import de.doe300.activerecord.RecordBase;
 import de.doe300.activerecord.RecordCore;
 import de.doe300.activerecord.TestInterface;
-import java.sql.SQLException;
+import de.doe300.activerecord.TestServer;
+import org.junit.AfterClass;
 import org.junit.Assert;
 import org.junit.BeforeClass;
 import org.junit.Test;
@@ -21,27 +22,34 @@ public class GroupResultTest extends Assert
 	}
 	
 	@BeforeClass
-	public static void init() throws SQLException, Exception
+	public static void createTables() throws Exception
 	{
-		base = RecordCore.fromDatabase( TestInterface.createTestConnection(), true).buildBase(TestInterface.class);
+		TestServer.buildTestTables();
+		base = RecordCore.fromDatabase( TestServer.getTestConnection(), true).buildBase(TestInterface.class);
 		base.createRecord().setName( "Adam5");
 		base.createRecord().setName( "Adam5");
 		base.createRecord().setName( "Adam5");
 	}
-
+	
+	@AfterClass
+	public static void destroyTables() throws Exception
+	{
+		TestServer.destroyTestTables();
+	}
+	
 	@Test
 	public void testStream()
 	{
 		assertTrue(base.where( new SimpleCondition("name", null, Comparison.IS_NOT_NULL)).
 				groupBy( "name").filter( (GroupResult<Object,TestInterface> r) -> r.getKey().equals( "Adam5")).
-				anyMatch( (GroupResult<Object,TestInterface> r) -> r.stream().count() >= 3));
+				anyMatch( (GroupResult<Object,TestInterface> r) -> r.stream().count() == 3));
 	}
 
 	@Test
 	public void testWhere()
 	{
 		GroupResult<String,TestInterface> res = new GroupResult<String,TestInterface>("Adam5", base.find( new SimpleCondition("name", "Adam5", Comparison.IS)), base.count( new SimpleCondition("name", "Adam5", Comparison.IS)), base.getDefaultOrder());
-		assertTrue( res.where( new SimpleCondition("name", "Adam5", Comparison.IS)).stream().count() == res.size());
+		assertTrue( res.where( new SimpleCondition("name", "Adam5", Comparison.IS)).stream().count() == 3);
 	}
 
 	@Test

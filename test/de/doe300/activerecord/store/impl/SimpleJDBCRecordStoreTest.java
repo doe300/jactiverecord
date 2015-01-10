@@ -3,11 +3,12 @@ package de.doe300.activerecord.store.impl;
 import de.doe300.activerecord.RecordBase;
 import de.doe300.activerecord.RecordCore;
 import de.doe300.activerecord.TestInterface;
+import de.doe300.activerecord.TestServer;
 import de.doe300.activerecord.dsl.Comparison;
 import de.doe300.activerecord.dsl.SimpleCondition;
-import java.sql.SQLException;
 import java.util.Collections;
 import java.util.Map;
+import org.junit.AfterClass;
 import org.junit.Assert;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
@@ -30,12 +31,19 @@ public class SimpleJDBCRecordStoreTest extends Assert
 	}
 	
 	@BeforeClass
-	public static void init() throws SQLException, Exception
+	public static void createTables() throws Exception
 	{
-		store = new SimpleJDBCRecordStore(TestInterface.createTestConnection());
+		TestServer.buildTestTables();
+		store = new SimpleJDBCRecordStore(TestServer.getTestConnection());
 		base = RecordCore.fromStore( "Test1", store).buildBase(TestInterface.class);
 		assertNotNull( base );
 		primaryKey = base.createRecord().getPrimaryKey();
+	}
+	
+	@AfterClass
+	public static void destroyTables() throws Exception
+	{
+		TestServer.destroyTestTables();
 	}
 
 	@Test

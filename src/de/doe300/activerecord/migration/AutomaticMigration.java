@@ -50,6 +50,7 @@ import java.util.stream.Collectors;
  */
 public class AutomaticMigration implements Migration
 {
+	//TODO move ID to first column
 	private final Class<? extends ActiveRecord> recordType;
 	private final boolean dropColumnsOnUpdate;
 
@@ -60,7 +61,7 @@ public class AutomaticMigration implements Migration
 	}
 
 	@Override
-	public boolean apply( Connection con ) throws Exception
+	public boolean apply( Connection con ) throws SQLException
 	{
 		String tableName = getTableName( recordType );
 		//1. check if table exists
@@ -100,7 +101,7 @@ public class AutomaticMigration implements Migration
 	 * @throws Exception 
 	 */
 	@Override
-	public boolean update( Connection con) throws Exception
+	public boolean update( Connection con) throws SQLException
 	{
 		//TODO
 		String tableName = getTableName( recordType );
@@ -208,7 +209,7 @@ public class AutomaticMigration implements Migration
 	 * @param recordType
 	 * @return the columns
 	 */
-	private static Map<String,String> getColumnsFromModel(Class<? extends ActiveRecord> recordType)
+	private static Map<String,String> getColumnsFromModel(Class<? extends ActiveRecord> recordType) throws IllegalArgumentException
 	{
 		HashMap<String,String> columns = new HashMap<>(10);
 		Method[] methods = recordType.getMethods();
@@ -295,7 +296,7 @@ public class AutomaticMigration implements Migration
 	 * @return the mapped SQL-type
 	 * @see java.sql.Types
 	 */
-	public static String getSQLType(int jdbcType)
+	public static String getSQLType(int jdbcType) throws IllegalArgumentException
 	{
 		if(jdbcType == Types.SQLXML)
 		{
@@ -328,7 +329,7 @@ public class AutomaticMigration implements Migration
 	 * @see http://www.cis.upenn.edu/~bcpierce/courses/629/jdkdocs/guide/jdbc/getstart/mapping.doc.html
 	 * @see java.sql.Types
 	 */
-	public static String getSQLType(Class<?> javaType)
+	public static String getSQLType(Class<?> javaType) throws IllegalArgumentException
 	{
 		if(javaType.equals( String.class))
 		{

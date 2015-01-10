@@ -4,11 +4,12 @@ import de.doe300.activerecord.proxy.handlers.CollectionHandler;
 import de.doe300.activerecord.RecordBase;
 import de.doe300.activerecord.RecordCore;
 import de.doe300.activerecord.TestInterface;
+import de.doe300.activerecord.TestServer;
 import de.doe300.activerecord.record.RecordType;
-import java.sql.SQLException;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.Iterator;
+import org.junit.AfterClass;
 import org.junit.Assert;
 import org.junit.BeforeClass;
 import org.junit.Test;
@@ -24,11 +25,18 @@ public class CollectionHandlerTest extends Assert
 	private static TestCollectionInterface record;
 	
 	@BeforeClass
-	public static void init() throws SQLException, Exception
+	public static void createTables() throws Exception
 	{
+		TestServer.buildTestTables();
 		handler = new CollectionHandler();
-		base = RecordCore.fromDatabase( TestInterface.createTestConnection(), false).buildBase(CollectionHandlerTest.TestCollectionInterface.class, handler);
+		base = RecordCore.fromDatabase( TestServer.getTestConnection(), false).buildBase(CollectionHandlerTest.TestCollectionInterface.class, handler);
 		record = base.createRecord();
+	}
+	
+	@AfterClass
+	public static void destroyTables() throws Exception
+	{
+		TestServer.destroyTestTables();
 	}
 	
 	public CollectionHandlerTest()
