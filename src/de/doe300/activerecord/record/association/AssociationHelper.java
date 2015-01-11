@@ -1,9 +1,13 @@
-package de.doe300.activerecord;
+package de.doe300.activerecord.record.association;
 
+import de.doe300.activerecord.RecordBase;
+import de.doe300.activerecord.dsl.AndCondition;
 import de.doe300.activerecord.record.ActiveRecord;
 import de.doe300.activerecord.dsl.Comparison;
 import de.doe300.activerecord.dsl.Condition;
 import de.doe300.activerecord.dsl.SimpleCondition;
+import java.util.Set;
+import java.util.function.Consumer;
 import java.util.stream.Stream;
 
 /**
@@ -94,6 +98,23 @@ public final class AssociationHelper
 	}
 	
 	/**
+	 * This given <code>record</code> has many associated records having this record's primary-key in the column specified in <code>foreignKeyColumn</code>
+	 * @param <T>
+	 * @param record
+	 * @param type
+	 * @param foreignKeyColumn the name of the column of the other model holding the primary key
+	 * @return the associated records as modifiable set
+	 */
+	public static <T extends ActiveRecord> Set<T> getHasManySet(ActiveRecord record, Class<T> type, String foreignKeyColumn)
+	{
+		final RecordBase<T> base = record.getBase().getCore().buildBase( type);
+		final Condition cond = new SimpleCondition(foreignKeyColumn, record.getPrimaryKey(), Comparison.IS);
+		final Consumer<T> setAssoc = (T t) -> base.getStore().setValue( base, t.getPrimaryKey(), foreignKeyColumn, record.getPrimaryKey() );
+		final Consumer<T> unsetAssoc = (T t) -> base.getStore().setValue( base, t.getPrimaryKey(), foreignKeyColumn, null );
+		return new HasManyAssociationSet<T>(base, cond, setAssoc, unsetAssoc );
+	}
+	
+	/**
 	 * This method sets the column <code>foreignKeyColumn</code> of the <code>otherRecord</code> to the primary-key of <code>record</code>
 	 * @param record
 	 * @param otherRecord
@@ -149,6 +170,23 @@ public final class AssociationHelper
 		return Stream.empty();
 	}
 	
+	
+	/**
+	 * This helper is used to retrieve all associated records of the other model defined by <code>type</code> in a has-many through (the <code>associationTable</code>) association.
+	 * @param <T>
+	 * @param record
+	 * @param type the type of the other model
+	 * @param associationTable the table storing pairs of foreign keys to both models
+	 * @param thisForeignKeyColumn the name of the column in the <code>associationTable</code> storing the foreign key to <code>record</code>
+	 * @param otherForeignKeyColumn the name of the column in the <code>associationTable</code> storing the foreign key to the other model defined by <code>type</code>
+	 * @return all matching associations as a modifiable Set
+	 */
+	public static <T extends ActiveRecord> Set<T> getHasManyThroughSet(ActiveRecord record, Class<T> type, String associationTable, String thisForeignKeyColumn, String otherForeignKeyColumn)
+	{
+		RecordBase<T> otherBase = record.getBase().getCore().getBase( type );
+		return new HasManyThroughAssociationSet<T>(otherBase, record.getPrimaryKey(), associationTable, thisForeignKeyColumn,otherForeignKeyColumn);
+	}
+	
 	/**
 	 * This helper is used to set the record <code>otherRecord</code> associated with <code>record</code> in a has-many through (the <code>associationTable</code>) association.
 	 * @param record
@@ -156,12 +194,30 @@ public final class AssociationHelper
 	 * @param associationTable the table storing pairs of foreign keys to both models
 	 * @param thisForeignKeyColumn the name of the column in the <code>associationTable</code> storing the foreign key to <code>record</code>
 	 * @param otherForeignKeyColumn the name of the column in the <code>associationTable</code> storing the foreign key to the other model defined by <code>type</code>
+	 * @return whether the association was added
 	 */
-	public static void addHasManyThrough(ActiveRecord record, ActiveRecord otherRecord, String associationTable, String thisForeignKeyColumn, String otherForeignKeyColumn)
+	public static boolean addHasManyThrough(ActiveRecord record, ActiveRecord otherRecord, String associationTable, String thisForeignKeyColumn, String otherForeignKeyColumn)
 	{
-		//TODO need to add row
+		return record.getBase().getStore().addRow( associationTable, new String[]{thisForeignKeyColumn,otherForeignKeyColumn}, new Object[]{record.getPrimaryKey(),otherRecord.getPrimaryKey()});
 	}
-	//TODO missing: remove row for mapping-table
+	
+	/**
+	 * This helper is used to remove the association between the two records in a has-many through (the <code>associationTable</code>) association.
+	 * @param record
+	 * @param otherRecord
+	 * @param associationTable the table storing pairs of foreign keys to both models
+	 * @param thisForeignKeyColumn the name of the column in the <code>associationTable</code> storing the foreign key to <code>record</code>
+	 * @param otherForeignKeyColumn the name of the column in the <code>associationTable</code> storing the foreign key to the other model defined by <code>type</code>
+	 * @return whether the association was removed
+	 */
+	public static boolean removeHasManyThrough(ActiveRecord record, ActiveRecord otherRecord, String associationTable, String thisForeignKeyColumn, String otherForeignKeyColumn)
+	{
+		Condition cond = new AndCondition(
+				new SimpleCondition(thisForeignKeyColumn, record.getPrimaryKey(), Comparison.IS),
+				new SimpleCondition(otherForeignKeyColumn, otherRecord.getPrimaryKey(), Comparison.IS)
+		);
+		return record.getBase().getStore().removeRow( associationTable, cond );
+	}
 	
 	private AssociationHelper()
 	{

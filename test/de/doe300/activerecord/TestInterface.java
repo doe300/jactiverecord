@@ -1,5 +1,6 @@
 package de.doe300.activerecord;
 
+import de.doe300.activerecord.record.association.AssociationHelper;
 import de.doe300.activerecord.migration.Attribute;
 import de.doe300.activerecord.record.RecordType;
 import de.doe300.activerecord.record.RecordCallbacks;

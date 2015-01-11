@@ -470,4 +470,38 @@ public class SimpleJDBCRecordStore implements RecordStore
 	public void clearCache(RecordBase<?> base, int primaryKey )
 	{
 	}
+
+	@Override
+	public boolean addRow( String tableName, String[] rows, Object[] values ) throws IllegalArgumentException
+	{
+		String sql = "INSERT INTO "+tableName+" ("+Arrays.stream( rows).collect( Collectors.joining(", "))+") VALUES ("+
+				Arrays.stream( values ).map( (Object obj) -> "?").collect( Collectors.joining(", "))+")";
+		try(PreparedStatement stm = con.prepareStatement( sql ))
+		{
+			for(int i = 0;i<values.length;i++)
+			{
+				stm.setObject( i+1, values[i]);
+			}
+			return stm.executeUpdate() == 1;
+		}
+		catch ( SQLException ex )
+		{
+			throw new RuntimeException("Failed to insert new row",ex);
+		}
+	}
+
+	@Override
+	public boolean removeRow( String tableName, Condition cond ) throws IllegalArgumentException
+	{
+		String sql = "DELETE FROM "+tableName+toWhereClause( cond );
+		try(PreparedStatement stm = con.prepareStatement( sql ))
+		{
+			fillStatement( stm, cond );
+			return stm.executeUpdate() >= 1;
+		}
+		catch ( SQLException ex )
+		{
+			throw new RuntimeException("Failed to insert new row",ex);
+		}
+	}
 }

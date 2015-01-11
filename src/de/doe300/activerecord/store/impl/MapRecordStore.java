@@ -201,4 +201,16 @@ public class MapRecordStore implements RecordStore
 	public void clearCache(RecordBase<?> base, int primaryKey )
 	{
 	}
+
+	@Override
+	public boolean addRow( String tableName, String[] rows, Object[] values ) throws IllegalArgumentException
+	{
+		throw new UnsupportedOperationException( "Not supported yet." ); //To change body of generated methods, choose Tools | Templates.
+	}
+
+	@Override
+	public boolean removeRow( String tableName, Condition cond ) throws IllegalArgumentException
+	{
+		throw new UnsupportedOperationException( "Not supported yet." ); //To change body of generated methods, choose Tools | Templates.
+	}
 }

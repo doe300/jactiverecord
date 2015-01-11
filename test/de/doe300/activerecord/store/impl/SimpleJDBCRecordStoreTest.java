@@ -167,4 +167,16 @@ public class SimpleJDBCRecordStoreTest extends Assert
 	{
 		assertFalse( store.saveAll( base));
 	}
+
+	@Test
+	public void testAddRow()
+	{
+		assertTrue( store.addRow( "mappingTable", new String[]{"fk_test1", "fk_test2"}, new Object[]{primaryKey,primaryKey} ));
+	}
+
+	@Test
+	public void testRemoveRow()
+	{
+		assertTrue( store.removeRow( "mappingTable", new SimpleCondition("fk_test1", primaryKey, Comparison.IS)));
+	}
 }

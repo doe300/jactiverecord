@@ -84,13 +84,22 @@ public interface RecordStore extends AutoCloseable
 	 * Access made with this method is not required to be cached and should therefore be only used if no model applies to the requested table.
 	 * 
 	 * @param tableName
-	 * @param column the column to set
-	 * @param value the value to set
-	 * @param condColumn the column to match to the <code>condValue</code>
-	 * @param condValue the value to search for
+	 * @param rows
+	 * @param values
+	 * @return whether the row was added
 	 * @throws IllegalArgumentException if the <code>tableName</code> does not exist or the <code>condValue</code> does not match the type for <code>condColumn</code>
 	 */
-//	public void setValue(String tableName, String column, Object value, String condColumn, Object condValue) throws IllegalArgumentException;
+	public boolean addRow(String tableName, String[] rows, Object[] values) throws IllegalArgumentException;
+	
+	/**
+	 * This method is for usage only if the table has no mapped model, i.e. for association-tables.
+	 * 
+	 * @param tableName
+	 * @param cond the condition to match
+	 * @return whether the row was removed
+	 * @throws IllegalArgumentException if the <code>tableName</code> does not exist or the <code>condValue</code> does not match the type for <code>condColumn</code>
+	 */
+	public boolean removeRow(String tableName, Condition cond) throws IllegalArgumentException;
 	
 	/**
 	 * This method is only necessary for caching RecordStores

@@ -1,5 +1,9 @@
-package de.doe300.activerecord;
+package de.doe300.activerecord.record.association;
 
+import de.doe300.activerecord.RecordBase;
+import de.doe300.activerecord.RecordCore;
+import de.doe300.activerecord.TestInterface;
+import de.doe300.activerecord.TestServer;
 import de.doe300.activerecord.dsl.Comparison;
 import de.doe300.activerecord.dsl.SimpleCondition;
 import java.sql.SQLException;
@@ -108,6 +112,33 @@ public class AssociationHelperTest extends Assert
 	@Test
 	public void testAddHasManyThrough()
 	{
+		TestInterface i = base.createRecord(), i2 = base.createRecord();
+		assertTrue( AssociationHelper.addHasManyThrough( i, i2, "mappingTable", "fk_test1", "fk_test2"));
 	}
 	
+	@Test
+	public void testRemoveHasManyThrough()
+	{
+		TestInterface i = base.createRecord(), i2 = base.createRecord();
+		assertTrue( AssociationHelper.addHasManyThrough( i, i2, "mappingTable", "fk_test1", "fk_test2"));
+		assertTrue( AssociationHelper.removeHasManyThrough( i, i2, "mappingTable", "fk_test1", "fk_test2"));
+	}
+
+	@Test
+	public void testGetHasManySet()
+	{
+		TestInterface i = base.createRecord(), i2 = base.createRecord();
+		AssociationHelper.setHasOne( i, i2, "fk_test_id");
+		AssociationHelper.setHasOne( i, i, "fk_test_id");
+		assertEquals( 2, AssociationHelper.getHasManySet( i, TestInterface.class, "fk_test_id").size());
+	}
+
+	@Test
+	public void testGetHasManyThroughSet()
+	{
+		TestInterface i = base.createRecord(), i2 = base.createRecord();
+		assertTrue( AssociationHelper.addHasManyThrough( i, i2, "mappingTable", "fk_test1", "fk_test2"));
+		assertTrue( AssociationHelper.addHasManyThrough( i, i, "mappingTable", "fk_test1", "fk_test2"));
+		assertEquals( 2, AssociationHelper.getHasManyThroughSet( i, TestInterface.class, "mappingTable", "fk_test1", "fk_test2").size());
+	}
 }
