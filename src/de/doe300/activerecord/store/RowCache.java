@@ -20,11 +20,13 @@ public class RowCache implements Comparable<RowCache>
 	private boolean isInDB;
 	private final String tableName;
 
-	private RowCache(String primaryKey, String tableName, Map<String,Object> columnData)
+	private RowCache(String primaryKey, String tableName, Map<String,Object> columnData, boolean inDB)
 	{
 		this.primaryKey = primaryKey.toLowerCase();
 		this.tableName = tableName;
 		this.columnData = columnData;
+		columnData.put( RecordStore.COLUMN_CREATED_AT, new Timestamp(System.currentTimeMillis()));
+		this.isInDB = inDB;
 	}
 	
 	/**
@@ -47,7 +49,7 @@ public class RowCache implements Comparable<RowCache>
 				tableName = set.getMetaData().getTableName(i);
 			}
 		}
-		return new RowCache(primaryKey,tableName,data );
+		return new RowCache(primaryKey,tableName,data, true );
 	}
 	
 	/**
@@ -69,17 +71,17 @@ public class RowCache implements Comparable<RowCache>
 			}
 			data.put( set.getMetaData().getColumnLabel( i).toLowerCase(), set.getObject( i ));
 		}
-		return new RowCache(primaryKey,tableName,data);
+		return new RowCache(primaryKey,tableName,data, true);
 	}
 	
 	public static RowCache fromMap(String tableName, String primaryKey, Map<String,Object> map)
 	{
-		return new RowCache(primaryKey,tableName,new HashMap<>(map ) );
+		return new RowCache(primaryKey,tableName,new HashMap<>(map ),false );
 	}
 	
 	public static RowCache emptyCache(String tableName, String primaryKey)
 	{
-		return new RowCache(primaryKey, tableName, new HashMap<>(10));
+		return new RowCache(primaryKey, tableName, new HashMap<>(10),false);
 	}
 	
 	public Object setData(String columnName, Object value, boolean updateTimestamp)
@@ -172,6 +174,8 @@ public class RowCache implements Comparable<RowCache>
 		{
 			setData( set.getMetaData().getColumnLabel( i).toLowerCase(), set.getObject( i ),updateTimestamp);
 		}
+		isInDB = true;
+		dataChanged =false;
 	}
 	
 	public Map<String,Object> toMap()

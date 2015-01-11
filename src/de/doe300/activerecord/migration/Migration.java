@@ -43,7 +43,7 @@ public interface Migration
 	{
 		try
 		{
-			ResultSet set = con.getMetaData().getTables(null, null, null, null );
+			ResultSet set = con.getMetaData().getTables(con.getCatalog(), con.getSchema(), null, null );
 			while(set.next())
 			{
 				if(set.getString( "TABLE_NAME").equalsIgnoreCase(name))

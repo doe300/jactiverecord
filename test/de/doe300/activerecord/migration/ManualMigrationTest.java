@@ -18,7 +18,6 @@ public class ManualMigrationTest
 	
 	public ManualMigrationTest()
 	{
-		//FIXME passes test but does not create or drop table!!
 	}
 	
 	@BeforeClass

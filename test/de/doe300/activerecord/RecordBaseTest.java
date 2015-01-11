@@ -295,7 +295,6 @@ public class RecordBaseTest<T extends TestInterface> extends Assert
 	}
 	
 	@Test
-	//Tests FinderMethods#findFor(String,Object)
 	public void testFindForColumn()
 	{
 		T t = base.createRecord();
@@ -303,7 +302,6 @@ public class RecordBaseTest<T extends TestInterface> extends Assert
 	}
 	
 	@Test
-	//Tests FinderMethods#findFirstFor(String,Object)
 	public void testFindFirstForColumn()
 	{
 		T t = base.createRecord();
@@ -311,7 +309,6 @@ public class RecordBaseTest<T extends TestInterface> extends Assert
 	}
 	
 	@Test
-	//Tests FinderMethods#findFor(Map)
 	public void testFindForMap()
 	{
 		T t = base.createRecord();
@@ -319,7 +316,6 @@ public class RecordBaseTest<T extends TestInterface> extends Assert
 	}
 	
 	@Test
-	//Tests FinderMethods#findFirstFor(Map)
 	public void testFindFirstForMap()
 	{
 		T t = base.createRecord();
