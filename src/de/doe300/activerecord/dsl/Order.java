@@ -14,18 +14,34 @@ public class Order implements Comparator<Map<String,Object>>, SQLCommand
 	private final String[] columns;
 	private final OrderType types[];
 
+	/**
+	 * The order of the <code>columns</code> specifies the priority of the column in the ordering.
+	 * If the <code>types</code>-array is smaller than the <code>columns</code>, the rest will be filled with {@link OrderType#ASCENDING}
+	 * allowing for  only the <code>columns</code> to be specified.
+	 * @param columns
+	 * @param types the order-types, may be <code>null</code> 
+	 */
 	public Order( String[] columns, OrderType[] types )
 	{
 		this.columns = columns;
 		this.types = levelTypes( columns.length, types );
 	}
 
+	/**
+	 * Order by a single column
+	 * @param column
+	 * @param type 
+	 */
 	public Order(String column, OrderType type)
 	{
 		this.columns = new String[]{column};
 		this.types = new OrderType[]{type};
 	}
 	
+	/**
+	 * @param sqlOrderBy
+	 * @return a new order from the SQL ORDER BY-Statement
+	 */
 	public static Order fromSQLString(String sqlOrderBy)
 	{
 		if(sqlOrderBy==null|| sqlOrderBy.isEmpty())
@@ -56,13 +72,16 @@ public class Order implements Comparator<Map<String,Object>>, SQLCommand
 	
 	private OrderType[] levelTypes(int num, OrderType[] types)
 	{
-		if(num==types.length)
+		if(types!=null && num==types.length)
 		{
 			return types;
 		}
 		OrderType[] newTypes = new OrderType[ num ];
 		Arrays.fill( newTypes, OrderType.ASCENDING);
-		System.arraycopy( types, 0, newTypes, 0, types.length);
+		if(types!=null)
+		{
+			System.arraycopy( types, 0, newTypes, 0, types.length);
+		}
 		return newTypes;
 	}
 	
@@ -78,6 +97,10 @@ public class Order implements Comparator<Map<String,Object>>, SQLCommand
 			if(val1 instanceof Comparable)
 			{
 				compare = ((Comparable)val1).compareTo( o2.get( columns[index]));
+				if(types[index] == OrderType.DESCENDING)
+				{
+					compare = -compare;
+				}
 			}
 			index++;
 		}
@@ -97,6 +120,9 @@ public class Order implements Comparator<Map<String,Object>>, SQLCommand
 		return sb.toString();
 	}
 
+	/**
+	 * @return a Comparator to sort records
+	 */
 	public Comparator<ActiveRecord> toRecordComparator()
 	{
 		return new Comparator<ActiveRecord>()
@@ -111,8 +137,14 @@ public class Order implements Comparator<Map<String,Object>>, SQLCommand
 		};
 	}
 
+	/**
+	 * The type of ordering
+	 */
 	public static enum OrderType implements SQLCommand
 	{
+		/**
+		 * Order by value ascending
+		 */
 		ASCENDING {
 
 			@Override
@@ -121,6 +153,9 @@ public class Order implements Comparator<Map<String,Object>>, SQLCommand
 				return "ASC";
 			}
 		},
+		/**
+		 * Order by value descending
+		 */
 		DESCENDING {
 
 			@Override
