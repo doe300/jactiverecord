@@ -10,6 +10,7 @@ import java.util.AbstractSet;
 import java.util.Collection;
 import java.util.Iterator;
 import java.util.Set;
+import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 /**
@@ -17,7 +18,7 @@ import java.util.stream.Stream;
  * @author doe300
  * @param <T>
  */
-public class HasManyThroughAssociationSet<T extends ActiveRecord> extends AbstractSet<T> implements Set<T>
+public class HasManyThroughAssociationSet<T extends ActiveRecord> extends AbstractSet<T> implements AssociationSet<T>
 {
 	private final RecordBase<T> destBase;
 	private final String mappingTableName, thisMappingKey, foreignMappingKey;
@@ -126,5 +127,19 @@ public class HasManyThroughAssociationSet<T extends ActiveRecord> extends Abstra
 	public Stream<T> stream()
 	{
 		return getAssocationKeys().map( destBase::getRecord );
+	}
+
+	@Override
+	public Stream<T> find( Condition condition )
+	{
+		Set<Integer> keys = getAssocationKeys().collect( Collectors.toSet());
+		return destBase.find( new AndCondition(new SimpleCondition(destBase.getPrimaryColumn(), keys, Comparison.IN), condition));
+	}
+
+	@Override
+	public T findFirst( Condition condition )
+	{
+		Set<Integer> keys = getAssocationKeys().collect( Collectors.toSet());
+		return destBase.findFirst( new AndCondition(new SimpleCondition(destBase.getPrimaryColumn(), keys, Comparison.IN), condition));
 	}
 }

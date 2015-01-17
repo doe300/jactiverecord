@@ -4,8 +4,9 @@ import de.doe300.activerecord.RecordBase;
 import de.doe300.activerecord.RecordCore;
 import de.doe300.activerecord.TestInterface;
 import de.doe300.activerecord.TestServer;
+import de.doe300.activerecord.dsl.Comparison;
+import de.doe300.activerecord.dsl.SimpleCondition;
 import java.util.Arrays;
-import java.util.Set;
 import org.junit.AfterClass;
 import org.junit.Assert;
 import org.junit.BeforeClass;
@@ -17,7 +18,7 @@ import org.junit.Test;
  */
 public class HasManyAssociationSetTest extends Assert
 {
-	private static Set<TestInterface> set;
+	private static AssociationSet<TestInterface> set;
 	private static RecordBase<TestInterface> base;
 	private static TestInterface assocI;
 	private static TestInterface a1, a2, a3;
@@ -56,7 +57,6 @@ public class HasManyAssociationSetTest extends Assert
 	public void testSize()
 	{
 		assertEquals(3, set.size());
-		assertEquals( 3, set.stream().count());
 	}
 
 	@Test
@@ -125,6 +125,25 @@ public class HasManyAssociationSetTest extends Assert
 		assertFalse( set.isEmpty());
 		set.clear();
 		assertTrue( set.isEmpty());
+	}
+
+	@Test
+	public void testStream()
+	{
+		set.addAll( Arrays.asList( a1,a2,a3));
+		assertEquals( 3, set.stream().count());
+	}
+
+	@Test
+	public void testFind()
+	{
+		assertTrue(set.find( new SimpleCondition(a2.getBase().getPrimaryColumn(), a2.getPrimaryKey(), Comparison.IS)).allMatch( (TestInterface i) -> i.equals( a2)));
+	}
+
+	@Test
+	public void testFindFirst()
+	{
+		assertEquals( a2, set.findFirst( new SimpleCondition(a2.getBase().getPrimaryColumn(), a2.getPrimaryKey(), Comparison.IS)));
 	}
 	
 }

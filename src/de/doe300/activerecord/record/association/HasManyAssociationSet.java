@@ -1,12 +1,12 @@
 package de.doe300.activerecord.record.association;
 
 import de.doe300.activerecord.RecordBase;
+import de.doe300.activerecord.dsl.AndCondition;
 import de.doe300.activerecord.dsl.Condition;
 import de.doe300.activerecord.record.ActiveRecord;
 import java.util.AbstractSet;
 import java.util.Collection;
 import java.util.Iterator;
-import java.util.Set;
 import java.util.function.Consumer;
 import java.util.stream.Stream;
 
@@ -15,7 +15,7 @@ import java.util.stream.Stream;
  * @author doe300
  * @param <T>
  */
-public class HasManyAssociationSet<T extends ActiveRecord> extends AbstractSet<T> implements Set<T>
+public class HasManyAssociationSet<T extends ActiveRecord> extends AbstractSet<T> implements AssociationSet<T>
 {
 	private final RecordBase<T> destBase;
 	private final Condition associationCond;
@@ -121,5 +121,17 @@ public class HasManyAssociationSet<T extends ActiveRecord> extends AbstractSet<T
 	public Stream<T> stream()
 	{
 		return destBase.find( associationCond );
+	}
+
+	@Override
+	public Stream<T> find( Condition condition )
+	{
+		return destBase.find( new AndCondition(associationCond, condition ));
+	}
+
+	@Override
+	public T findFirst( Condition condition )
+	{
+		return destBase.findFirst( new AndCondition(associationCond,condition));
 	}
 }

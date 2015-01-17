@@ -6,7 +6,6 @@ import de.doe300.activerecord.record.ActiveRecord;
 import de.doe300.activerecord.dsl.Comparison;
 import de.doe300.activerecord.dsl.Condition;
 import de.doe300.activerecord.dsl.SimpleCondition;
-import java.util.Set;
 import java.util.function.Consumer;
 import java.util.stream.Stream;
 
@@ -105,7 +104,7 @@ public final class AssociationHelper
 	 * @param foreignKeyColumn the name of the column of the other model holding the primary key
 	 * @return the associated records as modifiable set
 	 */
-	public static <T extends ActiveRecord> Set<T> getHasManySet(ActiveRecord record, Class<T> type, String foreignKeyColumn)
+	public static <T extends ActiveRecord> AssociationSet<T> getHasManySet(ActiveRecord record, Class<T> type, String foreignKeyColumn)
 	{
 		final RecordBase<T> base = record.getBase().getCore().buildBase( type);
 		final Condition cond = new SimpleCondition(foreignKeyColumn, record.getPrimaryKey(), Comparison.IS);
@@ -181,7 +180,7 @@ public final class AssociationHelper
 	 * @param otherForeignKeyColumn the name of the column in the <code>associationTable</code> storing the foreign key to the other model defined by <code>type</code>
 	 * @return all matching associations as a modifiable Set
 	 */
-	public static <T extends ActiveRecord> Set<T> getHasManyThroughSet(ActiveRecord record, Class<T> type, String associationTable, String thisForeignKeyColumn, String otherForeignKeyColumn)
+	public static <T extends ActiveRecord> AssociationSet<T> getHasManyThroughSet(ActiveRecord record, Class<T> type, String associationTable, String thisForeignKeyColumn, String otherForeignKeyColumn)
 	{
 		RecordBase<T> otherBase = record.getBase().getCore().getBase( type );
 		return new HasManyThroughAssociationSet<T>(otherBase, record.getPrimaryKey(), associationTable, thisForeignKeyColumn,otherForeignKeyColumn);
