@@ -16,6 +16,10 @@ public class AndCondition implements Condition
 {
 	private final Condition[] conditions;
 
+	/**
+	 * Default constructor, concatenating all arguments with AND
+	 * @param conditions 
+	 */
 	public AndCondition( Condition... conditions )
 	{
 		this.conditions = Objects.requireNonNull( conditions );

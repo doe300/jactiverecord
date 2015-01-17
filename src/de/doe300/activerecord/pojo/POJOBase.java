@@ -35,11 +35,22 @@ public class POJOBase<T extends ActiveRecord> extends RecordBase<T>
 		}
 	}
 	
+	/**
+	 * Sets the given property in the record-store
+	 * @param primaryKey
+	 * @param name
+	 * @param value 
+	 */
 	public void setProperty(int primaryKey, String name, Object value)
 	{
 		store.setValue( this, primaryKey, name, value );
 	}
 	
+	/**
+	 * @param primaryKey
+	 * @param name
+	 * @return the value for the given property from the underlying store
+	 */
 	public Object getProperty(int primaryKey, String name)
 	{
 		return store.getValue( this, primaryKey, name );

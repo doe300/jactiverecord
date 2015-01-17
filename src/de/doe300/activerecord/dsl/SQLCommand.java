@@ -6,5 +6,8 @@ package de.doe300.activerecord.dsl;
  */
 public interface SQLCommand
 {
+	/**
+	 * @return the sQL representation of this statement
+	 */
 	public String toSQL();
 }

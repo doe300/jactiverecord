@@ -16,6 +16,11 @@ public class SimpleCondition implements Condition, SQLCommand
 	private final Object value;
 	private final Comparison comp;
 
+	/**
+	 * @param key
+	 * @param value
+	 * @param comp 
+	 */
 	public SimpleCondition( String key, Object value, Comparison comp )
 	{
 		this.key = key;
@@ -42,6 +47,9 @@ public class SimpleCondition implements Condition, SQLCommand
 		return val;
 	}
 	
+	/**
+	 * @return the key (attribute or column) this condition checks for
+	 */
 	public String getKey()
 	{
 		return key;
@@ -57,6 +65,9 @@ public class SimpleCondition implements Condition, SQLCommand
 		return new Object[]{value};
 	}
 	
+	/**
+	 * @return the comparison-method
+	 */
 	public Comparison getComparison()
 	{
 		return comp;

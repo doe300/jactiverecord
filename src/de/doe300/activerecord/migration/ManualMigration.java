@@ -11,6 +11,12 @@ public class ManualMigration implements Migration
 {
 	private final String command, revertedCommand, updateCommand;
 
+	/**
+	 * 
+	 * @param command the command for {@link #apply(java.sql.Connection) }
+	 * @param updateCommand the command for {@link #update(java.sql.Connection) }
+	 * @param revertCommand the command for {@link #revert(java.sql.Connection) }
+	 */
 	public ManualMigration(String command, String updateCommand, String revertCommand)
 	{
 		this.command = command;

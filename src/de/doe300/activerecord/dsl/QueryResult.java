@@ -1,7 +1,6 @@
 package de.doe300.activerecord.dsl;
 
 import de.doe300.activerecord.record.ActiveRecord;
-import de.doe300.activerecord.dsl.Condition;
 import java.util.List;
 import java.util.Map;
 import java.util.function.Function;
@@ -9,9 +8,10 @@ import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 /**
- *
+ * The result of a query
  * @author doe300
  * @param <T>
+ * @see QueryMethods
  */
 public class QueryResult<T extends ActiveRecord> implements QueryMethods<T>
 {
@@ -19,6 +19,12 @@ public class QueryResult<T extends ActiveRecord> implements QueryMethods<T>
 	private final int size;
 	private final Order order;
 
+	/**
+	 * 
+	 * @param baseStream
+	 * @param size
+	 * @param order 
+	 */
 	public QueryResult( Stream<T> baseStream, int size, Order order )
 	{
 		this.baseStream = order!=null ? baseStream.sorted( order.toRecordComparator()) : baseStream;
@@ -50,6 +56,11 @@ public class QueryResult<T extends ActiveRecord> implements QueryMethods<T>
 		return size;
 	}
 
+	/**
+	 * Groups the records in this result by the given column
+	 * @param column
+	 * @return the grouped result
+	 */
 	public Stream<GroupResult<Object, T>> groupBy( String column )
 	{
 		return baseStream.collect( Collectors.groupingBy( (T t)-> {
@@ -57,6 +68,13 @@ public class QueryResult<T extends ActiveRecord> implements QueryMethods<T>
 		})).entrySet().stream().map( (Map.Entry<Object, List<T>> e)-> new GroupResult<Object, T>(e.getKey(), e.getValue().stream(), e.getValue().size(),order));
 	}
 	
+	/**
+	 * Groups the record in this result by the return-value of the given function.
+	 * All records for which the <code>method</code> returns the same value are put into the same group.
+	 * @param <R>
+	 * @param method
+	 * @return the grouped results
+	 */
 	public <R> Stream<GroupResult<R, T>> groupBy( Function<T, R> method )
 	{
 		return baseStream.collect( Collectors.groupingBy( (T t)-> method.apply( t )))

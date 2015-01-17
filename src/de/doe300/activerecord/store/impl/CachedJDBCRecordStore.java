@@ -23,6 +23,9 @@ public class CachedJDBCRecordStore extends SimpleJDBCRecordStore implements Reco
 	private final Map<RecordBase<?>, Map<Integer, RowCache>> cache;
 	private final Map<String,String[]> columnsCache;
 
+	/**
+	 * @param con 
+	 */
 	public CachedJDBCRecordStore( Connection con)
 	{
 		super( con );

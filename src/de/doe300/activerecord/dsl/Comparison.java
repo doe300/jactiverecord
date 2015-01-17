@@ -12,6 +12,9 @@ import java.util.regex.Pattern;
  */
 public enum Comparison implements BiPredicate<Object, Object>
 {
+	/**
+	 * Exact match of the two values
+	 */
 	IS {
 
 		@Override
@@ -20,6 +23,10 @@ public enum Comparison implements BiPredicate<Object, Object>
 			return Objects.equals( value, compareValue);
 		}
 	}, 
+	/**
+	 * Non-match of the values
+	 * @see #IS
+	 */
 	IS_NOT {
 
 		@Override
@@ -28,6 +35,10 @@ public enum Comparison implements BiPredicate<Object, Object>
 			return !Objects.equals( value, compareValue);
 		}
 	}, 
+	/**
+	 * Regex-match (SQL LIKE-Statement).
+	 * This comparison uses <code>%</code> as wildcard.
+	 */
 	LIKE {
 
 		@Override
@@ -40,6 +51,9 @@ public enum Comparison implements BiPredicate<Object, Object>
 			return false;
 		}
 	}, 
+	/**
+	 * Whether the first argument is <code>null</code>.
+	 */
 	IS_NULL {
 
 		@Override
@@ -48,6 +62,10 @@ public enum Comparison implements BiPredicate<Object, Object>
 			return value == null;
 		}
 	}, 
+	/**
+	 * Whether the first value is not <code>null</code>
+	 * @see #IS_NULL
+	 */
 	IS_NOT_NULL {
 
 		@Override
@@ -56,6 +74,10 @@ public enum Comparison implements BiPredicate<Object, Object>
 			return value != null;
 		}
 	},
+	/**
+	 * Returns, whether the first value is larger than the second
+	 * @see Comparable
+	 */
 	LARGER {
 
 		@Override
@@ -64,6 +86,10 @@ public enum Comparison implements BiPredicate<Object, Object>
 			return ((Comparable)value).compareTo( compareValue) > 0;
 		}
 	},
+	/**
+	 * Returns, whether the first value is larger or equal to the second one
+	 * @see Comparable
+	 */
 	LARGER_EQUALS {
 
 		@Override
@@ -72,6 +98,10 @@ public enum Comparison implements BiPredicate<Object, Object>
 			return ((Comparable)value).compareTo( compareValue) >= 0;
 		}
 	},
+	/**
+	 * Returns whether the first value is smaller than the second
+	 * @see Comparable
+	 */
 	SMALLER {
 
 		@Override
@@ -80,6 +110,10 @@ public enum Comparison implements BiPredicate<Object, Object>
 			return ((Comparable)value).compareTo( compareValue) < 0;
 		}
 	},
+	/**
+	 * Returns whether the first value is smaller or equal to the second
+	 * @see Comparable
+	 */
 	SMALLER_EQUALS {
 
 		@Override
@@ -88,6 +122,9 @@ public enum Comparison implements BiPredicate<Object, Object>
 			return ((Comparable)value).compareTo( compareValue) <= 0;
 		}
 	},
+	/**
+	 * always returns true
+	 */
 	TRUE {
 
 		@Override
@@ -96,6 +133,10 @@ public enum Comparison implements BiPredicate<Object, Object>
 			return true;
 		}
 	},
+	/**
+	 * Checks whether the first value is in collection specified by the second value.
+	 * Supported collection-types are: Array and {@link Collection}.
+	 */
 	IN {
 
 		@Override

@@ -23,13 +23,16 @@ import java.util.stream.Stream;
 import java.util.stream.StreamSupport;
 
 /**
- *
+ * Simple non-caching implementation of the RecordStore backed by a JDBC-Connection.
  * @author doe300
  */
 public class SimpleJDBCRecordStore implements RecordStore
 {
 	protected final Connection con;
 
+	/**
+	 * @param con 
+	 */
 	public SimpleJDBCRecordStore(Connection con)
 	{
 		this.con=con;

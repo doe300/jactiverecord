@@ -23,6 +23,14 @@ public class HasManyThroughAssociationSet<T extends ActiveRecord> extends Abstra
 	private final String mappingTableName, thisMappingKey, foreignMappingKey;
 	private final int thisPrimaryKey;
 
+	/**
+	 * 
+	 * @param destBase the RecordBase for the associated record
+	 * @param thisPrimaryKey the primary-key to list the associations for
+	 * @param mappingTableName the name of the mapping-table
+	 * @param thisMappingKey the column of the mapping-table the primary key for the source object is stored
+	 * @param foreignMappingKey the column of the mapping-table the primary key for the associated objects are stored
+	 */
 	public HasManyThroughAssociationSet( RecordBase<T> destBase, int thisPrimaryKey, String mappingTableName, String thisMappingKey,
 			String foreignMappingKey )
 	{

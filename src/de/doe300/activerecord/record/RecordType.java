@@ -18,13 +18,13 @@ public @interface RecordType
 	 * If the value is empty, the name of the class will be used
 	 * @return the name of the data-set
 	 */
-	public String typeName() default "";
+	public String typeName();
 	
 	/**
 	 * The primaryKey-column MUST be an integer and auto-increment
 	 * @return the name of the primary key
 	 */
-	public String primaryKey() default "ID";
+	public String primaryKey();
 	
 	/**
 	 * Default columns are always loaded into cache and therefore faster to access
@@ -33,7 +33,7 @@ public @interface RecordType
 	public String[] defaultColumns();
 
 	/**
-	 * Default order of rows for retrieval operations, defaults to ordering by primary key ascending
+	 * Default order of rows for retrieval operations, defaults to ordering by primary key ascending.
 	 * @return the default order, as SQL ORDER BY clause
 	 * @see Order
 	 */

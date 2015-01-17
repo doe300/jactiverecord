@@ -53,6 +53,10 @@ public class AutomaticMigration implements Migration
 	private final Class<? extends ActiveRecord> recordType;
 	private final boolean dropColumnsOnUpdate;
 
+	/**
+	 * @param recordType the type to create and drop the table for
+	 * @param dropColumnsOnUpdate  whether to drop obsolete columns on update
+	 */
 	public AutomaticMigration(Class<? extends ActiveRecord> recordType, boolean dropColumnsOnUpdate )
 	{
 		this.recordType = recordType;

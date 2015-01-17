@@ -17,7 +17,7 @@ import de.doe300.activerecord.record.ActiveRecord;
 import de.doe300.activerecord.store.RecordStore;
 
 /**
- *
+ * ProxyHandler which adds support for records as map.
  * @author doe300
  */
 public class MapHandler implements ProxyHandler

@@ -1,7 +1,6 @@
 package de.doe300.activerecord.dsl;
 
 import de.doe300.activerecord.record.ActiveRecord;
-import de.doe300.activerecord.dsl.Condition;
 import java.util.stream.Stream;
 
 /**
@@ -17,6 +16,12 @@ public class GroupResult<R, T extends ActiveRecord> implements QueryMethods<T>
 	private final int size;
 	private final Order order;
 
+	/**
+	 * @param key the value this group has in common
+	 * @param baseStream the elements in this group
+	 * @param size the size of the group
+	 * @param order the ordering of the elements
+	 */
 	public GroupResult( R key, Stream<T> baseStream, int size, Order order )
 	{
 		this.key = key;
@@ -31,6 +36,9 @@ public class GroupResult<R, T extends ActiveRecord> implements QueryMethods<T>
 		return baseStream;
 	}
 	
+	/**
+	 * @return the key, all elements in this group have in common
+	 */
 	public R getKey()
 	{
 		return key;

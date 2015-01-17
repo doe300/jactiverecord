@@ -18,6 +18,14 @@ public final class ProxyBase<T extends ActiveRecord> extends RecordBase<T>
 	private final Class<? extends T> proxyType;
 	private final ProxyHandler[] proxyHandlers;
 	
+	/**
+	 * Do not call this constructor!
+	 * @param proxyType
+	 * @param recordType
+	 * @param proxyHandlers
+	 * @param store
+	 * @param core 
+	 */
 	public ProxyBase(Class<? extends T> proxyType, Class<T> recordType, ProxyHandler[] proxyHandlers, RecordStore store, RecordCore core)
 	{
 		super(recordType, core, store);

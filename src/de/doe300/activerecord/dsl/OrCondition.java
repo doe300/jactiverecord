@@ -9,13 +9,16 @@ import java.util.Objects;
 import java.util.stream.Collectors;
 
 /**
- *
+ * Grouped Condition, returning <code>true</code> if any of the children conditions returns <code>true</code>
  * @author doe300
  */
 public class OrCondition implements Condition
 {
 	private final Condition[] conditions;
 
+	/**
+	 * @param conditions 
+	 */
 	public OrCondition( Condition... conditions )
 	{
 		this.conditions = Objects.requireNonNull( conditions);

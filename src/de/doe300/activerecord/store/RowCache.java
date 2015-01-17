@@ -74,16 +74,34 @@ public class RowCache implements Comparable<RowCache>
 		return new RowCache(primaryKey,tableName,data, true);
 	}
 	
+	/**
+	 * Creates a new cache-entry and fills it with the values from the given map.
+	 * @param tableName
+	 * @param primaryKey
+	 * @param map
+	 * @return the newly created cache-entry
+	 */
 	public static RowCache fromMap(String tableName, String primaryKey, Map<String,Object> map)
 	{
 		return new RowCache(primaryKey,tableName,new HashMap<>(map ),false );
 	}
 	
+	/**
+	 * @param tableName
+	 * @param primaryKey
+	 * @return a new created empty cache-row
+	 */
 	public static RowCache emptyCache(String tableName, String primaryKey)
 	{
 		return new RowCache(primaryKey, tableName, new HashMap<>(10),false);
 	}
 	
+	/**
+	 * @param columnName
+	 * @param value
+	 * @param updateTimestamp
+	 * @return the previous value or <code>null</code>
+	 */
 	public Object setData(String columnName, Object value, boolean updateTimestamp)
 	{
 		if(Objects.equals( RowCache.this.getData( columnName.toLowerCase()), value))
@@ -98,6 +116,11 @@ public class RowCache implements Comparable<RowCache>
 		return columnData.put( columnName.toLowerCase(), value );
 	}
 	
+	/**
+	 * @param names
+	 * @param values
+	 * @param updateTimestamp 
+	 */
 	public void setData(String[] names, Object[] values, boolean updateTimestamp)
 	{
 		for(int i=0;i<names.length;i++)
@@ -111,21 +134,35 @@ public class RowCache implements Comparable<RowCache>
 		dataChanged = true;
 	}
 	
+	/**
+	 * @param columnName
+	 * @return the stored value
+	 */
 	public Object getData(String columnName)
 	{
 		return columnData.get( columnName.toLowerCase() );
 	}
 	
+	/**
+	 * @param columnName
+	 * @return whether the given column is cached
+	 */
 	public boolean hasData(String columnName)
 	{
 		return columnData.containsKey( columnName.toLowerCase() );
 	}
 	
+	/**
+	 * @return the primary key of the associated record
+	 */
 	public int getPrimaryKey()
 	{
 		return ( int ) columnData.get( primaryKey );
 	}
 	
+	/**
+	 * @return the name of the associated table
+	 */
 	public String getTableName()
 	{
 		return tableName;
@@ -156,6 +193,9 @@ public class RowCache implements Comparable<RowCache>
 		dataChanged = false;
 	}
 	
+	/**
+	 * clears all entries from the cache
+	 */
 	public void clear()
 	{
 		columnData.clear();
@@ -178,12 +218,20 @@ public class RowCache implements Comparable<RowCache>
 		dataChanged =false;
 	}
 	
+	/**
+	 * @return a map with all cached values
+	 */
 	public Map<String,Object> toMap()
 	{
 		//needs to be modifiable and a copy
 		return new HashMap<>(columnData);
 	}
 	
+	/**
+	 * Sets all cached values to the values given by <code>map</code>
+	 * @param map
+	 * @param updateTimestamp 
+	 */
 	public void update(Map<String,Object> map, boolean updateTimestamp)
 	{
 		for(Map.Entry<String,Object> e:map.entrySet())

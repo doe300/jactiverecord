@@ -70,7 +70,10 @@ public abstract class RecordBase<T extends ActiveRecord> implements FinderMethod
 	}
 	
 	/**
+	 * The table name is retrieved from {@link RecordType#typeName() }.
+	 * If this name is not set, the {@link Class#getSimpleName() simple-name} of the record-class is used.
 	 * @return the tableName
+	 * @see RecordType#typeName() 
 	 */
 	public String getTableName()
 	{
@@ -89,7 +92,10 @@ public abstract class RecordBase<T extends ActiveRecord> implements FinderMethod
 	}
 	
 	/**
+	 * Uses the {@link RecordType#primaryKey() }. If this key is not set, {@link RecordStore#DEFAULT_COLUMN_ID id} is used.
 	 * @return the name of the primary Column
+	 * @see RecordType#primaryKey()
+	 * @see RecordStore#DEFAULT_COLUMN_ID
 	 */
 	public String getPrimaryColumn()
 	{
@@ -108,7 +114,10 @@ public abstract class RecordBase<T extends ActiveRecord> implements FinderMethod
 	}
 	
 	/**
+	 * Looks up the default columns in {@link RecordType#defaultColumns() }.
+	 * If this value is not set, the {@link RecordStore#DEFAULT_COLUMN_ID id} is set as only default column.
 	 * @return the defaultColumns
+	 * @see RecordType#defaultColumns() 
 	 */
 	public String[] getDefaultColumns()
 	{
@@ -126,6 +135,13 @@ public abstract class RecordBase<T extends ActiveRecord> implements FinderMethod
 		return defaultColumns;
 	}
 	
+	/**
+	 * The default order is looked up in {@link RecordType#defaultOrder() }. If this value is not set,
+	 * the records are ordered by {@link #getPrimaryColumn() primary-key} {@link Order.OrderType#ASCENDING ascending}.
+	 * @return the default ordering of records
+	 * @see RecordType#defaultOrder()
+	 * @see Order.OrderType
+	 */
 	public Order getDefaultOrder()
 	{
 		if(defaultOrder == null)
@@ -143,6 +159,7 @@ public abstract class RecordBase<T extends ActiveRecord> implements FinderMethod
 	}
 	
 	/**
+	 * Two records are considered equal, if they are mapped to the same RecordBase and have the same <code>primary-key</code>
 	 * @param record1
 	 * @param record2
 	 * @return whether the two records are equals
@@ -387,6 +404,10 @@ public abstract class RecordBase<T extends ActiveRecord> implements FinderMethod
 	// Query-Methods
 	////
 	
+	/**
+	 * @param condition
+	 * @return the result for this query
+	 */
 	public QueryResult<T> where( Condition condition )
 	{
 		return new QueryResult<T>(find( condition), count( condition ) ,getDefaultOrder());
@@ -398,6 +419,7 @@ public abstract class RecordBase<T extends ActiveRecord> implements FinderMethod
 	
 	/**
 	 * @return whether this record is searchable
+	 * @see Searchable
 	 */
 	public boolean isSearchable()
 	{

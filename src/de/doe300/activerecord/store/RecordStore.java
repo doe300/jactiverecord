@@ -9,6 +9,7 @@ import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 /**
+ * Base interface for all kinds of record storing data-base.
  * NOTE: all column-arrays are minimum data, the implementing store can choose to return more than the requested data
  * @author doe300
  */
@@ -43,10 +44,30 @@ public interface RecordStore extends AutoCloseable
 	 */
 	public String[] getAllColumnNames(String tableName) throws UnsupportedOperationException;
 	
+	/**
+	 * @param base
+	 * @param primaryKey
+	 * @param name
+	 * @param value
+	 * @throws IllegalArgumentException 
+	 */
 	public void setValue(RecordBase<?> base, int primaryKey, String name, Object value) throws IllegalArgumentException;
 	
+	/**
+	 * @param base
+	 * @param primaryKey
+	 * @param names
+	 * @param values
+	 * @throws IllegalArgumentException 
+	 */
 	public void setValues(RecordBase<?> base, int primaryKey, String[] names, Object[] values) throws IllegalArgumentException;
 	
+	/**
+	 * @param base
+	 * @param primaryKey
+	 * @param values
+	 * @throws IllegalArgumentException 
+	 */
 	public void setValues(RecordBase<?> base, int primaryKey, Map<String,Object> values) throws IllegalArgumentException;
 	
 	/**
@@ -116,6 +137,12 @@ public interface RecordStore extends AutoCloseable
 	 */
 	public boolean saveAll(RecordBase<?> base);
 	
+	/**
+	 * Clears all cached records for the given RecordBase.
+	 * NOTE: this method does NOT write the cached values onto the underlying medium!
+	 * @param base
+	 * @param primaryKey 
+	 */
 	public void clearCache(RecordBase<?> base, int primaryKey);
 	
 	/**
@@ -238,6 +265,11 @@ public interface RecordStore extends AutoCloseable
 	// COUNT
 	////
 	
+	/**
+	 * @param base
+	 * @param condition
+	 * @return the number of records matching the given <code>condition</code>
+	 */
 	public default int count(RecordBase<?> base, Condition condition)
 	{
 		return ( int ) streamAll( base, condition ).count();

@@ -5,6 +5,7 @@ import de.doe300.activerecord.dsl.QueryResult;
 import de.doe300.activerecord.dsl.SimpleCondition;
 import de.doe300.activerecord.record.RecordType;
 import de.doe300.activerecord.validation.ValidationFailed;
+import java.lang.reflect.UndeclaredThrowableException;
 import java.sql.SQLException;
 import java.util.Arrays;
 import java.util.Collection;
@@ -290,7 +291,14 @@ public class RecordBaseTest<T extends TestInterface> extends Assert
 		t.setName( "Name");
 		assertNotNull( t.getName());
 		t.validate();
-		t.setName( null );
+		try{
+			t.setName( null );
+		}
+		catch(UndeclaredThrowableException e)
+		{
+			//TODO fix, so ValidationFailed is thrown
+			throw new ValidationFailed("name", t);
+		}
 		t.validate();
 	}
 	

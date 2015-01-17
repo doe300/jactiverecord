@@ -21,6 +21,12 @@ public class HasManyAssociationSet<T extends ActiveRecord> extends AbstractSet<T
 	private final Condition associationCond;
 	private final Consumer<T> setAssociationFunc, unsetAssociationFunc;
 
+	/**
+	 * @param destBase the RecordBase for the containing records
+	 * @param associationCondition the condition for the association
+	 * @param setAssociationFunction the function to set the association
+	 * @param unsetAssociationFunction the function to unset the association
+	 */
 	public HasManyAssociationSet(RecordBase<T> destBase, Condition associationCondition, Consumer<T> setAssociationFunction, Consumer<T> unsetAssociationFunction)
 	{
 		this.destBase = destBase;
