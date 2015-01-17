@@ -71,11 +71,11 @@ public class HasManyThroughAssociationSet<T extends ActiveRecord> extends Abstra
 		return destBase.getStore().addRow( mappingTableName, new String[]{thisMappingKey,foreignMappingKey}, new Object[]{thisPrimaryKey,e.getPrimaryKey()} );
 	}
 	
-	protected boolean remove0(T t)
+	protected boolean remove0(Integer key)
 	{
 		Condition cond = new AndCondition(
 				new SimpleCondition(thisMappingKey, thisPrimaryKey, Comparison.IS),
-				new SimpleCondition(foreignMappingKey, t.getPrimaryKey(), Comparison.IS)
+				new SimpleCondition(foreignMappingKey, key, Comparison.IS)
 		);
 		return destBase.getStore().removeRow( mappingTableName, cond );
 	}
@@ -87,31 +87,36 @@ public class HasManyThroughAssociationSet<T extends ActiveRecord> extends Abstra
 		{
 			return false;
 		}
-		return remove0( destBase.getRecordType().cast( o ));
+		return remove0( destBase.getRecordType().cast( o ).getPrimaryKey());
 	}
 
 	@Override
 	public boolean retainAll(Collection<?> c )
 	{
-		return getAssocationKeys().map( destBase::getRecord ).filter( (T t ) -> !c.contains( t)).peek( (T t)->
+		return stream().filter( (T t ) -> !c.contains( t)).peek( (T t)->
 		{
-			remove0( t );
+			remove0( t.getPrimaryKey() );
 		} ).count() > 0;
 	}
 
 	@Override
 	public boolean removeAll(Collection<?> c )
 	{
-		return getAssocationKeys().map( destBase::getRecord ).filter( c::contains).peek( (T t)->
+		return stream().filter( c::contains).peek( (T t)->
 		{
-			remove0( t );
+			remove0( t.getPrimaryKey() );
 		} ).count() > 0;
 	}
 
 	@Override
 	public void clear()
 	{
-		getAssocationKeys().forEach( null );
+		getAssocationKeys().forEach( (Integer i) -> {remove0( i );} );
 	}
 
+	@Override
+	public Stream<T> stream()
+	{
+		return getAssocationKeys().map( destBase::getRecord );
+	}
 }
