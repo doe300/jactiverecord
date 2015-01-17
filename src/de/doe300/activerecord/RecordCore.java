@@ -121,7 +121,7 @@ public final class RecordCore implements AutoCloseable
 		{
 			if(type.isInterface())
 			{
-				base = new ProxyBase<T>(( Class<? extends T> ) Proxy.getProxyClass( type.getClassLoader(), type), type, mergeHandlers( type, handlers ), store, this);
+				base = new ProxyBase<T>(Proxy.getProxyClass( type.getClassLoader(), type).asSubclass( type ), type, mergeHandlers( type, handlers ), store, this);
 			}
 			else
 			{
@@ -145,7 +145,7 @@ public final class RecordCore implements AutoCloseable
 		{
 			if(type.isInterface() && handlers!=null)
 			{
-				base = new ProxyBase<T>(( Class<? extends T> ) Proxy.getProxyClass( type.getClassLoader(), type), type, mergeHandlers( type, null ), store, this);
+				base = new ProxyBase<T>(Proxy.getProxyClass( type.getClassLoader(), type).asSubclass( type ), type, mergeHandlers( type, null ), store, this);
 			}
 			else if(!type.isInterface())
 			{

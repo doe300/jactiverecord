@@ -50,7 +50,6 @@ import java.util.stream.Collectors;
  */
 public class AutomaticMigration implements Migration
 {
-	//TODO move ID to first column
 	private final Class<? extends ActiveRecord> recordType;
 	private final boolean dropColumnsOnUpdate;
 
@@ -98,12 +97,11 @@ public class AutomaticMigration implements Migration
 	 * NOTE: If <code>dropColumnsOnUpdate</code> is set to <code>true</code>, this method will drop all columns it deems not used anymore!
 	 * @param con
 	 * @return whether the table was updated
-	 * @throws Exception 
+	 * @throws java.sql.SQLException
 	 */
 	@Override
 	public boolean update( Connection con) throws SQLException
 	{
-		//TODO
 		String tableName = getTableName( recordType );
 		//1. check if table exists
 		if(structureExists( con, tableName))
@@ -211,6 +209,7 @@ public class AutomaticMigration implements Migration
 	 */
 	private static Map<String,String> getColumnsFromModel(Class<? extends ActiveRecord> recordType) throws IllegalArgumentException
 	{
+		//TODO move ID to first column
 		HashMap<String,String> columns = new HashMap<>(10);
 		Method[] methods = recordType.getMethods();
 		for(Method method:methods)

@@ -325,6 +325,16 @@ public abstract class RecordBase<T extends ActiveRecord> implements FinderMethod
 		}
 		getStore().destroy(this, primaryKey );
 	}
+	
+	/**
+	 * Creates a duplicate of the given <code>record</code> which only differs in the primary key
+	 * @param record
+	 * @return the duplicate record
+	 */
+	public T duplicate(T record)
+	{
+		return createRecord( store.getValues( this, record.getPrimaryKey(), store.getAllColumnNames( getTableName())) );
+	}
 
 	////
 	// Finder-Methods
@@ -500,5 +510,5 @@ public abstract class RecordBase<T extends ActiveRecord> implements FinderMethod
 	{
 		return RecordCallbacks.class.isAssignableFrom( recordType);
 	}
-
+	
 }

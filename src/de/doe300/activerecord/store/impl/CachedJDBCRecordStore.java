@@ -89,7 +89,7 @@ public class CachedJDBCRecordStore extends SimpleJDBCRecordStore implements Reco
 		{
 			return c.getData( name );
 		}
-		Object value=getDBValue( base,primaryKey, name);
+		Object value=getDBValue( base, primaryKey, c, name);
 		c.setData( name, value, false );
 		return value;
 	}
@@ -99,6 +99,8 @@ public class CachedJDBCRecordStore extends SimpleJDBCRecordStore implements Reco
 	{
 		Map<String,Object> result = new HashMap<>(columns.length);
 		RowCache c = getCache( base,primaryKey );
+		//write changes in cache to DB so #getDBValue does not override cached changes with old data
+		save( base, primaryKey );
 		for(String col:columns)
 		{
 			if(c.hasData( col ))
@@ -110,7 +112,7 @@ public class CachedJDBCRecordStore extends SimpleJDBCRecordStore implements Reco
 			{
 				//TODO better handling for non existing row
 				//currently getDBValue is called for every column
-				Object val = getDBValue( base,primaryKey, col );
+				Object val = getDBValue( base, primaryKey, c, col );
 				result.put( col, val );
 			}
 		}
@@ -118,7 +120,7 @@ public class CachedJDBCRecordStore extends SimpleJDBCRecordStore implements Reco
 	}
 
 	/* Loads the whole row into cache at once */
-	private Object getDBValue(RecordBase<?> base, int primaryKey, String name) throws IllegalArgumentException
+	private Object getDBValue(RecordBase<?> base, int primaryKey, RowCache cache, String name) throws IllegalArgumentException
 	{
 		try(Statement stmt = con.createStatement())
 		{
@@ -126,9 +128,8 @@ public class CachedJDBCRecordStore extends SimpleJDBCRecordStore implements Reco
 			ResultSet res = stmt.executeQuery( "SELECT * FROM "+base.getTableName()+" WHERE "+base.getPrimaryColumn()+" = "+primaryKey);
 			if(res.next())
 			{
-				RowCache c = getCache( base,primaryKey );
-				c.update( res, false);
-				return c.getData( name );
+				cache.update( res, false);
+				return cache.getData( name );
 			}
 			return null;
 		}

@@ -16,4 +16,5 @@ import java.lang.annotation.Target;
 public @interface HasAttachment
 {
 	//TODO bind resources to tables, via extra table or filesystem
+	//or make interface and #getAttachment(Object key): Object
 }

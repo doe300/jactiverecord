@@ -321,4 +321,35 @@ public class RecordBaseTest<T extends TestInterface> extends Assert
 		T t = base.createRecord();
 		assertSame(t, base.findFirstFor(Collections.singletonMap( base.getPrimaryColumn(), t.getPrimaryKey())));
 	}
+
+	@Test
+	public void testCreateRecord_0args()
+	{
+		assertNotNull( base.createRecord() );
+	}
+
+	@Test
+	public void testCreateRecord_Map()
+	{
+		T record = base.createRecord( Collections.singletonMap( "name", "Afam"));
+		assertNotNull( record);
+		assertEquals( "Afam", record.getName());
+	}
+
+	@Test
+	public void testDuplicate()
+	{
+		T record = base.createRecord(Collections.singletonMap( "name", "Alex"));
+		assertNotNull( record);
+		T dup = base.duplicate( record );
+		assertNotNull( dup);
+		assertTrue( base.find( new SimpleCondition("name", "Alex", Comparison.IS)).count() >= 2);
+		assertTrue( base.count( new SimpleCondition("name", "Alex", Comparison.IS)) >= 2);
+	}
+
+	@Test
+	public void testHasCallbacks()
+	{
+		assertTrue( base.hasCallbacks());
+	}
 }

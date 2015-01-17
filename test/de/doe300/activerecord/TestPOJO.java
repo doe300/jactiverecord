@@ -112,7 +112,6 @@ public class TestPOJO implements ActiveRecord, TestInterface
 	@Override
 	public int hashCode()
 	{
-		// TODO Auto-generated method stub
 		return super.hashCode();
 	}
 }

@@ -172,7 +172,7 @@ public class RowCache implements Comparable<RowCache>
 	{
 		for(int i=1;i<=set.getMetaData().getColumnCount();i++)
 		{
-			setData( set.getMetaData().getColumnLabel( i).toLowerCase(), set.getObject( i ),updateTimestamp);
+				setData( set.getMetaData().getColumnLabel( i).toLowerCase(), set.getObject( i ),updateTimestamp);
 		}
 		isInDB = true;
 		dataChanged =false;

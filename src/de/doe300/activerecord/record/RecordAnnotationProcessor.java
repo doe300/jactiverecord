@@ -28,6 +28,8 @@ import javax.tools.Diagnostic;
 public class RecordAnnotationProcessor extends AbstractProcessor
 {
 	//TODO hasAttachment
+	//TODO adapt to POJORecord
+	//TODO generate (if flag is set) static Query- and FinderMethods for ActiveRecord-interface
 	
 	public RecordAnnotationProcessor()
 	{

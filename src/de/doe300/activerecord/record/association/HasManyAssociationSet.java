@@ -20,7 +20,6 @@ public class HasManyAssociationSet<T extends ActiveRecord> extends AbstractSet<T
 	private final RecordBase<T> destBase;
 	private final Condition associationCond;
 	private final Consumer<T> setAssociationFunc, unsetAssociationFunc;
-	//TODO cache entries ??
 
 	public HasManyAssociationSet(RecordBase<T> destBase, Condition associationCondition, Consumer<T> setAssociationFunction, Consumer<T> unsetAssociationFunction)
 	{

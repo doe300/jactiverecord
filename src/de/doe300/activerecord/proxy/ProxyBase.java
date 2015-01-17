@@ -34,8 +34,7 @@ public final class ProxyBase<T extends ActiveRecord> extends RecordBase<T>
 		}
 		catch ( ReflectiveOperationException | SecurityException ex )
 		{
-			//TODO
-			throw new RecordException();
+			throw new RecordException(ex);
 		}
 	}
 }
