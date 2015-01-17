@@ -8,6 +8,7 @@ import java.util.Collection;
 import java.util.Iterator;
 import java.util.Set;
 import java.util.function.Consumer;
+import java.util.stream.Stream;
 
 /**
  * Mapping of the has-many association into a modifiable Set writing all changes into the backing record-store
@@ -38,13 +39,13 @@ public class HasManyAssociationSet<T extends ActiveRecord> extends AbstractSet<T
 	@Override
 	public boolean contains( Object o )
 	{
-		return destBase.find( associationCond ).anyMatch( (T t)-> t.equals( o) );
+		return stream().anyMatch( (T t)-> t.equals( o) );
 	}
 
 	@Override
 	public Iterator<T> iterator()
 	{
-		return destBase.find( associationCond ).iterator();
+		return stream().iterator();
 	}
 
 	@Override
@@ -91,7 +92,7 @@ public class HasManyAssociationSet<T extends ActiveRecord> extends AbstractSet<T
 	public boolean retainAll(Collection<?> c )
 	{
 		//select all associated objects not in the other collection and remove association
-		return destBase.find( associationCond ).filter( (T t )-> !c.contains( t)).peek( unsetAssociationFunc).
+		return stream().filter( (T t )-> !c.contains( t)).peek( unsetAssociationFunc).
 				//if there are any, the associations were cahnged
 				count() > 0;
 	}
@@ -100,7 +101,7 @@ public class HasManyAssociationSet<T extends ActiveRecord> extends AbstractSet<T
 	public boolean removeAll(Collection<?> c )
 	{
 		//select all associations, which are in the other collection and remove the assoication
-		return destBase.find( associationCond ).filter( c::contains).peek( unsetAssociationFunc).
+		return stream().filter( c::contains).peek( unsetAssociationFunc).
 				//if there are any, associated set has changed
 				count() > 0;
 	}
@@ -108,7 +109,12 @@ public class HasManyAssociationSet<T extends ActiveRecord> extends AbstractSet<T
 	@Override
 	public void clear()
 	{
-		destBase.find( associationCond ).forEach( unsetAssociationFunc);
+		stream().forEach( unsetAssociationFunc);
 	}
 
+	@Override
+	public Stream<T> stream()
+	{
+		return destBase.find( associationCond );
+	}
 }

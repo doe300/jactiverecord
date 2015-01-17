@@ -259,4 +259,12 @@ public class CachedJDBCRecordStore extends SimpleJDBCRecordStore implements Reco
 	{
 		return true;
 	}
+
+	@Override
+	public int count(RecordBase<?> base, Condition condition )
+	{
+		//see #streamAllWithData for why there need to be a save
+		saveAll( base );
+		return super.count( base, condition );
+	}
 }
