@@ -102,7 +102,7 @@ public class RowCache implements Comparable<RowCache>
 	 * @param updateTimestamp
 	 * @return the previous value or <code>null</code>
 	 */
-	public Object setData(String columnName, Object value, boolean updateTimestamp)
+	public synchronized Object setData(String columnName, Object value, boolean updateTimestamp)
 	{
 		if(Objects.equals( RowCache.this.getData( columnName.toLowerCase()), value))
 		{
@@ -121,7 +121,7 @@ public class RowCache implements Comparable<RowCache>
 	 * @param values
 	 * @param updateTimestamp 
 	 */
-	public void setData(String[] names, Object[] values, boolean updateTimestamp)
+	public synchronized void setData(String[] names, Object[] values, boolean updateTimestamp)
 	{
 		for(int i=0;i<names.length;i++)
 		{
@@ -196,7 +196,7 @@ public class RowCache implements Comparable<RowCache>
 	/**
 	 * clears all entries from the cache
 	 */
-	public void clear()
+	public synchronized void clear()
 	{
 		columnData.clear();
 		dataChanged = false;
@@ -208,7 +208,7 @@ public class RowCache implements Comparable<RowCache>
 	 * @param updateTimestamp
 	 * @throws SQLException 
 	 */
-	public void update(ResultSet set, boolean updateTimestamp) throws SQLException
+	public synchronized void update(ResultSet set, boolean updateTimestamp) throws SQLException
 	{
 		for(int i=1;i<=set.getMetaData().getColumnCount();i++)
 		{
@@ -232,7 +232,7 @@ public class RowCache implements Comparable<RowCache>
 	 * @param map
 	 * @param updateTimestamp 
 	 */
-	public void update(Map<String,Object> map, boolean updateTimestamp)
+	public synchronized void update(Map<String,Object> map, boolean updateTimestamp)
 	{
 		for(Map.Entry<String,Object> e:map.entrySet())
 		{

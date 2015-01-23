@@ -12,6 +12,7 @@ import java.lang.reflect.Proxy;
 import java.sql.Connection;
 import java.sql.SQLException;
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -22,7 +23,7 @@ import java.util.Map;
  */
 public final class RecordCore implements AutoCloseable
 {
-	private final static Map<String, RecordCore> cores = new HashMap<>(5);
+	private final static Map<String, RecordCore> cores = Collections.synchronizedMap( new HashMap<String, RecordCore>(5));
 	
 	private final RecordStore store;
 	private final Map<Class<? extends ActiveRecord>, RecordBase<?>> bases;

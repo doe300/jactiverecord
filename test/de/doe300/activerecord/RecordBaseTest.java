@@ -39,7 +39,7 @@ public class RecordBaseTest<T extends TestInterface> extends Assert
 	{
 		return Arrays.asList(
 			new Object[]{TestInterface.class, RecordCore.fromDatabase( TestServer.getTestConnection(), true).buildBase( TestInterface.class )},
-				new Object[]{TestPOJO.class, RecordCore.fromDatabase( TestServer.getTestConnection(), true).buildBase( TestPOJO.class )}
+			new Object[]{TestPOJO.class, RecordCore.fromDatabase( TestServer.getTestConnection(), true).buildBase( TestPOJO.class )}
 		);
 	}
 	

@@ -94,5 +94,5 @@ public interface FinderMethods<T extends ActiveRecord>
 		return find( new SimpleCondition(null, null, Comparison.TRUE));
 	}
 	
-	//TODO public Stream<ActiveRecord> findBySQL(String sql)
+	//XXX public Stream<ActiveRecord> findBySQL(String sql) ??
 }

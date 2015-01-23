@@ -74,6 +74,32 @@ public class SimpleJDBCRecordStore implements RecordStore
 		}
 	}
 	
+	/**
+	 * Converts the input identifier to the case used in the DB
+	 * @param input
+	 * @return the input in the correct case
+	 */
+	protected String convertIdentifier(String input)
+	{
+		try
+		{
+			if(con.getMetaData().storesUpperCaseIdentifiers())
+			{
+				return input.toUpperCase();
+			}
+			if(con.getMetaData().storesLowerCaseIdentifiers())
+			{
+				return input.toLowerCase();
+			}
+			
+		}
+		catch ( SQLException ex )
+		{
+			//TODO do something
+		}
+		return input;
+	}
+	
 	@Override
 	public void setValue(RecordBase<?> base, int primaryKey, String name, Object value ) throws IllegalArgumentException
 	{
@@ -96,8 +122,8 @@ public class SimpleJDBCRecordStore implements RecordStore
 	{
 		//1. get updated columns
 		Map<String,Object> tmp = new HashMap<>(data.size());
-		//make all column names lower case
-		data.forEach( (String s,Object obj) -> tmp.put( s.toLowerCase(), obj));
+		//convert all column names to correct case
+		data.forEach( (String s,Object obj) -> tmp.put( convertIdentifier( s), obj));
 		//add timestamp if not present
 		if(base.isTimestamped() && !data.containsKey( COLUMN_UPDATED_AT))
 		{
@@ -324,7 +350,7 @@ public class SimpleJDBCRecordStore implements RecordStore
 	@Override
 	public boolean exists(String tableName)
 	{
-		try(ResultSet set = con.getMetaData().getTables(null, null, null, null ))
+		try(ResultSet set = con.getMetaData().getTables(con.getCatalog(), con.getSchema(), null, null ))
 		{
 			while(set.next())
 			{
@@ -344,7 +370,7 @@ public class SimpleJDBCRecordStore implements RecordStore
 	@Override
 	public String[] getAllColumnNames( String tableName )
 	{
-		try(ResultSet set = con.getMetaData().getColumns( null, null, tableName, null))
+		try(ResultSet set = con.getMetaData().getColumns(con.getCatalog(), con.getSchema(), convertIdentifier( tableName ), null))
 		{
 			List<String> columns = new ArrayList<>(10);
 			while(set.next())
@@ -374,8 +400,7 @@ public class SimpleJDBCRecordStore implements RecordStore
 			}
 			else
 			{
-				//TODO does this even work?
-				stmt = con.prepareStatement( "INSERT INTO "+base.getTableName()+" ()", Statement.RETURN_GENERATED_KEYS);
+				stmt = con.prepareStatement( "INSERT INTO "+base.getTableName()+"( "+base.getPrimaryColumn()+") VALUES (NULL)", Statement.RETURN_GENERATED_KEYS);
 			}
 			stmt.executeUpdate();
 			ResultSet rs = stmt.getGeneratedKeys();
