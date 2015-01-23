@@ -162,8 +162,10 @@ public interface RecordStore extends AutoCloseable
 	}
 	
 	/**
+	 * If the RecordBase has <code>autoCreate</code> set to true and the table doesn't exists, it will be generated.
 	 * @param base
 	 * @return the ID of the new record
+	 * @see RecordBase#isAutoCreate() 
 	 */
 	public int insertNewRecord(RecordBase<?> base);
 	

@@ -25,6 +25,7 @@ import java.util.stream.Stream;
  */
 public abstract class RecordBase<T extends ActiveRecord> implements FinderMethods<T>
 {
+	//TODO includes on get/find/query
 
 	protected final Class<T> recordType;
 	protected final RecordCore core;
@@ -159,6 +160,20 @@ public abstract class RecordBase<T extends ActiveRecord> implements FinderMethod
 	}
 	
 	/**
+	 * Any auto-created RecordBase creates the used table, if it doesn't exists.
+	 * @return whether the table for this record-type is automatically created
+	 * @see RecordType#autoCreate() 
+	 */
+	public boolean isAutoCreate()
+	{
+		if(recordType.isAnnotationPresent( RecordType.class))
+		{
+			return recordType.getAnnotation( RecordType.class).autoCreate();
+		}
+		return false;
+	}
+	
+	/**
 	 * Two records are considered equal, if they are mapped to the same RecordBase and have the same <code>primary-key</code>
 	 * @param record1
 	 * @param record2
@@ -212,7 +227,7 @@ public abstract class RecordBase<T extends ActiveRecord> implements FinderMethod
 		}
 		return record;
 	}
-	
+
 	/**
 	 * Unlike {@link #newRecord(int)}, this method creates a new entry in the underlying record-store
 	 * @return the newly created record
@@ -239,6 +254,8 @@ public abstract class RecordBase<T extends ActiveRecord> implements FinderMethod
 	{
 		int key = store.insertNewRecord(this);
 		T record = createProxy(key);
+		//just to make sure, no duplicate IDs are stored
+		data.remove( getPrimaryColumn());
 		store.setValues( this, key, data );
 		records.put( key, record );
 		if(hasCallbacks())

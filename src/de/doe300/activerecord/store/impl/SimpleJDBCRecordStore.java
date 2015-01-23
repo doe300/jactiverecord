@@ -3,6 +3,10 @@ package de.doe300.activerecord.store.impl;
 import de.doe300.activerecord.RecordBase;
 import de.doe300.activerecord.store.RecordStore;
 import de.doe300.activerecord.dsl.Condition;
+import de.doe300.activerecord.migration.AutomaticMigration;
+import de.doe300.activerecord.migration.ManualMigration;
+import de.doe300.activerecord.migration.Migration;
+import de.doe300.activerecord.record.RecordType;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
@@ -390,6 +394,30 @@ public class SimpleJDBCRecordStore implements RecordStore
 	{
 		try
 		{
+			if(base.isAutoCreate() && !exists( base.getTableName()))
+			{
+				String createSQL = base.getRecordType().getAnnotation( RecordType.class).autoCreateSQL();
+				Migration mig;
+				if(!createSQL.isEmpty())
+				{
+					mig = new ManualMigration(createSQL, null, null);
+				}
+				else
+				{
+					mig = new AutomaticMigration(base.getRecordType(), false);
+				}
+				try
+				{
+					if(!mig.apply( con ))
+					{
+						return -1;
+					}
+				}
+				catch(Exception e)
+				{
+					throw new RuntimeException("Failed to create table", e);
+				}
+			}
 			PreparedStatement stmt;
 			if(base.isTimestamped())
 			{
