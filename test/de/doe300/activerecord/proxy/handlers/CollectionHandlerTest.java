@@ -46,7 +46,7 @@ public class CollectionHandlerTest extends Assert
 	@Test
 	public void testSize()
 	{
-		assertTrue( record.size() == base.getStore().getAllColumnNames( base.getTableName()).length);
+		assertTrue( record.size() == base.getStore().getAllColumnNames( base.getTableName()).size());
 	}
 
 	@Test
@@ -71,14 +71,14 @@ public class CollectionHandlerTest extends Assert
 			size++;
 			assertTrue( record.contains( it.next()));
 		}
-		assertTrue( size == base.getStore().getAllColumnNames( base.getTableName()).length);
+		assertTrue( size == base.getStore().getAllColumnNames( base.getTableName()).size());
 	}
 
 	@Test
 	public void testToArray()
 	{
-		assertTrue( record.toArray().length == base.getStore().getAllColumnNames( base.getTableName()).length);
-		Object[] arr = new Object[base.getStore().getAllColumnNames( base.getTableName()).length];
+		assertTrue( record.toArray().length == base.getStore().getAllColumnNames( base.getTableName()).size());
+		Object[] arr = new Object[base.getStore().getAllColumnNames( base.getTableName()).size()];
 		assertSame( record.toArray(arr), arr);
 	}
 

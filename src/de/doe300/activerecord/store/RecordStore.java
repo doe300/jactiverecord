@@ -42,7 +42,7 @@ public interface RecordStore extends AutoCloseable
 	 * @return all available column-names
 	 * @throws java.lang.UnsupportedOperationException if the store can't retrieve the column-names
 	 */
-	public String[] getAllColumnNames(String tableName) throws UnsupportedOperationException;
+	public Set<String> getAllColumnNames(String tableName) throws UnsupportedOperationException;
 	
 	/**
 	 * @param base

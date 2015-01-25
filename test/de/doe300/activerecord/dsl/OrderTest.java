@@ -42,7 +42,7 @@ public class OrderTest extends Assert
 		m3.put( "age", 13);
 		
 		//same name, but title Z before A
-		assertTrue( o.compare( m1, m2) < 0);
+		assertTrue( o.compare( m1, m2) > 0);
 		//same name and title, but 13 before 23
 		assertTrue( o.compare( m1, m3) > 0);
 		

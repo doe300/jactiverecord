@@ -6,6 +6,7 @@ import de.doe300.activerecord.dsl.Condition;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Set;
 import java.util.TreeMap;
 import java.util.stream.Stream;
 
@@ -131,7 +132,7 @@ public class MapRecordStore implements RecordStore
 	}
 
 	@Override
-	public String[] getAllColumnNames( String tableName )
+	public Set<String> getAllColumnNames( String tableName )
 	{
 		throw new UnsupportedOperationException( "Not supported by MapRecordStore." );
 	}

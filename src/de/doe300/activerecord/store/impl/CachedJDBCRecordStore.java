@@ -11,6 +11,7 @@ import java.sql.SQLException;
 import java.sql.Statement;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Set;
 import java.util.TreeMap;
 import java.util.stream.Stream;
 
@@ -21,7 +22,7 @@ import java.util.stream.Stream;
 public class CachedJDBCRecordStore extends SimpleJDBCRecordStore implements RecordStore
 {
 	private final Map<RecordBase<?>, Map<Integer, RowCache>> cache;
-	private final Map<String,String[]> columnsCache;
+	private final Map<String,Set<String>> columnsCache;
 
 	/**
 	 * @param con 
@@ -236,9 +237,9 @@ public class CachedJDBCRecordStore extends SimpleJDBCRecordStore implements Reco
 	}
 
 	@Override
-	public String[] getAllColumnNames( String tableName )
+	public Set<String> getAllColumnNames( String tableName )
 	{
-		String[] columns=columnsCache.get( tableName );
+		Set<String> columns=columnsCache.get( tableName );
 		if(columns==null)
 		{
 			columns = super.getAllColumnNames( tableName );

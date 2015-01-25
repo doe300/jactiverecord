@@ -6,6 +6,7 @@ import de.doe300.activerecord.TestInterface;
 import de.doe300.activerecord.TestServer;
 import de.doe300.activerecord.dsl.Comparison;
 import de.doe300.activerecord.dsl.SimpleCondition;
+import java.util.Arrays;
 import java.util.Collections;
 import java.util.Map;
 import java.util.Objects;
@@ -147,7 +148,8 @@ public class CachedJDBCRecordStoreTest extends Assert
 	@Test
 	public void testGetAllColumnNames()
 	{
-		assertArrayEquals( new String[]{"id", "name", "age", "fk_test_id", "other", "created_at", "updated_at"}, store.getAllColumnNames( base.getTableName()) );
+		assertTrue( Arrays.asList( new String[]{"id", "name", "age", "fk_test_id", "other", "created_at", "updated_at"}).containsAll( store.getAllColumnNames( base.getTableName()) ) );
+		assertTrue( ( store.getAllColumnNames( base.getTableName()) ).containsAll( Arrays.asList( new String[]{"id", "name", "age", "fk_test_id", "other", "created_at", "updated_at"})) );
 	}
 
 	@Test
@@ -168,4 +170,3 @@ public class CachedJDBCRecordStoreTest extends Assert
 	}
 	
 }
-

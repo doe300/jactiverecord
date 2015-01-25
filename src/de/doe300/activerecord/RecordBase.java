@@ -365,7 +365,7 @@ public abstract class RecordBase<T extends ActiveRecord> implements FinderMethod
 	 */
 	public T duplicate(T record)
 	{
-		return createRecord( store.getValues( this, record.getPrimaryKey(), store.getAllColumnNames( getTableName())) );
+		return createRecord( store.getValues( this, record.getPrimaryKey(), store.getAllColumnNames( getTableName()).toArray( new String[0])) );
 	}
 
 	////

@@ -20,6 +20,7 @@ import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 import java.util.Spliterator;
 import java.util.function.Consumer;
 import java.util.stream.Collectors;
@@ -372,16 +373,16 @@ public class SimpleJDBCRecordStore implements RecordStore
 	}
 
 	@Override
-	public String[] getAllColumnNames( String tableName )
+	public Set<String> getAllColumnNames( String tableName )
 	{
 		try(ResultSet set = con.getMetaData().getColumns(con.getCatalog(), con.getSchema(), convertIdentifier( tableName ), null))
 		{
 			List<String> columns = new ArrayList<>(10);
 			while(set.next())
 			{
-				columns.add( set.getString( "COLUMN_NAME"));
+				columns.add( set.getString( "COLUMN_NAME").toLowerCase());
 			}
-			return columns.stream().map( (String s) -> s.toLowerCase()).collect( Collectors.toList()).toArray( new String[columns.size()]);
+			return columns.stream().collect( Collectors.toSet());
 		}
 		catch ( SQLException ex )
 		{

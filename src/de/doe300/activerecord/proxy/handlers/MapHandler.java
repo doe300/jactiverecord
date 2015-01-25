@@ -2,10 +2,8 @@ package de.doe300.activerecord.proxy.handlers;
 
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
-import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
-import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
 import java.util.TreeMap;
@@ -60,7 +58,7 @@ public class MapHandler implements ProxyHandler
 		private final RecordStore store;
 		private final RecordBase<?> base;
 		private final int primaryKey;
-		private final String[] columnNames;
+		private final Set<String> columnNames;
 
 		HandlerMap(final RecordBase<?> base, final int primaryKey, final RecordStore store)
 		{
@@ -73,7 +71,7 @@ public class MapHandler implements ProxyHandler
 		@Override
 		public Set<Entry<String, Object>> entrySet()
 		{
-			return Arrays.stream( columnNames).map( (final String s)->
+			return columnNames.stream().map( (final String s)->
 			{
 				return new Entry<String, Object>()
 					{
@@ -128,7 +126,7 @@ public class MapHandler implements ProxyHandler
 		@Override
 		public int size()
 		{
-			return columnNames.length;
+			return columnNames.size();
 		}
 
 		@Override
@@ -140,7 +138,7 @@ public class MapHandler implements ProxyHandler
 		@Override
 		public boolean containsKey( final Object key )
 		{
-			return Arrays.asList( columnNames).contains( key );
+			return columnNames.contains( key );
 		}
 
 		@Override
@@ -170,7 +168,7 @@ public class MapHandler implements ProxyHandler
 		@Override
 		public Set<String> keySet()
 		{
-			return Collections.unmodifiableSet(new HashSet<String>(Arrays.asList( columnNames )));
+			return Collections.unmodifiableSet(columnNames);
 		}
 
 		@Override

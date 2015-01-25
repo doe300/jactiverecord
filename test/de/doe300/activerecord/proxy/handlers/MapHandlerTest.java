@@ -5,7 +5,6 @@ import de.doe300.activerecord.RecordCore;
 import de.doe300.activerecord.TestInterface;
 import de.doe300.activerecord.TestServer;
 import de.doe300.activerecord.record.RecordType;
-import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Map;
 import org.junit.AfterClass;
@@ -45,7 +44,7 @@ public class MapHandlerTest extends Assert
 	@Test
 	public void testSize()
 	{
-		assertSame( base.getStore().getAllColumnNames( base.getTableName()).length, record.size());
+		assertSame( base.getStore().getAllColumnNames( base.getTableName()).size(), record.size());
 	}
 
 	@Test
@@ -112,20 +111,20 @@ public class MapHandlerTest extends Assert
 	@Test
 	public void testKeySet()
 	{
-		assertTrue( Arrays.asList(base.getStore().getAllColumnNames( base.getTableName())).containsAll( record.keySet()));
-		assertTrue( record.keySet().containsAll( Arrays.asList(base.getStore().getAllColumnNames( base.getTableName()))));
+		assertTrue( base.getStore().getAllColumnNames( base.getTableName()).containsAll( record.keySet()));
+		assertTrue( record.keySet().containsAll( base.getStore().getAllColumnNames( base.getTableName())));
 	}
 
 	@Test
 	public void testValues()
 	{
-		assertTrue( record.values().size() == base.getStore().getAllColumnNames( base.getTableName()).length);
+		assertTrue( record.values().size() == base.getStore().getAllColumnNames( base.getTableName()).size());
 	}
 
 	@Test
 	public void testEntrySet()
 	{
-		assertTrue( record.entrySet().size() == base.getStore().getAllColumnNames( base.getTableName()).length);
+		assertTrue( record.entrySet().size() == base.getStore().getAllColumnNames( base.getTableName()).size());
 		for(Map.Entry<String,Object> e:record.entrySet())
 		{
 			assertEquals( base.getStore().getValue( base, record.getPrimaryKey(), e.getKey()), e.getValue());

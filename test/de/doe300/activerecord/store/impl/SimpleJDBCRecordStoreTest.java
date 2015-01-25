@@ -6,6 +6,7 @@ import de.doe300.activerecord.TestInterface;
 import de.doe300.activerecord.TestServer;
 import de.doe300.activerecord.dsl.Comparison;
 import de.doe300.activerecord.dsl.SimpleCondition;
+import java.util.Arrays;
 import java.util.Collections;
 import java.util.Map;
 import org.junit.AfterClass;
@@ -13,6 +14,7 @@ import org.junit.Assert;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertSame;
+import static org.junit.Assert.assertTrue;
 import org.junit.BeforeClass;
 import org.junit.Test;
 
@@ -133,7 +135,8 @@ public class SimpleJDBCRecordStoreTest extends Assert
 	@Test
 	public void testGetAllColumnNames()
 	{
-		assertArrayEquals( new String[]{"id", "name", "age", "fk_test_id", "other", "created_at", "updated_at"}, store.getAllColumnNames( base.getTableName()) );
+		assertTrue( Arrays.asList( new String[]{"id", "name", "age", "fk_test_id", "other", "created_at", "updated_at"}).containsAll( store.getAllColumnNames( base.getTableName()) ) );
+		assertTrue( ( store.getAllColumnNames( base.getTableName()) ).containsAll( Arrays.asList( new String[]{"id", "name", "age", "fk_test_id", "other", "created_at", "updated_at"})) );
 	}
 
 	@Test

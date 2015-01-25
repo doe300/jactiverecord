@@ -3,6 +3,7 @@ package de.doe300.activerecord.mapping;
 import de.doe300.activerecord.record.ActiveRecord;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Set;
 
 /**
  * An ActiveRecord which can be mapped to and from a {@link Map}
@@ -17,8 +18,8 @@ public interface MappableRecord extends ActiveRecord
 	 */
 	public default Map<String,Object> getAttributes()
 	{
-		String[] columns = getBase().getStore().getAllColumnNames( getBase().getTableName());
-		Map<String,Object> attributes = new HashMap<>(columns.length);
+		Set<String> columns = getBase().getStore().getAllColumnNames( getBase().getTableName());
+		Map<String,Object> attributes = new HashMap<>(columns.size());
 		for(String col:columns)
 		{
 			attributes.put( col, getBase().getStore().getValue( getBase(), getPrimaryKey(), col));

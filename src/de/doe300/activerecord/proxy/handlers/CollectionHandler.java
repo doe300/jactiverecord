@@ -60,7 +60,7 @@ public class CollectionHandler implements ProxyHandler
 		private final RecordBase<?> base;
 		private final RecordStore store;
 		private final int primaryKey;
-		private final String[] columnNames;
+		private final Set<String> columnNames;
 
 		HandlerCollection(final RecordBase<?> base, final int primaryKey, final RecordStore store)
 		{
@@ -73,7 +73,7 @@ public class CollectionHandler implements ProxyHandler
 		@Override
 		public int size()
 		{
-			return columnNames.length;
+			return columnNames.size();
 		}
 
 		@Override
@@ -87,19 +87,18 @@ public class CollectionHandler implements ProxyHandler
 		{
 			return new Iterator<Object>()
 				{
-				private int index = -1;
+				private Iterator<String> it = columnNames.iterator();
 
 				@Override
 				public boolean hasNext()
 				{
-					index++;
-					return index<columnNames.length;
+					return it.hasNext();
 				}
 
 				@Override
 				public Object next()
 				{
-					return store.getValue(base, primaryKey, columnNames[index]);
+					return store.getValue(base, primaryKey, it.next());
 				}
 				};
 		}
@@ -126,10 +125,11 @@ public class CollectionHandler implements ProxyHandler
 		@Override
 		public Object[] toArray()
 		{
-			final Object[] arr = new Object[ columnNames.length];
-			for(int i=0;i<columnNames.length;i++)
+			final Object[] arr = new Object[ columnNames.size()];
+			Iterator<String> it = columnNames.iterator();
+			for(int i=0;i<columnNames.size()&&it.hasNext();i++)
 			{
-				arr[i] = store.getValue( base, primaryKey, columnNames[i]);
+				arr[i] = store.getValue( base, primaryKey, it.next());
 			}
 			return arr;
 		}
@@ -137,10 +137,11 @@ public class CollectionHandler implements ProxyHandler
 		@Override
 		public <T> T[] toArray( final T[] a )
 		{
-			final T[] res = a.length >= columnNames.length ? a : Arrays.copyOf( a, columnNames.length);
-			for(int i=0;i<columnNames.length;i++)
+			final T[] res = a.length >= columnNames.size() ? a : Arrays.copyOf( a, columnNames.size());
+			Iterator<String> it = columnNames.iterator();
+			for(int i=0;i<columnNames.size()&&it.hasNext();i++)
 			{
-				res[i] = ( T ) store.getValue( base, primaryKey, columnNames[i]);
+				res[i] = ( T ) store.getValue( base, primaryKey, it.next());
 			}
 			return res;
 		}
