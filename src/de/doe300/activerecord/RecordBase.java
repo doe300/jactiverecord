@@ -25,8 +25,6 @@ import java.util.stream.Stream;
  */
 public abstract class RecordBase<T extends ActiveRecord> implements FinderMethods<T>
 {
-	//TODO includes on get/find/query
-
 	protected final Class<T> recordType;
 	protected final RecordCore core;
 	protected final RecordStore store;

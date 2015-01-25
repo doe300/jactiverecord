@@ -13,18 +13,18 @@ import java.util.stream.Collectors;
 public class SimpleCondition implements Condition, SQLCommand
 {
 	private final String key;
-	private final Object value;
+	private final Object compValue;
 	private final Comparison comp;
 
 	/**
 	 * @param key
-	 * @param value
+	 * @param compValue
 	 * @param comp 
 	 */
-	public SimpleCondition( String key, Object value, Comparison comp )
+	public SimpleCondition( String key, Object compValue, Comparison comp )
 	{
 		this.key = key;
-		this.value = checkValue( value,comp );
+		this.compValue = checkValue( compValue,comp );
 		this.comp = comp;
 	}
 	
@@ -60,9 +60,9 @@ public class SimpleCondition implements Condition, SQLCommand
 	{
 		if(comp == Comparison.IN)
 		{
-			return ( Object[] ) value;
+			return ( Object[] ) compValue;
 		}
-		return new Object[]{value};
+		return new Object[]{compValue};
 	}
 	
 	/**
@@ -98,7 +98,7 @@ public class SimpleCondition implements Condition, SQLCommand
 				return key+" <= ?";
 			case IN:
 				//see: https://stackoverflow.com/questions/178479/preparedstatement-in-clause-alternatives
-				return key+" IN ("+Arrays.stream( (Object[])value).map( (Object o) -> "?").collect( Collectors.joining( ", "))+")";
+				return key+" IN ("+Arrays.stream( (Object[])compValue).map( (Object o) -> "?").collect( Collectors.joining( ", "))+")";
 			case TRUE:
 			default:
 				return "TRUE";
@@ -130,12 +130,12 @@ public class SimpleCondition implements Condition, SQLCommand
 	@Override
 	public boolean test( Map<String, Object> t )
 	{
-		return comp.test( t.get( key), value);
+		return comp.test( t.get( key), compValue);
 	}
 	
 	@Override
 	public boolean test( ActiveRecord t )
 	{
-		return comp.test( value, t.getBase().getStore().getValue( t.getBase(), t.getPrimaryKey(), key));
+		return comp.test(t.getBase().getStore().getValue( t.getBase(), t.getPrimaryKey(), key), compValue);
 	}
 }

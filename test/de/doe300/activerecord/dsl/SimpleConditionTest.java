@@ -14,7 +14,7 @@ import org.junit.Test;
  * But Predicate is already tested in {@link ComparisonTest}
  * @author doe300
  */
-public class ConditionsTest extends Assert
+public class SimpleConditionTest extends Assert
 {
 	private static RecordBase<TestInterface> base;
 	private static TestInterface t1, t2,t3;
@@ -74,7 +74,10 @@ public class ConditionsTest extends Assert
 	@Test
 	public void testIsNotCondition()
 	{
-		//TODO
+		//test Predicate
+		assertSame( t1, base.findFirst( new SimpleCondition("other", null, Comparison.IS_NULL)));
+		//test SQL
+		assertEquals( (Integer)t1.getPrimaryKey(), base.getStore().findFirst( base, new SimpleCondition("other", null,Comparison.IS_NULL)));
 	}
 	
 	@Test
@@ -89,25 +92,37 @@ public class ConditionsTest extends Assert
 	@Test
 	public void testIsNullCondition()
 	{
-		//TODO
+		//test Predicate
+		assertSame( t3, base.findFirst( new SimpleCondition("name", "123Name1", Comparison.IS_NOT)));
+		//test SQL
+		assertEquals( (Integer)t3.getPrimaryKey(), base.getStore().findFirst( base, new SimpleCondition("name", "123Name1", Comparison.IS_NOT)));
 	}
 	
 	@Test
 	public void testIsNotNullCondition()
 	{
-		//TODO
+		//test Predicate
+		assertSame( t1, base.findFirst( new SimpleCondition("name", null, Comparison.IS_NOT_NULL)));
+		//test SQL
+		assertEquals( (Integer)t1.getPrimaryKey(), base.getStore().findFirst( base, new SimpleCondition("name", null,Comparison.IS_NOT_NULL)));
 	}
 	
 	@Test
 	public void testLargerCondition()
 	{
-		//TODO
+		//test Predicate
+		assertSame( t1, base.findFirst( new SimpleCondition("age", -913, Comparison.LARGER)));
+		//test SQL
+		assertEquals( (Integer)t1.getPrimaryKey(), base.getStore().findFirst( base, new SimpleCondition("age", -913, Comparison.LARGER)));
 	}
 	
 	@Test
 	public void testLargerEqualsCondition()
 	{
-		//TODO
+		//test Predicate
+		assertSame( t1, base.findFirst( new SimpleCondition("age", -913, Comparison.LARGER_EQUALS)));
+		//test SQL
+		assertEquals( (Integer)t1.getPrimaryKey(), base.getStore().findFirst( base, new SimpleCondition("age", -913, Comparison.LARGER_EQUALS)));
 	}
 	
 	@Test

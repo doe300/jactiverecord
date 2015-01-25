@@ -127,7 +127,6 @@ public class CachedJDBCRecordStore extends SimpleJDBCRecordStore implements Reco
 	{
 		try(Statement stmt = con.createStatement())
 		{
-			//XXX only load default columns + requested column??
 			ResultSet res = stmt.executeQuery( "SELECT * FROM "+base.getTableName()+" WHERE "+base.getPrimaryColumn()+" = "+primaryKey);
 			if(res.next())
 			{
@@ -151,7 +150,6 @@ public class CachedJDBCRecordStore extends SimpleJDBCRecordStore implements Reco
 			RowCache c = getCache(base, primaryKey );
 			if(!c.isSynchronized())
 			{
-				//TODO improve: set only changed values
 				Map<String,Object> values = c.toMap();
 				super.setValues( base, primaryKey, values );
 				c.setSynchronized();
