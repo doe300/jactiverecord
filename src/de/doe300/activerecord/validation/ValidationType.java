@@ -22,32 +22,52 @@
  * SOFTWARE.
  *
  */
+
 package de.doe300.activerecord.validation;
 
-import de.doe300.activerecord.record.ActiveRecord;
-
 /**
- * An {@link ActiveRecord} which runs validations on its attributes.
- * Both validation methods should use the same validation-algorithm
+ * The type of validation to run
  * @author doe300
  * @see Validate
  */
-public interface ValidatedRecord extends ActiveRecord
+public enum ValidationType
 {
 	/**
-	 * @return whether this record is valid
+	 * Runs the validation specified in {@link Validate#customClass() } and  {@link Validate#customMethod()}
 	 */
-	public default boolean isValid()
-	{
-		return false;
-	}
-
+	CUSTOM,
 	/**
-	 * This method is called before {@link #save()}
-	 * @throws ValidationFailed the validation-error
+	 * Validates that the given value is <code>null</code>
+	 * @see #NOT_NULL
 	 */
-	public default void validate() throws ValidationFailed
-	{
-		throw new ValidationFailed(null, null, "Validation not implemented" );
-	}
+	IS_NULL,
+	/**
+	 * Validates that the given value is empty.
+	 * Validation for empty is currently only supported for String, Array, Collections and Maps.
+	 * Additionally, any Number with the value 0 is considered empty.
+	 * @see #NOT_EMPTY
+	 */
+	IS_EMPTY,
+	/**
+	 * Validates that the given value is not <code>null</code>
+	 * @see #IS_NULL
+	 */
+	NOT_NULL,
+	/**
+	 * Validates that the given value is not empty.
+	 * Validation for empty is currently only supported for String, Array, Collections and Maps
+	 * Additionally, any Number with the value 0 is considered empty.
+	 * @see #IS_EMPTY
+	 */
+	NOT_EMPTY,
+	/**
+	 * Validates that the value is a positive number
+	 * @see #NEGATIVE
+	 */
+	POSITIVE,
+	/**
+	 * Validates the value to be a negative number
+	 * @see #POSITIVE
+	 */
+	NEGATIVE
 }

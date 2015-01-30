@@ -32,8 +32,11 @@ import de.doe300.activerecord.record.Searchable;
 import de.doe300.activerecord.record.TimestampedRecord;
 import de.doe300.activerecord.record.attributes.AttributeGetter;
 import de.doe300.activerecord.record.attributes.AttributeSetter;
+import de.doe300.activerecord.validation.Validate;
 import de.doe300.activerecord.validation.ValidatedRecord;
+import de.doe300.activerecord.validation.Validates;
 import de.doe300.activerecord.validation.ValidationFailed;
+import de.doe300.activerecord.validation.ValidationType;
 import java.sql.Types;
 import java.util.stream.Stream;
 
@@ -43,6 +46,11 @@ import java.util.stream.Stream;
  */
 @Searchable(searchableColumns = {"name", "age"})
 @RecordType(typeName = "TESTTABLE", primaryKey = "id", defaultColumns = {"id", "name", "age"})
+@Validates({
+	@Validate(attribute = "age", type = ValidationType.POSITIVE),
+	@Validate(attribute = "name", type = ValidationType.NOT_NULL),
+	@Validate(attribute = "name", type = ValidationType.NOT_EMPTY)
+})
 public interface TestInterface extends TimestampedRecord, ValidatedRecord, RecordCallbacks
 {
 	public String getName();

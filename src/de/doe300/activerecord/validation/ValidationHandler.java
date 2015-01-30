@@ -28,18 +28,34 @@ import de.doe300.activerecord.proxy.RecordHandler;
 import de.doe300.activerecord.proxy.handlers.ProxyHandler;
 import de.doe300.activerecord.record.ActiveRecord;
 import java.lang.reflect.Method;
+import java.util.HashMap;
+import java.util.Map;
+import java.util.function.Consumer;
+import java.util.function.Predicate;
 
 /**
- *
+ * This handler dynamically creates the record's validation-method from its {@link Validate} annotations.
  * @author doe300
+ * @see Validate
+ * @see ValidatedRecord
  */
-public abstract class ValidationHandler implements ProxyHandler
+public class ValidationHandler implements ProxyHandler
 {
+	private static final Map<Class<? extends ActiveRecord>, Predicate<ActiveRecord>> validationChecks = new HashMap<>(10);
+	private static final Map<Class<? extends ActiveRecord>, Consumer<ActiveRecord>> validationEnforcements = new HashMap<>(10);
 
+	/**
+	 * 
+	 */
+	public ValidationHandler()
+	{
+	}
+	
 	@Override
 	public boolean handlesMethod( ActiveRecord record, Method method, Object[] args ) throws IllegalArgumentException
 	{
-		return method.getDeclaringClass() == ValidatedRecord.class;
+		//FIXME validate() is overridden by TestInterface and therefore not recognized here
+		return record instanceof ValidatedRecord && method.getDeclaringClass() == ValidatedRecord.class;
 	}
 
 	@Override
@@ -50,11 +66,11 @@ public abstract class ValidationHandler implements ProxyHandler
 		{
 			if(method.equals( ValidatedRecord.class.getMethod( "isValid")))			
 			{
-				return isValid( record );
+				return getOrCreateValidationCheck( handler.getRecordType() ).test( record );
 			}
 			if(method.equals( ValidatedRecord.class.getMethod( "validate")))
 			{
-				validate( record );
+				getOrCreateValidationEnforcer( handler.getRecordType()).accept( record );
 			}
 			throw new IllegalArgumentException("Method is not handled by this handler");
 		}
@@ -63,8 +79,57 @@ public abstract class ValidationHandler implements ProxyHandler
 			throw new IllegalArgumentException(ex);
 		}
 	}
-
-	public abstract boolean isValid(ActiveRecord record);
 	
-	public abstract void validate(ActiveRecord record) throws ValidationFailed;
+	private Predicate<ActiveRecord> getOrCreateValidationCheck(Class<? extends ActiveRecord> recordType)
+	{
+		if(!validationChecks.containsKey( recordType))
+		{
+			Validate[] validations = recordType.getAnnotationsByType( Validate.class);
+			if(validations.length==0)
+			{
+				validationChecks.put( recordType, (record)-> true);
+			}
+			else
+			{
+				Predicate<ActiveRecord> pred = (record) -> true;
+				for(Validate valid:validations)
+				{
+					pred = pred.and( (ActiveRecord record) -> {
+						Object value = record.getBase().getStore().getValue( record.getBase(), record.getPrimaryKey(), valid.attribute());
+						return Validations.getValidationMethod( valid ).test( record, value);
+					});
+				}
+				validationChecks.put( recordType, pred );
+			}
+		}
+		return validationChecks.get( recordType);
+	}
+	
+	private Consumer<ActiveRecord> getOrCreateValidationEnforcer(Class<? extends ActiveRecord> recordType)
+	{
+		if(!validationEnforcements.containsKey( recordType))
+		{
+			Validate[] validations = recordType.getAnnotationsByType( Validate.class);
+			if(validations.length==0)
+			{
+				validationEnforcements.put( recordType, (record)->{});
+			}
+			else
+			{
+				Consumer<ActiveRecord> con = (record)->{};
+				for(Validate valid:validations)
+				{
+					con = con.andThen( (ActiveRecord record) -> {
+						Object value = record.getBase().getStore().getValue( record.getBase(), record.getPrimaryKey(), valid.attribute());
+						if(!Validations.getValidationMethod( valid ).test( record, value))
+						{
+							throw new ValidationFailed(valid.attribute(), value);
+						}
+					});
+				}
+				validationEnforcements.put( recordType, con );
+			}
+		}
+		return validationEnforcements.get( recordType);
+	}
 }

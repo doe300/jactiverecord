@@ -22,32 +22,63 @@
  * SOFTWARE.
  *
  */
+
 package de.doe300.activerecord.validation;
 
-import de.doe300.activerecord.record.ActiveRecord;
+import de.doe300.activerecord.RecordBase;
+import de.doe300.activerecord.RecordCore;
+import de.doe300.activerecord.TestInterface;
+import de.doe300.activerecord.TestServer;
+import org.junit.AfterClass;
+import org.junit.Assert;
+import org.junit.BeforeClass;
+import org.junit.Test;
 
 /**
- * An {@link ActiveRecord} which runs validations on its attributes.
- * Both validation methods should use the same validation-algorithm
- * @author doe300
- * @see Validate
+ *
+ * @author daniel
  */
-public interface ValidatedRecord extends ActiveRecord
+
+
+public class ValidationHandlerTest extends Assert
 {
-	/**
-	 * @return whether this record is valid
-	 */
-	public default boolean isValid()
+	private static RecordBase<TestInterface> base;
+	
+	public ValidationHandlerTest()
 	{
-		return false;
+	}
+	
+	@BeforeClass
+	public static void createTables() throws Exception
+	{
+		TestServer.buildTestTables();
+		base = RecordCore.fromDatabase( TestServer.getTestConnection(), true).buildBase(TestInterface.class, new ValidationHandler());
+	}
+	
+	@AfterClass
+	public static void destroyTables() throws Exception
+	{
+		TestServer.destroyTestTables();
 	}
 
-	/**
-	 * This method is called before {@link #save()}
-	 * @throws ValidationFailed the validation-error
-	 */
-	public default void validate() throws ValidationFailed
+	@Test
+	public void testIsValid()
 	{
-		throw new ValidationFailed(null, null, "Validation not implemented" );
+		TestInterface i = base.createRecord();
+		assertFalse( i.isValid());
+		i.setAge( 23);
+		i.setName( "Adfan");
+		assertTrue( i.isValid());
+	}
+	
+	@Test
+	public void testValidate()
+	{
+		TestInterface i = base.createRecord();
+		i.setAge( 23);
+		i.setName( "Adam");
+		i.validate();
+		i.setAge(-100 );
+		i.validate();	//TODO Error is not thrown here
 	}
 }

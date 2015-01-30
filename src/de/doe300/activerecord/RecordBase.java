@@ -24,6 +24,10 @@
  */
 package de.doe300.activerecord;
 
+import java.util.Map;
+import java.util.TreeMap;
+import java.util.stream.Stream;
+
 import de.doe300.activerecord.dsl.Comparison;
 import de.doe300.activerecord.dsl.Condition;
 import de.doe300.activerecord.dsl.OrCondition;
@@ -31,16 +35,13 @@ import de.doe300.activerecord.dsl.Order;
 import de.doe300.activerecord.dsl.QueryResult;
 import de.doe300.activerecord.dsl.SimpleCondition;
 import de.doe300.activerecord.record.ActiveRecord;
-import de.doe300.activerecord.record.RecordType;
 import de.doe300.activerecord.record.RecordCallbacks;
+import de.doe300.activerecord.record.RecordType;
 import de.doe300.activerecord.record.Searchable;
 import de.doe300.activerecord.record.TimestampedRecord;
 import de.doe300.activerecord.store.RecordStore;
 import de.doe300.activerecord.validation.ValidatedRecord;
 import de.doe300.activerecord.validation.ValidationFailed;
-import java.util.Map;
-import java.util.TreeMap;
-import java.util.stream.Stream;
 
 /**
  * Common base for mapped objects
@@ -53,21 +54,26 @@ public abstract class RecordBase<T extends ActiveRecord> implements FinderMethod
 	protected final RecordCore core;
 	protected final RecordStore store;
 	protected final TreeMap<Integer, T> records;
-	
+
 	//caching variables
 	private String[] defaultColumns;
 	private String primaryColumn;
 	private String tableName;
 	private Order defaultOrder;
 
-	public RecordBase( Class<T> recordType, RecordCore core, RecordStore store )
+	/**
+	 * @param recordType
+	 * @param core
+	 * @param store
+	 */
+	public RecordBase( final Class<T> recordType, final RecordCore core, final RecordStore store )
 	{
 		this.recordType = recordType;
 		this.core = core;
 		this.store = store;
 		this.records = new TreeMap<>();
 	}
-	
+
 	/**
 	 * @return the store
 	 */
@@ -75,7 +81,7 @@ public abstract class RecordBase<T extends ActiveRecord> implements FinderMethod
 	{
 		return store;
 	}
-	
+
 	/**
 	 * @return the core
 	 */
@@ -83,7 +89,7 @@ public abstract class RecordBase<T extends ActiveRecord> implements FinderMethod
 	{
 		return core;
 	}
-	
+
 	/**
 	 * @return the data-type of the records
 	 */
@@ -91,12 +97,12 @@ public abstract class RecordBase<T extends ActiveRecord> implements FinderMethod
 	{
 		return recordType;
 	}
-	
+
 	/**
 	 * The table name is retrieved from {@link RecordType#typeName() }.
 	 * If this name is not set, the {@link Class#getSimpleName() simple-name} of the record-class is used.
 	 * @return the tableName
-	 * @see RecordType#typeName() 
+	 * @see RecordType#typeName()
 	 */
 	public String getTableName()
 	{
@@ -113,7 +119,7 @@ public abstract class RecordBase<T extends ActiveRecord> implements FinderMethod
 		}
 		return tableName;
 	}
-	
+
 	/**
 	 * Uses the {@link RecordType#primaryKey() }. If this key is not set, {@link RecordStore#DEFAULT_COLUMN_ID id} is used.
 	 * @return the name of the primary Column
@@ -135,12 +141,12 @@ public abstract class RecordBase<T extends ActiveRecord> implements FinderMethod
 		}
 		return primaryColumn;
 	}
-	
+
 	/**
 	 * Looks up the default columns in {@link RecordType#defaultColumns() }.
 	 * If this value is not set, the {@link RecordStore#DEFAULT_COLUMN_ID id} is set as only default column.
 	 * @return the defaultColumns
-	 * @see RecordType#defaultColumns() 
+	 * @see RecordType#defaultColumns()
 	 */
 	public String[] getDefaultColumns()
 	{
@@ -157,13 +163,16 @@ public abstract class RecordBase<T extends ActiveRecord> implements FinderMethod
 		}
 		return defaultColumns;
 	}
-	
+
 	/**
-	 * The default order is looked up in {@link RecordType#defaultOrder() }. If this value is not set,
-	 * the records are ordered by {@link #getPrimaryColumn() primary-key} {@link Order.OrderType#ASCENDING ascending}.
+	 * The default order is looked up in {@link RecordType#defaultOrder() }. If
+	 * this value is not set, the records are ordered by
+	 * {@link #getPrimaryColumn() primary-key}
+	 * {@link de.doe300.activerecord.dsl.Order.OrderType#ASCENDING ascending}.
+	 * 
 	 * @return the default ordering of records
 	 * @see RecordType#defaultOrder()
-	 * @see Order.OrderType
+	 * @see de.doe300.activerecord.dsl.Order.OrderType
 	 */
 	public Order getDefaultOrder()
 	{
@@ -180,11 +189,11 @@ public abstract class RecordBase<T extends ActiveRecord> implements FinderMethod
 		}
 		return defaultOrder;
 	}
-	
+
 	/**
 	 * Any auto-created RecordBase creates the used table, if it doesn't exists.
 	 * @return whether the table for this record-type is automatically created
-	 * @see RecordType#autoCreate() 
+	 * @see RecordType#autoCreate()
 	 */
 	public boolean isAutoCreate()
 	{
@@ -194,14 +203,14 @@ public abstract class RecordBase<T extends ActiveRecord> implements FinderMethod
 		}
 		return false;
 	}
-	
+
 	/**
 	 * Two records are considered equal, if they are mapped to the same RecordBase and have the same <code>primary-key</code>
 	 * @param record1
 	 * @param record2
 	 * @return whether the two records are equals
 	 */
-	public static boolean equals( ActiveRecord record1, ActiveRecord record2 )
+	public static boolean equals( final ActiveRecord record1, final ActiveRecord record2 )
 	{
 		if ( record1.getBase() == record2.getBase() )
 		{
@@ -209,12 +218,13 @@ public abstract class RecordBase<T extends ActiveRecord> implements FinderMethod
 		}
 		return false;
 	}
-	
+
 	/**
 	 * @param primaryKey
 	 * @return the record, if it exists or <code>null</code>
+	 * @throws RecordException
 	 */
-	public T getRecord(int primaryKey) throws RecordException
+	public T getRecord(final int primaryKey) throws RecordException
 	{
 		T record=records.get( primaryKey );
 		if(record==null && store.containsRecord( this, primaryKey))
@@ -228,20 +238,24 @@ public abstract class RecordBase<T extends ActiveRecord> implements FinderMethod
 		}
 		return record;
 	}
-	
+
 	/**
-	 * Returns a new record which is not yet stored to the underlying record-store
+	 * Returns a new record which is not yet stored to the underlying
+	 * record-store
+	 * 
 	 * @param primaryKey
 	 * @return the newly created record or <code>null</code>
-	 * @throws IllegalArgumentException if the record with this ID already exists
+	 * @throws RecordException
+	 * @throws IllegalArgumentException
+	 *             if the record with this ID already exists
 	 */
-	public T newRecord(int primaryKey) throws RecordException
+	public T newRecord(final int primaryKey) throws RecordException
 	{
 		if(records.containsKey( primaryKey) || store.containsRecord(this, primaryKey))
 		{
 			throw new IllegalArgumentException("Record with primaryKey "+primaryKey+" already exists for table "+getTableName());
 		}
-		T record = createProxy(primaryKey);
+		final T record = createProxy(primaryKey);
 		records.put( primaryKey, record );
 		if(hasCallbacks())
 		{
@@ -251,13 +265,16 @@ public abstract class RecordBase<T extends ActiveRecord> implements FinderMethod
 	}
 
 	/**
-	 * Unlike {@link #newRecord(int)}, this method creates a new entry in the underlying record-store
+	 * Unlike {@link #newRecord(int)}, this method creates a new entry in the
+	 * underlying record-store
+	 * 
 	 * @return the newly created record
+	 * @throws RecordException
 	 */
 	public T createRecord() throws RecordException
 	{
-		int key = store.insertNewRecord(this);
-		T record = createProxy(key);
+		final int key = store.insertNewRecord(this);
+		final T record = createProxy(key);
 		records.put( key, record );
 		if(hasCallbacks())
 		{
@@ -265,17 +282,19 @@ public abstract class RecordBase<T extends ActiveRecord> implements FinderMethod
 		}
 		return record;
 	}
-	
+
 	/**
 	 * This method creates a new record in the underlying Database
+	 * 
 	 * @param data
 	 * @return the newly created record
-	 * @see #createRecord() 
+	 * @throws RecordException
+	 * @see #createRecord()
 	 */
-	public T createRecord(Map<String,Object> data) throws RecordException
+	public T createRecord(final Map<String,Object> data) throws RecordException
 	{
-		int key = store.insertNewRecord(this);
-		T record = createProxy(key);
+		final int key = store.insertNewRecord(this);
+		final T record = createProxy(key);
 		//just to make sure, no duplicate IDs are stored
 		data.remove( getPrimaryColumn());
 		store.setValues( this, key, data );
@@ -286,22 +305,22 @@ public abstract class RecordBase<T extends ActiveRecord> implements FinderMethod
 		}
 		return record;
 	}
-	
+
 	/**
 	 * @param primaryKey
 	 * @return the proxy object mapped to the underlying record-store
 	 */
 	protected abstract T createProxy(int primaryKey) throws RecordException;
-	
+
 	/**
 	 * @param primaryKey
 	 * @return whether the record is stored in the underlying record-store
 	 */
-	public boolean hasRecord(int primaryKey)
+	public boolean hasRecord(final int primaryKey)
 	{
 		return getStore().containsRecord( this, primaryKey);
 	}
-	
+
 	/**
 	 * Saves all cached data to the record-store
 	 * @return whether data was changed
@@ -309,7 +328,7 @@ public abstract class RecordBase<T extends ActiveRecord> implements FinderMethod
 	 */
 	public boolean saveAll() throws ValidationFailed
 	{
-		for(T record : records.values())
+		for(final T record : records.values())
 		{
 			if(hasCallbacks())
 			{
@@ -322,7 +341,7 @@ public abstract class RecordBase<T extends ActiveRecord> implements FinderMethod
 		}
 		return store.saveAll(this);
 	}
-	
+
 	/**
 	 * @return whether the underlying record-store exists, i.e. the table in an SQL database
 	 */
@@ -330,14 +349,14 @@ public abstract class RecordBase<T extends ActiveRecord> implements FinderMethod
 	{
 		return store.exists(getTableName());
 	}
-	
+
 	/**
 	 * Saves the record to the record-store
 	 * @param record
 	 * @return whether data was changed
 	 * @throws ValidationFailed if the record is {@link ValidatedRecord} and the validation failed
 	 */
-	public boolean save(ActiveRecord record) throws ValidationFailed
+	public boolean save(final ActiveRecord record) throws ValidationFailed
 	{
 		if(hasCallbacks())
 		{
@@ -349,45 +368,45 @@ public abstract class RecordBase<T extends ActiveRecord> implements FinderMethod
 		}
 		return store.save(this, record.getPrimaryKey() );
 	}
-	
+
 	/**
 	 * @param record
 	 * @return whether the attributes of the record are in sync with the underlying store
 	 */
-	public boolean isSynchronized(ActiveRecord record)
+	public boolean isSynchronized(final ActiveRecord record)
 	{
 		return store.isSynchronized(this, record.getPrimaryKey());
 	}
-	
+
 	/**
 	 * Discards all changes made to this record and reloads it from the database
-	 * @param record 
+	 * @param record
 	 */
-	public void reload(ActiveRecord record)
+	public void reload(final ActiveRecord record)
 	{
 		store.clearCache(this,record.getPrimaryKey());
 	}
-	
+
 	/**
 	 * Removes the record with this primaryKey from the record-store and all cache
-	 * @param primaryKey 
+	 * @param primaryKey
 	 */
-	public void destroy(int primaryKey)
+	public void destroy(final int primaryKey)
 	{
-		T record = records.remove( primaryKey);
+		final T record = records.remove( primaryKey);
 		if(record != null && hasCallbacks())
 		{
 			((RecordCallbacks)record).onDestroy();
 		}
 		getStore().destroy(this, primaryKey );
 	}
-	
+
 	/**
 	 * Creates a duplicate of the given <code>record</code> which only differs in the primary key
 	 * @param record
 	 * @return the duplicate record
 	 */
-	public T duplicate(T record)
+	public T duplicate(final T record)
 	{
 		return createRecord( store.getValues( this, record.getPrimaryKey(), store.getAllColumnNames( getTableName()).toArray( new String[0])) );
 	}
@@ -395,67 +414,67 @@ public abstract class RecordBase<T extends ActiveRecord> implements FinderMethod
 	////
 	// Finder-Methods
 	////
-	
+
 	@Override
-	public Stream<T> find(Condition condition)
+	public Stream<T> find(final Condition condition)
 	{
-		return getStore().findAll(this, condition ).stream().map( (Integer i) ->
+		return getStore().findAll(this, condition ).stream().map( (final Integer i) ->
 		{
 			try
 			{
 				return getRecord( i);
 			}
-			catch ( Exception ex )
+			catch ( final Exception ex )
 			{
 				return null;
 			}
-		}).filter( (T t) -> t!= null);
+		}).filter( (final T t) -> t!= null);
 	}
-	
+
 	@Override
-	public T findFirst(Condition condition)
+	public T findFirst(final Condition condition)
 	{
-		Integer key = getStore().findFirst(this, condition );
+		final Integer key = getStore().findFirst(this, condition );
 		if(key!=null)
 		{
 			try
 			{
 				return getRecord(key );
 			}
-			catch ( Exception ex )
+			catch ( final Exception ex )
 			{
 				return null;
 			}
 		}
 		return null;
 	}
-	
+
 	/**
 	 * @param condition
 	 * @return the number of records matching these conditions
 	 */
-	public int count(Condition condition)
+	public int count(final Condition condition)
 	{
 		return store.count( this, condition);
 	}
-	
+
 	////
 	// Query-Methods
 	////
-	
+
 	/**
 	 * @param condition
 	 * @return the result for this query
 	 */
-	public QueryResult<T> where( Condition condition )
+	public QueryResult<T> where( final Condition condition )
 	{
 		return new QueryResult<T>(find( condition), count( condition ) ,getDefaultOrder());
 	}
-	
+
 	////
 	// Searchable
 	////
-	
+
 	/**
 	 * @return whether this record is searchable
 	 * @see Searchable
@@ -464,53 +483,53 @@ public abstract class RecordBase<T extends ActiveRecord> implements FinderMethod
 	{
 		return recordType.isAnnotationPresent( Searchable.class);
 	}
-	
+
 	/**
 	 * @param term
 	 * @return the matching records
 	 * @throws UnsupportedOperationException if the record-type is not annotated with {@link Searchable}
 	 * @see Searchable
 	 */
-	public Stream<T> search(String term)
+	public Stream<T> search(final String term)
 	{
 		if(!isSearchable())
 		{
 			throw new UnsupportedOperationException("Called 'search' for non seachable record-type" );
 		}
-		String[] columns = recordType.getAnnotation( Searchable.class).searchableColumns();
-		return find( toSearchClause( term, columns ) );
+		final String[] columns = recordType.getAnnotation( Searchable.class).searchableColumns();
+		return find( RecordBase.toSearchClause( term, columns ) );
 	}
-	
+
 	/**
 	 * @param term
 	 * @return the first matching record
 	 * @throws UnsupportedOperationException if the record-type is not annotated with {@link Searchable}
 	 * @see Searchable
 	 */
-	public T searchFirst(String term)
+	public T searchFirst(final String term)
 	{
 		if(!isSearchable())
 		{
 			throw new UnsupportedOperationException("Called 'searchFirst' for non seachable record-type" );
 		}
-		String[] columns = recordType.getAnnotation( Searchable.class).searchableColumns();
-		return findFirst( toSearchClause( term, columns ) );
+		final String[] columns = recordType.getAnnotation( Searchable.class).searchableColumns();
+		return findFirst( RecordBase.toSearchClause( term, columns ) );
 	}
-	
-	private static Condition toSearchClause(String term, String[] columns)
+
+	private static Condition toSearchClause(final String term, final String[] columns)
 	{
-		Condition[] conds = new Condition[columns.length];
+		final Condition[] conds = new Condition[columns.length];
 		for(int i=0;i<columns.length;i++)
 		{
 			conds[i] = new SimpleCondition(columns[i], "%"+term+"%", Comparison.LIKE);
 		}
 		return new OrCondition(conds );
 	}
-	
+
 	////
 	// TimestampedRecord
 	////
-	
+
 	/**
 	 * @return whether the record supports creation and update timestamps
 	 */
@@ -518,11 +537,11 @@ public abstract class RecordBase<T extends ActiveRecord> implements FinderMethod
 	{
 		return TimestampedRecord.class.isAssignableFrom( recordType );
 	}
-	
+
 	////
 	//	ValidatedRecord
 	////
-	
+
 	/**
 	 * @return whether the record-type is {@link ValidatedRecord validated}
 	 */
@@ -530,14 +549,14 @@ public abstract class RecordBase<T extends ActiveRecord> implements FinderMethod
 	{
 		return ValidatedRecord.class.isAssignableFrom( recordType);
 	}
-	
+
 	/**
 	 * A non-validated record type always returns true for {@link #isValid(de.doe300.activerecord.record.ActiveRecord) }
 	 * @param record
 	 * @return whether the record is valid
-	 * @see ValidatedRecord#isValid() 
+	 * @see ValidatedRecord#isValid()
 	 */
-	public boolean isValid(ActiveRecord record)
+	public boolean isValid(final ActiveRecord record)
 	{
 		if(isValidated())
 		{
@@ -545,24 +564,24 @@ public abstract class RecordBase<T extends ActiveRecord> implements FinderMethod
 		}
 		return true;
 	}
-	
+
 	/**
-	 * @param record 
+	 * @param record
 	 * @throws ValidationFailed if the validation failed
-	 * @see ValidatedRecord#validate() 
+	 * @see ValidatedRecord#validate()
 	 */
-	public void validate(ActiveRecord record)
+	public void validate(final ActiveRecord record)
 	{
 		if(isValidated())
 		{
 			((ValidatedRecord)record).validate();
 		}
 	}
-	
+
 	////
 	//	Callbacks
 	////
-	
+
 	/**
 	 * @return whether this record-type has callbacks
 	 * @see RecordCallbacks
@@ -571,5 +590,5 @@ public abstract class RecordBase<T extends ActiveRecord> implements FinderMethod
 	{
 		return RecordCallbacks.class.isAssignableFrom( recordType);
 	}
-	
+
 }

@@ -24,6 +24,7 @@
  */
 package de.doe300.activerecord.validation;
 
+import java.util.Collections;
 import org.junit.Assert;
 import org.junit.Test;
 
@@ -39,13 +40,6 @@ public class ValidationsTest extends Assert
 	}
 
 	@Test
-	public void testNotNull()
-	{
-		assertTrue( Validations.notNull("a"));
-		assertFalse( Validations.notNull(null));
-	}
-
-	@Test
 	public void testNotEmpty()
 	{
 		assertTrue( Validations.notEmpty("aa"));
@@ -55,11 +49,39 @@ public class ValidationsTest extends Assert
 	@Test(expected = ValidationFailed.class)
 	public void testValidate()
 	{
-		Validations.validate("name", null, Validations::notNull, "is null");
+		Validations.validate("name", null, (Object obj) -> obj != null, "is null");
 	}
 
 	@Test
 	public void testIsValid()
+	{
+	}
+
+	@Test
+	public void testIsEmpty()
+	{
+		assertTrue( Validations.isEmpty( ""));
+		assertFalse( Validations.isEmpty( Collections.singleton( "")));
+	}
+
+	@Test(expected = IllegalArgumentException.class)
+	public void testPositiveNumber()
+	{
+		assertTrue( Validations.positiveNumber( 3));
+		assertFalse( Validations.positiveNumber( -5));
+		Validations.positiveNumber( "23");
+	}
+
+	@Test(expected = IllegalArgumentException.class)
+	public void testNegativeNumber()
+	{
+		assertTrue( Validations.negativeNumber( -4346.4));
+		assertFalse( Validations.negativeNumber( 345));
+		Validations.negativeNumber( 'c' );
+	}
+
+	@Test
+	public void testGetValidationMethod()
 	{
 	}
 	

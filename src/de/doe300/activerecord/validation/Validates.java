@@ -22,32 +22,26 @@
  * SOFTWARE.
  *
  */
+
+
 package de.doe300.activerecord.validation;
 
-import de.doe300.activerecord.record.ActiveRecord;
+import java.lang.annotation.Documented;
+import java.lang.annotation.ElementType;
+import java.lang.annotation.Inherited;
+import java.lang.annotation.Retention;
+import java.lang.annotation.RetentionPolicy;
+import java.lang.annotation.Target;
 
 /**
- * An {@link ActiveRecord} which runs validations on its attributes.
- * Both validation methods should use the same validation-algorithm
+ *
  * @author doe300
- * @see Validate
  */
-public interface ValidatedRecord extends ActiveRecord
+@Documented
+@Retention(RetentionPolicy.RUNTIME)
+@Target(ElementType.TYPE)
+@Inherited
+public @interface Validates
 {
-	/**
-	 * @return whether this record is valid
-	 */
-	public default boolean isValid()
-	{
-		return false;
-	}
-
-	/**
-	 * This method is called before {@link #save()}
-	 * @throws ValidationFailed the validation-error
-	 */
-	public default void validate() throws ValidationFailed
-	{
-		throw new ValidationFailed(null, null, "Validation not implemented" );
-	}
+	public Validate[] value();
 }

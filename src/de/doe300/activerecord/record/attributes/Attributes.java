@@ -24,7 +24,6 @@
  */
 package de.doe300.activerecord.record.attributes;
 
-import de.doe300.activerecord.record.ActiveRecord;
 import java.lang.reflect.Array;
 import java.lang.reflect.Field;
 import java.lang.reflect.Method;
@@ -33,6 +32,8 @@ import java.util.Map;
 import java.util.function.Function;
 import java.util.function.Predicate;
 import java.util.function.ToIntFunction;
+
+import de.doe300.activerecord.record.ActiveRecord;
 
 /**
  *
@@ -46,7 +47,7 @@ public final class Attributes
 	 * @param getterOrSetter
 	 * @return the name of the property, or <code>null</code>
 	 */
-	public static String getPropertyName( Method getterOrSetter )
+	public static String getPropertyName( final Method getterOrSetter )
 	{
 		String result;
 		if ( getterOrSetter.getName().startsWith( "is" ) )
@@ -67,8 +68,8 @@ public final class Attributes
 			//valid getter/setter but not handled by this handler
 			return null;
 		}
-		StringBuilder res = new StringBuilder( result.length() );
-		for ( char c : result.toCharArray() )
+		final StringBuilder res = new StringBuilder( result.length() );
+		for ( final char c : result.toCharArray() )
 		{
 			if ( Character.isUpperCase( c ) )
 			{
@@ -86,11 +87,11 @@ public final class Attributes
 	 * @throws NoSuchMethodException
 	 * @see AttributeSetter
 	 */
-	public static Method getValidatorMethod( Method base) throws NoSuchMethodException
+	public static Method getValidatorMethod( final Method base) throws NoSuchMethodException
 	{
 		if(base.isAnnotationPresent( AttributeSetter.class))
 		{
-			AttributeSetter setter = base.getAnnotation( AttributeSetter.class);
+			final AttributeSetter setter = base.getAnnotation( AttributeSetter.class);
 			if(setter.validatorClass().equals( Void.class))
 			{
 				return null;
@@ -107,7 +108,7 @@ public final class Attributes
 	 * @param includeAttributeSetter whether to also check for {@link AttributeSetter}
 	 * @return the boolean
 	 */
-	public static boolean isSetter( Method method, Class<?> argType, boolean includeAttributeSetter)
+	public static boolean isSetter( final Method method, final Class<?> argType, final boolean includeAttributeSetter)
 	{
 		if(includeAttributeSetter && method.isAnnotationPresent( AttributeSetter.class))
 		{
@@ -125,10 +126,10 @@ public final class Attributes
 		{
 			try
 			{
-				Field f = method.getParameterTypes()[0].getField( "TYPE" );
+				final Field f = method.getParameterTypes()[0].getField( "TYPE" );
 				return f != null && f.get( null ).equals( argType );
 			}
-			catch ( ReflectiveOperationException rfe )
+			catch ( final ReflectiveOperationException rfe )
 			{
 				return false;
 			}
@@ -137,10 +138,10 @@ public final class Attributes
 		{
 			try
 			{
-				Field f = argType.getField( "TYPE" );
+				final Field f = argType.getField( "TYPE" );
 				return f != null && f.get( null ).equals( method.getParameterTypes()[0] );
 			}
-			catch ( ReflectiveOperationException rfe )
+			catch ( final ReflectiveOperationException rfe )
 			{
 				return false;
 			}
@@ -154,7 +155,7 @@ public final class Attributes
 	 * @param includeAttributeGetter whether to also check for {@link AttributeGetter}
 	 * @return the boolean
 	 */
-	public static boolean isGetter( Method method, boolean includeAttributeGetter )
+	public static boolean isGetter( final Method method, final boolean includeAttributeGetter )
 	{
 		if(includeAttributeGetter && method.isAnnotationPresent( AttributeGetter.class))
 		{
@@ -172,11 +173,11 @@ public final class Attributes
 	 * @see AttributeGetter
 	 * @see AttributeSetter
 	 */
-	public static Method getConverterMethod( Method base) throws NoSuchMethodException
+	public static Method getConverterMethod( final Method base) throws NoSuchMethodException
 	{
 		if ( base.isAnnotationPresent( AttributeGetter.class))
 		{
-			AttributeGetter getter = base.getAnnotation( AttributeGetter.class);
+			final AttributeGetter getter = base.getAnnotation( AttributeGetter.class);
 			if(getter.converterClass().equals( Void.class))
 			{
 				return null;
@@ -185,7 +186,7 @@ public final class Attributes
 		}
 		if ( base.isAnnotationPresent( AttributeSetter.class))
 		{
-			AttributeSetter setter = base.getAnnotation( AttributeSetter.class);
+			final AttributeSetter setter = base.getAnnotation( AttributeSetter.class);
 			if(setter.converterClass().equals( Void.class))
 			{
 				return null;
@@ -201,9 +202,9 @@ public final class Attributes
 	 * @param converterFunc (optional) function to convert data before checking
 	 * @return whether the attribute-value is not <code>null</code>
 	 */
-	public static boolean checkNotNull(ActiveRecord record, String attribute, Function<Object,Object> converterFunc)
+	public static boolean checkNotNull(final ActiveRecord record, final String attribute, final Function<Object,Object> converterFunc)
 	{
-		return checkAttribute( record, attribute, (Object o) -> o!= null, converterFunc);
+		return Attributes.checkAttribute( record, attribute, (final Object o) -> o!= null, converterFunc);
 	}
 	
 	/**
@@ -213,7 +214,7 @@ public final class Attributes
 	 * @param converterFunc (optional) function to convert data before checking
 	 * @return whether the attribute-value matches the <code>checkFunc</code>
 	 */
-	public static boolean checkAttribute(ActiveRecord record, String attribute, Predicate<Object> checkFunc, Function<Object,Object> converterFunc)
+	public static boolean checkAttribute(final ActiveRecord record, final String attribute, final Predicate<Object> checkFunc, final Function<Object,Object> converterFunc)
 	{
 		Object val = record.getBase().getStore().getValue( record.getBase(), record.getPrimaryKey(), attribute);
 		if(converterFunc!=null)
@@ -232,7 +233,7 @@ public final class Attributes
 	 * @param converterFunc (optional) function to convert data before determining length
 	 * @return the length of the attribute-value or <code>-1</code>
 	 */
-	public static int getLength(ActiveRecord record, String attribute, ToIntFunction<Object> lengthFunc, Function<Object,Object> converterFunc)
+	public static int getLength(final ActiveRecord record, final String attribute, final ToIntFunction<Object> lengthFunc, final Function<Object,Object> converterFunc)
 	{
 		Object val = record.getBase().getStore().getValue( record.getBase(), record.getPrimaryKey(), attribute);
 		if(converterFunc!=null)

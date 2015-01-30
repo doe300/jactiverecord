@@ -29,16 +29,26 @@ package de.doe300.activerecord.validation;
  */
 public class ValidationFailed extends RuntimeException
 {
+	private static final long serialVersionUID = 5985957524527711273L;
 	private final String column;
 	private final String description;
 	private final Object value;
-	
-	public ValidationFailed( String column, Object value)
+
+	/**
+	 * @param column
+	 * @param value
+	 */
+	public ValidationFailed( final String column, final Object value)
 	{
 		this(column,value,"");
 	}
 
-	public ValidationFailed( String column, Object value, String description )
+	/**
+	 * @param column
+	 * @param value
+	 * @param description
+	 */
+	public ValidationFailed( final String column, final Object value, final String description )
 	{
 		this.column = column;
 		this.description = description;

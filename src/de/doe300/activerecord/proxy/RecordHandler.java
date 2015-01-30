@@ -215,4 +215,12 @@ public final class RecordHandler<T extends ActiveRecord> implements InvocationHa
 		throw new NoSuchMethodException("Method '"+method.getName()+"' is not implemented for this record-type");
 	}
 
+	/**
+	 * @return the record-type
+	 * @see RecordBase#getRecordType() 
+	 */
+	public Class<T> getRecordType()
+	{
+		return base.getRecordType();
+	}
 }

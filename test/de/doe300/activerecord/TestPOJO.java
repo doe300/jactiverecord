@@ -29,6 +29,8 @@ import de.doe300.activerecord.record.ActiveRecord;
 import de.doe300.activerecord.record.RecordType;
 import de.doe300.activerecord.record.Searchable;
 import de.doe300.activerecord.store.RecordStore;
+import de.doe300.activerecord.validation.Validate;
+import de.doe300.activerecord.validation.ValidationType;
 
 /**
  *
@@ -36,6 +38,7 @@ import de.doe300.activerecord.store.RecordStore;
  */
 @Searchable(searchableColumns = {"name","age"})
 @RecordType(typeName = "TESTTABLE", primaryKey = "id", defaultColumns = {"id", "name", "age"})
+@Validate(attribute = "name", type = ValidationType.NOT_NULL)
 public class TestPOJO implements ActiveRecord, TestInterface
 {
 	private final int primaryKey;
