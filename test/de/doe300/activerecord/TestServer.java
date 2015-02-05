@@ -60,7 +60,8 @@ public class TestServer
 		if(con == null || con.isClosed())
 		{
 			//sa without password is the default user
-			con = DriverManager.getConnection( "jdbc:hsqldb:hsql://localhost:9999/test", "sa", "" );
+			//con = DriverManager.getConnection( "jdbc:hsqldb:hsql://localhost:9999/test", "sa", "" );
+			con = DriverManager.getConnection( "jdbc:hsqldb:mem:test", "sa", "");
 		}
 		return con;
 	}
