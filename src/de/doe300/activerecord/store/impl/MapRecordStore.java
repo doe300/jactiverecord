@@ -27,6 +27,7 @@ package de.doe300.activerecord.store.impl;
 import de.doe300.activerecord.RecordBase;
 import de.doe300.activerecord.store.RecordStore;
 import de.doe300.activerecord.dsl.Condition;
+import de.doe300.activerecord.scope.Scope;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
@@ -124,26 +125,26 @@ public class MapRecordStore implements RecordStore
 	}
 
 	@Override
-	public Map<String, Object> findFirstWithData( RecordBase<?> base, String[] columns, Condition condition )
+	public Map<String, Object> findFirstWithData( RecordBase<?> base, String[] columns, Scope scope )
 	{
 		if(data.containsKey( base))
 		{
 			return data.get(base).entrySet().stream().filter((Map.Entry<Integer,Map<String,Object>> e)->
 			{
-				return condition.test( e.getValue());
+				return scope.getCondition().test( e.getValue());
 			}).map( (Map.Entry<Integer,Map<String,Object>> e)->e.getValue()).sorted( base.getDefaultOrder()).findFirst().orElse( null );
 		}
 		return Collections.emptyMap();
 	}
 
 	@Override
-	public Stream<Map<String, Object>> streamAllWithData( RecordBase<?> base, String[] columns, Condition condition )
+	public Stream<Map<String, Object>> streamAllWithData( RecordBase<?> base, String[] columns, Scope scope )
 	{
 		if(data.containsKey( base))
 		{
 			return data.get(base).entrySet().stream().filter((Map.Entry<Integer,Map<String,Object>> e)->
 			{
-				return condition.test( e.getValue());
+				return scope.getCondition().test( e.getValue());
 			}).map( (Map.Entry<Integer,Map<String,Object>> e)->e.getValue()).sorted( base.getDefaultOrder());
 		}
 		return Stream.empty();

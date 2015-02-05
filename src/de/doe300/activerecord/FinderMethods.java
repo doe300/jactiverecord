@@ -29,6 +29,7 @@ import de.doe300.activerecord.record.ActiveRecord;
 import de.doe300.activerecord.dsl.Comparison;
 import de.doe300.activerecord.dsl.Condition;
 import de.doe300.activerecord.dsl.SimpleCondition;
+import de.doe300.activerecord.scope.Scope;
 import java.util.ArrayList;
 import java.util.Map;
 import java.util.stream.Stream;
@@ -45,14 +46,20 @@ public interface FinderMethods<T extends ActiveRecord>
 	 * @param condition
 	 * @return all records matching the given condition or an empty Stream
 	 */
-	public Stream<T> find(Condition condition);
+	public default Stream<T> find(Condition condition)
+	{
+		return findWithScope( new Scope(condition, null, Scope.NO_LIMIT));
+	}
 	
 	/**
 	 * Finds the first record for the given condition
 	 * @param condition
 	 * @return the first record matching the condition or <code>null</code>
 	 */
-	public T findFirst(Condition condition);
+	public default T findFirst(Condition condition)
+	{
+		return findFirstWithScope( new Scope(condition, null, Scope.NO_LIMIT));
+	}
 	
 	/**
 	 * @param column
@@ -118,5 +125,16 @@ public interface FinderMethods<T extends ActiveRecord>
 		return find( new SimpleCondition(null, null, Comparison.TRUE));
 	}
 	
-	//XXX public Stream<ActiveRecord> findBySQL(String sql) ??
+	/**
+	 * The most flexible finder-method
+	 * @param scope
+	 * @return the stream of results
+	 */
+	public Stream<T> findWithScope(final Scope scope);
+	
+	/**
+	 * @param scope
+	 * @return the first record according to the scope or <code>null</code>
+	 */
+	public T findFirstWithScope(final Scope scope);
 }

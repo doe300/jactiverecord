@@ -30,6 +30,7 @@ import de.doe300.activerecord.TestInterface;
 import de.doe300.activerecord.TestServer;
 import de.doe300.activerecord.dsl.Comparison;
 import de.doe300.activerecord.dsl.SimpleCondition;
+import de.doe300.activerecord.scope.Scope;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.Map;
@@ -134,7 +135,8 @@ public class SimpleJDBCRecordStoreTest extends Assert
 	@Test
 	public void testFindFirstWithData()
 	{
-		assertTrue(store.findFirstWithData( base, base.getDefaultColumns(), new SimpleCondition(base.getPrimaryColumn(), primaryKey, Comparison.IS) ).size()>=base.getDefaultColumns().length);
+		Scope scope = new Scope(new SimpleCondition(base.getPrimaryColumn(), primaryKey, Comparison.IS), null, Scope.NO_LIMIT );
+		assertTrue(store.findFirstWithData( base, base.getDefaultColumns(), scope).size()>=base.getDefaultColumns().length);
 	}
 
 	@Test
@@ -146,7 +148,15 @@ public class SimpleJDBCRecordStoreTest extends Assert
 	@Test
 	public void testStreamAllWithData()
 	{
-		assertTrue( store.streamAllWithData( base, new String[]{base.getPrimaryColumn()}, new SimpleCondition(base.getPrimaryColumn(), primaryKey, Comparison.IS)).count() == 1);
+		Scope scope = new Scope(new SimpleCondition(base.getPrimaryColumn(), primaryKey, Comparison.IS), null, 2 );
+		assertTrue( store.streamAllWithData( base, new String[]{base.getPrimaryColumn()}, scope).count() == 1);
+		
+		//Test Limit
+		Scope scope2 = new Scope(new SimpleCondition("age", 123, Comparison.IS), null, 2 );
+		base.createRecord().setAge( 123);
+		base.createRecord().setAge( 123);
+		base.createRecord().setAge( 123);
+		assertTrue( store.streamAllWithData( base, base.getDefaultColumns(), scope2).count() == 2);
 	}
 
 	@Test

@@ -27,10 +27,12 @@ package de.doe300.activerecord.store.impl;
 import de.doe300.activerecord.RecordBase;
 import de.doe300.activerecord.store.RecordStore;
 import de.doe300.activerecord.dsl.Condition;
+import de.doe300.activerecord.dsl.Order;
 import de.doe300.activerecord.migration.AutomaticMigration;
 import de.doe300.activerecord.migration.ManualMigration;
 import de.doe300.activerecord.migration.Migration;
 import de.doe300.activerecord.record.RecordType;
+import de.doe300.activerecord.scope.Scope;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
@@ -76,6 +78,15 @@ public class SimpleJDBCRecordStore implements RecordStore
 		String clause =" WHERE ";
 		clause += condition.toSQL();
 		return clause;
+	}
+	
+	protected Order toOrder(RecordBase<?> base, Scope scope)
+	{
+		if(scope.getOrder()!=null)
+		{
+			return scope.getOrder();
+		}
+		return base.getDefaultOrder();
 	}
 	
 	protected String toColumnsList(String[] columns, String primaryColumn)
@@ -263,14 +274,14 @@ public class SimpleJDBCRecordStore implements RecordStore
 	}
 
 	@Override
-	public Map<String, Object> findFirstWithData( RecordBase<?> base, String[] columns, Condition condition )
+	public Map<String, Object> findFirstWithData( RecordBase<?> base, String[] columns, Scope scope )
 	{
-		String sql = "SELECT "+toColumnsList( columns, base.getPrimaryColumn() )+" FROM "+base.getTableName()+" "+toWhereClause( condition )+" ORDER BY "+base.getDefaultOrder().toSQL()+" LIMIT 1";
+		String sql = "SELECT "+toColumnsList( columns, base.getPrimaryColumn() )+" FROM "+base.getTableName()+" "+toWhereClause( scope.getCondition() )+" ORDER BY "+toOrder( base, scope ).toSQL()+" LIMIT 1";
 		try(PreparedStatement stm = con.prepareStatement(sql))
 		{
-			if(condition!=null)
+			if(scope.getCondition()!=null)
 			{
-				fillStatement( stm, condition );
+				fillStatement( stm, scope.getCondition() );
 			}
 			ResultSet res = stm.executeQuery();
 			if(res.next())
@@ -315,14 +326,18 @@ public class SimpleJDBCRecordStore implements RecordStore
 	}
 
 	@Override
-	public Stream<Map<String, Object>> streamAllWithData( RecordBase<?> base, String[] columns, Condition condition )
+	public Stream<Map<String, Object>> streamAllWithData( RecordBase<?> base, String[] columns, Scope scope )
 	{
-		String sql = "SELECT "+toColumnsList( columns, base.getPrimaryColumn() )+" FROM "+base.getTableName()+" "+toWhereClause( condition )+" ORDER BY "+base.getDefaultOrder().toSQL();
+		String sql = "SELECT "+toColumnsList( columns, base.getPrimaryColumn() )+" FROM "+base.getTableName()+" "+toWhereClause( scope.getCondition() )+" ORDER BY "+toOrder( base, scope ).toSQL();
+		if(scope.getLimit()!=Scope.NO_LIMIT)
+		{
+			sql += " LIMIT "+scope.getLimit();
+		}
 		try(PreparedStatement stm = con.prepareStatement(sql))
 		{
-			if(condition!=null)
+			if(scope.getCondition()!=null)
 			{
-				fillStatement( stm, condition );
+				fillStatement( stm, scope.getCondition() );
 			}
 			final ResultSet res = stm.executeQuery();
 			return StreamSupport.stream( new Spliterator<Map<String,Object>>()

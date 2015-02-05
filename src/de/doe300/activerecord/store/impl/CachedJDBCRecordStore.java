@@ -28,6 +28,7 @@ import de.doe300.activerecord.RecordBase;
 import de.doe300.activerecord.store.RowCache;
 import de.doe300.activerecord.store.RecordStore;
 import de.doe300.activerecord.dsl.Condition;
+import de.doe300.activerecord.scope.Scope;
 
 import java.sql.Connection;
 import java.sql.ResultSet;
@@ -223,7 +224,7 @@ public class CachedJDBCRecordStore extends SimpleJDBCRecordStore implements Reco
 	}
 
 	@Override
-	public Map<String, Object> findFirstWithData( RecordBase<?> base, String[] columns, Condition condition )
+	public Map<String, Object> findFirstWithData( RecordBase<?> base, String[] columns, Scope scope )
 	{
 		//1.check in cache for conditions
 		Map<String,Object> res;
@@ -231,15 +232,16 @@ public class CachedJDBCRecordStore extends SimpleJDBCRecordStore implements Reco
 		{
 			res= cache.get( base).entrySet().stream().filter( (Map.Entry<Integer,RowCache> e) ->
 			{
-				return condition.test( e.getValue().toMap() );
-			}).map( (Map.Entry<Integer,RowCache> e) -> e.getValue().toMap()).sorted( base.getDefaultOrder()).findFirst().orElse( null);
+				return scope.getCondition().test( e.getValue().toMap() );
+			}).map( (Map.Entry<Integer,RowCache> e) -> e.getValue().toMap()).sorted( toOrder( base, scope )).findFirst().orElse( null);
 			if(res!=null)
 			{
 				return res;
 			}
 		}
+		//TODO is wrong, if a matching record is in cache could still be first in DB
 		//1.1 load from DB if not found
-		Map<String,Object> map = super.findFirstWithData( base, columns, condition );
+		Map<String,Object> map = super.findFirstWithData( base, columns, scope );
 		//2. store in cache
 		if(map!=null && !map.isEmpty())
 		{
@@ -249,12 +251,12 @@ public class CachedJDBCRecordStore extends SimpleJDBCRecordStore implements Reco
 	}
 
 	@Override
-	public Stream<Map<String, Object>> streamAllWithData( RecordBase<?> base, String[] columns, Condition condition )
+	public Stream<Map<String, Object>> streamAllWithData( RecordBase<?> base, String[] columns, Scope scope )
 	{
 		//need to combine results from cache and DB -> too expensive, so just grab from DB and store in cache
 		//fails if correct value is in cache but not in DB -> save all cache
 		saveAll( base );
-		return super.streamAllWithData( base, columns, condition ).peek( (Map<String,Object> map )-> 
+		return super.streamAllWithData( base, columns, scope ).peek( (Map<String,Object> map )-> 
 		{
 			getCache(base, ( Integer ) map.get( base.getPrimaryColumn())).update( map, false );
 		});

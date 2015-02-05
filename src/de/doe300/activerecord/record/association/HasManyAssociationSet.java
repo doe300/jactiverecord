@@ -28,6 +28,7 @@ import de.doe300.activerecord.RecordBase;
 import de.doe300.activerecord.dsl.AndCondition;
 import de.doe300.activerecord.dsl.Condition;
 import de.doe300.activerecord.record.ActiveRecord;
+import de.doe300.activerecord.scope.Scope;
 import java.util.AbstractSet;
 import java.util.Collection;
 import java.util.Iterator;
@@ -148,14 +149,16 @@ public class HasManyAssociationSet<T extends ActiveRecord> extends AbstractSet<T
 	}
 
 	@Override
-	public Stream<T> find( Condition condition )
+	public Stream<T> findWithScope(final Scope scope)
 	{
-		return destBase.find( new AndCondition(associationCond, condition ));
+		Scope newScope = new Scope(new AndCondition(associationCond, scope.getCondition()), scope.getOrder(), scope.getLimit());
+		return destBase.findWithScope(newScope );
 	}
 
 	@Override
-	public T findFirst( Condition condition )
+	public T findFirstWithScope( final Scope scope )
 	{
-		return destBase.findFirst( new AndCondition(associationCond,condition));
+		Scope newScope = new Scope(new AndCondition(associationCond, scope.getCondition()), scope.getOrder(), scope.getLimit());
+		return destBase.findFirstWithScope( newScope );
 	}
 }

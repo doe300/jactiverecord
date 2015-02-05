@@ -29,13 +29,16 @@ import de.doe300.activerecord.RecordCore;
 import de.doe300.activerecord.TestInterface;
 import de.doe300.activerecord.TestServer;
 import de.doe300.activerecord.dsl.Comparison;
+import de.doe300.activerecord.dsl.Order;
 import de.doe300.activerecord.dsl.SimpleCondition;
+import de.doe300.activerecord.scope.Scope;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.Map;
 import java.util.Objects;
 import org.junit.AfterClass;
 import org.junit.Assert;
+import static org.junit.Assert.assertTrue;
 import org.junit.BeforeClass;
 import org.junit.Test;
 
@@ -156,17 +159,33 @@ public class CachedJDBCRecordStoreTest extends Assert
 	@Test
 	public void testFindFirstWithData()
 	{
-		assertTrue(store.findFirstWithData( base, base.getDefaultColumns(), new SimpleCondition(base.getPrimaryColumn(), primaryKey, Comparison.IS) ).size()>=base.getDefaultColumns().length);
+		Scope scope = new Scope(new SimpleCondition(base.getPrimaryColumn(), primaryKey, Comparison.IS), null, Scope.NO_LIMIT );
+		assertTrue(store.findFirstWithData( base, base.getDefaultColumns(), scope).size()>=base.getDefaultColumns().length);
 	}
 
 	@Test
 	public void testStreamAllWithData()
 	{
-		assertTrue( store.streamAllWithData( base, new String[]{base.getPrimaryColumn()}, new SimpleCondition(base.getPrimaryColumn(), primaryKey, Comparison.IS)).count() == 1);
+		Scope scope = new Scope(new SimpleCondition(base.getPrimaryColumn(), primaryKey, Comparison.IS), null, 2 );
+		assertTrue( store.streamAllWithData( base, new String[]{base.getPrimaryColumn()}, scope).count() == 1);
+		
+		Scope scope2 = new Scope(new SimpleCondition("name", "Failes", Comparison.IS), Order.fromSQLString( "id DESC"), 2 );
 		//Tests streaming with data in cache but not in store
 		TestInterface i = base.createRecord();
 		i.setName( "Failes");
-		assertTrue( store.streamAllWithData( base, new String[]{base.getPrimaryColumn()}, new SimpleCondition("name", "Failes", Comparison.IS)).anyMatch( (Map<String,Object> m) -> ((Integer)i.getPrimaryKey()).equals(m.get( base.getPrimaryColumn()))));
+		assertTrue( store.streamAllWithData( base, new String[]{base.getPrimaryColumn()}, scope2).anyMatch(
+				(Map<String,Object> m) -> ((Integer)i.getPrimaryKey()).equals(m.get( base.getPrimaryColumn()))
+		));
+		
+		//Test Limit
+		base.createRecord().setName( "Failes");
+		base.createRecord().setName( "Failes");
+		assertTrue( store.streamAllWithData( base, base.getDefaultColumns(), scope2).count() == 2);
+		
+		//Test Order (the two last added records should be returned, so the first is not in the results)
+		assertFalse( store.streamAllWithData( base, base.getDefaultColumns(), scope2).anyMatch(
+				(Map<String,Object> map) -> Integer.valueOf( i.getPrimaryKey()).equals( map.get( base.getPrimaryColumn()))
+		));
 	}
 
 	@Test

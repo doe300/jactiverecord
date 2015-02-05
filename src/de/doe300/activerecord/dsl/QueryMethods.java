@@ -26,6 +26,7 @@ package de.doe300.activerecord.dsl;
 
 import de.doe300.activerecord.FinderMethods;
 import de.doe300.activerecord.record.ActiveRecord;
+import de.doe300.activerecord.scope.Scope;
 import java.util.stream.Stream;
 
 /**
@@ -77,14 +78,14 @@ public interface QueryMethods<T extends ActiveRecord> extends FinderMethods<T>
 	public Order getOrder();
 	
 	@Override
-	public default Stream<T> find( Condition condition )
+	public default Stream<T> findWithScope( final Scope scope )
 	{
-		return where( condition ).stream().sorted( getOrder().toRecordComparator());
+		return null; //where( condition ).stream().sorted( getOrder().toRecordComparator());
 	}
 
 	@Override
-	public default T findFirst( Condition condition )
+	public default T findFirstWithScope( final Scope scope)
 	{
-		return where( condition ).stream().sorted( getOrder().toRecordComparator()).findFirst().get();
+		return null; //where( condition ).stream().sorted( getOrder().toRecordComparator()).findFirst().get();
 	}
 }

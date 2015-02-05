@@ -39,6 +39,7 @@ import de.doe300.activerecord.record.RecordCallbacks;
 import de.doe300.activerecord.record.RecordType;
 import de.doe300.activerecord.record.Searchable;
 import de.doe300.activerecord.record.TimestampedRecord;
+import de.doe300.activerecord.scope.Scope;
 import de.doe300.activerecord.store.RecordStore;
 import de.doe300.activerecord.validation.ValidatedRecord;
 import de.doe300.activerecord.validation.ValidationFailed;
@@ -416,9 +417,9 @@ public abstract class RecordBase<T extends ActiveRecord> implements FinderMethod
 	////
 
 	@Override
-	public Stream<T> find(final Condition condition)
+	public Stream<T> findWithScope(final Scope scope)
 	{
-		return getStore().findAll(this, condition ).stream().map( (final Integer i) ->
+		return getStore().findAll(this, scope ).stream().map( (final Integer i) ->
 		{
 			try
 			{
@@ -432,9 +433,9 @@ public abstract class RecordBase<T extends ActiveRecord> implements FinderMethod
 	}
 
 	@Override
-	public T findFirst(final Condition condition)
+	public T findFirstWithScope(final Scope scope)
 	{
-		final Integer key = getStore().findFirst(this, condition );
+		final Integer key = getStore().findFirst(this, scope );
 		if(key!=null)
 		{
 			try
@@ -591,4 +592,18 @@ public abstract class RecordBase<T extends ActiveRecord> implements FinderMethod
 		return RecordCallbacks.class.isAssignableFrom( recordType);
 	}
 
+	
+	////
+	//	Scopes
+	////
+	
+//	public boolean isScopeApplicable(Scope scope)
+//	{
+//		//TODO check if conditions and orders are applicable for this record-type
+//	}
+	
+//	public QueryResult<T> queryWithScope(Scope)
+//	{
+//		
+//	}	
 }

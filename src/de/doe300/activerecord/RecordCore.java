@@ -186,6 +186,7 @@ public final class RecordCore implements AutoCloseable
 	
 	private ProxyHandler[] mergeHandlers(Class<? extends ActiveRecord> type, ProxyHandler[] custom)
 	{
+		//TODO add handlers by default, e.g. ValidatedHandler if recordType is ValidatedRecord and annotated with Validate
 		if(this.handlers==null)
 		{
 			return custom;

@@ -23,62 +23,58 @@
  *
  */
 
-package de.doe300.activerecord.validation;
 
-import de.doe300.activerecord.RecordBase;
-import de.doe300.activerecord.RecordCore;
-import de.doe300.activerecord.TestInterface;
-import de.doe300.activerecord.TestServer;
-import org.junit.AfterClass;
-import org.junit.Assert;
-import org.junit.BeforeClass;
-import org.junit.Test;
+package de.doe300.activerecord.scope;
+
+import de.doe300.activerecord.dsl.Condition;
+import de.doe300.activerecord.dsl.Order;
 
 /**
- *
- * @author daniel
+ * A scope is a set of predefined conditions to narrow the results
+ * @author doe300
  */
-
-
-public class ValidationHandlerTest extends Assert
+public final class Scope
 {
-	private static RecordBase<TestInterface> base;
+	public static final int NO_LIMIT = -1;
 	
-	public ValidationHandlerTest()
+	private final Condition condition;
+	private final Order order;
+	private final int limit;
+
+	/**
+	 * 
+	 * @param condition the condition to narrow the results, may be <code>null</code>
+	 * @param order a order to apply to the results, may be <code>null</code>
+	 * @param limit a maximum number of results to retrieve, <code>NO_LIMIT</code> to disable
+	 */
+	public Scope(Condition condition, Order order, int limit )
 	{
-	}
-	
-	@BeforeClass
-	public static void createTables() throws Exception
-	{
-		TestServer.buildTestTables();
-		base = RecordCore.fromDatabase( TestServer.getTestConnection(), true).buildBase(TestInterface.class, new ValidationHandler());
-	}
-	
-	@AfterClass
-	public static void destroyTables() throws Exception
-	{
-		TestServer.destroyTestTables();
+		this.condition = condition;
+		this.order = order;
+		this.limit = limit;
 	}
 
-	@Test
-	public void testIsValid()
+	/**
+	 * @return the condition, may be <code>null</code>
+	 */
+	public Condition getCondition()
 	{
-		TestInterface i = base.createRecord();
-		assertFalse( i.isValid());
-		i.setAge( 23);
-		i.setName( "Adfan");
-		assertTrue( i.isValid());
+		return condition;
 	}
-	
-	@Test
-	public void testValidate()
+
+	/**
+	 * @return the order, may be <code>null</code>
+	 */
+	public Order getOrder()
 	{
-		TestInterface i = base.createRecord();
-		i.setAge( 23);
-		i.setName( "Adam");
-		i.validate();
-		i.setAge(-100 );
-		i.validate();
+		return order;
+	}
+
+	/**
+	 * @return the limit
+	 */
+	public int getLimit()
+	{
+		return limit;
 	}
 }

@@ -27,6 +27,7 @@ package de.doe300.activerecord.store;
 import de.doe300.activerecord.RecordBase;
 import de.doe300.activerecord.record.TimestampedRecord;
 import de.doe300.activerecord.dsl.Condition;
+import de.doe300.activerecord.scope.Scope;
 import java.util.Map;
 import java.util.Set;
 import java.util.stream.Collectors;
@@ -221,12 +222,12 @@ public interface RecordStore extends AutoCloseable
 	
 	/**
 	 * @param base
-	 * @param condition
+	 * @param scope
 	 * @return the primaryKey of the first match or <code>null</code>
 	 */
-	public default Integer findFirst(RecordBase<?> base, Condition condition)
+	public default Integer findFirst(RecordBase<?> base, Scope scope)
 	{
-		Map<String, Object> data = findFirstWithData(base, new String[]{base.getPrimaryColumn()}, condition );
+		Map<String, Object> data = findFirstWithData(base, new String[]{base.getPrimaryColumn()}, scope);
 		if(data!=null)
 		{
 			return ( Integer ) data.get( base.getPrimaryColumn());
@@ -236,22 +237,22 @@ public interface RecordStore extends AutoCloseable
 	
 	/**
 	 * @param base
-	 * @param condition
+	 * @param scope
 	 * @return the primary keys of all matches or an empty Set
 	 */
-	public default Set<Integer> findAll(RecordBase<?> base, Condition condition)
+	public default Set<Integer> findAll(RecordBase<?> base, Scope scope)
 	{
-		return streamAll(base, condition ).collect( Collectors.toSet());
+		return streamAll(base, scope).collect( Collectors.toSet());
 	}
 	
 	/**
 	 * @param base
-	 * @param condition
+	 * @param scope
 	 * @return all matching primary keys or an empty Stream
 	 */
-	public default Stream<Integer> streamAll(RecordBase<?> base, Condition condition)
+	public default Stream<Integer> streamAll(RecordBase<?> base, Scope scope)
 	{
-		return streamAllWithData( base, new String[]{base.getPrimaryColumn()}, condition).map( (Map<String,Object> map)->
+		return streamAllWithData( base, new String[]{base.getPrimaryColumn()}, scope).map( (Map<String,Object> map)->
 		{
 			return (Integer)map.get( base.getPrimaryColumn());
 		});
@@ -260,20 +261,20 @@ public interface RecordStore extends AutoCloseable
 	/**
 	 * @param base
 	 * @param columns
-	 * @param condition
+	 * @param scope
 	 * @return the data for the first match or an empty map
 	 */
-	public Map<String, Object> findFirstWithData(RecordBase<?> base, String[] columns, Condition condition);
+	public Map<String, Object> findFirstWithData(RecordBase<?> base, String[] columns, Scope scope);
 	
 	/**
 	 * @param base
 	 * @param columns
-	 * @param condition
+	 * @param scope
 	 * @return the data for all matches or an empty map
 	 */
-	public default Map<Integer, Map<String, Object>> findAllWithData(RecordBase<?> base, String[] columns, Condition condition)
+	public default Map<Integer, Map<String, Object>> findAllWithData(RecordBase<?> base, String[] columns, Scope scope)
 	{
-		return streamAllWithData( base, columns, condition ).collect( Collectors.toMap( (Map<String,Object> map) -> 
+		return streamAllWithData( base, columns, scope ).collect( Collectors.toMap( (Map<String,Object> map) -> 
 		{
 			return (Integer)map.get( base.getPrimaryColumn());
 		}, (Map<String,Object> map)->map));
@@ -282,10 +283,10 @@ public interface RecordStore extends AutoCloseable
 	/**
 	 * @param base
 	 * @param columns
-	 * @param condition
+	 * @param scope
 	 * @return the requested data for all matches or an empty Stream
 	 */
-	public Stream<Map<String, Object>> streamAllWithData(RecordBase<?> base, String[] columns, Condition condition);
+	public Stream<Map<String, Object>> streamAllWithData(RecordBase<?> base, String[] columns, Scope scope);
 	
 	////
 	// COUNT
@@ -298,6 +299,6 @@ public interface RecordStore extends AutoCloseable
 	 */
 	public default int count(RecordBase<?> base, Condition condition)
 	{
-		return ( int ) streamAll( base, condition ).count();
+		return ( int ) streamAll( base, new Scope(condition, null, Scope.NO_LIMIT) ).count();
 	}
 }
