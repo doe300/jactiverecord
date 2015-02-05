@@ -50,13 +50,19 @@ public interface QueryMethods<T extends ActiveRecord> extends FinderMethods<T>
 	 * @param condition
 	 * @return a new QueryResult matching the given condition
 	 */
-	public QueryResult<T> where(Condition condition);
+	public default QueryResult<T> where(Condition condition)
+	{
+		return withScope( new Scope(condition, null, size()));
+	}
 	
 	/**
 	 * @param number
 	 * @return a new QueryResult with the limit of records applied
 	 */
-	public QueryResult<T> limit(int number);
+	public default QueryResult<T> limit(int number)
+	{
+		return withScope( new Scope(null, null, number));
+	}
 	
 	/**
 	 * @param order
@@ -64,7 +70,7 @@ public interface QueryMethods<T extends ActiveRecord> extends FinderMethods<T>
 	 */
 	public default QueryResult<T> order(Order order)
 	{
-		return new QueryResult<T>(stream(), size(), order);
+		return withScope( new Scope(null, order, size()));
 	}
 
 	/**
@@ -77,15 +83,21 @@ public interface QueryMethods<T extends ActiveRecord> extends FinderMethods<T>
 	 */
 	public Order getOrder();
 	
+	/**
+	 * @param scope
+	 * @return  a new QueryResult matching the given scope
+	 */
+	public QueryResult<T> withScope(Scope scope);
+	
 	@Override
 	public default Stream<T> findWithScope( final Scope scope )
 	{
-		return null; //where( condition ).stream().sorted( getOrder().toRecordComparator());
+		return withScope( scope ).stream();
 	}
 
 	@Override
 	public default T findFirstWithScope( final Scope scope)
 	{
-		return null; //where( condition ).stream().sorted( getOrder().toRecordComparator()).findFirst().get();
+		return withScope( scope ).stream().findFirst().get();
 	}
 }

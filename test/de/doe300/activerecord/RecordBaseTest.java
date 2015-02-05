@@ -28,6 +28,7 @@ import de.doe300.activerecord.dsl.Comparison;
 import de.doe300.activerecord.dsl.QueryResult;
 import de.doe300.activerecord.dsl.SimpleCondition;
 import de.doe300.activerecord.record.RecordType;
+import de.doe300.activerecord.scope.Scope;
 import de.doe300.activerecord.validation.ValidationFailed;
 import java.lang.reflect.UndeclaredThrowableException;
 import java.sql.SQLException;
@@ -383,5 +384,28 @@ public class RecordBaseTest<T extends TestInterface> extends Assert
 	public void testHasCallbacks()
 	{
 		assertTrue( base.hasCallbacks());
+	}
+
+	@Test
+	public void testFindWithScope()
+	{
+		Scope scope = new Scope(new SimpleCondition(base.getPrimaryColumn(), null, Comparison.IS_NOT_NULL), null, Scope.NO_LIMIT );
+		assertNotNull( base.findFirstWithScope( scope ));
+	}
+
+	@Test
+	public void testFindFirstWithScope()
+	{
+		Scope scope = new Scope(new SimpleCondition(base.getPrimaryColumn(), null, Comparison.IS_NOT_NULL), null, Scope.NO_LIMIT );
+		assertNotNull( base.findFirstWithScope( scope ));
+	}
+
+	@Test
+	public void testQueryWithScope()
+	{
+		Scope scope = new Scope(new SimpleCondition("name", base, Comparison.TRUE), null, Scope.NO_LIMIT );
+		QueryResult<T> res = base.withScope(scope);
+		assertNotNull( res );
+		assertEquals( base.getDefaultOrder(), res.getOrder());
 	}
 }

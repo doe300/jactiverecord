@@ -25,6 +25,7 @@
 package de.doe300.activerecord.dsl;
 
 import de.doe300.activerecord.record.ActiveRecord;
+import de.doe300.activerecord.scope.Scope;
 import java.util.stream.Stream;
 
 /**
@@ -69,15 +70,26 @@ public class GroupResult<R, T extends ActiveRecord> implements QueryMethods<T>
 	}
 
 	@Override
-	public QueryResult<T> where( Condition condition )
+	public QueryResult<T> withScope( Scope scope )
 	{
-		return new QueryResult<T>(baseStream.filter( condition::test), SIZE_UNKNOWN,order);
-	}
-
-	@Override
-	public QueryResult<T> limit( int number )
-	{
-		return new QueryResult<T>(baseStream.limit( number), Math.min(number,size),order);
+		Stream<T> stream = baseStream;
+		int limit = SIZE_UNKNOWN;
+		Order sorting = order;
+		if(scope.getCondition()!=null)
+		{
+			stream = stream.filter( scope.getCondition()::test);
+		}
+		if(scope.getLimit() != Scope.NO_LIMIT)
+		{
+			stream = stream.limit( scope.getLimit());
+			limit = Math.min( limit, scope.getLimit());
+		}
+		if(scope.getOrder() != null)
+		{
+			stream = stream.sorted( scope.getOrder().toRecordComparator());
+			sorting = scope.getOrder();
+		}
+		return new QueryResult<T>(stream, limit, sorting );
 	}
 
 	@Override

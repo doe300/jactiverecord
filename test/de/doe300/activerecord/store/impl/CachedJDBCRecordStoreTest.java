@@ -211,5 +211,11 @@ public class CachedJDBCRecordStoreTest extends Assert
 	{
 		assertTrue( store.isCached());
 	}
+
+	@Test
+	public void testCount()
+	{
+		assertTrue( store.count( base, new SimpleCondition(base.getPrimaryColumn(), primaryKey, Comparison.IS)) == 1);
+	}
 	
 }

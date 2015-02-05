@@ -471,6 +471,16 @@ public abstract class RecordBase<T extends ActiveRecord> implements FinderMethod
 	{
 		return new QueryResult<T>(find( condition), count( condition ) ,getDefaultOrder());
 	}
+	
+	/**
+	 * 
+	 * @param scope
+	 * @return the result of this query
+	 */
+	public QueryResult<T> withScope(Scope scope)
+	{
+		return new QueryResult<T>(findWithScope( scope), Math.min(scope.getLimit(), count( scope.getCondition())), scope.getOrder()!= null ? scope.getOrder() : getDefaultOrder());
+	}
 
 	////
 	// Searchable
@@ -591,19 +601,4 @@ public abstract class RecordBase<T extends ActiveRecord> implements FinderMethod
 	{
 		return RecordCallbacks.class.isAssignableFrom( recordType);
 	}
-
-	
-	////
-	//	Scopes
-	////
-	
-//	public boolean isScopeApplicable(Scope scope)
-//	{
-//		//TODO check if conditions and orders are applicable for this record-type
-//	}
-	
-//	public QueryResult<T> queryWithScope(Scope)
-//	{
-//		
-//	}	
 }
