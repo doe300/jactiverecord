@@ -15,3 +15,6 @@
 /nbproject/
 /build/
 /build.xml
+.classpath
+.settings
+.project
