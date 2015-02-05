@@ -3,13 +3,15 @@
 /test/testdb.properties
 /test/testdb.script
 /.jacocoverage/
-/nbproject/
 /test/testdb.lck
 /dist/
-/build.xml
 /test/test.tmp/
 /test/test.properties
 /test/test.script
 /test/test.lck
 /test/test.log
 /.apt_generated/
+/target/
+/nbproject/
+/build/
+/build.xml

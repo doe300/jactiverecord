@@ -44,6 +44,10 @@ public class TestPOJO implements ActiveRecord, TestInterface
 	private final int primaryKey;
 	private final POJOBase<TestPOJO> base;
 
+	/**
+	 * @param key
+	 * @param base
+	 */
 	public TestPOJO(final int key, final POJOBase<TestPOJO> base)
 	{
 		this.primaryKey = key;
