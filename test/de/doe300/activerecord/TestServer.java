@@ -28,9 +28,11 @@ import de.doe300.activerecord.migration.AutomaticMigrationTest;
 import de.doe300.activerecord.migration.ManualMigrationTest;
 import java.io.PrintWriter;
 import java.sql.Connection;
+import java.sql.Driver;
 import java.sql.DriverManager;
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.util.Enumeration;
 import org.hsqldb.Server;
 
 /**
@@ -59,6 +61,11 @@ public class TestServer
 	{
 		if(con == null || con.isClosed())
 		{
+			Enumeration<Driver> drivers = DriverManager.getDrivers();
+			while(drivers.hasMoreElements())
+			{
+				System.out.println( drivers.nextElement().getClass() );
+			}
 			//sa without password is the default user
 			//con = DriverManager.getConnection( "jdbc:hsqldb:hsql://localhost:9999/test", "sa", "" );
 			con = DriverManager.getConnection( "jdbc:hsqldb:mem:test", "sa", "");

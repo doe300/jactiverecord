@@ -24,6 +24,7 @@
  */
 package de.doe300.activerecord.migration;
 
+import de.doe300.activerecord.logging.Logging;
 import de.doe300.activerecord.record.ActiveRecord;
 import de.doe300.activerecord.record.RecordType;
 import de.doe300.activerecord.record.TimestampedRecord;
@@ -103,15 +104,20 @@ public class AutomaticMigration implements Migration
 				+columns.entrySet().stream().map( (Map.Entry<String,String> e) -> e.getKey()+" "+e.getValue())
 						.collect( Collectors.joining(", "))
 				+" )";
+		Logging.getLogger().info( recordType.getSimpleName(), "Executing automatic table-creation...");
+		Logging.getLogger().info( recordType.getSimpleName(), sql);
 		try(Statement stm = con.createStatement())
 		{
 			if(stm.executeUpdate(sql)<0)
 			{
+				Logging.getLogger().error( recordType.getSimpleName(), "Automatic table-creation failed!");
 				return false;
 			}
 		}
 		catch(SQLException e)
 		{
+			Logging.getLogger().error( recordType.getSimpleName(), "Automatic table-creation failed with error!");
+			Logging.getLogger().error( recordType.getSimpleName(), e);
 			throw e;
 		}
 		return true;
@@ -162,6 +168,8 @@ public class AutomaticMigration implements Migration
 					"DROP COLUMN "+
 					removeColumns.entrySet().stream().map( (Map.Entry<String,String> e) -> e.getKey()).collect( Collectors.joining( ", "))+
 					")";
+			Logging.getLogger().info(recordType.getSimpleName(), "Executing automatic table-update...");
+			Logging.getLogger().info(recordType.getSimpleName(), sql);
 			try(Statement stm = con.createStatement())
 			{
 				changed = (stm.executeUpdate(sql) >= 0);
@@ -173,10 +181,16 @@ public class AutomaticMigration implements Migration
 					"ADD "+
 					addColumns.entrySet().stream().map( (Map.Entry<String,String> e) -> e.getKey()+" "+e.getValue()).collect( Collectors.joining( ", "))+
 					")";
+			Logging.getLogger().info(recordType.getSimpleName(), "Executing automatic table-update...");
+			Logging.getLogger().info(recordType.getSimpleName(), sql);
 			try(Statement stm = con.createStatement())
 			{
 				changed = changed || (stm.executeUpdate(sql) >= 0);
 			}
+		}
+		if(!changed)
+		{
+			Logging.getLogger().error(recordType.getSimpleName(), "Automatic table-update failed!");
 		}
 		return changed;
 	}
@@ -198,15 +212,20 @@ public class AutomaticMigration implements Migration
 		}
 		//2. drop table
 		String sql = "DROP TABLE "+tableName;
+		Logging.getLogger().info(recordType.getSimpleName(), "Executing automatic table-drop...");
+		Logging.getLogger().info(recordType.getSimpleName(), sql);
 		try(Statement stm = con.createStatement( ))
 		{
 			if(stm.executeUpdate(sql) < 0)
 			{
+				Logging.getLogger().error(recordType.getSimpleName(), "Automatic table-drop failed!");
 				return false;
 			}
 		}
 		catch(SQLException e)
 		{
+			Logging.getLogger().error( recordType.getSimpleName(), "Automatic table-drop failed with error!");
+			Logging.getLogger().error( recordType.getSimpleName(), e);
 			throw e;
 		}
 		return true;

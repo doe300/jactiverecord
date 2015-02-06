@@ -34,6 +34,7 @@ import de.doe300.activerecord.dsl.OrCondition;
 import de.doe300.activerecord.dsl.Order;
 import de.doe300.activerecord.dsl.QueryResult;
 import de.doe300.activerecord.dsl.SimpleCondition;
+import de.doe300.activerecord.logging.Logging;
 import de.doe300.activerecord.record.ActiveRecord;
 import de.doe300.activerecord.record.RecordCallbacks;
 import de.doe300.activerecord.record.RecordType;
@@ -43,6 +44,7 @@ import de.doe300.activerecord.scope.Scope;
 import de.doe300.activerecord.store.RecordStore;
 import de.doe300.activerecord.validation.ValidatedRecord;
 import de.doe300.activerecord.validation.ValidationFailed;
+import java.util.Arrays;
 
 /**
  * Common base for mapped objects
@@ -117,6 +119,7 @@ public abstract class RecordBase<T extends ActiveRecord> implements FinderMethod
 			{
 				tableName = recordType.getSimpleName();
 			}
+			Logging.getLogger().debug( recordType.getSimpleName(), "Using table-name: "+tableName);
 		}
 		return tableName;
 	}
@@ -139,6 +142,7 @@ public abstract class RecordBase<T extends ActiveRecord> implements FinderMethod
 			{
 				primaryColumn = RecordStore.DEFAULT_COLUMN_ID;
 			}
+			Logging.getLogger().debug( recordType.getSimpleName(), "Using primary-key: "+primaryColumn);
 		}
 		return primaryColumn;
 	}
@@ -161,6 +165,7 @@ public abstract class RecordBase<T extends ActiveRecord> implements FinderMethod
 			{
 				defaultColumns = new String[]{RecordStore.DEFAULT_COLUMN_ID};
 			}
+			Logging.getLogger().debug( recordType.getSimpleName(), "Using default-columns: "+Arrays.toString(defaultColumns));
 		}
 		return defaultColumns;
 	}
@@ -187,6 +192,7 @@ public abstract class RecordBase<T extends ActiveRecord> implements FinderMethod
 			{
 				defaultOrder = new Order(getPrimaryColumn(), Order.OrderType.ASCENDING);
 			}
+			Logging.getLogger().debug( recordType.getSimpleName(), "Using default order: "+defaultOrder.toSQL());
 		}
 		return defaultOrder;
 	}
@@ -254,6 +260,7 @@ public abstract class RecordBase<T extends ActiveRecord> implements FinderMethod
 	{
 		if(records.containsKey( primaryKey) || store.containsRecord(this, primaryKey))
 		{
+			Logging.getLogger().error( recordType.getSimpleName(), "Record with primary-key "+primaryKey+" already exists");
 			throw new IllegalArgumentException("Record with primaryKey "+primaryKey+" already exists for table "+getTableName());
 		}
 		final T record = createProxy(primaryKey);
@@ -329,6 +336,7 @@ public abstract class RecordBase<T extends ActiveRecord> implements FinderMethod
 	 */
 	public boolean saveAll() throws ValidationFailed
 	{
+		Logging.getLogger().debug( recordType.getSimpleName(), "Saving all records...");
 		for(final T record : records.values())
 		{
 			if(hasCallbacks())
@@ -505,6 +513,7 @@ public abstract class RecordBase<T extends ActiveRecord> implements FinderMethod
 	{
 		if(!isSearchable())
 		{
+			Logging.getLogger().error( recordType.getSimpleName(), "record-type is not searchable");
 			throw new UnsupportedOperationException("Called 'search' for non seachable record-type" );
 		}
 		final String[] columns = recordType.getAnnotation( Searchable.class).searchableColumns();
@@ -521,6 +530,7 @@ public abstract class RecordBase<T extends ActiveRecord> implements FinderMethod
 	{
 		if(!isSearchable())
 		{
+			Logging.getLogger().error( recordType.getSimpleName(), "record-type is not searchable");
 			throw new UnsupportedOperationException("Called 'searchFirst' for non seachable record-type" );
 		}
 		final String[] columns = recordType.getAnnotation( Searchable.class).searchableColumns();

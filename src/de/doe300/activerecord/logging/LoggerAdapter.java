@@ -22,35 +22,39 @@
  * SOFTWARE.
  *
  */
-package de.doe300.activerecord.validation;
-
-import de.doe300.activerecord.logging.Logging;
-import de.doe300.activerecord.record.ActiveRecord;
+package de.doe300.activerecord.logging;
 
 /**
- * An {@link ActiveRecord} which runs validations on its attributes.
- * Both validation methods should use the same validation-algorithm
+ * Adapter to write to various logger-APIs
  * @author doe300
- * @see Validate
  */
-public interface ValidatedRecord extends ActiveRecord
+public interface LoggerAdapter
 {
 	/**
-	 * @return whether this record is valid
+	 * Information message
+	 * @param source
+	 * @param message 
 	 */
-	public default boolean isValid()
-	{
-		Logging.getLogger().info( getBase().getRecordType().getSimpleName(), "Default implementation of isValid() called");
-		return false;
-	}
-
+	public void info(String source, String message);
+	
 	/**
-	 * This method is called before {@link #save()}
-	 * @throws ValidationFailed the validation-error
+	 * Debug message
+	 * @param source
+	 * @param message 
 	 */
-	public default void validate() throws ValidationFailed
-	{
-		Logging.getLogger().info( getBase().getRecordType().getSimpleName(), "Default implementation of validate() called");
-		throw new ValidationFailed(null, null, "Validation not implemented" );
-	}
+	public void debug(String source, String message);
+	
+	/**
+	 * Error message
+	 * @param source
+	 * @param message 
+	 */
+	public void error(String source, String message);
+	
+	/**
+	 * Throws Error
+	 * @param source
+	 * @param exception 
+	 */
+	public void error(String source, Throwable exception);
 }

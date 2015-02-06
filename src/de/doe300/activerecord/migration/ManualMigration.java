@@ -24,6 +24,7 @@
  */
 package de.doe300.activerecord.migration;
 
+import de.doe300.activerecord.logging.Logging;
 import java.sql.Connection;
 
 /**
@@ -51,6 +52,8 @@ public class ManualMigration implements Migration
 	@Override
 	public boolean apply( Connection con ) throws Exception
 	{
+		Logging.getLogger().info("ManualMigration", "Executing manual migration...");
+		Logging.getLogger().info("ManualMigration", command);
 		return con.createStatement().executeUpdate(command ) >= 0;
 	}
 
@@ -61,6 +64,8 @@ public class ManualMigration implements Migration
 		{
 			return false;
 		}
+		Logging.getLogger().info("ManualMigration", "Executing manual revert...");
+		Logging.getLogger().info("ManualMigration", revertedCommand);
 		return con.createStatement().executeUpdate(revertedCommand) >= 0;
 	}
 
@@ -71,6 +76,8 @@ public class ManualMigration implements Migration
 		{
 			return false;
 		}
+		Logging.getLogger().info("ManualMigration", "Executing manual update...");
+		Logging.getLogger().info("ManualMigration", updateCommand);
 		return con.createStatement().executeUpdate(updateCommand) >= 0;
 	}
 }

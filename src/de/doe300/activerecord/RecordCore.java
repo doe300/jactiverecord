@@ -24,6 +24,7 @@
  */
 package de.doe300.activerecord;
 
+import de.doe300.activerecord.logging.Logging;
 import de.doe300.activerecord.pojo.POJOBase;
 import de.doe300.activerecord.proxy.ProxyBase;
 import de.doe300.activerecord.proxy.handlers.ProxyHandler;
@@ -74,6 +75,7 @@ public final class RecordCore implements AutoCloseable
 		{
 			core = new RecordCore(cached ? new CachedJDBCRecordStore(dbConnection ): new SimpleJDBCRecordStore(dbConnection ));
 			cores.put( cat, core );
+			Logging.getLogger().info( "RecordCore", "registered new"+(cached? " cached ":" ")+"record-core for DB-connection: "+cat);
 		}
 		return core;
 	}
@@ -89,6 +91,7 @@ public final class RecordCore implements AutoCloseable
 		{
 			core = new RecordCore(new MapRecordStore());
 			cores.put( name, core );
+			Logging.getLogger().info( "RecordCore", "registered new record-core for memory-store: "+name);
 		}
 		return core;
 	}
@@ -105,6 +108,7 @@ public final class RecordCore implements AutoCloseable
 		{
 			core = new RecordCore(store );
 			cores.put( name, core );
+			Logging.getLogger().info( "RecordCore", "registered new record-core for record-store: "+name);
 		}
 		return core;
 	}
@@ -122,6 +126,7 @@ public final class RecordCore implements AutoCloseable
 	public void close() throws Exception
 	{
 		store.close();
+		Logging.getLogger().info( "RecordCore", "RecordCore closed");
 	}
 	
 	/**
@@ -153,6 +158,7 @@ public final class RecordCore implements AutoCloseable
 				base = new POJOBase<T>(type, this, store );
 			}
 			bases.put( type, base );
+			Logging.getLogger().debug( "RecordCore", "Built new record-base for "+type.getCanonicalName());
 		}
 		return base;
 	}
@@ -178,6 +184,7 @@ public final class RecordCore implements AutoCloseable
 			}
 			if(base != null)
 			{
+				Logging.getLogger().debug( "RecordCore", "Created new record-base for "+type.getCanonicalName());
 				bases.put( type, base );
 			}
 		}

@@ -22,35 +22,71 @@
  * SOFTWARE.
  *
  */
-package de.doe300.activerecord.validation;
+package de.doe300.activerecord.logging;
 
-import de.doe300.activerecord.logging.Logging;
-import de.doe300.activerecord.record.ActiveRecord;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 /**
- * An {@link ActiveRecord} which runs validations on its attributes.
- * Both validation methods should use the same validation-algorithm
+ * LoggerAdapter for the java built in logging API {@link java.util.logging.Logger}
  * @author doe300
- * @see Validate
  */
-public interface ValidatedRecord extends ActiveRecord
+public class JRELoggerAdapter implements LoggerAdapter
 {
+	private static Logger LOGGER = Logger.getLogger( "JActiveRecord");
+
 	/**
-	 * @return whether this record is valid
+	 * Uses the default log-level
 	 */
-	public default boolean isValid()
+	public JRELoggerAdapter()
 	{
-		Logging.getLogger().info( getBase().getRecordType().getSimpleName(), "Default implementation of isValid() called");
-		return false;
+	}
+	
+	/**
+	 * @param logLevel 
+	 */
+	public JRELoggerAdapter(Level logLevel)
+	{
+		LOGGER.setLevel( logLevel);
 	}
 
 	/**
-	 * This method is called before {@link #save()}
-	 * @throws ValidationFailed the validation-error
+	 * @param logger 
 	 */
-	public default void validate() throws ValidationFailed
+	public JRELoggerAdapter(Logger logger)
 	{
-		Logging.getLogger().info( getBase().getRecordType().getSimpleName(), "Default implementation of validate() called");
-		throw new ValidationFailed(null, null, "Validation not implemented" );
+		LOGGER = logger;
+	}
+
+	@Override
+	public void info( String source, String message )
+	{
+		LOGGER.log(Level.INFO, "{0}: {1}", new Object[ ]{ source, message });
+	}
+
+	@Override
+	public void debug( String source, String message )
+	{
+		LOGGER.log(Level.FINER, "{0}: {1}", new Object[ ]{ source, message });
+	}
+
+	@Override
+	public void error( String source, String message )
+	{
+		LOGGER.log(Level.SEVERE, "{0}: {1}", new Object[ ]{ source, message });
+	}
+
+	@Override
+	public void error( String source, Throwable exception )
+	{
+		LOGGER.log( Level.SEVERE, source, exception);
+	}
+
+	/**
+	 * @return the underlying logger
+	 */
+	public Logger getLogger()
+	{
+		return LOGGER;
 	}
 }

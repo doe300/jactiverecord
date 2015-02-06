@@ -22,35 +22,34 @@
  * SOFTWARE.
  *
  */
-package de.doe300.activerecord.validation;
-
-import de.doe300.activerecord.logging.Logging;
-import de.doe300.activerecord.record.ActiveRecord;
+package de.doe300.activerecord.logging;
 
 /**
- * An {@link ActiveRecord} which runs validations on its attributes.
- * Both validation methods should use the same validation-algorithm
+ *
  * @author doe300
- * @see Validate
  */
-public interface ValidatedRecord extends ActiveRecord
+public final class Logging
 {
+	private static LoggerAdapter logger = new JRELoggerAdapter();
+
 	/**
-	 * @return whether this record is valid
+	 * @return the logger
 	 */
-	public default boolean isValid()
+	public static LoggerAdapter getLogger()
 	{
-		Logging.getLogger().info( getBase().getRecordType().getSimpleName(), "Default implementation of isValid() called");
-		return false;
+		return logger;
 	}
 
 	/**
-	 * This method is called before {@link #save()}
-	 * @throws ValidationFailed the validation-error
+	 * @param aLogger the logger to set
 	 */
-	public default void validate() throws ValidationFailed
+	public static void setLogger( LoggerAdapter aLogger )
 	{
-		Logging.getLogger().info( getBase().getRecordType().getSimpleName(), "Default implementation of validate() called");
-		throw new ValidationFailed(null, null, "Validation not implemented" );
+		logger = aLogger;
 	}
+
+	private Logging()
+	{
+	}
+	
 }

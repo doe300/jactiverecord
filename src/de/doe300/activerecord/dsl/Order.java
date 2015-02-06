@@ -144,6 +144,12 @@ public class Order implements Comparator<Map<String,Object>>, SQLCommand
 		return sb.toString();
 	}
 
+	@Override
+	public String toString()
+	{
+		return toSQL();
+	}
+
 	/**
 	 * @return a Comparator to sort records
 	 */

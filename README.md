@@ -29,7 +29,7 @@ Usage
 There are 2 ways to use JActiveRecord only which differ in the type of the record:
 
 - Use an *Interface* (which extends *ActiveRecord*) as record-type. Instances of this Interface will be automatically created and maintained via Java's Proxy-API.
-- Use a *plain-old-java-object* (POJO) to be managed by the corresponging *RecordBase*. The class **must** implement *ActiveRecord* and provide a public constructor accepting the record's ID (*Integer*) and the *RecordBase* and **should** not be instantiated outside of JActiveRecord to prevent confusion.
+- Use a *plain-old-java-object* (POJO) to be managed by the corresponding *RecordBase*. The class **must** implement *ActiveRecord* and provide a public constructor accepting the record's ID (*Integer*) and the *RecordBase* and **should** not be instantiated outside of JActiveRecord to prevent confusion.
 
 
-For an example on how to use it, see the tes-cases, especially *TestActiveRecordSyntax* and the *TestInterface* and *TestPOJO*.
+For an example on how to use it, see the test-cases, especially *TestActiveRecordSyntax* and the *TestInterface* and *TestPOJO*.

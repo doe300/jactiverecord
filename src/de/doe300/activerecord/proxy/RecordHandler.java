@@ -25,6 +25,7 @@
 package de.doe300.activerecord.proxy;
 
 import de.doe300.activerecord.RecordBase;
+import de.doe300.activerecord.logging.Logging;
 import de.doe300.activerecord.proxy.handlers.ProxyHandler;
 import de.doe300.activerecord.record.ActiveRecord;
 import de.doe300.activerecord.record.TimestampedRecord;
@@ -142,6 +143,7 @@ public final class RecordHandler<T extends ActiveRecord> implements InvocationHa
 			{
 				if(handler.handlesMethod( record, method, args ))
 				{
+					Logging.getLogger().debug( base.getRecordType().getSimpleName(), "Method "+method.getName()+" is handled by "+handler);
 					return handler.invoke( record, this, method, args );
 				}
 			}
@@ -176,6 +178,7 @@ public final class RecordHandler<T extends ActiveRecord> implements InvocationHa
 			Method validatorMethod = Attributes.getValidatorMethod(method);
 			if(args == null|| args.length==0)
 			{
+				Logging.getLogger().error( base.getRecordType().getSimpleName(), method.getName()+": Argument for setter can't be null");
 				throw new IllegalArgumentException("Argument for setter can't be null");
 			}
 			if(validatorMethod!=null)
@@ -212,6 +215,7 @@ public final class RecordHandler<T extends ActiveRecord> implements InvocationHa
 			}
 		}
 		//method not handled
+		Logging.getLogger().error( base.getRecordType().getSimpleName(), "Method '"+method.getName()+"' is not implemented for this record-type");
 		throw new NoSuchMethodException("Method '"+method.getName()+"' is not implemented for this record-type");
 	}
 

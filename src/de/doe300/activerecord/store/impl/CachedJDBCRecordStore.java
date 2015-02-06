@@ -28,6 +28,7 @@ import de.doe300.activerecord.RecordBase;
 import de.doe300.activerecord.store.RowCache;
 import de.doe300.activerecord.store.RecordStore;
 import de.doe300.activerecord.dsl.Condition;
+import de.doe300.activerecord.logging.Logging;
 import de.doe300.activerecord.scope.Scope;
 
 import java.sql.Connection;
@@ -153,7 +154,10 @@ public class CachedJDBCRecordStore extends SimpleJDBCRecordStore implements Reco
 	{
 		try(Statement stmt = con.createStatement())
 		{
-			ResultSet res = stmt.executeQuery( "SELECT * FROM "+base.getTableName()+" WHERE "+base.getPrimaryColumn()+" = "+primaryKey);
+			String sql = "SELECT * FROM "+base.getTableName()+" WHERE "+base.getPrimaryColumn()+" = "+primaryKey;
+			Logging.getLogger().debug( "CachedJDBCStore", "Loading into cache...");
+			Logging.getLogger().debug( "CachedJDBCStore", sql);
+			ResultSet res = stmt.executeQuery(sql );
 			if(res.next())
 			{
 				cache.update( res, false);
@@ -163,6 +167,8 @@ public class CachedJDBCRecordStore extends SimpleJDBCRecordStore implements Reco
 		}
 		catch ( SQLException ex )
 		{
+			Logging.getLogger().error( "CachedJDBCStore", "Failed to load into cache!");
+			Logging.getLogger().error( "CachedJDBCStore", ex);
 			throw new IllegalArgumentException(ex);
 		}
 	}
@@ -178,6 +184,7 @@ public class CachedJDBCRecordStore extends SimpleJDBCRecordStore implements Reco
 			{
 				Map<String,Object> values = c.toMap();
 				super.setValues( base, primaryKey, values );
+				Logging.getLogger().debug( "CachedJDBCStore", "Cache entry saved!");
 				c.setSynchronized();
 				return true;
 			}
@@ -204,6 +211,10 @@ public class CachedJDBCRecordStore extends SimpleJDBCRecordStore implements Reco
 				changed = true;
 			}
 		}
+		if(changed)
+		{
+			Logging.getLogger().debug( "CachedJDBCStore", "Cache entries saved!");
+		}
 		return changed;
 	}
 
@@ -219,6 +230,7 @@ public class CachedJDBCRecordStore extends SimpleJDBCRecordStore implements Reco
 		if(hasCache(base, primaryKey ))
 		{
 			cache.get( base).remove(primaryKey );
+			Logging.getLogger().debug( "CachedJDBCStore", "Cache entry destroyed!");
 		}
 		super.destroy( base,primaryKey );
 	}

@@ -22,35 +22,38 @@
  * SOFTWARE.
  *
  */
-package de.doe300.activerecord.validation;
-
-import de.doe300.activerecord.logging.Logging;
-import de.doe300.activerecord.record.ActiveRecord;
+package de.doe300.activerecord.logging;
 
 /**
- * An {@link ActiveRecord} which runs validations on its attributes.
- * Both validation methods should use the same validation-algorithm
+ * LoggerAdapter using {@link System.out} and {@link System.err} as output
  * @author doe300
- * @see Validate
  */
-public interface ValidatedRecord extends ActiveRecord
+public class ConsoleLogger implements LoggerAdapter
 {
-	/**
-	 * @return whether this record is valid
-	 */
-	public default boolean isValid()
+
+	@Override
+	public void info( String source, String message )
 	{
-		Logging.getLogger().info( getBase().getRecordType().getSimpleName(), "Default implementation of isValid() called");
-		return false;
+		System.out.println( source+" [INFO] "+message);
 	}
 
-	/**
-	 * This method is called before {@link #save()}
-	 * @throws ValidationFailed the validation-error
-	 */
-	public default void validate() throws ValidationFailed
+	@Override
+	public void debug( String source, String message )
 	{
-		Logging.getLogger().info( getBase().getRecordType().getSimpleName(), "Default implementation of validate() called");
-		throw new ValidationFailed(null, null, "Validation not implemented" );
+		System.out.println( source+" [DEBUG] "+message);
 	}
+
+	@Override
+	public void error( String source, String message )
+	{
+		System.err.println( source+" [ERROR] "+message);
+	}
+
+	@Override
+	public void error( String source, Throwable exception )
+	{
+		System.out.println( source+" [ERROR] "+exception.getMessage());
+		exception.printStackTrace( System.err);
+	}
+
 }
