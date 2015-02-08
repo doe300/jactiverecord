@@ -138,6 +138,14 @@ public final class RecordCore implements AutoCloseable
 	}
 	
 	/**
+	 * @return the underlying record-store
+	 */
+	public RecordStore getStore()
+	{
+		return store;
+	}
+	
+	/**
 	 * Creates a new base for this type if none already exists.
 	 * @param <T>
 	 * @param type

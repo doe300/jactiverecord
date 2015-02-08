@@ -41,6 +41,28 @@ import org.hsqldb.Server;
  */
 public class TestServer
 {
+	
+	static 
+	{
+		try
+		{
+			if(Class.forName("org.hsqldb.jdbc.JDBCDriver")==null)
+			{
+				throw new RuntimeException("HSQLDB Driver not found");
+			}
+			Enumeration<Driver> drivers = DriverManager.getDrivers();
+			while(drivers.hasMoreElements())
+			{
+				System.out.println( drivers.nextElement().getClass() );
+			}
+		}
+		catch ( ClassNotFoundException ex )
+		{
+			System.err.println( ex.getMessage() );
+			ex.printStackTrace( System.err);
+		}
+	}
+	
 	public static void main(String[] args)
 	{
 		Server hsqlServer = new Server();
@@ -61,11 +83,6 @@ public class TestServer
 	{
 		if(con == null || con.isClosed())
 		{
-			Enumeration<Driver> drivers = DriverManager.getDrivers();
-			while(drivers.hasMoreElements())
-			{
-				System.out.println( drivers.nextElement().getClass() );
-			}
 			//sa without password is the default user
 			//con = DriverManager.getConnection( "jdbc:hsqldb:hsql://localhost:9999/test", "sa", "" );
 			con = DriverManager.getConnection( "jdbc:hsqldb:mem:test", "sa", "");

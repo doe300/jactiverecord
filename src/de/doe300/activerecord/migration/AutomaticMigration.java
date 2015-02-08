@@ -158,7 +158,6 @@ public class AutomaticMigration implements Migration
 				filter( (Map.Entry<String,String> e) -> desiredColumns.containsKey( e.getKey())).collect( Collectors.toMap( Map.Entry::getKey, Map.Entry::getValue));
 		Map<String,String> addColumns = desiredColumns.entrySet().stream().
 				filter( (Map.Entry<String,String> e) -> hasColumns.containsKey( e.getKey())).collect( Collectors.toMap( Map.Entry::getKey, Map.Entry::getValue));
-		//TODO also modify columns?!?
 		//5. execute updates
 		boolean changed = false;
 		//SQL needs extra statements for add and drop columns
