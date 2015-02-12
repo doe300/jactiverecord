@@ -1,4 +1,4 @@
-JActiveRecord                                                     [![BuildStatus](https://travis-ci.org/doe300/jactiverecord.svg)](https://travis-ci.org/doe300/jactiverecord)
+JActiveRecord
 =============
 
 A java-based object-database-binding on top of JDBC inspired by Rails ActiveRecord.
