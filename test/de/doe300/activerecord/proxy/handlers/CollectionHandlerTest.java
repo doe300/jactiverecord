@@ -24,7 +24,6 @@
  */
 package de.doe300.activerecord.proxy.handlers;
 
-import de.doe300.activerecord.proxy.handlers.CollectionHandler;
 import de.doe300.activerecord.RecordBase;
 import de.doe300.activerecord.RecordCore;
 import de.doe300.activerecord.TestInterface;

@@ -26,6 +26,8 @@ package de.doe300.activerecord;
 
 import de.doe300.activerecord.record.association.AssociationHelper;
 import de.doe300.activerecord.migration.Attribute;
+import de.doe300.activerecord.migration.indices.Index;
+import de.doe300.activerecord.migration.indices.IndexType;
 import de.doe300.activerecord.record.RecordType;
 import de.doe300.activerecord.record.RecordCallbacks;
 import de.doe300.activerecord.record.Searchable;
@@ -51,6 +53,7 @@ import java.util.stream.Stream;
 	@Validate(attribute = "name", type = ValidationType.NOT_NULL),
 	@Validate(attribute = "name", type = ValidationType.NOT_EMPTY)
 })
+@Index(type = IndexType.NON_UNIQUE, name = "fk_other", columns = {"other"})
 public interface TestInterface extends TimestampedRecord, ValidatedRecord, RecordCallbacks
 {
 	public String getName();

@@ -25,6 +25,7 @@
 package de.doe300.activerecord.migration;
 
 import de.doe300.activerecord.logging.Logging;
+import de.doe300.activerecord.migration.indices.Index;
 import de.doe300.activerecord.record.ActiveRecord;
 import de.doe300.activerecord.record.RecordType;
 import de.doe300.activerecord.record.TimestampedRecord;
@@ -40,6 +41,7 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
 import java.sql.Types;
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.stream.Collectors;
@@ -112,6 +114,18 @@ public class AutomaticMigration implements Migration
 			{
 				Logging.getLogger().error( recordType.getSimpleName(), "Automatic table-creation failed!");
 				return false;
+			}
+			//4 add indices
+			Index[] indices = recordType.getAnnotationsByType( Index.class);
+			if(indices.length > 0)
+			{
+				String indicesSQL = Arrays.stream( indices ).map( (Index index)-> index.type().toSQL( tableName, index.name(), index.columns())).collect( Collectors.joining( "; "));
+				Logging.getLogger().info( recordType.getSimpleName(), "Adding indices...");
+				Logging.getLogger().info( recordType.getSimpleName(), indicesSQL);
+				if(con.createStatement().executeUpdate( indicesSQL) < 0)
+				{
+					Logging.getLogger().error( recordType.getSimpleName(), "Adding indices failed!");
+				}
 			}
 		}
 		catch(SQLException e)

@@ -22,58 +22,39 @@
  * SOFTWARE.
  *
  */
-package de.doe300.activerecord.migration;
+package de.doe300.activerecord.migration.indices;
 
+import de.doe300.activerecord.migration.AutomaticMigration;
 import java.lang.annotation.Documented;
 import java.lang.annotation.ElementType;
+import java.lang.annotation.Repeatable;
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
 
 /**
- * Specifies attributes (columns) in a record-type for generation via  {@link AutomaticMigration}.
- * It is recommended to specify both {@link #type() } and {@link #typeName() }
+ * Annotation for adding indices to a created table
  * @author doe300
+ * @see AutomaticMigration
  */
 @Documented
 @Retention(RetentionPolicy.RUNTIME)
-@Target(ElementType.METHOD)
-public @interface Attribute
+@Target(ElementType.TYPE)
+@Repeatable(Indices.class)
+public @interface Index
 {
 	/**
-	 * @return the name of the column in the data-source
+	 * @return the type of index
+	 */
+	public IndexType type();
+	
+	/**
+	 * @return the columns to create the index on. The order of the columns is retained as order in the index
+	 */
+	public String[] columns();
+	
+	/**
+	 * @return the name of the index
 	 */
 	public String name();
-	
-	/**
-	 * This type is the second priority to generate the mapped column.
-	 * The specified {@link java.sql.Types type} is mapped to the default SQL-type.
-	 * If some more precise constraints on the type are required, {@link #typeName() } should be used
-	 * 
-	 * @return the SQL-Type
-	 * @see java.sql.Types
-	 * @see #typeName() 
-	 */
-	public int type();
-	
-	/**
-	 * This type is used in first priority to generate the mapped column.
-	 * Use this value to specify additional constraints on the type, i.e. "varchar(200)" or "NUMBER(3,0)".
-	 * If this value is not given, the {@link #type() } will be mapped to its standard type
-	 * 
-	 * Note: some types may not be supported by all DBMS
-	 * @return the name of the SQL type
-	 */
-	public String typeName() default "";
-	
-	/**
-	 * A column which is the primary key may never be null
-	 * @return whether this column may be NULL
-	 */
-	public boolean mayBeNull() default true;
-	
-	/**
-	 * @return the default value, as SQL text
-	 */
-	public String defaultValue() default "";	
 }
