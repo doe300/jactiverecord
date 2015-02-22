@@ -115,7 +115,7 @@ public class AutomaticMigration implements Migration
 				Logging.getLogger().error( recordType.getSimpleName(), "Automatic table-creation failed!");
 				return false;
 			}
-			//4 add indices
+			//4. add indices
 			Index[] indices = recordType.getAnnotationsByType( Index.class);
 			if(indices.length > 0)
 			{
