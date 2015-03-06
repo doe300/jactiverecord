@@ -75,5 +75,21 @@ public @interface Attribute
 	/**
 	 * @return the default value, as SQL text
 	 */
-	public String defaultValue() default "";	
+	public String defaultValue() default "";
+	
+	/**
+	 * All cells in an unique column must have different values
+	 * @return whether this column is UNIQUE
+	 */
+	public boolean isUnique() default false;
+	
+	/**
+	 * @return table to reference as a FOREIGN KEY
+	 */
+	public String foreignKeyTable() default "";
+	
+	/**
+	 * @return the column to reference as a FOREIGN KEY
+	 */
+	public String foreignKeyColumn() default "";
 }

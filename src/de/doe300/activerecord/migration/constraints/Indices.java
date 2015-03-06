@@ -22,38 +22,22 @@
  * SOFTWARE.
  *
  */
-package de.doe300.activerecord.migration.indices;
+package de.doe300.activerecord.migration.constraints;
 
-import org.junit.Assert;
-import org.junit.Test;
+import java.lang.annotation.Documented;
+import java.lang.annotation.ElementType;
+import java.lang.annotation.Retention;
+import java.lang.annotation.RetentionPolicy;
+import java.lang.annotation.Target;
 
-
-
-public class IndexTypeTest extends Assert
+/**
+ *
+ * @author doe300
+ */
+@Documented
+@Retention(RetentionPolicy.RUNTIME)
+@Target(ElementType.TYPE)
+public @interface Indices
 {
-	
-	public IndexTypeTest()
-	{
-	}
-	
-	@Test
-	public void test_NON_UNIQUE()
-	{
-		assertEquals( "CREATE  INDEX index1 ON table1 (column1, column2)", IndexType.NON_UNIQUE.toSQL( "table1", "index1",
-				new String[]{"column1", "column2"}));
-	}
-	
-	@Test
-	public void test_UNIQUE()
-	{
-		assertEquals( "CREATE UNIQUE INDEX  ON table1 (column1, column2)", IndexType.UNIQUE.toSQL( "table1", null,
-				new String[]{"column1", "column2"}));
-	}
-	
-	@Test
-	public void test_CLUSTERED()
-	{
-		assertEquals( "CREATE CLUSTERED INDEX index1 ON table1 (column1)", IndexType.CLUSTERED.toSQL( "table1", "index1",
-				new String[]{"column1"}));
-	}
+	public Index[] value();
 }

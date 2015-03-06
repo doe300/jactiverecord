@@ -26,8 +26,8 @@ package de.doe300.activerecord;
 
 import de.doe300.activerecord.record.association.AssociationHelper;
 import de.doe300.activerecord.migration.Attribute;
-import de.doe300.activerecord.migration.indices.Index;
-import de.doe300.activerecord.migration.indices.IndexType;
+import de.doe300.activerecord.migration.constraints.Index;
+import de.doe300.activerecord.migration.constraints.IndexType;
 import de.doe300.activerecord.record.RecordType;
 import de.doe300.activerecord.record.RecordCallbacks;
 import de.doe300.activerecord.record.Searchable;
@@ -65,7 +65,7 @@ public interface TestInterface extends TimestampedRecord, ValidatedRecord, Recor
 	
 	public void setAge(int age);
 
-	@Attribute(name = "fk_test_id", type = Types.INTEGER)
+	@Attribute(name = "fk_test_id", type = Types.INTEGER, foreignKeyTable = "testtable", foreignKeyColumn = "id")
 	public default TestInterface getDirectionOne()
 	{
 		return AssociationHelper.getBelongsTo(this, TestInterface.class, "fk_test_id" );

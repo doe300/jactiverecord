@@ -22,7 +22,7 @@
  * SOFTWARE.
  *
  */
-package de.doe300.activerecord.migration.indices;
+package de.doe300.activerecord.migration.constraints;
 
 import de.doe300.activerecord.dsl.SQLCommand;
 

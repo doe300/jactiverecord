@@ -22,39 +22,38 @@
  * SOFTWARE.
  *
  */
-package de.doe300.activerecord.migration.indices;
+package de.doe300.activerecord.migration.constraints;
 
-import de.doe300.activerecord.migration.AutomaticMigration;
-import java.lang.annotation.Documented;
-import java.lang.annotation.ElementType;
-import java.lang.annotation.Repeatable;
-import java.lang.annotation.Retention;
-import java.lang.annotation.RetentionPolicy;
-import java.lang.annotation.Target;
+import org.junit.Assert;
+import org.junit.Test;
 
-/**
- * Annotation for adding indices to a created table
- * @author doe300
- * @see AutomaticMigration
- */
-@Documented
-@Retention(RetentionPolicy.RUNTIME)
-@Target(ElementType.TYPE)
-@Repeatable(Indices.class)
-public @interface Index
+
+
+public class IndexTypeTest extends Assert
 {
-	/**
-	 * @return the type of index
-	 */
-	public IndexType type();
 	
-	/**
-	 * @return the columns to create the index on. The order of the columns is retained as order in the index
-	 */
-	public String[] columns();
+	public IndexTypeTest()
+	{
+	}
 	
-	/**
-	 * @return the name of the index
-	 */
-	public String name();
+	@Test
+	public void test_NON_UNIQUE()
+	{
+		assertEquals( "CREATE  INDEX index1 ON table1 (column1, column2)", IndexType.NON_UNIQUE.toSQL( "table1", "index1",
+				new String[]{"column1", "column2"}));
+	}
+	
+	@Test
+	public void test_UNIQUE()
+	{
+		assertEquals( "CREATE UNIQUE INDEX  ON table1 (column1, column2)", IndexType.UNIQUE.toSQL( "table1", null,
+				new String[]{"column1", "column2"}));
+	}
+	
+	@Test
+	public void test_CLUSTERED()
+	{
+		assertEquals( "CREATE CLUSTERED INDEX index1 ON table1 (column1)", IndexType.CLUSTERED.toSQL( "table1", "index1",
+				new String[]{"column1"}));
+	}
 }

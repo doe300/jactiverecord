@@ -22,22 +22,39 @@
  * SOFTWARE.
  *
  */
-package de.doe300.activerecord.migration.indices;
+package de.doe300.activerecord.migration.constraints;
 
+import de.doe300.activerecord.migration.AutomaticMigration;
 import java.lang.annotation.Documented;
 import java.lang.annotation.ElementType;
+import java.lang.annotation.Repeatable;
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
 
 /**
- *
+ * Annotation for adding indices to a created table
  * @author doe300
+ * @see AutomaticMigration
  */
 @Documented
 @Retention(RetentionPolicy.RUNTIME)
 @Target(ElementType.TYPE)
-public @interface Indices
+@Repeatable(Indices.class)
+public @interface Index
 {
-	public Index[] value();
+	/**
+	 * @return the type of index
+	 */
+	public IndexType type();
+	
+	/**
+	 * @return the columns to create the index on. The order of the columns is retained as order in the index
+	 */
+	public String[] columns();
+	
+	/**
+	 * @return the name of the index
+	 */
+	public String name();
 }
