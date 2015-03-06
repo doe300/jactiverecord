@@ -28,6 +28,7 @@ import de.doe300.activerecord.RecordBase;
 import de.doe300.activerecord.record.TimestampedRecord;
 import de.doe300.activerecord.dsl.Condition;
 import de.doe300.activerecord.scope.Scope;
+import java.sql.Connection;
 import java.util.Map;
 import java.util.Set;
 import java.util.stream.Collectors;
@@ -54,6 +55,11 @@ public interface RecordStore extends AutoCloseable
 	 * The timestamp of the last update
 	 */
 	public static final String COLUMN_UPDATED_AT="updated_at";
+	
+	/**
+	 * @return the underlying Connection or <code>null</code>
+	 */
+	public Connection getConnection();
 	
 	/**
 	 * @param tableName 

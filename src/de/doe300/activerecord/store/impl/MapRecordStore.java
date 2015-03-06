@@ -28,6 +28,7 @@ import de.doe300.activerecord.RecordBase;
 import de.doe300.activerecord.store.RecordStore;
 import de.doe300.activerecord.dsl.Condition;
 import de.doe300.activerecord.scope.Scope;
+import java.sql.Connection;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
@@ -51,6 +52,12 @@ public class MapRecordStore implements RecordStore
 	public MapRecordStore( Map<RecordBase<?>, Map<Integer, Map<String, Object>>> data )
 	{
 		this.data = data;
+	}
+
+	@Override
+	public Connection getConnection()
+	{
+		return null;
 	}
 	
 	@Override

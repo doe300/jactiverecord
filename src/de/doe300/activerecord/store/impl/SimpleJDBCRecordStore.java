@@ -139,6 +139,12 @@ public class SimpleJDBCRecordStore implements RecordStore
 		}
 		return input;
 	}
+
+	@Override
+	public Connection getConnection()
+	{
+		return con;
+	}
 	
 	@Override
 	public void setValue(RecordBase<?> base, int primaryKey, String name, Object value ) throws IllegalArgumentException
