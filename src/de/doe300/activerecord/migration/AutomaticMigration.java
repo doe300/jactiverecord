@@ -26,6 +26,7 @@ package de.doe300.activerecord.migration;
 
 import de.doe300.activerecord.logging.Logging;
 import de.doe300.activerecord.migration.constraints.Index;
+import de.doe300.activerecord.migration.constraints.ReferenceRule;
 import de.doe300.activerecord.record.ActiveRecord;
 import de.doe300.activerecord.record.RecordType;
 import de.doe300.activerecord.record.TimestampedRecord;
@@ -291,10 +292,13 @@ public class AutomaticMigration implements Migration
 				columns.put( name, columns.get( name) 
 						+(att.mayBeNull()?" NULL": " NOT NULL")
 						+(att.isUnique()?" UNIQUE": "")
+						+(!"".equals( att.defaultValue() )?" DEFAULT "+att.defaultValue(): "")
 						+(att.foreignKeyTable().isEmpty() ? "" : " REFERENCES "+att.foreignKeyTable()
 							+(att.foreignKeyColumn().isEmpty() ? "" : " ("+att.foreignKeyColumn()+")")
+							+(att.onUpdate().toSQL( ReferenceRule.ACTION_UPDATE))
+							+(att.onDelete().toSQL( ReferenceRule.ACTION_DELETE))
 						)
-						+(!"".equals( att.defaultValue() )?" DEFAULT "+att.defaultValue(): ""));
+						+(att.checkConstraint().isEmpty() ? "" : " CHECK("+att.checkConstraint()+")"));
 				continue;
 			}
 			//skip default or static methods

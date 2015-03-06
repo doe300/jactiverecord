@@ -24,6 +24,7 @@
  */
 package de.doe300.activerecord.migration;
 
+import de.doe300.activerecord.migration.constraints.ReferenceRule;
 import java.lang.annotation.Documented;
 import java.lang.annotation.ElementType;
 import java.lang.annotation.Retention;
@@ -32,7 +33,24 @@ import java.lang.annotation.Target;
 
 /**
  * Specifies attributes (columns) in a record-type for generation via  {@link AutomaticMigration}.
- * It is recommended to specify both {@link #type() } and {@link #typeName() }
+ * It is recommended to specify both {@link #type() } and {@link #typeName() }.
+ * <p>
+ * Currently is able to generate this column definition:
+ * <br>
+ * <pre>
+ * name							- the column_name as of #name()
+ *   type							- the data-type, either #typeName() or the SQL type for #type()
+ *     (NULL|NOT NULL)					- the result of #mayBeNull()
+ *     [UNIQUE]						- if #isUnique() is set to true
+ *     [DEFAULT defaultValue]				- if a #defaultValue() is set
+ *     [REFERENCES referenceTable				- the #foreignKeyTable(), if set
+ *       [(referenceColumn)]				- the #foreignKeyColumn(), if set
+ *       [ON UPDATE (CASCADE|SET DEFAULT|SET NULL)]	- the value of #onUpdate(), if any other than NONE
+ *       [ON DELETE (CASCADE|SET DEFAULT|SET NULL)]	- the value of #onDelete(), if any other than NONE
+ *     ]
+ *     [CHECK(constraint)]				- the SQL clause in #checkConstraint() unless empty
+ * </pre>
+ * </p>
  * @author doe300
  */
 @Documented
@@ -92,4 +110,20 @@ public @interface Attribute
 	 * @return the column to reference as a FOREIGN KEY
 	 */
 	public String foreignKeyColumn() default "";
+	
+	/**
+	 * @return the rule for UPDATE of the associated row for this FOREIGN KEY
+	 */
+	public ReferenceRule onUpdate() default ReferenceRule.NONE;
+
+	/**
+	 * @return the rule for DELETE called on the associated row of this FOREIGN KEY
+	 */
+	public ReferenceRule onDelete() default ReferenceRule.NONE;
+
+	/**
+	 * If defined (any value other than an empty string), the given value will be added as CHECK-constraint to the column
+	 * @return the SQL constraint to apply
+	 */
+	public String checkConstraint() default "";
 }
