@@ -71,7 +71,7 @@ public class CachedJDBCRecordStore extends SimpleJDBCRecordStore implements Reco
 		RowCache c = tableCache.get( primaryKey);
 		if(c == null)
 		{
-			c = RowCache.emptyCache( base.getTableName(), base.getPrimaryColumn() );
+			c = RowCache.emptyCache( base.getTableName(), base.getPrimaryColumn(), base.isTimestamped() );
 			c.setData( base.getPrimaryColumn(), primaryKey, false);
 			tableCache.put( primaryKey, c );
 		}
@@ -118,6 +118,11 @@ public class CachedJDBCRecordStore extends SimpleJDBCRecordStore implements Reco
 		if(c.hasData( name ))
 		{
 			return c.getData( name );
+		}
+		else
+		{
+			//write changes in cache to DB so #getDBValue does not override cached changes with old data
+			save( base, primaryKey );
 		}
 		Object value=getDBValue( base, primaryKey, c, name);
 		c.setData( name, value, false );

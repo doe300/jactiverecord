@@ -45,7 +45,7 @@ public class RowCacheTest extends Assert
 	@BeforeClass
 	public static void setUpClass()
 	{
-		cacheEntry = RowCache.fromMap("test", "pk", Collections.singletonMap( "pk", 11));
+		cacheEntry = RowCache.fromMap("test", "pk", Collections.singletonMap( "pk", 11), true);
 	}
 	
 	@Test
@@ -61,7 +61,7 @@ public class RowCacheTest extends Assert
 	@Test
 	public void testFromMap()
 	{
-		RowCache cache = RowCache.fromMap( "test123", "pk", Collections.singletonMap( "pk", 12));
+		RowCache cache = RowCache.fromMap( "test123", "pk", Collections.singletonMap( "pk", 12), true);
 		assertNotNull( cache );
 		assertEquals( 12, cache.getPrimaryKey());
 		assertEquals( 12, cache.getData( "pk"));
@@ -70,7 +70,7 @@ public class RowCacheTest extends Assert
 	@Test
 	public void testEmptyCache()
 	{
-		RowCache cache = RowCache.emptyCache( "tes", "key");
+		RowCache cache = RowCache.emptyCache( "tes", "key", false);
 		assertNotNull( cache );
 		assertNull( cache.getData( "key"));
 	}
@@ -151,7 +151,7 @@ public class RowCacheTest extends Assert
 	@Test
 	public void testClear()
 	{
-		RowCache cache = RowCache.emptyCache("test", "pk");
+		RowCache cache = RowCache.emptyCache("test", "pk", true);
 		cache.setData( "name", "Adam", false);
 		assertFalse( cache.isSynchronized());
 		cache.clear();
@@ -188,7 +188,7 @@ public class RowCacheTest extends Assert
 	@Test
 	public void testCompareTo()
 	{
-		RowCache cache = RowCache.fromMap("test", "pk", Collections.singletonMap( "pk", 14));
+		RowCache cache = RowCache.fromMap("test", "pk", Collections.singletonMap( "pk", 14),true);
 		assertTrue( cacheEntry.compareTo( cache) < 0);
 		assertTrue( cache.compareTo( cacheEntry) > 0);
 	}

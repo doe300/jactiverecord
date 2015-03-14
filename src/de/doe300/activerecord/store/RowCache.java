@@ -41,60 +41,20 @@ public class RowCache implements Comparable<RowCache>
 	private boolean dataChanged = false;
 	private final String primaryKey;
 	private boolean isInDB;
+	private final boolean isTimestamped;
 	private final String tableName;
 
-	private RowCache(String primaryKey, String tableName, Map<String,Object> columnData, boolean inDB)
+	private RowCache(String primaryKey, String tableName, Map<String,Object> columnData, boolean inDB, boolean isTimestamped)
 	{
 		this.primaryKey = primaryKey.toLowerCase();
 		this.tableName = tableName;
 		this.columnData = columnData;
-		columnData.put( RecordStore.COLUMN_CREATED_AT, new Timestamp(System.currentTimeMillis()));
+		this.isTimestamped = isTimestamped;
+		if(isTimestamped)
+		{
+			columnData.put( RecordStore.COLUMN_CREATED_AT, new Timestamp(System.currentTimeMillis()));
+		}
 		this.isInDB = inDB;
-	}
-	
-	/**
-	 * Only supports ResultSet of one single TABLE.
-	 * Chooses the first auto-increment column as primary key
-	 * @param set
-	 * @return
-	 * @throws SQLException 
-	 */
-	public static RowCache fromResultRow(ResultSet set) throws SQLException
-	{
-		Map<String,Object> data = new HashMap<>(set.getMetaData().getColumnCount());
-		String primaryKey=null, tableName = null;
-		for(int i=1;i<=set.getMetaData().getColumnCount();i++)
-		{
-			data.put( set.getMetaData().getColumnLabel( i).toLowerCase(), set.getObject( i ));
-			if(primaryKey==null && set.getMetaData().isAutoIncrement( i ))
-			{
-				primaryKey = set.getMetaData().getColumnLabel( i );
-				tableName = set.getMetaData().getTableName(i);
-			}
-		}
-		return new RowCache(primaryKey,tableName,data, true );
-	}
-	
-	/**
-	 * Filters all columns retrieved from the TABLE with the given name, ignores the rest
-	 * @param tableName
-	 * @param primaryKey
-	 * @param set
-	 * @return
-	 * @throws SQLException 
-	 */
-	public static RowCache fromResultRow(String tableName, String primaryKey, ResultSet set) throws SQLException
-	{
-		Map<String,Object> data = new HashMap<>(set.getMetaData().getColumnCount());
-		for(int i=1;i<=set.getMetaData().getColumnCount();i++)
-		{
-			if(!set.getMetaData().getTableName( i ).equals( tableName ))
-			{
-				continue;
-			}
-			data.put( set.getMetaData().getColumnLabel( i).toLowerCase(), set.getObject( i ));
-		}
-		return new RowCache(primaryKey,tableName,data, true);
 	}
 	
 	/**
@@ -102,21 +62,23 @@ public class RowCache implements Comparable<RowCache>
 	 * @param tableName
 	 * @param primaryKey
 	 * @param map
+	 * @param isTimestamped
 	 * @return the newly created cache-entry
 	 */
-	public static RowCache fromMap(String tableName, String primaryKey, Map<String,Object> map)
+	public static RowCache fromMap(String tableName, String primaryKey, Map<String,Object> map, boolean isTimestamped)
 	{
-		return new RowCache(primaryKey,tableName,new HashMap<>(map ),false );
+		return new RowCache(primaryKey,tableName,new HashMap<>(map ),false, isTimestamped );
 	}
 	
 	/**
 	 * @param tableName
 	 * @param primaryKey
+	 * @param isTimestamped
 	 * @return a new created empty cache-row
 	 */
-	public static RowCache emptyCache(String tableName, String primaryKey)
+	public static RowCache emptyCache(String tableName, String primaryKey, boolean isTimestamped)
 	{
-		return new RowCache(primaryKey, tableName, new HashMap<>(10),false);
+		return new RowCache(primaryKey, tableName, new HashMap<>(10),false, isTimestamped);
 	}
 	
 	/**
@@ -132,7 +94,7 @@ public class RowCache implements Comparable<RowCache>
 			return value;
 		}
 		dataChanged = true;
-		if(updateTimestamp)
+		if(isTimestamped && updateTimestamp)
 		{
 			columnData.put( RecordStore.COLUMN_UPDATED_AT, new Timestamp(System.currentTimeMillis()));
 		}
@@ -150,7 +112,7 @@ public class RowCache implements Comparable<RowCache>
 		{
 			columnData.put( names[i].toLowerCase(), values[i]);
 		}
-		if(updateTimestamp)
+		if(isTimestamped && updateTimestamp)
 		{
 			columnData.put( RecordStore.COLUMN_UPDATED_AT, new Timestamp(System.currentTimeMillis()));
 		}

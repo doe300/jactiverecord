@@ -36,6 +36,7 @@ import de.doe300.activerecord.store.impl.SimpleJDBCRecordStore;
 import java.lang.reflect.Proxy;
 import java.sql.Connection;
 import java.sql.SQLException;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashMap;
@@ -210,7 +211,8 @@ public final class RecordCore implements AutoCloseable
 		{
 			return this.handlers.get( type );
 		}
-		List<ProxyHandler> proxies = Arrays.asList( custom );
+		List<ProxyHandler> proxies = new ArrayList<>(custom.length);
+		proxies.addAll( Arrays.asList( custom));
 		if(handlers.containsKey( type ))
 		{
 			for(ProxyHandler h: handlers.get( type ))

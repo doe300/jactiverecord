@@ -54,7 +54,6 @@ public class ValidationHandler implements ProxyHandler
 	@Override
 	public boolean handlesMethod( ActiveRecord record, Method method, Object[] args ) throws IllegalArgumentException
 	{
-		//FIXME validate() is overridden by TestInterface and therefore not recognized here
 		return record instanceof ValidatedRecord && method.getDeclaringClass() == ValidatedRecord.class;
 	}
 

@@ -303,9 +303,11 @@ public abstract class RecordBase<T extends ActiveRecord> implements FinderMethod
 	{
 		final int key = store.insertNewRecord(this);
 		final T record = createProxy(key);
-		//just to make sure, no duplicate IDs are stored
+		//just to make sure, ID is not overridden
 		data.remove( getPrimaryColumn());
 		store.setValues( this, key, data );
+		//save data all the way down to DB
+		store.save( this, key );
 		records.put( key, record );
 		if(hasCallbacks())
 		{
