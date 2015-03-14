@@ -48,8 +48,8 @@ public class SimpleCondition implements Condition, SQLCommand
 	public SimpleCondition( String key, Object compValue, Comparison comp )
 	{
 		this.key = key;
-		this.compValue = checkValue( compValue,comp );
-		this.comp = comp;
+		this.compValue = checkValue( compValue, comp );
+		this.comp = checkComparison( this.compValue, comp);
 	}
 	
 	private static Object checkValue(Object val, Comparison comp)
@@ -69,6 +69,23 @@ public class SimpleCondition implements Condition, SQLCommand
 		}
 		
 		return val;
+	}
+	
+	private static Comparison checkComparison(Object val, Comparison comp)
+	{
+		//check for null
+		if(val == null)
+		{
+			if(comp == Comparison.IS)
+			{
+				return Comparison.IS_NULL;
+			}
+			if(comp == Comparison.IS_NOT)
+			{
+				return Comparison.IS_NOT_NULL;
+			}
+		}
+		return comp;
 	}
 	
 	/**
