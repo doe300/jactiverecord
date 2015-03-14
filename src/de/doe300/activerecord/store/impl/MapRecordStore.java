@@ -170,14 +170,18 @@ public class MapRecordStore implements RecordStore
 	}
 
 	@Override
-	public int insertNewRecord(RecordBase<?> base )
+	public int insertNewRecord(RecordBase<?> base, Map<String,Object> columns )
 	{
 		if(!data.containsKey( base))
 		{
 			data.put( base, new TreeMap<>());
 		}
 		int key = data.get( base ).size();
-		data.get( base ).put( key, new HashMap<>(10));
+		data.get( base ).put( key, new HashMap<>(columns != null ? columns.size() : 10));
+		if(columns != null)
+		{
+			data.get( base ).get( key ).putAll( columns );
+		}
 		return key;
 	}
 

@@ -194,11 +194,13 @@ public interface RecordStore extends AutoCloseable
 	
 	/**
 	 * If the RecordBase has <code>autoCreate</code> set to true and the table doesn't exists, it will be generated.
+	 * if any <code>columnData</code> is set, is has to be written to the underlying resource!
 	 * @param base
+	 * @param columnData the data to insert, may be <code>null</code>
 	 * @return the ID of the new record
 	 * @see RecordBase#isAutoCreate() 
 	 */
-	public int insertNewRecord(RecordBase<?> base);
+	public int insertNewRecord(RecordBase<?> base, Map<String,Object> columnData);
 	
 	/**
 	 * A record may be non-synchronized if the record-store uses caches or the record was not yet saved to the underlying resource

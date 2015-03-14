@@ -471,7 +471,7 @@ public class SimpleJDBCRecordStore implements RecordStore
 	}
 
 	@Override
-	public int insertNewRecord(RecordBase<?> base)
+	public int insertNewRecord(RecordBase<?> base, Map<String,Object> columns)
 	{
 		try
 		{
@@ -502,21 +502,35 @@ public class SimpleJDBCRecordStore implements RecordStore
 				}
 			}
 			PreparedStatement stmt;
+			Map<String,Object> rowData = new HashMap<>(columns != null ? columns.size() : 3 );
+			//set initial values
+			if(columns != null)
+			{
+				rowData.putAll( columns );
+			}
+			//make sure, primary key is not set
+			rowData.put( base.getPrimaryColumn(), null);
+			//add timestamp
 			if(base.isTimestamped())
 			{
-				String sql = "INSERT INTO "+base.getTableName()+" ("+COLUMN_CREATED_AT+", "+COLUMN_UPDATED_AT+") VALUES (?, ?)";
-				Logging.getLogger().debug( "JDBCStore", sql);
-				stmt = con.prepareStatement( sql, Statement.RETURN_GENERATED_KEYS );
 				long timestamp = System.currentTimeMillis();
-				stmt.setTimestamp( 1, new Timestamp(timestamp));
-				stmt.setTimestamp( 2, new Timestamp(timestamp));
+				rowData.putIfAbsent(COLUMN_CREATED_AT, new Timestamp(timestamp ));
+				rowData.putIfAbsent(COLUMN_UPDATED_AT, new Timestamp(timestamp ));
 			}
-			else
+			
+			String sql = "INSERT INTO "+base.getTableName()+
+					" ("+rowData.entrySet().stream().map((Map.Entry<String,Object> e) -> e.getKey()).map( this::convertIdentifier).collect( Collectors.joining( ", "))+
+					") VALUES ("+rowData.entrySet().stream().map((Map.Entry<String,Object> e) -> "?").collect( Collectors.joining( ", "))+")";
+			Logging.getLogger().debug( "JDBCStore", sql);
+			stmt = con.prepareStatement( sql, Statement.RETURN_GENERATED_KEYS );
+			
+			int i = 0;
+			for(Map.Entry<String,Object> e : rowData.entrySet())
 			{
-				String sql = "INSERT INTO "+base.getTableName()+"( "+base.getPrimaryColumn()+") VALUES (NULL)";
-				Logging.getLogger().debug( "JDBCStore", sql);
-				stmt = con.prepareStatement( sql, Statement.RETURN_GENERATED_KEYS);
+				stmt.setObject( i+1, e.getValue());
+				i++;
 			}
+			
 			stmt.executeUpdate();
 			ResultSet rs = stmt.getGeneratedKeys();
 			if(rs.next())

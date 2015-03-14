@@ -125,7 +125,7 @@ public class SimpleJDBCRecordStoreTest extends Assert
 	@Test
 	public void testDestroy()
 	{
-		int key = store.insertNewRecord( base);
+		int key = store.insertNewRecord( base, null);
 		assertTrue( key >= 0);
 		assertTrue( store.containsRecord( base, key));
 		store.destroy( base, key );
@@ -176,7 +176,7 @@ public class SimpleJDBCRecordStoreTest extends Assert
 	@Test
 	public void testInsertNewRecord()
 	{
-		assertTrue( store.insertNewRecord(base ) > 0);
+		assertTrue( store.insertNewRecord(base, null ) > 0);
 	}
 
 	@Test

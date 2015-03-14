@@ -89,7 +89,7 @@ public class MapRecordStoreTest extends Assert
 	@Test
 	public void testDestroy()
 	{
-		int key = store.insertNewRecord( base );
+		int key = store.insertNewRecord( base, null );
 		assertTrue( store.containsRecord( base, key));
 		store.destroy( base, key);
 		assertFalse( store.containsRecord( base, key));
@@ -124,7 +124,7 @@ public class MapRecordStoreTest extends Assert
 	@Test
 	public void testInsertNewRecord()
 	{
-		int key = store.insertNewRecord( base );
+		int key = store.insertNewRecord( base, null );
 		assertTrue( store.containsRecord( base, key));
 	}
 

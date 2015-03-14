@@ -281,7 +281,7 @@ public abstract class RecordBase<T extends ActiveRecord> implements FinderMethod
 	 */
 	public T createRecord() throws RecordException
 	{
-		final int key = store.insertNewRecord(this);
+		final int key = store.insertNewRecord(this, null);
 		final T record = createProxy(key);
 		records.put( key, record );
 		if(hasCallbacks())
@@ -301,13 +301,10 @@ public abstract class RecordBase<T extends ActiveRecord> implements FinderMethod
 	 */
 	public T createRecord(final Map<String,Object> data) throws RecordException
 	{
-		final int key = store.insertNewRecord(this);
-		final T record = createProxy(key);
 		//just to make sure, ID is not overridden
 		data.remove( getPrimaryColumn());
-		store.setValues( this, key, data );
-		//save data all the way down to DB
-		store.save( this, key );
+		final int key = store.insertNewRecord(this, data);
+		final T record = createProxy(key);
 		records.put( key, record );
 		if(hasCallbacks())
 		{
