@@ -24,13 +24,6 @@
  */
 package de.doe300.activerecord.store.impl;
 
-import de.doe300.activerecord.RecordBase;
-import de.doe300.activerecord.store.RowCache;
-import de.doe300.activerecord.store.RecordStore;
-import de.doe300.activerecord.dsl.Condition;
-import de.doe300.activerecord.logging.Logging;
-import de.doe300.activerecord.scope.Scope;
-
 import java.sql.Connection;
 import java.sql.ResultSet;
 import java.sql.SQLException;
@@ -40,6 +33,13 @@ import java.util.Map;
 import java.util.Set;
 import java.util.TreeMap;
 import java.util.stream.Stream;
+
+import de.doe300.activerecord.RecordBase;
+import de.doe300.activerecord.dsl.Condition;
+import de.doe300.activerecord.logging.Logging;
+import de.doe300.activerecord.scope.Scope;
+import de.doe300.activerecord.store.RecordStore;
+import de.doe300.activerecord.store.RowCache;
 
 /**
  * Uses write-back cache
@@ -51,16 +51,16 @@ public class CachedJDBCRecordStore extends SimpleJDBCRecordStore implements Reco
 	private final Map<String,Set<String>> columnsCache;
 
 	/**
-	 * @param con 
+	 * @param con
 	 */
-	public CachedJDBCRecordStore( Connection con)
+	public CachedJDBCRecordStore( final Connection con)
 	{
 		super( con );
 		this.cache=new HashMap<>(10);
 		this.columnsCache = new TreeMap<>();
 	}
-	
-	private RowCache getCache(RecordBase<?> base, Integer primaryKey)
+
+	private RowCache getCache(final RecordBase<?> base, final Integer primaryKey)
 	{
 		Map<Integer, RowCache> tableCache = cache.get( base);
 		if(tableCache == null)
@@ -77,14 +77,14 @@ public class CachedJDBCRecordStore extends SimpleJDBCRecordStore implements Reco
 		}
 		return c;
 	}
-	
-	private boolean hasCache(RecordBase<?> base, int primaryKey)
+
+	private boolean hasCache(final RecordBase<?> base, final int primaryKey)
 	{
 		return cache.containsKey( base) && cache.get( base).containsKey( primaryKey);
 	}
 
 	@Override
-	public boolean containsRecord( RecordBase<?> base, Integer primaryKey )
+	public boolean containsRecord( final RecordBase<?> base, final Integer primaryKey )
 	{
 		if(hasCache( base, primaryKey ))
 		{
@@ -92,51 +92,49 @@ public class CachedJDBCRecordStore extends SimpleJDBCRecordStore implements Reco
 		}
 		return super.containsRecord( base, primaryKey );
 	}
-	
+
 	@Override
-	public void setValue( RecordBase<?> base, int primaryKey, String name, Object value ) throws IllegalArgumentException
+	public void setValue( final RecordBase<?> base, final int primaryKey, final String name, final Object value ) throws IllegalArgumentException
 	{
 		getCache(base, primaryKey ).setData( name, value, base.isTimestamped());
 	}
 
 	@Override
-	public void setValues( RecordBase<?> base, int primaryKey, String[] names, Object[] values ) throws IllegalArgumentException
+	public void setValues( final RecordBase<?> base, final int primaryKey, final String[] names, final Object[] values ) throws IllegalArgumentException
 	{
 		getCache(base, primaryKey ).setData( names, values, base.isTimestamped() );
 	}
 
 	@Override
-	public void setValues( RecordBase<?> base, int primaryKey, Map<String, Object> values ) throws IllegalArgumentException
+	public void setValues( final RecordBase<?> base, final int primaryKey, final Map<String, Object> values ) throws IllegalArgumentException
 	{
 		getCache( base,primaryKey).update( values, base.isTimestamped() );
 	}
-	
+
 	@Override
-	public Object getValue( RecordBase<?> base, int primaryKey, String name ) throws IllegalArgumentException
+	public Object getValue( final RecordBase<?> base, final int primaryKey, final String name ) throws IllegalArgumentException
 	{
-		RowCache c = getCache(base, primaryKey );
+		final RowCache c = getCache(base, primaryKey );
 		if(c.hasData( name ))
 		{
 			return c.getData( name );
 		}
-		else
-		{
-			//write changes in cache to DB so #getDBValue does not override cached changes with old data
-			save( base, primaryKey );
-		}
-		Object value=getDBValue( base, primaryKey, c, name);
+		// write changes in cache to DB so #getDBValue does not override cached
+		// changes with old data
+		save(base, primaryKey);
+		final Object value=getDBValue( base, primaryKey, c, name);
 		c.setData( name, value, false );
 		return value;
 	}
 
 	@Override
-	public Map<String, Object> getValues( RecordBase<?> base, int primaryKey, String[] columns ) throws IllegalArgumentException
+	public Map<String, Object> getValues( final RecordBase<?> base, final int primaryKey, final String[] columns ) throws IllegalArgumentException
 	{
-		Map<String,Object> result = new HashMap<>(columns.length);
-		RowCache c = getCache( base,primaryKey );
+		final Map<String,Object> result = new HashMap<>(columns.length);
+		final RowCache c = getCache( base,primaryKey );
 		//write changes in cache to DB so #getDBValue does not override cached changes with old data
 		save( base, primaryKey );
-		for(String col:columns)
+		for(final String col:columns)
 		{
 			if(c.hasData( col ))
 			{
@@ -147,7 +145,7 @@ public class CachedJDBCRecordStore extends SimpleJDBCRecordStore implements Reco
 			{
 				//TODO better handling for non existing row
 				//currently getDBValue is called for every column
-				Object val = getDBValue( base, primaryKey, c, col );
+				final Object val = getDBValue( base, primaryKey, c, col );
 				result.put( col, val );
 			}
 		}
@@ -155,14 +153,14 @@ public class CachedJDBCRecordStore extends SimpleJDBCRecordStore implements Reco
 	}
 
 	/* Loads the whole row into cache at once */
-	private Object getDBValue(RecordBase<?> base, int primaryKey, RowCache cache, String name) throws IllegalArgumentException
+	private Object getDBValue(final RecordBase<?> base, final int primaryKey, final RowCache cache, final String name) throws IllegalArgumentException
 	{
-		try(Statement stmt = con.createStatement())
+		final String sql =
+			"SELECT * FROM " + base.getTableName() + " WHERE " + base.getPrimaryColumn() + " = " + primaryKey;
+		Logging.getLogger().debug("CachedJDBCStore", "Loading into cache...");
+		Logging.getLogger().debug("CachedJDBCStore", sql);
+		try (Statement stmt = con.createStatement(); final ResultSet res = stmt.executeQuery(sql))
 		{
-			String sql = "SELECT * FROM "+base.getTableName()+" WHERE "+base.getPrimaryColumn()+" = "+primaryKey;
-			Logging.getLogger().debug( "CachedJDBCStore", "Loading into cache...");
-			Logging.getLogger().debug( "CachedJDBCStore", sql);
-			ResultSet res = stmt.executeQuery(sql );
 			if(res.next())
 			{
 				cache.update( res, false);
@@ -170,7 +168,7 @@ public class CachedJDBCRecordStore extends SimpleJDBCRecordStore implements Reco
 			}
 			return null;
 		}
-		catch ( SQLException ex )
+		catch ( final SQLException ex )
 		{
 			Logging.getLogger().error( "CachedJDBCStore", "Failed to load into cache!");
 			Logging.getLogger().error( "CachedJDBCStore", ex);
@@ -179,15 +177,15 @@ public class CachedJDBCRecordStore extends SimpleJDBCRecordStore implements Reco
 	}
 
 	@Override
-	public boolean save(RecordBase<?> base, int primaryKey)
+	public boolean save(final RecordBase<?> base, final int primaryKey)
 	{
 		//is write-back cache, so synchronization needs to be called explicitely
 		if(hasCache( base, primaryKey ))
 		{
-			RowCache c = getCache(base, primaryKey );
+			final RowCache c = getCache(base, primaryKey );
 			if(!c.isSynchronized())
 			{
-				Map<String,Object> values = c.toMap();
+				final Map<String,Object> values = c.toMap();
 				super.setValues( base, primaryKey, values );
 				Logging.getLogger().debug( "CachedJDBCStore", "Cache entry saved!");
 				c.setSynchronized();
@@ -198,19 +196,19 @@ public class CachedJDBCRecordStore extends SimpleJDBCRecordStore implements Reco
 	}
 
 	@Override
-	public boolean saveAll(RecordBase<?> base)
+	public boolean saveAll(final RecordBase<?> base)
 	{
 		if(!cache.containsKey( base) || cache.get( base).isEmpty())
 		{
 			return false;
 		}
 		boolean changed = false;
-		for(Map.Entry<Integer,RowCache> c : cache.get( base).entrySet())
+		for(final Map.Entry<Integer,RowCache> c : cache.get( base).entrySet())
 		{
 			if(!c.getValue().isSynchronized())
 			{
 				//XXX see #save
-				Map<String,Object> values = c.getValue().toMap();
+				final Map<String,Object> values = c.getValue().toMap();
 				super.setValues( base, c.getKey(), values);
 				c.getValue().setSynchronized();
 				changed = true;
@@ -224,13 +222,13 @@ public class CachedJDBCRecordStore extends SimpleJDBCRecordStore implements Reco
 	}
 
 	@Override
-	public boolean isSynchronized( RecordBase<?> base, int primaryKey )
+	public boolean isSynchronized( final RecordBase<?> base, final int primaryKey )
 	{
 		return !hasCache( base, primaryKey ) || getCache( base, primaryKey ).isSynchronized();
 	}
 
 	@Override
-	public void destroy(RecordBase<?> base, int primaryKey)
+	public void destroy(final RecordBase<?> base, final int primaryKey)
 	{
 		if(hasCache(base, primaryKey ))
 		{
@@ -241,16 +239,16 @@ public class CachedJDBCRecordStore extends SimpleJDBCRecordStore implements Reco
 	}
 
 	@Override
-	public Map<String, Object> findFirstWithData( RecordBase<?> base, String[] columns, Scope scope )
+	public Map<String, Object> findFirstWithData( final RecordBase<?> base, final String[] columns, final Scope scope )
 	{
 		//1.check in cache for conditions
 		Map<String,Object> res;
 		if(cache.containsKey( base))
 		{
-			res= cache.get( base).entrySet().stream().filter( (Map.Entry<Integer,RowCache> e) ->
+			res= cache.get( base).entrySet().stream().filter( (final Map.Entry<Integer,RowCache> e) ->
 			{
 				return scope.getCondition().test( e.getValue().toMap() );
-			}).map( (Map.Entry<Integer,RowCache> e) -> e.getValue().toMap()).sorted( toOrder( base, scope )).findFirst().orElse( null);
+			}).map( (final Map.Entry<Integer,RowCache> e) -> e.getValue().toMap()).sorted( toOrder( base, scope )).findFirst().orElse( null);
 			if(res!=null)
 			{
 				return res;
@@ -258,7 +256,7 @@ public class CachedJDBCRecordStore extends SimpleJDBCRecordStore implements Reco
 		}
 		//TODO is wrong, if a matching record is in cache could still be first in DB
 		//1.1 load from DB if not found
-		Map<String,Object> map = super.findFirstWithData( base, columns, scope );
+		final Map<String,Object> map = super.findFirstWithData( base, columns, scope );
 		//2. store in cache
 		if(map!=null && !map.isEmpty())
 		{
@@ -268,19 +266,19 @@ public class CachedJDBCRecordStore extends SimpleJDBCRecordStore implements Reco
 	}
 
 	@Override
-	public Stream<Map<String, Object>> streamAllWithData( RecordBase<?> base, String[] columns, Scope scope )
+	public Stream<Map<String, Object>> streamAllWithData( final RecordBase<?> base, final String[] columns, final Scope scope )
 	{
 		//need to combine results from cache and DB -> too expensive, so just grab from DB and store in cache
 		//fails if correct value is in cache but not in DB -> save all cache
 		saveAll( base );
-		return super.streamAllWithData( base, columns, scope ).peek( (Map<String,Object> map )-> 
+		return super.streamAllWithData( base, columns, scope ).peek( (final Map<String,Object> map )->
 		{
 			getCache(base, ( Integer ) map.get( base.getPrimaryColumn())).update( map, false );
 		});
 	}
 
 	@Override
-	public Set<String> getAllColumnNames( String tableName )
+	public Set<String> getAllColumnNames( final String tableName )
 	{
 		Set<String> columns=columnsCache.get( tableName );
 		if(columns==null)
@@ -292,7 +290,7 @@ public class CachedJDBCRecordStore extends SimpleJDBCRecordStore implements Reco
 	}
 
 	@Override
-	public void clearCache(RecordBase<?> base, int primaryKey )
+	public void clearCache(final RecordBase<?> base, final int primaryKey )
 	{
 		if(hasCache( base, primaryKey ))
 		{
@@ -307,7 +305,7 @@ public class CachedJDBCRecordStore extends SimpleJDBCRecordStore implements Reco
 	}
 
 	@Override
-	public int count(RecordBase<?> base, Condition condition )
+	public int count(final RecordBase<?> base, final Condition condition )
 	{
 		//see #streamAllWithData for why there need to be a save
 		saveAll( base );

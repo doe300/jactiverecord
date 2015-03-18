@@ -24,16 +24,6 @@
  */
 package de.doe300.activerecord.store.impl;
 
-import de.doe300.activerecord.RecordBase;
-import de.doe300.activerecord.store.RecordStore;
-import de.doe300.activerecord.dsl.Condition;
-import de.doe300.activerecord.dsl.Order;
-import de.doe300.activerecord.logging.Logging;
-import de.doe300.activerecord.migration.AutomaticMigration;
-import de.doe300.activerecord.migration.ManualMigration;
-import de.doe300.activerecord.migration.Migration;
-import de.doe300.activerecord.record.RecordType;
-import de.doe300.activerecord.scope.Scope;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
@@ -53,6 +43,17 @@ import java.util.stream.Collectors;
 import java.util.stream.Stream;
 import java.util.stream.StreamSupport;
 
+import de.doe300.activerecord.RecordBase;
+import de.doe300.activerecord.dsl.Condition;
+import de.doe300.activerecord.dsl.Order;
+import de.doe300.activerecord.logging.Logging;
+import de.doe300.activerecord.migration.AutomaticMigration;
+import de.doe300.activerecord.migration.ManualMigration;
+import de.doe300.activerecord.migration.Migration;
+import de.doe300.activerecord.record.RecordType;
+import de.doe300.activerecord.scope.Scope;
+import de.doe300.activerecord.store.RecordStore;
+
 /**
  * Simple non-caching implementation of the RecordStore backed by a JDBC-Connection.
  * @author doe300
@@ -62,14 +63,14 @@ public class SimpleJDBCRecordStore implements RecordStore
 	protected final Connection con;
 
 	/**
-	 * @param con 
+	 * @param con
 	 */
-	public SimpleJDBCRecordStore(Connection con)
+	public SimpleJDBCRecordStore(final Connection con)
 	{
 		this.con=con;
 	}
-	
-	protected String toWhereClause(Condition condition)
+
+	protected String toWhereClause(final Condition condition)
 	{
 		if(condition==null)
 		{
@@ -79,8 +80,8 @@ public class SimpleJDBCRecordStore implements RecordStore
 		clause += condition.toSQL();
 		return clause;
 	}
-	
-	protected Order toOrder(RecordBase<?> base, Scope scope)
+
+	protected Order toOrder(final RecordBase<?> base, final Scope scope)
 	{
 		if(scope.getOrder()!=null)
 		{
@@ -88,38 +89,38 @@ public class SimpleJDBCRecordStore implements RecordStore
 		}
 		return base.getDefaultOrder();
 	}
-	
-	protected String toColumnsList(String[] columns, String primaryColumn)
+
+	protected String toColumnsList(final String[] columns, final String primaryColumn)
 	{
 		if(columns==null||columns.length==0)
 		{
 			return primaryColumn;
 		}
-		if(Arrays.stream( columns ).anyMatch( (String col)-> col.equalsIgnoreCase(primaryColumn)))
+		if(Arrays.stream( columns ).anyMatch( (final String col)-> col.equalsIgnoreCase(primaryColumn)))
 		{
 			return Arrays.stream( columns ).collect( Collectors.joining(", "));
 		}
 		return primaryColumn+", "+Arrays.stream( columns ).collect( Collectors.joining(", "));
 	}
-	
-	protected void fillStatement(PreparedStatement stm, Condition condition) throws SQLException
+
+	protected void fillStatement(final PreparedStatement stm, final Condition condition) throws SQLException
 	{
 		if(condition.hasWildcards())
 		{
-			Object[] values = condition.getValues();
+			final Object[] values = condition.getValues();
 			for(int i=0;i<values.length;i++)
 			{
 				stm.setObject( i+1, values[i]);
 			}
 		}
 	}
-	
+
 	/**
 	 * Converts the input identifier to the case used in the DB
 	 * @param input
 	 * @return the input in the correct case
 	 */
-	protected String convertIdentifier(String input)
+	protected String convertIdentifier(final String input)
 	{
 		try
 		{
@@ -131,9 +132,9 @@ public class SimpleJDBCRecordStore implements RecordStore
 			{
 				return input.toLowerCase();
 			}
-			
+
 		}
-		catch ( SQLException ex )
+		catch ( final SQLException ex )
 		{
 			//TODO do something
 		}
@@ -145,50 +146,50 @@ public class SimpleJDBCRecordStore implements RecordStore
 	{
 		return con;
 	}
-	
+
 	@Override
-	public void setValue(RecordBase<?> base, int primaryKey, String name, Object value ) throws IllegalArgumentException
+	public void setValue(final RecordBase<?> base, final int primaryKey, final String name, final Object value ) throws IllegalArgumentException
 	{
 		setValues( base, primaryKey, Collections.singletonMap( name, value));
 	}
-	
+
 	@Override
-	public void setValues(RecordBase<?> base, int primaryKey, String[] names, Object[] values ) throws IllegalArgumentException
+	public void setValues(final RecordBase<?> base, final int primaryKey, final String[] names, final Object[] values ) throws IllegalArgumentException
 	{
-		Map<String,Object> map = new HashMap<>(names.length);
+		final Map<String,Object> map = new HashMap<>(names.length);
 		for(int i = 0;i<names.length;i++)
 		{
 			map.put( names[i], values[i]);
 		}
 		setValues( base, primaryKey, map );
 	}
-	
+
 	@Override
-	public void setValues(RecordBase<?> base, int primaryKey, Map<String,Object> data) throws IllegalArgumentException
+	public void setValues(final RecordBase<?> base, final int primaryKey, final Map<String,Object> data) throws IllegalArgumentException
 	{
 		//1. get updated columns
-		Map<String,Object> tmp = new HashMap<>(data.size());
+		final Map<String,Object> tmp = new HashMap<>(data.size());
 		//convert all column names to correct case
-		data.forEach( (String s,Object obj) -> tmp.put( convertIdentifier( s), obj));
+		data.forEach( (final String s,final Object obj) -> tmp.put( convertIdentifier( s), obj));
 		//add timestamp if not present
-		if(base.isTimestamped() && !data.containsKey( COLUMN_UPDATED_AT))
+		if(base.isTimestamped() && !data.containsKey( RecordStore.COLUMN_UPDATED_AT))
 		{
-			tmp.put( COLUMN_UPDATED_AT, new Timestamp(System.currentTimeMillis()));
+			tmp.put( RecordStore.COLUMN_UPDATED_AT, new Timestamp(System.currentTimeMillis()));
 		}
 		//Don't update ID
 		tmp.remove( base.getPrimaryColumn());
-		Iterator<Map.Entry<String,Object>> entries = tmp.entrySet().iterator();
-		String[] columns = new String[tmp.size()];
-		Object[] values = new Object[tmp.size()];
+		final Iterator<Map.Entry<String,Object>> entries = tmp.entrySet().iterator();
+		final String[] columns = new String[tmp.size()];
+		final Object[] values = new Object[tmp.size()];
 		for(int i=0;i<columns.length && entries.hasNext();i++)
 		{
-			Map.Entry<String,Object> e = entries.next();
+			final Map.Entry<String,Object> e = entries.next();
 			columns[i] = e.getKey();
 			values[i] = e.getValue();
 		}
 		//2. create statement
 		String sql = "UPDATE "+base.getTableName()+" SET ";
-		sql+= Arrays.stream( columns).map( (String s)-> s+ " = ? ").collect( Collectors.joining(", "));
+		sql+= Arrays.stream( columns).map( (final String s)-> s+ " = ? ").collect( Collectors.joining(", "));
 		sql += " WHERE "+base.getPrimaryColumn()+" = "+primaryKey;
 		Logging.getLogger().debug( "JDBCStore", sql);
 		try(PreparedStatement stm = con.prepareStatement( sql ))
@@ -200,7 +201,7 @@ public class SimpleJDBCRecordStore implements RecordStore
 			//3. execute
 			stm.execute();
 		}
-		catch ( SQLException ex )
+		catch ( final SQLException ex )
 		{
 			Logging.getLogger().error( "JDBCStore", "Failed to set values!");
 			Logging.getLogger().error( "JDBCStore", ex);
@@ -209,13 +210,14 @@ public class SimpleJDBCRecordStore implements RecordStore
 	}
 
 	@Override
-	public Object getValue(RecordBase<?> base, int primaryKey, String name ) throws IllegalArgumentException
+	public Object getValue(final RecordBase<?> base, final int primaryKey, final String name ) throws IllegalArgumentException
 	{
-		try(Statement stm = con.createStatement())
+		final String sql =
+			"SELECT " + name + " FROM " + base.getTableName() + " WHERE " + base.getPrimaryColumn() + " = "
+				+ primaryKey;
+		Logging.getLogger().debug("JDBCStore", sql);
+		try (Statement stm = con.createStatement(); ResultSet res = stm.executeQuery(sql))
 		{
-			String sql = "SELECT "+name+" FROM "+base.getTableName()+" WHERE "+base.getPrimaryColumn()+" = "+primaryKey;
-			Logging.getLogger().debug( "JDBCStore", sql);
-			ResultSet res = stm.executeQuery( sql );
 			if(res.next())
 			{
 				return res.getObject( name );
@@ -223,26 +225,27 @@ public class SimpleJDBCRecordStore implements RecordStore
 			Logging.getLogger().debug( "JDBCStore", "no value found");
 			return null;
 		}
-		catch ( SQLException ex )
+		catch ( final SQLException ex )
 		{
 			Logging.getLogger().error( "JDBCStore", "Failed to get value!");
 			Logging.getLogger().error( "JDBCStore", ex);
 			throw new IllegalArgumentException(ex);
 		}
 	}
-	
+
 	@Override
-	public Map<String, Object> getValues( RecordBase<?> base, int primaryKey, String[] columns ) throws IllegalArgumentException
+	public Map<String, Object> getValues( final RecordBase<?> base, final int primaryKey, final String[] columns ) throws IllegalArgumentException
 	{
-		try(Statement stm = con.createStatement())
+		final String sql =
+			"SELECT " + toColumnsList(columns, base.getPrimaryColumn()) + " FROM " + base.getTableName() + " WHERE "
+				+ base.getPrimaryColumn() + " = " + primaryKey;
+		Logging.getLogger().debug("JDBCStore", sql);
+		try (Statement stm = con.createStatement(); final ResultSet res = stm.executeQuery(sql))
 		{
-			String sql = "SELECT "+toColumnsList(columns, base.getPrimaryColumn() )+" FROM "+base.getTableName()+" WHERE "+base.getPrimaryColumn()+" = "+primaryKey;
-			Logging.getLogger().debug( "JDBCStore", sql);
-			ResultSet res = stm.executeQuery(sql);
 			if(res.next())
 			{
-				Map<String,Object> values=new HashMap<>(columns.length);
-				for(String column:columns)
+				final Map<String,Object> values=new HashMap<>(columns.length);
+				for(final String column:columns)
 				{
 					values.put( column, res.getObject( column));
 				}
@@ -251,30 +254,30 @@ public class SimpleJDBCRecordStore implements RecordStore
 			Logging.getLogger().debug( "JDBCStore", "no values found");
 			return Collections.emptyMap();
 		}
-		catch ( SQLException ex )
+		catch ( final SQLException ex )
 		{
 			Logging.getLogger().error( "JDBCStore", "Failed to get values!");
 			Logging.getLogger().error( "JDBCStore", ex);
 			throw new IllegalArgumentException(ex);
 		}
 	}
-	
+
 	@Override
-	public boolean isSynchronized( RecordBase<?> base, int primaryKey)
+	public boolean isSynchronized( final RecordBase<?> base, final int primaryKey)
 	{
 		return true;
 	}
 
 	@Override
-	public boolean containsRecord( RecordBase<?> base, Integer primaryKey )
+	public boolean containsRecord( final RecordBase<?> base, final Integer primaryKey )
 	{
-		String sql = "SELECT "+base.getPrimaryColumn()+" FROM "+base.getTableName()+" WHERE "+base.getPrimaryColumn()+" = "+primaryKey;
+		final String sql = "SELECT "+base.getPrimaryColumn()+" FROM "+base.getTableName()+" WHERE "+base.getPrimaryColumn()+" = "+primaryKey;
 		Logging.getLogger().debug( "JDBCStore", sql);
 		try(PreparedStatement stmt = con.prepareStatement( sql ))
 		{
 			return stmt.executeQuery().next();
 		}
-		catch ( SQLException ex )
+		catch ( final SQLException ex )
 		{
 			Logging.getLogger().error( "JDBCStore", "Failed to get row!");
 			Logging.getLogger().error( "JDBCStore", ex);
@@ -283,15 +286,15 @@ public class SimpleJDBCRecordStore implements RecordStore
 	}
 
 	@Override
-	public void destroy( RecordBase<?> base, int primaryKey )
+	public void destroy( final RecordBase<?> base, final int primaryKey )
 	{
 		try(Statement stm = con.createStatement())
 		{
-			String sql = "DELETE FROM "+base.getTableName()+" WHERE "+base.getPrimaryColumn()+" = "+primaryKey;
+			final String sql = "DELETE FROM "+base.getTableName()+" WHERE "+base.getPrimaryColumn()+" = "+primaryKey;
 			Logging.getLogger().debug( "JDBCStore", sql);
 			stm.executeUpdate( sql);
 		}
-		catch ( SQLException ex )
+		catch ( final SQLException ex )
 		{
 			Logging.getLogger().error( "JDBCStore", "Failed to destroy row!");
 			Logging.getLogger().error( "JDBCStore", ex);
@@ -300,9 +303,9 @@ public class SimpleJDBCRecordStore implements RecordStore
 	}
 
 	@Override
-	public Map<String, Object> findFirstWithData( RecordBase<?> base, String[] columns, Scope scope )
+	public Map<String, Object> findFirstWithData( final RecordBase<?> base, final String[] columns, final Scope scope )
 	{
-		String sql = "SELECT "+toColumnsList( columns, base.getPrimaryColumn() )+" FROM "+base.getTableName()+" "+toWhereClause( scope.getCondition() )+" ORDER BY "+toOrder( base, scope ).toSQL()+" LIMIT 1";
+		final String sql = "SELECT "+toColumnsList( columns, base.getPrimaryColumn() )+" FROM "+base.getTableName()+" "+toWhereClause( scope.getCondition() )+" ORDER BY "+toOrder( base, scope ).toSQL()+" LIMIT 1";
 		Logging.getLogger().debug( "JDBCStore", sql);
 		try(PreparedStatement stm = con.prepareStatement(sql))
 		{
@@ -310,20 +313,22 @@ public class SimpleJDBCRecordStore implements RecordStore
 			{
 				fillStatement( stm, scope.getCondition() );
 			}
-			ResultSet res = stm.executeQuery();
-			if(res.next())
+			try (final ResultSet res = stm.executeQuery())
 			{
-				Map<String,Object> values=new HashMap<>(columns.length);
-				for(String column:columns)
+				if (res.next())
 				{
-					values.put( column, res.getObject( column));
+					final Map<String, Object> values = new HashMap<>(columns.length);
+					for (final String column : columns)
+					{
+						values.put(column, res.getObject(column));
+					}
+					return values;
 				}
-				return values;
+				Logging.getLogger().debug("JDBCStore", "no matching rows found");
+				return Collections.emptyMap();
 			}
-			Logging.getLogger().debug( "JDBCStore", "no matching rows found");
-			return Collections.emptyMap();
 		}
-		catch ( SQLException ex )
+		catch ( final SQLException ex )
 		{
 			Logging.getLogger().error( "JDBCStore", "Failed to find matches!");
 			Logging.getLogger().error( "JDBCStore", ex);
@@ -332,9 +337,9 @@ public class SimpleJDBCRecordStore implements RecordStore
 	}
 
 	@Override
-	public int count( RecordBase<?> base, Condition condition )
+	public int count( final RecordBase<?> base, final Condition condition )
 	{
-		String sql = "SELECT COUNT(1) as size FROM "+base.getTableName()+" "+toWhereClause( condition );
+		final String sql = "SELECT COUNT(1) as size FROM "+base.getTableName()+" "+toWhereClause( condition );
 		Logging.getLogger().debug( "JDBCStore", sql);
 		//column name can't be count, because its a keyword
 		try(PreparedStatement stm = con.prepareStatement(sql))
@@ -343,15 +348,18 @@ public class SimpleJDBCRecordStore implements RecordStore
 			{
 				fillStatement( stm, condition );
 			}
-			ResultSet res = stm.executeQuery();
-			if(res.next())
+			try (final ResultSet res = stm.executeQuery())
 			{
-				return res.getInt( "size");
+				if (res.next())
+				{
+					return res.getInt("size");
+				}
+				Logging.getLogger().debug("JDBCStore", "no matching rows found");
+				return -1;
 			}
-			Logging.getLogger().debug( "JDBCStore", "no matching rows found");
-			return -1;
+
 		}
-		catch ( SQLException ex )
+		catch ( final SQLException ex )
 		{
 			Logging.getLogger().error( "JDBCStore", "Failed to count matches!");
 			Logging.getLogger().error( "JDBCStore", ex);
@@ -360,7 +368,7 @@ public class SimpleJDBCRecordStore implements RecordStore
 	}
 
 	@Override
-	public Stream<Map<String, Object>> streamAllWithData( RecordBase<?> base, String[] columns, Scope scope )
+	public Stream<Map<String, Object>> streamAllWithData( final RecordBase<?> base, final String[] columns, final Scope scope )
 	{
 		String sql = "SELECT "+toColumnsList( columns, base.getPrimaryColumn() )+" FROM "+base.getTableName()+" "+toWhereClause( scope.getCondition() )+" ORDER BY "+toOrder( base, scope ).toSQL();
 		if(scope.getLimit()!=Scope.NO_LIMIT)
@@ -374,53 +382,12 @@ public class SimpleJDBCRecordStore implements RecordStore
 			{
 				fillStatement( stm, scope.getCondition() );
 			}
-			final ResultSet res = stm.executeQuery();
-			return StreamSupport.stream( new Spliterator<Map<String,Object>>()
+			try (final ResultSet res = stm.executeQuery())
 			{
-
-				@Override
-				public boolean tryAdvance(Consumer<? super Map<String, Object>> action )
-				{
-					try
-					{
-						if(!res.next())
-						{
-							return false;
-						}
-						Map<String,Object> values=new HashMap<>(columns.length);
-						for(String column:columns)
-						{
-							values.put( column, res.getObject( column));
-						}
-						action.accept( values);
-						return true;
-					}
-					catch ( SQLException ex )
-					{
-						return false;
-					}
-				}
-
-				@Override
-				public Spliterator<Map<String, Object>> trySplit()
-				{
-					return null;
-				}
-
-				@Override
-				public long estimateSize()
-				{
-					return Long.MAX_VALUE;
-				}
-
-				@Override
-				public int characteristics()
-				{
-					return DISTINCT|IMMUTABLE|NONNULL|ORDERED;
-				}
-			},false);
+				return allWithDataStream(columns, res);
+			}
 		}
-		catch ( SQLException ex )
+		catch ( final SQLException ex )
 		{
 			Logging.getLogger().error( "JDBCStore", "Failed to find matches!");
 			Logging.getLogger().error( "JDBCStore", ex);
@@ -428,8 +395,56 @@ public class SimpleJDBCRecordStore implements RecordStore
 		}
 	}
 
+	private Stream<Map<String, Object>> allWithDataStream(final String[] columns, final ResultSet res)
+	{
+		return StreamSupport.stream( new Spliterator<Map<String,Object>>()
+		{
+
+			@Override
+			public boolean tryAdvance(final Consumer<? super Map<String, Object>> action )
+			{
+				try
+				{
+					if(!res.next())
+					{
+						return false;
+					}
+					final Map<String,Object> values=new HashMap<>(columns.length);
+					for(final String column:columns)
+					{
+						values.put( column, res.getObject( column));
+					}
+					action.accept( values);
+					return true;
+				}
+				catch ( final SQLException ex )
+				{
+					return false;
+				}
+			}
+
+			@Override
+			public Spliterator<Map<String, Object>> trySplit()
+			{
+				return null;
+			}
+
+			@Override
+			public long estimateSize()
+			{
+				return Long.MAX_VALUE;
+			}
+
+			@Override
+			public int characteristics()
+			{
+				return Spliterator.DISTINCT|Spliterator.IMMUTABLE|Spliterator.NONNULL|Spliterator.ORDERED;
+			}
+		},false);
+	}
+
 	@Override
-	public boolean exists(String tableName)
+	public boolean exists(final String tableName)
 	{
 		try(ResultSet set = con.getMetaData().getTables(con.getCatalog(), con.getSchema(), null, null ))
 		{
@@ -442,7 +457,7 @@ public class SimpleJDBCRecordStore implements RecordStore
 			}
 			return false;
 		}
-		catch ( SQLException ex )
+		catch ( final SQLException ex )
 		{
 			Logging.getLogger().error( "JDBCStore", "Failed to find table!");
 			Logging.getLogger().error( "JDBCStore", ex);
@@ -451,18 +466,18 @@ public class SimpleJDBCRecordStore implements RecordStore
 	}
 
 	@Override
-	public Set<String> getAllColumnNames( String tableName )
+	public Set<String> getAllColumnNames( final String tableName )
 	{
 		try(ResultSet set = con.getMetaData().getColumns(con.getCatalog(), con.getSchema(), convertIdentifier( tableName ), null))
 		{
-			Set<String> columns = new HashSet<>(10);
+			final Set<String> columns = new HashSet<>(10);
 			while(set.next())
 			{
 				columns.add( set.getString( "COLUMN_NAME").toLowerCase());
 			}
 			return columns;
 		}
-		catch ( SQLException ex )
+		catch ( final SQLException ex )
 		{
 			Logging.getLogger().error( "JDBCStore", "Failed to retrieve columns for table!");
 			Logging.getLogger().error( "JDBCStore", ex);
@@ -471,14 +486,14 @@ public class SimpleJDBCRecordStore implements RecordStore
 	}
 
 	@Override
-	public int insertNewRecord(RecordBase<?> base, Map<String,Object> columns)
+	public int insertNewRecord(final RecordBase<?> base, final Map<String,Object> columns)
 	{
 		try
 		{
 			if(base.isAutoCreate() && !exists( base.getTableName()))
 			{
 				Logging.getLogger().info( "JDBCStore", "auto creating table "+base.getTableName());
-				String createSQL = base.getRecordType().getAnnotation( RecordType.class).autoCreateSQL();
+				final String createSQL = base.getRecordType().getAnnotation( RecordType.class).autoCreateSQL();
 				Migration mig;
 				if(!createSQL.isEmpty())
 				{
@@ -495,14 +510,14 @@ public class SimpleJDBCRecordStore implements RecordStore
 						return -1;
 					}
 				}
-				catch(Exception e)
+				catch(final Exception e)
 				{
 					Logging.getLogger().error( "JDBCStore", "Failed to create table");
 					throw new RuntimeException("Failed to create table", e);
 				}
 			}
 			PreparedStatement stmt;
-			Map<String,Object> rowData = new HashMap<>(columns != null ? columns.size() : 3 );
+			final Map<String,Object> rowData = new HashMap<>(columns != null ? columns.size() : 3 );
 			//set initial values
 			if(columns != null)
 			{
@@ -513,34 +528,36 @@ public class SimpleJDBCRecordStore implements RecordStore
 			//add timestamp
 			if(base.isTimestamped())
 			{
-				long timestamp = System.currentTimeMillis();
-				rowData.putIfAbsent(COLUMN_CREATED_AT, new Timestamp(timestamp ));
-				rowData.putIfAbsent(COLUMN_UPDATED_AT, new Timestamp(timestamp ));
+				final long timestamp = System.currentTimeMillis();
+				rowData.putIfAbsent(RecordStore.COLUMN_CREATED_AT, new Timestamp(timestamp ));
+				rowData.putIfAbsent(RecordStore.COLUMN_UPDATED_AT, new Timestamp(timestamp ));
 			}
-			
-			String sql = "INSERT INTO "+base.getTableName()+
-					" ("+rowData.entrySet().stream().map((Map.Entry<String,Object> e) -> e.getKey()).map( this::convertIdentifier).collect( Collectors.joining( ", "))+
-					") VALUES ("+rowData.entrySet().stream().map((Map.Entry<String,Object> e) -> "?").collect( Collectors.joining( ", "))+")";
+
+			final String sql = "INSERT INTO "+base.getTableName()+
+					" ("+rowData.entrySet().stream().map((final Map.Entry<String,Object> e) -> e.getKey()).map( this::convertIdentifier).collect( Collectors.joining( ", "))+
+					") VALUES ("+rowData.entrySet().stream().map((final Map.Entry<String,Object> e) -> "?").collect( Collectors.joining( ", "))+")";
 			Logging.getLogger().debug( "JDBCStore", sql);
 			stmt = con.prepareStatement( sql, Statement.RETURN_GENERATED_KEYS );
-			
+
 			int i = 0;
-			for(Map.Entry<String,Object> e : rowData.entrySet())
+			for(final Map.Entry<String,Object> e : rowData.entrySet())
 			{
 				stmt.setObject( i+1, e.getValue());
 				i++;
 			}
-			
+
 			stmt.executeUpdate();
-			ResultSet rs = stmt.getGeneratedKeys();
-			if(rs.next())
+			try (final ResultSet rs = stmt.getGeneratedKeys())
 			{
-				return rs.getInt( base.getPrimaryColumn());
+				if (rs.next())
+				{
+					return rs.getInt(base.getPrimaryColumn());
+				}
+				Logging.getLogger().error("JDBCStore", "Failed to insert new row!");
+				return -1;
 			}
-			Logging.getLogger().error( "JDBCStore", "Failed to insert new row!");
-			return -1;
 		}
-		catch ( SQLException ex )
+		catch ( final SQLException ex )
 		{
 			Logging.getLogger().error( "JDBCStore", "Failed to insert new row!");
 			Logging.getLogger().error( "JDBCStore", ex);
@@ -555,60 +572,67 @@ public class SimpleJDBCRecordStore implements RecordStore
 	}
 
 	@Override
-	public Stream<Object> getValues( String tableName, String column, String condColumn, Object condValue ) throws
+	public Stream<Object> getValues( final String tableName, final String column, final String condColumn, final Object condValue ) throws
 			IllegalArgumentException
 	{
-		String sql = "SELECT "+column+" FROM " +tableName+ " WHERE "+condColumn+" = ?";
+		final String sql = "SELECT "+column+" FROM " +tableName+ " WHERE "+condColumn+" = ?";
 		Logging.getLogger().debug( "JDBCStore", sql);
 		try(PreparedStatement stmt = con.prepareStatement( sql))
 		{
 			stmt.setObject( 1, condValue);
-			ResultSet res = stmt.executeQuery();
-			return StreamSupport.stream( new Spliterator<Object>()
+			try (final ResultSet res = stmt.executeQuery())
 			{
-				@Override
-				public boolean tryAdvance(Consumer<? super Object> action )
-				{
-					try
-					{
-						if(!res.next())
-						{
-							return false;
-						}
-						action.accept( res.getObject( 1));
-						return true;
-					}
-					catch ( SQLException ex )
-					{
-						return false;
-					}
-				}
-
-				@Override
-				public Spliterator<Object> trySplit()
-				{
-					return null;
-				}
-
-				@Override
-				public long estimateSize()
-				{
-					return Long.MAX_VALUE;
-				}
-
-				@Override
-				public int characteristics()
-				{
-					return DISTINCT|IMMUTABLE|NONNULL|ORDERED;
-				}
-			}, false);
+				return valuesStream(res);
+			}
 		}
-		catch ( SQLException ex )
+		catch ( final SQLException ex )
 		{
 			Logging.getLogger().error( "JDBCStore", "Failed to retrieve values!");
 			Logging.getLogger().error( "JDBCStore", ex);
 			throw new IllegalArgumentException(ex);
 		}
+	}
+
+	private Stream<Object> valuesStream(final ResultSet res)
+	{
+		return StreamSupport.stream( new Spliterator<Object>()
+		{
+			@Override
+			public boolean tryAdvance(final Consumer<? super Object> action )
+			{
+				try
+				{
+					if(!res.next())
+					{
+						return false;
+					}
+					action.accept( res.getObject( 1));
+					return true;
+				}
+				catch ( final SQLException ex )
+				{
+					return false;
+				}
+			}
+
+			@Override
+			public Spliterator<Object> trySplit()
+			{
+				return null;
+			}
+
+			@Override
+			public long estimateSize()
+			{
+				return Long.MAX_VALUE;
+			}
+
+			@Override
+			public int characteristics()
+			{
+				return Spliterator.DISTINCT|Spliterator.IMMUTABLE|Spliterator.NONNULL|Spliterator.ORDERED;
+			}
+		}, false);
 	}
 
 	@Override
@@ -618,27 +642,28 @@ public class SimpleJDBCRecordStore implements RecordStore
 	}
 
 	@Override
-	public boolean save(RecordBase<?> base, int primaryKey )
+	public boolean save(final RecordBase<?> base, final int primaryKey )
 	{
 		return false;
 	}
 
 	@Override
-	public boolean saveAll(RecordBase<?> base )
+	public boolean saveAll(final RecordBase<?> base )
 	{
 		return false;
 	}
 
 	@Override
-	public void clearCache(RecordBase<?> base, int primaryKey )
+	public void clearCache(final RecordBase<?> base, final int primaryKey )
 	{
+		// no cache to clear
 	}
 
 	@Override
-	public boolean addRow( String tableName, String[] rows, Object[] values ) throws IllegalArgumentException
+	public boolean addRow( final String tableName, final String[] rows, final Object[] values ) throws IllegalArgumentException
 	{
-		String sql = "INSERT INTO "+tableName+" ("+Arrays.stream( rows).collect( Collectors.joining(", "))+") VALUES ("+
-				Arrays.stream( values ).map( (Object obj) -> "?").collect( Collectors.joining(", "))+")";
+		final String sql = "INSERT INTO "+tableName+" ("+Arrays.stream( rows).collect( Collectors.joining(", "))+") VALUES ("+
+				Arrays.stream( values ).map( (final Object obj) -> "?").collect( Collectors.joining(", "))+")";
 		Logging.getLogger().debug( "JDBCStore", sql);
 		try(PreparedStatement stm = con.prepareStatement( sql ))
 		{
@@ -648,7 +673,7 @@ public class SimpleJDBCRecordStore implements RecordStore
 			}
 			return stm.executeUpdate() == 1;
 		}
-		catch ( SQLException ex )
+		catch ( final SQLException ex )
 		{
 			Logging.getLogger().error( "JDBCStore", "Failed to add row");
 			Logging.getLogger().error( "JDBCStore", ex);
@@ -657,16 +682,16 @@ public class SimpleJDBCRecordStore implements RecordStore
 	}
 
 	@Override
-	public boolean removeRow( String tableName, Condition cond ) throws IllegalArgumentException
+	public boolean removeRow( final String tableName, final Condition cond ) throws IllegalArgumentException
 	{
-		String sql = "DELETE FROM "+tableName+toWhereClause( cond );
+		final String sql = "DELETE FROM "+tableName+toWhereClause( cond );
 		Logging.getLogger().debug( "JDBCStore", sql);
 		try(PreparedStatement stm = con.prepareStatement( sql ))
 		{
 			fillStatement( stm, cond );
 			return stm.executeUpdate() >= 1;
 		}
-		catch ( SQLException ex )
+		catch ( final SQLException ex )
 		{
 			Logging.getLogger().error( "JDBCStore", "Failed to remove row");
 			Logging.getLogger().error( "JDBCStore", ex);
