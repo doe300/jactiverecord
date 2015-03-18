@@ -195,7 +195,7 @@ public final class Attributes
 		}
 		return null;
 	}
-	
+
 	/**
 	 * @param record
 	 * @param attribute
@@ -206,7 +206,7 @@ public final class Attributes
 	{
 		return Attributes.checkAttribute( record, attribute, (final Object o) -> o!= null, converterFunc);
 	}
-	
+
 	/**
 	 * @param record
 	 * @param attribute
@@ -223,7 +223,7 @@ public final class Attributes
 		}
 		return checkFunc.test( val );
 	}
-	
+
 	/**
 	 * For common data-types ({@link String}, {@link Collection}, {@link Map}, {@link Array}) the length-function is provided out of the box.
 	 * For any other type, the <code>checkFunc</code> must be specified.
@@ -252,17 +252,21 @@ public final class Attributes
 		{
 			return Array.getLength( val);
 		}
-		if(val instanceof Collection)	
+		if(val instanceof Collection)
 		{
 			return ((Collection)val).size();
 		}
-		if(val instanceof Map)	
+		if(val instanceof Map)
 		{
 			return ((Map)val).size();
 		}
+		if (lengthFunc != null)
+		{
+			return lengthFunc.applyAsInt(val);
+		}
 		return -1;
 	}
-	
+
 	private Attributes()
 	{
 	}
