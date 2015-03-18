@@ -35,19 +35,22 @@ import de.doe300.activerecord.dsl.Order;
  */
 public final class Scope
 {
+	/**
+	 * No specific limit was set
+	 */
 	public static final int NO_LIMIT = -1;
-	
+
 	private final Condition condition;
 	private final Order order;
 	private final int limit;
 
 	/**
-	 * 
+	 *
 	 * @param condition the condition to narrow the results, may be <code>null</code>
 	 * @param order a order to apply to the results, may be <code>null</code>
 	 * @param limit a maximum number of results to retrieve, <code>NO_LIMIT</code> to disable
 	 */
-	public Scope(Condition condition, Order order, int limit )
+	public Scope(final Condition condition, final Order order, final int limit )
 	{
 		this.condition = condition;
 		this.order = order;

@@ -40,14 +40,19 @@ public class POJOBase<T extends ActiveRecord> extends RecordBase<T>
 	//TODO Test (run all, or at least most tests with TestInterface and TestPOJO)
 	//Test Validations, Callbacks, Timestamps, ...
 	//ToString, hashCode, ....
-	
-	public POJOBase( Class<T> recordType, RecordCore core, RecordStore store )
+
+	/**
+	 * @param recordType
+	 * @param core
+	 * @param store
+	 */
+	public POJOBase( final Class<T> recordType, final RecordCore core, final RecordStore store )
 	{
 		super( recordType, core, store );
 	}
 
 	@Override
-	protected T createProxy( int primaryKey ) throws RecordException
+	protected T createProxy( final int primaryKey ) throws RecordException
 	{
 		try
 		{
@@ -58,24 +63,24 @@ public class POJOBase<T extends ActiveRecord> extends RecordBase<T>
 			throw new RecordException(ex);
 		}
 	}
-	
+
 	/**
 	 * Sets the given property in the record-store
 	 * @param primaryKey
 	 * @param name
-	 * @param value 
+	 * @param value
 	 */
-	public void setProperty(int primaryKey, String name, Object value)
+	public void setProperty(final int primaryKey, final String name, final Object value)
 	{
 		store.setValue( this, primaryKey, name, value );
 	}
-	
+
 	/**
 	 * @param primaryKey
 	 * @param name
 	 * @return the value for the given property from the underlying store
 	 */
-	public Object getProperty(int primaryKey, String name)
+	public Object getProperty(final int primaryKey, final String name)
 	{
 		return store.getValue( this, primaryKey, name );
 	}

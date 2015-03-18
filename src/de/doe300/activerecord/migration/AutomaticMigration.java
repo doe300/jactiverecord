@@ -24,16 +24,6 @@
  */
 package de.doe300.activerecord.migration;
 
-import de.doe300.activerecord.logging.Logging;
-import de.doe300.activerecord.migration.constraints.Index;
-import de.doe300.activerecord.migration.constraints.ReferenceRule;
-import de.doe300.activerecord.record.ActiveRecord;
-import de.doe300.activerecord.record.RecordType;
-import de.doe300.activerecord.record.TimestampedRecord;
-import de.doe300.activerecord.record.attributes.AttributeGetter;
-import de.doe300.activerecord.record.attributes.AttributeSetter;
-import de.doe300.activerecord.record.attributes.Attributes;
-import de.doe300.activerecord.store.RecordStore;
 import java.lang.reflect.Field;
 import java.lang.reflect.Method;
 import java.lang.reflect.Modifier;
@@ -47,11 +37,22 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.stream.Collectors;
 
+import de.doe300.activerecord.logging.Logging;
+import de.doe300.activerecord.migration.constraints.Index;
+import de.doe300.activerecord.migration.constraints.ReferenceRule;
+import de.doe300.activerecord.record.ActiveRecord;
+import de.doe300.activerecord.record.RecordType;
+import de.doe300.activerecord.record.TimestampedRecord;
+import de.doe300.activerecord.record.attributes.AttributeGetter;
+import de.doe300.activerecord.record.attributes.AttributeSetter;
+import de.doe300.activerecord.record.attributes.Attributes;
+import de.doe300.activerecord.store.RecordStore;
+
 /**
  * This migration is used to automatically create a table from a given record-type.
  * It supports {@link TimestampedRecord}.
- * 
- * This migration walks through all methods of the given type and tries to determine the columns. 
+ *
+ * This migration walks through all methods of the given type and tries to determine the columns.
  * Column-names for the attributes are retrieved in this order:
  * <ol>
  *	<li>If the method is annotated by {@link Attribute}, the {@link Attribute#name() } is used as name:
@@ -69,11 +70,11 @@ import java.util.stream.Collectors;
  *	</li>
  *	<li>Use the methods property-name as column-name and its return-type (or only parameter) as data-type, map it via {@link #getSQLType(int) } and finish</li>
  * </ol>
- * 
+ *
  * NOTE: The resulting columns may be inaccurate due to type discrepancies in mapping java-types to SQL-types.
  * Also, this migration is optimized for interface based records and may yield some unexpected results on POJO records.
- * 
- * 
+ *
+ *
  * @author doe300
  */
 public class AutomaticMigration implements Migration
@@ -85,26 +86,26 @@ public class AutomaticMigration implements Migration
 	 * @param recordType the type to create and drop the table for
 	 * @param dropColumnsOnUpdate  whether to drop obsolete columns on update
 	 */
-	public AutomaticMigration(Class<? extends ActiveRecord> recordType, boolean dropColumnsOnUpdate )
+	public AutomaticMigration(final Class<? extends ActiveRecord> recordType, final boolean dropColumnsOnUpdate )
 	{
 		this.recordType = recordType;
 		this.dropColumnsOnUpdate = dropColumnsOnUpdate;
 	}
 
 	@Override
-	public boolean apply( Connection con ) throws SQLException
+	public boolean apply( final Connection con ) throws SQLException
 	{
-		String tableName = getTableName( recordType );
+		final String tableName = AutomaticMigration.getTableName( recordType );
 		//1. check if table exists
 		if(structureExists( con, tableName))
 		{
 			return false;
 		}
 		//2. get desired columns and types
-		Map<String,String> columns = getColumnsFromModel( recordType );
+		final Map<String,String> columns = AutomaticMigration.getColumnsFromModel( recordType );
 		//3. execute statement
-		String sql = "CREATE TABLE "+tableName+" ("
-				+columns.entrySet().stream().map( (Map.Entry<String,String> e) -> e.getKey()+" "+e.getValue())
+		final String sql = "CREATE TABLE "+tableName+" ("
+				+columns.entrySet().stream().map( (final Map.Entry<String,String> e) -> e.getKey()+" "+e.getValue())
 						.collect( Collectors.joining(", "))
 				+" )";
 		Logging.getLogger().info( recordType.getSimpleName(), "Executing automatic table-creation...");
@@ -117,10 +118,10 @@ public class AutomaticMigration implements Migration
 				return false;
 			}
 			//4. add indices
-			Index[] indices = recordType.getAnnotationsByType( Index.class);
+			final Index[] indices = recordType.getAnnotationsByType( Index.class);
 			if(indices.length > 0)
 			{
-				String indicesSQL = Arrays.stream( indices ).map( (Index index)-> index.type().toSQL( tableName, index.name(), index.columns())).collect( Collectors.joining( "; "));
+				final String indicesSQL = Arrays.stream( indices ).map( (final Index index)-> index.type().toSQL( tableName, index.name(), index.columns())).collect( Collectors.joining( "; "));
 				Logging.getLogger().info( recordType.getSimpleName(), "Adding indices...");
 				Logging.getLogger().info( recordType.getSimpleName(), indicesSQL);
 				if(con.createStatement().executeUpdate( indicesSQL) < 0)
@@ -129,7 +130,7 @@ public class AutomaticMigration implements Migration
 				}
 			}
 		}
-		catch(SQLException e)
+		catch(final SQLException e)
 		{
 			Logging.getLogger().error( recordType.getSimpleName(), "Automatic table-creation failed with error!");
 			Logging.getLogger().error( recordType.getSimpleName(), e);
@@ -137,28 +138,28 @@ public class AutomaticMigration implements Migration
 		}
 		return true;
 	}
-	
+
 	/**
 	 * Updates the table for the given record-type.
 	 * More precisely, adds and removes columns to fit the current methods of the record-type.
 	 * For more information on how columns are generated from the type's methods, see the documentation of this class.
-	 * 
+	 *
 	 * NOTE: If <code>dropColumnsOnUpdate</code> is set to <code>true</code>, this method will drop all columns it deems not used anymore!
 	 * @param con
 	 * @return whether the table was updated
 	 * @throws java.sql.SQLException
 	 */
 	@Override
-	public boolean update( Connection con) throws SQLException
+	public boolean update( final Connection con) throws SQLException
 	{
-		String tableName = getTableName( recordType );
+		final String tableName = AutomaticMigration.getTableName( recordType );
 		//1. check if table exists
 		if(structureExists( con, tableName))
 		{
 			return false;
 		}
 		//2. get existing columns
-		Map<String,String> hasColumns = new HashMap<>(10);
+		final Map<String,String> hasColumns = new HashMap<>(10);
 		try(ResultSet set = con.getMetaData().getColumns( con.getCatalog(), con.getSchema(), tableName, null))
 		{
 			while(set.next())
@@ -167,39 +168,39 @@ public class AutomaticMigration implements Migration
 			}
 		}
 		//3. get desired columns
-		Map<String,String> desiredColumns = getColumnsFromModel( recordType );
+		final Map<String,String> desiredColumns = AutomaticMigration.getColumnsFromModel( recordType );
 		//4. calculate difference
-		Map<String,String> removeColumns = hasColumns.entrySet().stream().
-				filter( (Map.Entry<String,String> e) -> desiredColumns.containsKey( e.getKey())).collect( Collectors.toMap( Map.Entry::getKey, Map.Entry::getValue));
-		Map<String,String> addColumns = desiredColumns.entrySet().stream().
-				filter( (Map.Entry<String,String> e) -> hasColumns.containsKey( e.getKey())).collect( Collectors.toMap( Map.Entry::getKey, Map.Entry::getValue));
+		final Map<String,String> removeColumns = hasColumns.entrySet().stream().
+				filter( (final Map.Entry<String,String> e) -> desiredColumns.containsKey( e.getKey())).collect( Collectors.toMap( Map.Entry::getKey, Map.Entry::getValue));
+		final Map<String,String> addColumns = desiredColumns.entrySet().stream().
+				filter( (final Map.Entry<String,String> e) -> hasColumns.containsKey( e.getKey())).collect( Collectors.toMap( Map.Entry::getKey, Map.Entry::getValue));
 		//5. execute updates
 		boolean changed = false;
 		//SQL needs extra statements for add and drop columns
 		if(dropColumnsOnUpdate && !removeColumns.isEmpty())
 		{
-			String sql = "ALTER TABLE "+tableName+" ("+
+			final String sql = "ALTER TABLE "+tableName+" ("+
 					"DROP COLUMN "+
-					removeColumns.entrySet().stream().map( (Map.Entry<String,String> e) -> e.getKey()).collect( Collectors.joining( ", "))+
+					removeColumns.entrySet().stream().map( (final Map.Entry<String,String> e) -> e.getKey()).collect( Collectors.joining( ", "))+
 					")";
 			Logging.getLogger().info(recordType.getSimpleName(), "Executing automatic table-update...");
 			Logging.getLogger().info(recordType.getSimpleName(), sql);
 			try(Statement stm = con.createStatement())
 			{
-				changed = (stm.executeUpdate(sql) >= 0);
+				changed = stm.executeUpdate(sql) >= 0;
 			}
 		}
 		if(!addColumns.isEmpty())
 		{
-			String sql = "ALTER TABLE "+tableName+" ("+
+			final String sql = "ALTER TABLE "+tableName+" ("+
 					"ADD "+
-					addColumns.entrySet().stream().map( (Map.Entry<String,String> e) -> e.getKey()+" "+e.getValue()).collect( Collectors.joining( ", "))+
+					addColumns.entrySet().stream().map( (final Map.Entry<String,String> e) -> e.getKey()+" "+e.getValue()).collect( Collectors.joining( ", "))+
 					")";
 			Logging.getLogger().info(recordType.getSimpleName(), "Executing automatic table-update...");
 			Logging.getLogger().info(recordType.getSimpleName(), sql);
 			try(Statement stm = con.createStatement())
 			{
-				changed = changed || (stm.executeUpdate(sql) >= 0);
+				changed = changed || stm.executeUpdate(sql) >= 0;
 			}
 		}
 		if(!changed)
@@ -213,19 +214,19 @@ public class AutomaticMigration implements Migration
 	 * This method drops the created table, if it exists
 	 * @param con
 	 * @return whether the table existed and was dropped
-	 * @throws SQLException 
+	 * @throws SQLException
 	 */
 	@Override
-	public boolean revert( Connection con ) throws SQLException
+	public boolean revert( final Connection con ) throws SQLException
 	{
-		String tableName = getTableName( recordType );
+		final String tableName = AutomaticMigration.getTableName( recordType );
 		//1. check if table exists
 		if(!structureExists( con, tableName))
 		{
 			return false;
 		}
 		//2. drop table
-		String sql = "DROP TABLE "+tableName;
+		final String sql = "DROP TABLE "+tableName;
 		Logging.getLogger().info(recordType.getSimpleName(), "Executing automatic table-drop...");
 		Logging.getLogger().info(recordType.getSimpleName(), sql);
 		try(Statement stm = con.createStatement( ))
@@ -236,7 +237,7 @@ public class AutomaticMigration implements Migration
 				return false;
 			}
 		}
-		catch(SQLException e)
+		catch(final SQLException e)
 		{
 			Logging.getLogger().error( recordType.getSimpleName(), "Automatic table-drop failed with error!");
 			Logging.getLogger().error( recordType.getSimpleName(), e);
@@ -245,7 +246,7 @@ public class AutomaticMigration implements Migration
 		return true;
 	}
 
-	private static String getTableName(Class<? extends ActiveRecord> type)
+	private static String getTableName(final Class<? extends ActiveRecord> type)
 	{
 		if(type.isAnnotationPresent(RecordType.class))
 		{
@@ -253,8 +254,8 @@ public class AutomaticMigration implements Migration
 		}
 		return type.getSimpleName();
 	}
-	
-	private static String getPrimaryColumn(Class<? extends ActiveRecord> type)
+
+	private static String getPrimaryColumn(final Class<? extends ActiveRecord> type)
 	{
 		if(type.isAnnotationPresent(RecordType.class))
 		{
@@ -262,41 +263,41 @@ public class AutomaticMigration implements Migration
 		}
 		return RecordStore.DEFAULT_COLUMN_ID;
 	}
-	
+
 	/**
 	 * The column-names are all in lower case
 	 * @param recordType
 	 * @return the columns
 	 */
-	private static Map<String,String> getColumnsFromModel(Class<? extends ActiveRecord> recordType) throws IllegalArgumentException
+	private static Map<String,String> getColumnsFromModel(final Class<? extends ActiveRecord> recordType) throws IllegalArgumentException
 	{
 		//TODO move ID to first column
-		HashMap<String,String> columns = new HashMap<>(10);
-		Method[] methods = recordType.getMethods();
-		for(Method method:methods)
+		final HashMap<String,String> columns = new HashMap<>(10);
+		final Method[] methods = recordType.getMethods();
+		for(final Method method:methods)
 		{
 			//1. get attributes
 			//this is priorized before skipping of default methods, so columns for assoziations are created correctly
 			if(method.isAnnotationPresent( Attribute.class))
 			{
-				Attribute att = method.getAnnotation( Attribute.class);
-				String name = att.name().toLowerCase();
+				final Attribute att = method.getAnnotation( Attribute.class);
+				final String name = att.name().toLowerCase();
 				if(!"".equals( att.typeName() ))
 				{
 					columns.put(name, att.typeName());
 				}
 				else
 				{
-					columns.putIfAbsent(name, getSQLType( att.type()));
+					columns.putIfAbsent(name, AutomaticMigration.getSQLType( att.type()));
 				}
-				columns.put( name, columns.get( name) 
+				columns.put( name, columns.get( name)
 						+(att.mayBeNull()?" NULL": " NOT NULL")
 						+(att.isUnique()?" UNIQUE": "")
 						+(!"".equals( att.defaultValue() )?" DEFAULT "+att.defaultValue(): "")
 						+(att.foreignKeyTable().isEmpty() ? "" : " REFERENCES "+att.foreignKeyTable()
 							+(att.foreignKeyColumn().isEmpty() ? "" : " ("+att.foreignKeyColumn()+")")
-							+(att.onUpdate().toSQL( ReferenceRule.ACTION_UPDATE))
-							+(att.onDelete().toSQL( ReferenceRule.ACTION_DELETE))
+							+att.onUpdate().toSQL( ReferenceRule.ACTION_UPDATE)
+							+att.onDelete().toSQL( ReferenceRule.ACTION_DELETE)
 						)
 						+(att.checkConstraint().isEmpty() ? "" : " CHECK("+att.checkConstraint()+")"));
 				continue;
@@ -316,13 +317,13 @@ public class AutomaticMigration implements Migration
 			//2. get attribute-accessors
 			if(method.isAnnotationPresent( AttributeGetter.class))
 			{
-				AttributeGetter acc = method.getAnnotation( AttributeGetter.class);
+				final AttributeGetter acc = method.getAnnotation( AttributeGetter.class);
 				columnName = acc.name().toLowerCase();
 				attType = method.getReturnType();
 			}
 			else if(method.isAnnotationPresent( AttributeSetter.class))
 			{
-				AttributeSetter acc = method.getAnnotation( AttributeSetter.class);
+				final AttributeSetter acc = method.getAnnotation( AttributeSetter.class);
 				columnName = acc.name().toLowerCase();
 				attType = method.getParameterTypes()[0];
 			}
@@ -340,63 +341,68 @@ public class AutomaticMigration implements Migration
 			//convert type (for 2. and 3.)
 			if(columnName!=null && attType!=null)
 			{
-				columns.putIfAbsent(columnName, getSQLType( attType));
+				columns.putIfAbsent(columnName, AutomaticMigration.getSQLType( attType));
 			}
 		}
 		//4. add timestamps, other features
 		if(TimestampedRecord.class.isAssignableFrom( recordType))
 		{
 			//forces the timestamps to be overriden, because they need to be of type Timestamp
-			columns.put(RecordStore.COLUMN_CREATED_AT, getSQLType( java.sql.Timestamp.class));
-			columns.put(RecordStore.COLUMN_UPDATED_AT, getSQLType( java.sql.Timestamp.class));
+			columns.put(RecordStore.COLUMN_CREATED_AT, AutomaticMigration.getSQLType( java.sql.Timestamp.class));
+			columns.put(RecordStore.COLUMN_UPDATED_AT, AutomaticMigration.getSQLType( java.sql.Timestamp.class));
 		}
 		//5. mark or add primary key, add constraints
-		String primaryColumn = getPrimaryColumn( recordType).toLowerCase();
-		columns.putIfAbsent( primaryColumn, getSQLType( Integer.class));
+		final String primaryColumn = AutomaticMigration.getPrimaryColumn( recordType).toLowerCase();
+		columns.putIfAbsent( primaryColumn, AutomaticMigration.getSQLType( Integer.class));
 		columns.put( primaryColumn, columns.get( primaryColumn)+" IDENTITY PRIMARY KEY");
 		return columns;
 	}
-	
+
 	/**
 	 * Note: The result of this method may be inaccurate
+	 *
 	 * @param jdbcType
 	 * @return the mapped SQL-type
+	 * @throws IllegalArgumentException
 	 * @see java.sql.Types
 	 */
-	public static String getSQLType(int jdbcType) throws IllegalArgumentException
+	public static String getSQLType(final int jdbcType) throws IllegalArgumentException
 	{
 		if(jdbcType == Types.SQLXML)
 		{
 			return "XML";
 		}
-		for(Field f: Types.class.getFields())
+		for(final Field f: Types.class.getFields())
 		{
 			if(f.getType()==Integer.TYPE)
 			{
 				try
 				{
-					int val = f.getInt( null);
+					final int val = f.getInt( null);
 					if( val == jdbcType)
 					{
 						return f.getName().replaceAll( "_", " ");
 					}
 				}
-				catch ( IllegalArgumentException | IllegalAccessException ex )
+				catch (final IllegalAccessException ex)
 				{
+					throw new IllegalArgumentException(ex);
 				}
 			}
 		}
 		throw new IllegalArgumentException("Unknown Type: "+jdbcType);
 	}
-	
+
 	/**
 	 * Note: The result of this method may be inaccurate
+	 * 
 	 * @param javaType
 	 * @return the mapped SQL-type
-	 * @see http://www.cis.upenn.edu/~bcpierce/courses/629/jdkdocs/guide/jdbc/getstart/mapping.doc.html
+	 * @throws IllegalArgumentException
+	 * @see "http://www.cis.upenn.edu/~bcpierce/courses/629/jdkdocs/guide/jdbc/getstart/mapping.doc.html"
 	 * @see java.sql.Types
 	 */
-	public static String getSQLType(Class<?> javaType) throws IllegalArgumentException
+	public static String getSQLType(final Class<?> javaType) throws IllegalArgumentException
 	{
 		if(javaType.equals( String.class))
 		{

@@ -32,23 +32,27 @@ public class NoLogger implements LoggerAdapter
 {
 
 	@Override
-	public void info( String source, String message )
+	public void info( final String source, final String message )
 	{
+		// do nothing
 	}
 
 	@Override
-	public void debug( String source, String message )
+	public void debug( final String source, final String message )
 	{
+		// do nothing
 	}
 
 	@Override
-	public void error( String source, String message )
+	public void error( final String source, final String message )
 	{
+		// do nothing
 	}
 
 	@Override
-	public void error( String source, Throwable exception )
+	public void error( final String source, final Throwable exception )
 	{
+		// do nothing
 	}
 
 }

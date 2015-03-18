@@ -43,5 +43,8 @@ import java.lang.annotation.Target;
 @Inherited
 public @interface Validates
 {
+	/**
+	 * @return the validations
+	 */
 	public Validate[] value();
 }

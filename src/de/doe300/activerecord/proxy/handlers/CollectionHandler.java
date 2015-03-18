@@ -49,6 +49,9 @@ public class CollectionHandler implements ProxyHandler
 {
 	private final Map<ActiveRecord, HandlerCollection> collections;
 
+	/**
+	 *
+	 */
 	public CollectionHandler()
 	{
 		this.collections = new TreeMap<>();
@@ -111,7 +114,7 @@ public class CollectionHandler implements ProxyHandler
 		{
 			return new Iterator<Object>()
 				{
-				private Iterator<String> it = columnNames.iterator();
+				private final Iterator<String> it = columnNames.iterator();
 
 				@Override
 				public boolean hasNext()
@@ -150,7 +153,7 @@ public class CollectionHandler implements ProxyHandler
 		public Object[] toArray()
 		{
 			final Object[] arr = new Object[ columnNames.size()];
-			Iterator<String> it = columnNames.iterator();
+			final Iterator<String> it = columnNames.iterator();
 			for(int i=0;i<columnNames.size()&&it.hasNext();i++)
 			{
 				arr[i] = store.getValue( base, primaryKey, it.next());
@@ -162,7 +165,7 @@ public class CollectionHandler implements ProxyHandler
 		public <T> T[] toArray( final T[] a )
 		{
 			final T[] res = a.length >= columnNames.size() ? a : Arrays.copyOf( a, columnNames.size());
-			Iterator<String> it = columnNames.iterator();
+			final Iterator<String> it = columnNames.iterator();
 			for(int i=0;i<columnNames.size()&&it.hasNext();i++)
 			{
 				res[i] = ( T ) store.getValue( base, primaryKey, it.next());

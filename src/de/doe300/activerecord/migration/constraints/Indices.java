@@ -39,5 +39,8 @@ import java.lang.annotation.Target;
 @Target(ElementType.TYPE)
 public @interface Indices
 {
+	/**
+	 * @return the indices
+	 */
 	public Index[] value();
 }

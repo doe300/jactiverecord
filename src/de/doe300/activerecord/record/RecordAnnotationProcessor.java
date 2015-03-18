@@ -24,11 +24,9 @@
  */
 package de.doe300.activerecord.record;
 
-import de.doe300.activerecord.record.attributes.AttributeGetter;
-import de.doe300.activerecord.record.attributes.AttributeSetter;
-import de.doe300.activerecord.validation.ValidationFailed;
 import java.lang.reflect.Method;
 import java.util.Set;
+
 import javax.annotation.processing.AbstractProcessor;
 import javax.annotation.processing.RoundEnvironment;
 import javax.annotation.processing.SupportedAnnotationTypes;
@@ -41,10 +39,13 @@ import javax.lang.model.type.TypeKind;
 import javax.lang.model.type.TypeMirror;
 import javax.tools.Diagnostic;
 
+import de.doe300.activerecord.record.attributes.AttributeGetter;
+import de.doe300.activerecord.record.attributes.AttributeSetter;
+import de.doe300.activerecord.validation.ValidationFailed;
+
 /**
- *
  * @author doe300
- * @see http://docs.oracle.com/javase/7/docs/api/javax/annotation/processing/Processor.html
+ * @see "http://docs.oracle.com/javase/7/docs/api/javax/annotation/processing/Processor.html"
  */
 @SupportedSourceVersion(SourceVersion.RELEASE_8)
 @SupportedAnnotationTypes({"de.doe300.activerecord.record.DataSet", "de.doe300.activerecord.attributes.AttributeGetter",
@@ -55,30 +56,33 @@ public class RecordAnnotationProcessor extends AbstractProcessor
 	//TODO adapt to POJORecord
 	//TODO generate (if flag is set) static Query- and FinderMethods for ActiveRecord-interface
 	//TODO generate Record-interface from DB-Table
-	
+
+	/**
+	 *
+	 */
 	public RecordAnnotationProcessor()
 	{
 		//public no-arg processor required
 	}
 
 	//TODO also use this processor to generate accessor-methods or other kind of methods??
-	
+
 	@Override
-	public boolean process(Set<? extends TypeElement> annotations, RoundEnvironment roundEnv )
+	public boolean process(final Set<? extends TypeElement> annotations, final RoundEnvironment roundEnv )
 	{
 		////
 		//	AttributeAccessor
 		////
-		roundEnv.getElementsAnnotatedWith( AttributeGetter.class).forEach( (Element e)->{
-			AttributeGetter accessor= e.getAnnotation( AttributeGetter.class);
-			ExecutableElement executable = ((ExecutableElement)e);
-			
+		roundEnv.getElementsAnnotatedWith( AttributeGetter.class).forEach( (final Element e)->{
+			final AttributeGetter accessor= e.getAnnotation( AttributeGetter.class);
+			final ExecutableElement executable = (ExecutableElement)e;
+
 			//check syntax of attribute-name
-			if(executable.getSimpleName().chars().anyMatch( (int i)-> i == ' '))
+			if(executable.getSimpleName().chars().anyMatch( (final int i)-> i == ' '))
 			{
 				processingEnv.getMessager().printMessage( Diagnostic.Kind.ERROR, "Name must not contain any spaces", e);
 			}
-			
+
 			if(!executable.getParameters().isEmpty())
 			{
 				processingEnv.getMessager().printMessage( Diagnostic.Kind.ERROR, "Method annotated with AttributeGetter must not have any parameters", e );
@@ -87,12 +91,12 @@ public class RecordAnnotationProcessor extends AbstractProcessor
 			{
 				processingEnv.getMessager().printMessage( Diagnostic.Kind.ERROR, "Any method annotated with AttributeGetter must return an non void type", e);
 			}
-			
+
 			//check existence of converter
 			if(!accessor.converterClass().equals( Void.class))
 			{
 				Method converterMethod = null;
-				for(Method m: accessor.converterClass().getMethods())
+				for(final Method m: accessor.converterClass().getMethods())
 				{
 					if(m.getName().equals( accessor.converterMethod()))
 					{
@@ -121,17 +125,17 @@ public class RecordAnnotationProcessor extends AbstractProcessor
 				}
 			}
 		});
-		
-		roundEnv.getElementsAnnotatedWith( AttributeSetter.class).forEach((Element e)->{
-			AttributeSetter accessor= e.getAnnotation( AttributeSetter.class);
-			ExecutableElement executable = ((ExecutableElement)e);
-			
+
+		roundEnv.getElementsAnnotatedWith( AttributeSetter.class).forEach((final Element e)->{
+			final AttributeSetter accessor= e.getAnnotation( AttributeSetter.class);
+			final ExecutableElement executable = (ExecutableElement)e;
+
 			//check syntax of attribute-name
-			if(executable.getSimpleName().chars().anyMatch( (int i)-> i == ' '))
+			if(executable.getSimpleName().chars().anyMatch( (final int i)-> i == ' '))
 			{
 				processingEnv.getMessager().printMessage( Diagnostic.Kind.ERROR, "Name must not contain any spaces", e);
 			}
-			
+
 			if(executable.getParameters().size()!=1)
 			{
 				processingEnv.getMessager().printMessage( Diagnostic.Kind.ERROR, "Method annotated with AttributeSetter must have exactly one parameter", e );
@@ -140,12 +144,12 @@ public class RecordAnnotationProcessor extends AbstractProcessor
 			{
 				processingEnv.getMessager().printMessage( Diagnostic.Kind.NOTE, "Any return-value from a method annotated with AttributeSetter is ignored", e);
 			}
-			
+
 			//check existence of validator
 			if(!accessor.validatorClass().equals( Void.class))
 			{
 				Method validatorMethod = null;
-				for(Method m: accessor.validatorClass().getMethods())
+				for(final Method m: accessor.validatorClass().getMethods())
 				{
 					if(m.getName().equals( accessor.validatorMethod()))
 					{
@@ -164,7 +168,7 @@ public class RecordAnnotationProcessor extends AbstractProcessor
 				else
 				{
 					boolean validationErrorThrown = false;
-					for(Class<?> exType : validatorMethod.getExceptionTypes())
+					for(final Class<?> exType : validatorMethod.getExceptionTypes())
 					{
 						if(ValidationFailed.class.isAssignableFrom( exType))
 						{
@@ -178,12 +182,12 @@ public class RecordAnnotationProcessor extends AbstractProcessor
 					}
 				}
 			}
-			
+
 			//check existence of converter
 			if(!accessor.converterClass().equals( Void.class))
 			{
 				Method converterMethod = null;
-				for(Method m: accessor.converterClass().getMethods())
+				for(final Method m: accessor.converterClass().getMethods())
 				{
 					if(m.getName().equals( accessor.converterMethod()))
 					{
@@ -212,18 +216,18 @@ public class RecordAnnotationProcessor extends AbstractProcessor
 				}
 			}
 		});
-		
+
 		////
 		//	Searchable
 		////
-		roundEnv.getElementsAnnotatedWith( Searchable.class).forEach( (Element e)->{
+		roundEnv.getElementsAnnotatedWith( Searchable.class).forEach( (final Element e)->{
 			if(!e.getKind().isInterface())
 			{
 				processingEnv.getMessager().printMessage( Diagnostic.Kind.WARNING, "Searchables need to be interfaces", e);
 			}
-			TypeElement el = ( TypeElement ) e;
+			final TypeElement el = ( TypeElement ) e;
 			boolean activeRecordFound = false;
-			for(TypeMirror i :el.getInterfaces())
+			for(final TypeMirror i :el.getInterfaces())
 			{
 				if(processingEnv.getTypeUtils().isSubtype( i, processingEnv.getElementUtils().getTypeElement( ActiveRecord.class.getCanonicalName()).asType() ))
 				{

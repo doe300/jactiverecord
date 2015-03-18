@@ -25,32 +25,33 @@
 package de.doe300.activerecord.logging;
 
 /**
- * LoggerAdapter using {@link System.out} and {@link System.err} as output
+ * LoggerAdapter using {@link System#out} and {@link System#err} as output
+ * 
  * @author doe300
  */
 public class ConsoleLogger implements LoggerAdapter
 {
 
 	@Override
-	public void info( String source, String message )
+	public void info( final String source, final String message )
 	{
 		System.out.println( source+" [INFO] "+message);
 	}
 
 	@Override
-	public void debug( String source, String message )
+	public void debug( final String source, final String message )
 	{
 		System.out.println( source+" [DEBUG] "+message);
 	}
 
 	@Override
-	public void error( String source, String message )
+	public void error( final String source, final String message )
 	{
 		System.err.println( source+" [ERROR] "+message);
 	}
 
 	@Override
-	public void error( String source, Throwable exception )
+	public void error( final String source, final Throwable exception )
 	{
 		System.out.println( source+" [ERROR] "+exception.getMessage());
 		exception.printStackTrace( System.err);

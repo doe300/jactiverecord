@@ -44,7 +44,7 @@ public class RowCache implements Comparable<RowCache>
 	private final boolean isTimestamped;
 	private final String tableName;
 
-	private RowCache(String primaryKey, String tableName, Map<String,Object> columnData, boolean inDB, boolean isTimestamped)
+	private RowCache(final String primaryKey, final String tableName, final Map<String,Object> columnData, final boolean inDB, final boolean isTimestamped)
 	{
 		this.primaryKey = primaryKey.toLowerCase();
 		this.tableName = tableName;
@@ -56,7 +56,7 @@ public class RowCache implements Comparable<RowCache>
 		}
 		this.isInDB = inDB;
 	}
-	
+
 	/**
 	 * Creates a new cache-entry and fills it with the values from the given map.
 	 * @param tableName
@@ -65,29 +65,29 @@ public class RowCache implements Comparable<RowCache>
 	 * @param isTimestamped
 	 * @return the newly created cache-entry
 	 */
-	public static RowCache fromMap(String tableName, String primaryKey, Map<String,Object> map, boolean isTimestamped)
+	public static RowCache fromMap(final String tableName, final String primaryKey, final Map<String,Object> map, final boolean isTimestamped)
 	{
 		return new RowCache(primaryKey,tableName,new HashMap<>(map ),false, isTimestamped );
 	}
-	
+
 	/**
 	 * @param tableName
 	 * @param primaryKey
 	 * @param isTimestamped
 	 * @return a new created empty cache-row
 	 */
-	public static RowCache emptyCache(String tableName, String primaryKey, boolean isTimestamped)
+	public static RowCache emptyCache(final String tableName, final String primaryKey, final boolean isTimestamped)
 	{
 		return new RowCache(primaryKey, tableName, new HashMap<>(10),false, isTimestamped);
 	}
-	
+
 	/**
 	 * @param columnName
 	 * @param value
 	 * @param updateTimestamp
 	 * @return the previous value or <code>null</code>
 	 */
-	public synchronized Object setData(String columnName, Object value, boolean updateTimestamp)
+	public synchronized Object setData(final String columnName, final Object value, final boolean updateTimestamp)
 	{
 		if(Objects.equals( RowCache.this.getData( columnName.toLowerCase()), value))
 		{
@@ -100,13 +100,13 @@ public class RowCache implements Comparable<RowCache>
 		}
 		return columnData.put( columnName.toLowerCase(), value );
 	}
-	
+
 	/**
 	 * @param names
 	 * @param values
-	 * @param updateTimestamp 
+	 * @param updateTimestamp
 	 */
-	public synchronized void setData(String[] names, Object[] values, boolean updateTimestamp)
+	public synchronized void setData(final String[] names, final Object[] values, final boolean updateTimestamp)
 	{
 		for(int i=0;i<names.length;i++)
 		{
@@ -118,25 +118,25 @@ public class RowCache implements Comparable<RowCache>
 		}
 		dataChanged = true;
 	}
-	
+
 	/**
 	 * @param columnName
 	 * @return the stored value
 	 */
-	public Object getData(String columnName)
+	public synchronized Object getData(final String columnName)
 	{
 		return columnData.get( columnName.toLowerCase() );
 	}
-	
+
 	/**
 	 * @param columnName
 	 * @return whether the given column is cached
 	 */
-	public boolean hasData(String columnName)
+	public boolean hasData(final String columnName)
 	{
 		return columnData.containsKey( columnName.toLowerCase() );
 	}
-	
+
 	/**
 	 * @return the primary key of the associated record
 	 */
@@ -144,7 +144,7 @@ public class RowCache implements Comparable<RowCache>
 	{
 		return ( int ) columnData.get( primaryKey );
 	}
-	
+
 	/**
 	 * @return the name of the associated table
 	 */
@@ -152,7 +152,7 @@ public class RowCache implements Comparable<RowCache>
 	{
 		return tableName;
 	}
-	
+
 	/**
 	 * @return whether this row is represented in the DB
 	 */
@@ -160,7 +160,7 @@ public class RowCache implements Comparable<RowCache>
 	{
 		return isInDB;
 	}
-	
+
 	/**
 	 * This method does not consider external changes to the DB
 	 * @return whether the data in this cache is the same as in the DB
@@ -169,15 +169,15 @@ public class RowCache implements Comparable<RowCache>
 	{
 		return !dataChanged;
 	}
-	
+
 	/**
 	 * Sets this cache to a synchronized state
 	 */
-	public void setSynchronized()
+	public synchronized void setSynchronized()
 	{
 		dataChanged = false;
 	}
-	
+
 	/**
 	 * clears all entries from the cache
 	 */
@@ -186,14 +186,14 @@ public class RowCache implements Comparable<RowCache>
 		columnData.clear();
 		dataChanged = false;
 	}
-	
+
 	/**
 	 * Updates the cache-entry with data from the DB
 	 * @param set
 	 * @param updateTimestamp
-	 * @throws SQLException 
+	 * @throws SQLException
 	 */
-	public synchronized void update(ResultSet set, boolean updateTimestamp) throws SQLException
+	public synchronized void update(final ResultSet set, final boolean updateTimestamp) throws SQLException
 	{
 		for(int i=1;i<=set.getMetaData().getColumnCount();i++)
 		{
@@ -202,7 +202,7 @@ public class RowCache implements Comparable<RowCache>
 		isInDB = true;
 		dataChanged =false;
 	}
-	
+
 	/**
 	 * @return a map with all cached values
 	 */
@@ -211,15 +211,15 @@ public class RowCache implements Comparable<RowCache>
 		//needs to be modifiable and a copy
 		return new HashMap<>(columnData);
 	}
-	
+
 	/**
 	 * Sets all cached values to the values given by <code>map</code>
 	 * @param map
-	 * @param updateTimestamp 
+	 * @param updateTimestamp
 	 */
-	public synchronized void update(Map<String,Object> map, boolean updateTimestamp)
+	public synchronized void update(final Map<String,Object> map, final boolean updateTimestamp)
 	{
-		for(Map.Entry<String,Object> e:map.entrySet())
+		for(final Map.Entry<String,Object> e:map.entrySet())
 		{
 			setData( e.getKey().toLowerCase(), e.getValue(),updateTimestamp);
 		}
@@ -238,18 +238,18 @@ public class RowCache implements Comparable<RowCache>
 	}
 
 	@Override
-	public boolean equals( Object obj )
+	public boolean equals( final Object obj )
 	{
-		return (obj instanceof RowCache) && obj.toString().equals( toString());
+		return obj instanceof RowCache && obj.toString().equals( toString());
 	}
 
 	@Override
-	public int compareTo( RowCache o )
+	public int compareTo( final RowCache o )
 	{
 		if(o.getTableName().equals( getTableName()))
 		{
 			return Integer.compare( getPrimaryKey(), o.getPrimaryKey());
 		}
 		return getTableName().compareTo( o.getTableName());
-	}	
+	}
 }

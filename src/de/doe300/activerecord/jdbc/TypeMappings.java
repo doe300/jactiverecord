@@ -235,13 +235,12 @@ public final class TypeMappings
 	
 	/**
 	 * To be used in attribute-setters for XML DOMResults
-	 * @param <T>
 	 * @param result the result to copy the content from
 	 * @param record
 	 * @param columnName
 	 * @throws SQLException 
 	 */
-	public static <T extends Result> void writeXML(DOMResult result, ActiveRecord record, String columnName) throws SQLException
+	public static void writeXML(DOMResult result, ActiveRecord record, String columnName) throws SQLException
 	{
 		Connection con = record.getBase().getStore().getConnection();
 		if(con == null || con.isClosed())

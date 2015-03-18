@@ -30,7 +30,7 @@ import de.doe300.activerecord.migration.AutomaticMigration;
 /**
  * Rule for FOREIGN KEYS for ON DELETE or ON UPDATE clauses
  * @author doe300
- * 
+ *
  * @see Attribute
  * @see AutomaticMigration
  */
@@ -42,7 +42,7 @@ public enum ReferenceRule
 	NONE
 	{
 		@Override
-		public String toSQL( String onAction )
+		public String toSQL( final String onAction )
 		{
 			return "";
 		}
@@ -54,7 +54,7 @@ public enum ReferenceRule
 	CASCADE
 	{
 		@Override
-		public String toSQL( String onAction )
+		public String toSQL( final String onAction )
 		{
 			return " ON "+onAction+" CASCADE";
 		}
@@ -66,7 +66,7 @@ public enum ReferenceRule
 	SET_DEFAULT
 	{
 		@Override
-		public String toSQL( String onAction )
+		public String toSQL( final String onAction )
 		{
 			return " ON "+onAction+" SET DEFAULT";
 		}
@@ -78,21 +78,25 @@ public enum ReferenceRule
 	SET_NULL
 	{
 		@Override
-		public String toSQL( String onAction )
+		public String toSQL( final String onAction )
 		{
 			return " ON "+onAction+" SET NULL";
 		}
 	};
-	
+
 	/**
 	 * The SQL UPDATE action
 	 */
 	public static final String ACTION_UPDATE = "UPDATE";
-	
+
 	/**
 	 * The SQL DELETE action
 	 */
 	public static final String ACTION_DELETE = "DELETE";
 
+	/**
+	 * @param onAction
+	 * @return the SQL clause
+	 */
 	public abstract String toSQL(String onAction);
 }
