@@ -38,36 +38,35 @@ public interface Migration
 	 * Applies this migration to the given connection
 	 * @param con
 	 * @return whether the migration was applied
-	 * @throws Exception 
+	 * @throws Exception
 	 */
 	public boolean apply(Connection con) throws Exception;
-	
+
 	/**
 	 * Reverts the changes from this migration
 	 * @param con
 	 * @return whether the migration was reverted
-	 * @throws Exception 
+	 * @throws Exception
 	 */
 	public boolean revert(Connection con) throws Exception;
-	
+
 	/**
 	 * Update the data-structure or executes the <code>update</code>statement, depending on the type of migration
 	 * @param con
 	 * @return whether the update was successful
-	 * @throws Exception 
+	 * @throws Exception
 	 */
 	public boolean update(Connection con) throws Exception;
-	
+
 	/**
 	 * @param con
 	 * @param name
 	 * @return whether the structure already exists
 	 */
-	public default boolean structureExists(Connection con, String name)
+	public default boolean structureExists(final Connection con, final String name)
 	{
-		try
+		try (ResultSet set = con.getMetaData().getTables(con.getCatalog(), con.getSchema(), null, null))
 		{
-			ResultSet set = con.getMetaData().getTables(con.getCatalog(), con.getSchema(), null, null );
 			while(set.next())
 			{
 				if(set.getString( "TABLE_NAME").equalsIgnoreCase(name))
@@ -77,7 +76,7 @@ public interface Migration
 			}
 			return false;
 		}
-		catch ( SQLException ex )
+		catch ( final SQLException ex )
 		{
 			return false;
 		}
