@@ -24,9 +24,10 @@
  */
 package de.doe300.activerecord;
 
+import java.sql.SQLException;
+
 import de.doe300.activerecord.dsl.Comparison;
 import de.doe300.activerecord.dsl.SimpleCondition;
-import java.sql.SQLException;
 
 /**
  * Just some code to test the feeling of the syntax
@@ -34,14 +35,19 @@ import java.sql.SQLException;
  */
 public class TestActiveRecordSyntax
 {
-	public static void main(String[] args) throws SQLException, Exception
+	/**
+	 * @param args
+	 * @throws SQLException
+	 * @throws Exception
+	 */
+	public static void main(final String[] args) throws SQLException, Exception
 	{
 		//0, create new core
-		RecordCore core = RecordCore.fromDatabase( null, true );
+		final RecordCore core = RecordCore.fromDatabase(TestServer.getTestConnection(), true);
 		//1. create new recordbase
-		RecordBase<TestInterface> base = core.getBase( TestInterface.class);
+		final RecordBase<TestInterface> base = core.getBase( TestInterface.class);
 		//2. get record
-		TestInterface el = base.getRecord(1);
+		final TestInterface el = base.getRecord(1);
 		//3. change & store record
 		el.setAge( 23);
 		el.save();
@@ -49,8 +55,8 @@ public class TestActiveRecordSyntax
 		el.destroy();
 
 		//5. get all for attribute
-		base.findFor( "age", 23).forEach( (TestInterface i)-> System.err.println( i.getName() ));
-		
+		base.findFor( "age", 23).forEach( (final TestInterface i)-> System.err.println( i.getName() ));
+
 		//6. query
 		base.where( new SimpleCondition("name", "Max", Comparison.IS));
 	}

@@ -24,13 +24,14 @@
  */
 package de.doe300.activerecord.proxy.handlers;
 
-import de.doe300.activerecord.TestInterface;
-import de.doe300.activerecord.TestServer;
-import de.doe300.activerecord.proxy.RecordHandler;
 import org.junit.AfterClass;
 import org.junit.Assert;
 import org.junit.BeforeClass;
 import org.junit.Test;
+
+import de.doe300.activerecord.TestInterface;
+import de.doe300.activerecord.TestServer;
+import de.doe300.activerecord.proxy.RecordHandler;
 
 /**
  *
@@ -49,7 +50,7 @@ public class InterfaceProxyHandlerTest extends Assert
 	public static void createTables() throws Exception
 	{
 		TestServer.buildTestTables();
-		handler = new DummyInterfaceProxyHandler();
+		InterfaceProxyHandlerTest.handler = new DummyInterfaceProxyHandler();
 	}
 	
 	@AfterClass
@@ -68,15 +69,6 @@ public class InterfaceProxyHandlerTest extends Assert
 	{
 	}
 
-	public class InterfaceProxyHandlerImpl extends InterfaceProxyHandler
-	{
-
-		public InterfaceProxyHandlerImpl()
-		{
-			super( null );
-		}
-	}
-	
 	static class DummyInterfaceProxyHandler extends InterfaceProxyHandler<TestInterface>
 	{
 
@@ -85,12 +77,12 @@ public class InterfaceProxyHandlerTest extends Assert
 			super( TestInterface.class );
 		}
 		
-		public TestInterface getDirectionOne(TestInterface record, RecordHandler<TestInterface> handler)
+		public TestInterface getDirectionOne(final TestInterface record, final RecordHandler<TestInterface> handler)
 		{
 			return record;
 		}
 		
-		public void setDirectionOne(TestInterface record, RecordHandler<TestInterface> handler, TestInterface otherRecord)
+		public void setDirectionOne(final TestInterface record, final RecordHandler<TestInterface> handler, final TestInterface otherRecord)
 		{
 		}
 	}

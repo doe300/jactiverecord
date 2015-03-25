@@ -382,10 +382,9 @@ public class SimpleJDBCRecordStore implements RecordStore
 			{
 				fillStatement( stm, scope.getCondition() );
 			}
-			try (final ResultSet res = stm.executeQuery())
-			{
-				return allWithDataStream(columns, res);
-			}
+			//this result-set can't be try-with-resource because it is required to stay open
+			final ResultSet res = stm.executeQuery();
+			return allWithDataStream(columns, res);
 		}
 		catch ( final SQLException ex )
 		{
@@ -516,7 +515,6 @@ public class SimpleJDBCRecordStore implements RecordStore
 					throw new RuntimeException("Failed to create table", e);
 				}
 			}
-			PreparedStatement stmt;
 			final Map<String,Object> rowData = new HashMap<>(columns != null ? columns.size() : 3 );
 			//set initial values
 			if(columns != null)
@@ -537,25 +535,27 @@ public class SimpleJDBCRecordStore implements RecordStore
 					" ("+rowData.entrySet().stream().map((final Map.Entry<String,Object> e) -> e.getKey()).map( this::convertIdentifier).collect( Collectors.joining( ", "))+
 					") VALUES ("+rowData.entrySet().stream().map((final Map.Entry<String,Object> e) -> "?").collect( Collectors.joining( ", "))+")";
 			Logging.getLogger().debug( "JDBCStore", sql);
-			stmt = con.prepareStatement( sql, Statement.RETURN_GENERATED_KEYS );
-
-			int i = 0;
-			for(final Map.Entry<String,Object> e : rowData.entrySet())
+			try (PreparedStatement stmt = con.prepareStatement(sql, Statement.RETURN_GENERATED_KEYS))
 			{
-				stmt.setObject( i+1, e.getValue());
-				i++;
-			}
-
-			stmt.executeUpdate();
-			try (final ResultSet rs = stmt.getGeneratedKeys())
-			{
-				if (rs.next())
+				int i = 0;
+				for (final Map.Entry<String, Object> e : rowData.entrySet())
 				{
-					return rs.getInt(base.getPrimaryColumn());
+					stmt.setObject(i + 1, e.getValue());
+					i++;
 				}
-				Logging.getLogger().error("JDBCStore", "Failed to insert new row!");
-				return -1;
+
+				stmt.executeUpdate();
+				try (final ResultSet rs = stmt.getGeneratedKeys())
+				{
+					if (rs.next())
+					{
+						return rs.getInt(base.getPrimaryColumn());
+					}
+					Logging.getLogger().error("JDBCStore", "Failed to insert new row!");
+					return -1;
+				}
 			}
+
 		}
 		catch ( final SQLException ex )
 		{
@@ -580,10 +580,9 @@ public class SimpleJDBCRecordStore implements RecordStore
 		try(PreparedStatement stmt = con.prepareStatement( sql))
 		{
 			stmt.setObject( 1, condValue);
-			try (final ResultSet res = stmt.executeQuery())
-			{
-				return valuesStream(res);
-			}
+			//can't use try-with-resource here, because result-set is required to stay open
+			final ResultSet res = stmt.executeQuery();
+			return valuesStream(res);
 		}
 		catch ( final SQLException ex )
 		{
