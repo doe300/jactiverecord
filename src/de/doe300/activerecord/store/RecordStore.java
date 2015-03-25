@@ -42,11 +42,6 @@ import java.util.stream.Stream;
 public interface RecordStore extends AutoCloseable
 {
 	/**
-	 * The default column for the primary key
-	 */
-	public static final String DEFAULT_COLUMN_ID = "id";
-	
-	/**
 	 * @return the underlying Connection or <code>null</code>
 	 */
 	public Connection getConnection();

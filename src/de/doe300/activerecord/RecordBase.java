@@ -125,10 +125,10 @@ public abstract class RecordBase<T extends ActiveRecord> implements FinderMethod
 	}
 
 	/**
-	 * Uses the {@link RecordType#primaryKey() }. If this key is not set, {@link RecordStore#DEFAULT_COLUMN_ID id} is used.
+	 * Uses the {@link RecordType#primaryKey() }. If this key is not set, {@link ActiveRecord#DEFAULT_PRIMARY_COLUMN id} is used.
 	 * @return the name of the primary Column
 	 * @see RecordType#primaryKey()
-	 * @see RecordStore#DEFAULT_COLUMN_ID
+	 * @see ActiveRecord#DEFAULT_PRIMARY_COLUMN
 	 */
 	public String getPrimaryColumn()
 	{
@@ -140,7 +140,7 @@ public abstract class RecordBase<T extends ActiveRecord> implements FinderMethod
 			}
 			else
 			{
-				primaryColumn = RecordStore.DEFAULT_COLUMN_ID;
+				primaryColumn = ActiveRecord.DEFAULT_PRIMARY_COLUMN;
 			}
 			Logging.getLogger().debug( recordType.getSimpleName(), "Using primary-key: "+primaryColumn);
 		}
@@ -149,7 +149,7 @@ public abstract class RecordBase<T extends ActiveRecord> implements FinderMethod
 
 	/**
 	 * Looks up the default columns in {@link RecordType#defaultColumns() }.
-	 * If this value is not set, the {@link RecordStore#DEFAULT_COLUMN_ID id} is set as only default column.
+	 * If this value is not set, the {@link ActiveRecord#DEFAULT_PRIMARY_COLUMN id} is set as only default column.
 	 * @return the defaultColumns
 	 * @see RecordType#defaultColumns()
 	 */
@@ -163,7 +163,7 @@ public abstract class RecordBase<T extends ActiveRecord> implements FinderMethod
 			}
 			else
 			{
-				defaultColumns = new String[]{RecordStore.DEFAULT_COLUMN_ID};
+				defaultColumns = new String[]{ActiveRecord.DEFAULT_PRIMARY_COLUMN};
 			}
 			Logging.getLogger().debug( recordType.getSimpleName(), "Using default-columns: "+Arrays.toString(defaultColumns));
 		}

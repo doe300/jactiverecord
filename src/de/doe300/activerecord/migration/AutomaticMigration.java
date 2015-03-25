@@ -46,7 +46,6 @@ import de.doe300.activerecord.record.TimestampedRecord;
 import de.doe300.activerecord.record.attributes.AttributeGetter;
 import de.doe300.activerecord.record.attributes.AttributeSetter;
 import de.doe300.activerecord.record.attributes.Attributes;
-import de.doe300.activerecord.store.RecordStore;
 
 /**
  * This migration is used to automatically create a table from a given record-type.
@@ -261,7 +260,7 @@ public class AutomaticMigration implements Migration
 		{
 			return type.getAnnotation(RecordType.class).primaryKey();
 		}
-		return RecordStore.DEFAULT_COLUMN_ID;
+		return ActiveRecord.DEFAULT_PRIMARY_COLUMN;
 	}
 
 	/**

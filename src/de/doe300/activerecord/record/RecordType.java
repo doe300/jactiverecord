@@ -49,7 +49,7 @@ public @interface RecordType
 	 * The primaryKey-column MUST be an integer and auto-increment
 	 * @return the name of the primary key
 	 */
-	public String primaryKey();
+	public String primaryKey() default ActiveRecord.DEFAULT_PRIMARY_COLUMN;
 	
 	/**
 	 * Default columns are always loaded into cache and therefore faster to access

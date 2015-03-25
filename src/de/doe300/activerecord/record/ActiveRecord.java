@@ -34,6 +34,11 @@ import de.doe300.activerecord.store.RecordStore;
 public interface ActiveRecord extends Comparable<ActiveRecord>
 {
 	/**
+	 * The default column for the primary key
+	 */
+	public static final String DEFAULT_PRIMARY_COLUMN = "id";
+
+	/**
 	 * Saves all cached values to the record-store
 	 * @return whether this record was saved and data was changed
 	 * @see #isSynchronized() 
