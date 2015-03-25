@@ -25,9 +25,11 @@
 package de.doe300.activerecord.store.impl;
 
 import de.doe300.activerecord.RecordBase;
+import de.doe300.activerecord.record.TimestampedRecord;
 import de.doe300.activerecord.store.RecordStore;
 import de.doe300.activerecord.dsl.Condition;
 import de.doe300.activerecord.scope.Scope;
+
 import java.sql.Connection;
 import java.util.Collections;
 import java.util.HashMap;
@@ -66,7 +68,7 @@ public class MapRecordStore implements RecordStore
 		getRow( base, primaryKey ).put( name, value );
 		if(base.isTimestamped())
 		{
-			getRow( base, primaryKey ).put( COLUMN_UPDATED_AT, System.currentTimeMillis());
+			getRow( base, primaryKey ).put( TimestampedRecord.COLUMN_UPDATED_AT, System.currentTimeMillis());
 		}
 	}
 
@@ -218,7 +220,7 @@ public class MapRecordStore implements RecordStore
 		getRow( base, primaryKey ).putAll(values );
 		if(base.isTimestamped())
 		{
-			getRow( base, primaryKey ).put( COLUMN_UPDATED_AT, System.currentTimeMillis());
+			getRow( base, primaryKey ).put( TimestampedRecord.COLUMN_UPDATED_AT, System.currentTimeMillis());
 		}
 	}
 

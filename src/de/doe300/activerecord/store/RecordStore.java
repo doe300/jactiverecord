@@ -47,16 +47,6 @@ public interface RecordStore extends AutoCloseable
 	public static final String DEFAULT_COLUMN_ID = "id";
 	
 	/**
-	 * The creation timestamp
-	 */
-	public static final String COLUMN_CREATED_AT="created_at";
-	
-	/**
-	 * The timestamp of the last update
-	 */
-	public static final String COLUMN_UPDATED_AT="updated_at";
-	
-	/**
 	 * @return the underlying Connection or <code>null</code>
 	 */
 	public Connection getConnection();
@@ -182,14 +172,14 @@ public interface RecordStore extends AutoCloseable
 	public boolean isCached();
 	
 	/**
-	 * Updates the {@link #COLUMN_UPDATED_AT} on the given record
+	 * Updates the {@link TimestampedRecord#COLUMN_UPDATED_AT} on the given record
 	 * @param base
 	 * @param primaryKey 
 	 * @see TimestampedRecord
 	 */
 	public default void touch(RecordBase<?> base, int primaryKey)
 	{
-		setValue( base, primaryKey, COLUMN_UPDATED_AT, System.currentTimeMillis());
+		setValue( base, primaryKey, TimestampedRecord.COLUMN_UPDATED_AT, System.currentTimeMillis());
 	}
 	
 	/**

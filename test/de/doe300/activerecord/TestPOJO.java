@@ -28,7 +28,7 @@ import de.doe300.activerecord.pojo.POJOBase;
 import de.doe300.activerecord.record.ActiveRecord;
 import de.doe300.activerecord.record.RecordType;
 import de.doe300.activerecord.record.Searchable;
-import de.doe300.activerecord.store.RecordStore;
+import de.doe300.activerecord.record.TimestampedRecord;
 import de.doe300.activerecord.validation.Validate;
 import de.doe300.activerecord.validation.ValidationType;
 
@@ -113,13 +113,13 @@ public class TestPOJO implements ActiveRecord, TestInterface
 	@Override
 	public long getCreatedAt()
 	{
-		return ( long ) base.getProperty( primaryKey, RecordStore.COLUMN_CREATED_AT);
+		return ( long ) base.getProperty( primaryKey, TimestampedRecord.COLUMN_CREATED_AT);
 	}
 
 	@Override
 	public long getUpdatedAt()
 	{
-		return ( long ) base.getProperty( primaryKey, RecordStore.COLUMN_UPDATED_AT);
+		return ( long ) base.getProperty( primaryKey, TimestampedRecord.COLUMN_UPDATED_AT);
 	}
 
 	@Override

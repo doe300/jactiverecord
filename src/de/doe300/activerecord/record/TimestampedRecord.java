@@ -25,16 +25,24 @@
 package de.doe300.activerecord.record;
 
 import de.doe300.activerecord.migration.AutomaticMigration;
-import de.doe300.activerecord.store.RecordStore;
 
 /**
- * Timestamped ActiveRecords automatically maintain {@link RecordStore#COLUMN_CREATED_AT created_at} and  {@link RecordStore#COLUMN_UPDATED_AT updated_at}
+ * Timestamped ActiveRecords automatically maintain {@link TimestampedRecord#COLUMN_CREATED_AT created_at} and  {@link TimestampedRecord#COLUMN_UPDATED_AT updated_at}
  * values (of type java.sql.Timestamp). The <code>updated_at</code> will be updated every time, a attribute of the record is changed.
  * {@link AutomaticMigration} will generate this two columns automatically.
  * @author doe300
  */
 public interface TimestampedRecord extends ActiveRecord
 {
+	/**
+	 * The creation timestamp
+	 */
+	public static final String COLUMN_CREATED_AT="created_at";
+	/**
+	 * The timestamp of the last update
+	 */
+	public static final String COLUMN_UPDATED_AT="updated_at";
+
 	/**
 	 * @return the creation date of this entry
 	 */

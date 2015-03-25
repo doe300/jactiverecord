@@ -31,6 +31,8 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.Objects;
 
+import de.doe300.activerecord.record.TimestampedRecord;
+
 /**
  * Caches one single row of one DB TABLE
  * @author doe300
@@ -52,7 +54,7 @@ public class RowCache implements Comparable<RowCache>
 		this.isTimestamped = isTimestamped;
 		if(isTimestamped)
 		{
-			columnData.put( RecordStore.COLUMN_CREATED_AT, new Timestamp(System.currentTimeMillis()));
+			columnData.put( TimestampedRecord.COLUMN_CREATED_AT, new Timestamp(System.currentTimeMillis()));
 		}
 		this.isInDB = inDB;
 	}
@@ -96,7 +98,7 @@ public class RowCache implements Comparable<RowCache>
 		dataChanged = true;
 		if(isTimestamped && updateTimestamp)
 		{
-			columnData.put( RecordStore.COLUMN_UPDATED_AT, new Timestamp(System.currentTimeMillis()));
+			columnData.put( TimestampedRecord.COLUMN_UPDATED_AT, new Timestamp(System.currentTimeMillis()));
 		}
 		return columnData.put( columnName.toLowerCase(), value );
 	}
@@ -114,7 +116,7 @@ public class RowCache implements Comparable<RowCache>
 		}
 		if(isTimestamped && updateTimestamp)
 		{
-			columnData.put( RecordStore.COLUMN_UPDATED_AT, new Timestamp(System.currentTimeMillis()));
+			columnData.put( TimestampedRecord.COLUMN_UPDATED_AT, new Timestamp(System.currentTimeMillis()));
 		}
 		dataChanged = true;
 	}

@@ -26,9 +26,12 @@ package de.doe300.activerecord.store;
 
 import java.sql.Timestamp;
 import java.util.Collections;
+
 import org.junit.Assert;
 import org.junit.BeforeClass;
 import org.junit.Test;
+
+import de.doe300.activerecord.record.TimestampedRecord;
 
 /**
  *
@@ -82,14 +85,14 @@ public class RowCacheTest extends Assert
 		Thread.sleep( 100);
 		cacheEntry.setData( "name", "Adam", true);
 		assertEquals("Adam", cacheEntry.getData( "name"));
-		assertNotNull( cacheEntry.getData( RecordStore.COLUMN_UPDATED_AT));
-		assertTrue( now < ((Timestamp)cacheEntry.getData( RecordStore.COLUMN_UPDATED_AT)).getTime());
+		assertNotNull( cacheEntry.getData( TimestampedRecord.COLUMN_UPDATED_AT));
+		assertTrue( now < ((Timestamp)cacheEntry.getData( TimestampedRecord.COLUMN_UPDATED_AT)).getTime());
 		Thread.sleep( 100);
 		now = System.currentTimeMillis();
 		cacheEntry.setData( "age", 23, false);
 		assertEquals(23, cacheEntry.getData( "age"));
-		assertNotNull( cacheEntry.getData( RecordStore.COLUMN_UPDATED_AT));
-		assertTrue( now > ((Timestamp)cacheEntry.getData( RecordStore.COLUMN_UPDATED_AT)).getTime());
+		assertNotNull( cacheEntry.getData( TimestampedRecord.COLUMN_UPDATED_AT));
+		assertTrue( now > ((Timestamp)cacheEntry.getData( TimestampedRecord.COLUMN_UPDATED_AT)).getTime());
 	}
 
 	@Test
@@ -100,15 +103,15 @@ public class RowCacheTest extends Assert
 		cacheEntry.setData( new String[]{"name", "age"}, new Object[]{"Adam", 23}, true);
 		assertEquals("Adam", cacheEntry.getData( "name"));
 		assertEquals(23, cacheEntry.getData( "age"));
-		assertNotNull( cacheEntry.getData( RecordStore.COLUMN_UPDATED_AT));
-		assertTrue( now < ((Timestamp)cacheEntry.getData( RecordStore.COLUMN_UPDATED_AT)).getTime());
+		assertNotNull( cacheEntry.getData( TimestampedRecord.COLUMN_UPDATED_AT));
+		assertTrue( now < ((Timestamp)cacheEntry.getData( TimestampedRecord.COLUMN_UPDATED_AT)).getTime());
 	}
 
 	@Test
 	public void testGetData()
 	{
 		cacheEntry.setData( "title", "Mister", true);
-		assertNotNull( cacheEntry.getData( RecordStore.COLUMN_UPDATED_AT));
+		assertNotNull( cacheEntry.getData( TimestampedRecord.COLUMN_UPDATED_AT));
 		assertEquals( "Mister", cacheEntry.getData( "title"));
 	}
 
@@ -117,7 +120,7 @@ public class RowCacheTest extends Assert
 	{
 		assertFalse( cacheEntry.hasData( "no_data"));
 		cacheEntry.setData( "name", "Florian", false);
-		assertTrue( cacheEntry.hasData( RecordStore.COLUMN_CREATED_AT));
+		assertTrue( cacheEntry.hasData( TimestampedRecord.COLUMN_CREATED_AT));
 		assertTrue( cacheEntry.hasData( "name"));
 	}
 

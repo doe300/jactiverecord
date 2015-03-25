@@ -348,8 +348,8 @@ public class AutomaticMigration implements Migration
 		if(TimestampedRecord.class.isAssignableFrom( recordType))
 		{
 			//forces the timestamps to be overriden, because they need to be of type Timestamp
-			columns.put(RecordStore.COLUMN_CREATED_AT, AutomaticMigration.getSQLType( java.sql.Timestamp.class));
-			columns.put(RecordStore.COLUMN_UPDATED_AT, AutomaticMigration.getSQLType( java.sql.Timestamp.class));
+			columns.put(TimestampedRecord.COLUMN_CREATED_AT, AutomaticMigration.getSQLType( java.sql.Timestamp.class));
+			columns.put(TimestampedRecord.COLUMN_UPDATED_AT, AutomaticMigration.getSQLType( java.sql.Timestamp.class));
 		}
 		//5. mark or add primary key, add constraints
 		final String primaryColumn = AutomaticMigration.getPrimaryColumn( recordType).toLowerCase();

@@ -51,6 +51,7 @@ import de.doe300.activerecord.migration.AutomaticMigration;
 import de.doe300.activerecord.migration.ManualMigration;
 import de.doe300.activerecord.migration.Migration;
 import de.doe300.activerecord.record.RecordType;
+import de.doe300.activerecord.record.TimestampedRecord;
 import de.doe300.activerecord.scope.Scope;
 import de.doe300.activerecord.store.RecordStore;
 
@@ -172,9 +173,9 @@ public class SimpleJDBCRecordStore implements RecordStore
 		//convert all column names to correct case
 		data.forEach( (final String s,final Object obj) -> tmp.put( convertIdentifier( s), obj));
 		//add timestamp if not present
-		if(base.isTimestamped() && !data.containsKey( RecordStore.COLUMN_UPDATED_AT))
+		if(base.isTimestamped() && !data.containsKey( TimestampedRecord.COLUMN_UPDATED_AT))
 		{
-			tmp.put( RecordStore.COLUMN_UPDATED_AT, new Timestamp(System.currentTimeMillis()));
+			tmp.put( TimestampedRecord.COLUMN_UPDATED_AT, new Timestamp(System.currentTimeMillis()));
 		}
 		//Don't update ID
 		tmp.remove( base.getPrimaryColumn());
@@ -527,8 +528,8 @@ public class SimpleJDBCRecordStore implements RecordStore
 			if(base.isTimestamped())
 			{
 				final long timestamp = System.currentTimeMillis();
-				rowData.putIfAbsent(RecordStore.COLUMN_CREATED_AT, new Timestamp(timestamp ));
-				rowData.putIfAbsent(RecordStore.COLUMN_UPDATED_AT, new Timestamp(timestamp ));
+				rowData.putIfAbsent(TimestampedRecord.COLUMN_CREATED_AT, new Timestamp(timestamp ));
+				rowData.putIfAbsent(TimestampedRecord.COLUMN_UPDATED_AT, new Timestamp(timestamp ));
 			}
 
 			final String sql = "INSERT INTO "+base.getTableName()+
