@@ -24,6 +24,7 @@
  */
 package de.doe300.activerecord.migration;
 
+import de.doe300.activerecord.RecordBase;
 import java.lang.reflect.Field;
 import java.lang.reflect.Method;
 import java.lang.reflect.Modifier;
@@ -290,9 +291,9 @@ public class AutomaticMigration implements Migration
 					columns.putIfAbsent(name, AutomaticMigration.getSQLType( att.type()));
 				}
 				columns.put( name, columns.get( name)
+						+(!"".equals( att.defaultValue() )?" DEFAULT "+att.defaultValue(): "")
 						+(att.mayBeNull()?" NULL": " NOT NULL")
 						+(att.isUnique()?" UNIQUE": "")
-						+(!"".equals( att.defaultValue() )?" DEFAULT "+att.defaultValue(): "")
 						+(att.foreignKeyTable().isEmpty() ? "" : " REFERENCES "+att.foreignKeyTable()
 							+(att.foreignKeyColumn().isEmpty() ? "" : " ("+att.foreignKeyColumn()+")")
 							+att.onUpdate().toSQL( ReferenceRule.ACTION_UPDATE)
@@ -301,13 +302,23 @@ public class AutomaticMigration implements Migration
 						+(att.checkConstraint().isEmpty() ? "" : " CHECK("+att.checkConstraint()+")"));
 				continue;
 			}
+			//skip getClass() - for POJO records
+			if(method.getDeclaringClass().equals( Object.class))
+			{
+				continue;
+			}
 			//skip default or static methods
 			if(method.isDefault() || (method.getModifiers() & Modifier.STATIC) == Modifier.STATIC || (method.getModifiers() & Modifier.PUBLIC) != Modifier.PUBLIC)
 			{
 				continue;
 			}
-			//skip methods from ActiveRecord (#getPrimaryKey() and #getBase())
+			//skip methods from ActiveRecord (#getPrimaryKey() and #getBase()) - for interface-records
 			if(method.getDeclaringClass().equals( ActiveRecord.class))
+			{
+				continue;
+			}
+			//skip methods from ActiveRecord (#getPrimaryKey() and #getBase()) - for POJO records
+			if(method.getName().equals( "getPrimaryKey") && method.getReturnType().equals( Integer.TYPE) || method.getName().equals( "getBase") && RecordBase.class.isAssignableFrom( method.getReturnType()))
 			{
 				continue;
 			}
@@ -455,6 +466,11 @@ public class AutomaticMigration implements Migration
 		{
 			//for foreign key
 			return "INTEGER";
+		}
+		if(javaType.isEnum())
+		{
+			//for enum-name
+			return "VARCHAR(255)";
 		}
 		throw new IllegalArgumentException("Type not mapped: "+javaType);
 	}

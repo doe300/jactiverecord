@@ -37,10 +37,6 @@ import de.doe300.activerecord.store.RecordStore;
  */
 public class POJOBase<T extends ActiveRecord> extends RecordBase<T>
 {
-	//TODO Test (run all, or at least most tests with TestInterface and TestPOJO)
-	//Test Validations, Callbacks, Timestamps, ...
-	//ToString, hashCode, ....
-
 	/**
 	 * @param recordType
 	 * @param core

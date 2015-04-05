@@ -24,6 +24,7 @@
  */
 package de.doe300.activerecord;
 
+import de.doe300.activerecord.jdbc.TypeMappings;
 import de.doe300.activerecord.pojo.POJOBase;
 import de.doe300.activerecord.record.ActiveRecord;
 import de.doe300.activerecord.record.RecordType;
@@ -144,5 +145,11 @@ public class TestPOJO implements ActiveRecord, TestInterface
 	public int hashCode()
 	{
 		return super.hashCode();
+	}
+
+	@Override
+	public ValidationType getTestEnum()
+	{
+		return TypeMappings.readEnumValue( ValidationType.class, this, "test_enum");
 	}
 }

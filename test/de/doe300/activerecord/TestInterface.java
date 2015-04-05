@@ -127,4 +127,6 @@ public interface TestInterface extends TimestampedRecord, ValidatedRecord, Recor
 	{
 		checkName( getName());
 	}
+	
+	public ValidationType getTestEnum();
 }

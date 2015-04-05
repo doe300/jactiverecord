@@ -25,32 +25,54 @@
 package de.doe300.activerecord.migration;
 
 import de.doe300.activerecord.TestInterface;
+import de.doe300.activerecord.TestPOJO;
 import de.doe300.activerecord.TestServer;
 import java.sql.Connection;
 import java.sql.SQLException;
+import java.util.Arrays;
+import java.util.Collection;
 import org.junit.Assert;
-import org.junit.BeforeClass;
 import org.junit.Test;
+import org.junit.runner.RunWith;
+import org.junit.runners.Parameterized;
 
 /**
  *
  * @author daniel
  */
+@RunWith(Parameterized.class)
 public class AutomaticMigrationTest
 {
-	private static AutomaticMigration mig;
+	private final AutomaticMigration mig;
 	private static Connection con;
-	
-	public AutomaticMigrationTest()
-	{
+	static{
+		try
+		{
+			con = TestServer.getTestConnection();
+		}
+		catch ( SQLException ex )
+		{
+			throw new RuntimeException(ex);
+		}
 	}
 	
-	@BeforeClass
-	public static void init() throws SQLException
+	public AutomaticMigrationTest(AutomaticMigration migration)
 	{
-		mig = new AutomaticMigration(TestInterface.class, true);
-		con = TestServer.getTestConnection();
+		this.mig = migration;
 	}
+	
+	@Parameterized.Parameters
+	public static Collection<Object[]> getParameters() throws SQLException
+	{
+		return Arrays.asList(
+			new Object[]{new AutomaticMigration(TestInterface.class, true)},
+			new Object[]{new AutomaticMigration(TestPOJO.class, true)}
+		);
+	}
+	
+	//is used by other tests to build/drop test table
+	public static final AutomaticMigrationTest testDataMigration = 
+			new AutomaticMigrationTest(new AutomaticMigration(TestInterface.class, true));
 
 	@Test
 	public void testApply() throws SQLException
@@ -78,6 +100,7 @@ public class AutomaticMigrationTest
 	@Test
 	public void testGetSQLType_Class()
 	{
+		//TODO
 	}
 	
 }

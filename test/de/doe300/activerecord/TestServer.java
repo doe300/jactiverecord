@@ -101,8 +101,7 @@ public class TestServer
 	
 	public static void buildTestTables() throws SQLException, Exception
 	{
-		AutomaticMigrationTest.init();
-		new AutomaticMigrationTest().testApply();
+		AutomaticMigrationTest.testDataMigration.testApply();
 		ManualMigrationTest.init();
 		new ManualMigrationTest().testApply();
 		
@@ -110,7 +109,7 @@ public class TestServer
 	
 	public static void destroyTestTables() throws SQLException, Exception
 	{
-		new AutomaticMigrationTest().testRevert();
+		AutomaticMigrationTest.testDataMigration.testRevert();
 		new ManualMigrationTest().testRevert();
 	}
 }

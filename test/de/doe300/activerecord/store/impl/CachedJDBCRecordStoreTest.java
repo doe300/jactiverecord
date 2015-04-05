@@ -191,7 +191,7 @@ public class CachedJDBCRecordStoreTest extends Assert
 	@Test
 	public void testGetAllColumnNames()
 	{
-		assertTrue( Arrays.asList( new String[]{"id", "name", "age", "fk_test_id", "other", "created_at", "updated_at"}).containsAll( store.getAllColumnNames( base.getTableName()) ) );
+		assertTrue( Arrays.asList( new String[]{"id", "name", "age", "fk_test_id", "other", "created_at", "updated_at", "test_enum"}).containsAll( store.getAllColumnNames( base.getTableName()) ) );
 		assertTrue( ( store.getAllColumnNames( base.getTableName()) ).containsAll( Arrays.asList( new String[]{"id", "name", "age", "fk_test_id", "other", "created_at", "updated_at"})) );
 	}
 
