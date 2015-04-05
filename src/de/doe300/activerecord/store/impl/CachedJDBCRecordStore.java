@@ -241,6 +241,7 @@ public class CachedJDBCRecordStore extends SimpleJDBCRecordStore implements Reco
 	@Override
 	public Map<String, Object> findFirstWithData( final RecordBase<?> base, final String[] columns, final Scope scope )
 	{
+		checkTableExists( base );
 		//1.check in cache for conditions
 		Map<String,Object> res;
 		if(cache.containsKey( base))

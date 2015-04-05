@@ -141,6 +141,43 @@ public class SimpleJDBCRecordStore implements RecordStore
 		}
 		return input;
 	}
+	
+	protected void checkTableExists(RecordBase<?> base) throws IllegalStateException
+	{
+		if(!exists( base.getTableName()))
+		{
+			if(base.isAutoCreate())
+			{
+				Logging.getLogger().info( "JDBCStore", "auto creating table "+base.getTableName());
+				final String createSQL = base.getRecordType().getAnnotation( RecordType.class).autoCreateSQL();
+				Migration mig;
+				if(!createSQL.isEmpty())
+				{
+					mig = new ManualMigration(createSQL, null, null);
+				}
+				else
+				{
+					mig = new AutomaticMigration(base.getRecordType(), false);
+				}
+				try
+				{
+					if(!mig.apply( con ))
+					{
+						throw new RuntimeException("Migration failed");
+					}
+				}
+				catch(final Exception e)
+				{
+					Logging.getLogger().error( "JDBCStore", "Failed to create table");
+					throw new RuntimeException("Failed to create table", e);
+				}
+			}
+			else
+			{
+				throw new IllegalStateException("Table doesn't exists: "+base.getTableName());
+			}
+		}
+	}
 
 	@Override
 	public Connection getConnection()
@@ -272,6 +309,7 @@ public class SimpleJDBCRecordStore implements RecordStore
 	@Override
 	public boolean containsRecord( final RecordBase<?> base, final Integer primaryKey )
 	{
+		checkTableExists( base );
 		final String sql = "SELECT "+base.getPrimaryColumn()+" FROM "+base.getTableName()+" WHERE "+base.getPrimaryColumn()+" = "+primaryKey;
 		Logging.getLogger().debug( "JDBCStore", sql);
 		try(PreparedStatement stmt = con.prepareStatement( sql ))
@@ -289,6 +327,7 @@ public class SimpleJDBCRecordStore implements RecordStore
 	@Override
 	public void destroy( final RecordBase<?> base, final int primaryKey )
 	{
+		checkTableExists( base );
 		try(Statement stm = con.createStatement())
 		{
 			final String sql = "DELETE FROM "+base.getTableName()+" WHERE "+base.getPrimaryColumn()+" = "+primaryKey;
@@ -306,6 +345,7 @@ public class SimpleJDBCRecordStore implements RecordStore
 	@Override
 	public Map<String, Object> findFirstWithData( final RecordBase<?> base, final String[] columns, final Scope scope )
 	{
+		checkTableExists( base );
 		final String sql = "SELECT "+toColumnsList( columns, base.getPrimaryColumn() )+" FROM "+base.getTableName()+" "+toWhereClause( scope.getCondition() )+" ORDER BY "+toOrder( base, scope ).toSQL()+" LIMIT 1";
 		Logging.getLogger().debug( "JDBCStore", sql);
 		try(PreparedStatement stm = con.prepareStatement(sql))
@@ -340,6 +380,7 @@ public class SimpleJDBCRecordStore implements RecordStore
 	@Override
 	public int count( final RecordBase<?> base, final Condition condition )
 	{
+		checkTableExists( base );
 		final String sql = "SELECT COUNT(1) as size FROM "+base.getTableName()+" "+toWhereClause( condition );
 		Logging.getLogger().debug( "JDBCStore", sql);
 		//column name can't be count, because its a keyword
@@ -490,32 +531,7 @@ public class SimpleJDBCRecordStore implements RecordStore
 	{
 		try
 		{
-			if(base.isAutoCreate() && !exists( base.getTableName()))
-			{
-				Logging.getLogger().info( "JDBCStore", "auto creating table "+base.getTableName());
-				final String createSQL = base.getRecordType().getAnnotation( RecordType.class).autoCreateSQL();
-				Migration mig;
-				if(!createSQL.isEmpty())
-				{
-					mig = new ManualMigration(createSQL, null, null);
-				}
-				else
-				{
-					mig = new AutomaticMigration(base.getRecordType(), false);
-				}
-				try
-				{
-					if(!mig.apply( con ))
-					{
-						return -1;
-					}
-				}
-				catch(final Exception e)
-				{
-					Logging.getLogger().error( "JDBCStore", "Failed to create table");
-					throw new RuntimeException("Failed to create table", e);
-				}
-			}
+			checkTableExists( base );
 			final Map<String,Object> rowData = new HashMap<>(columns != null ? columns.size() : 3 );
 			//set initial values
 			if(columns != null)
