@@ -25,6 +25,7 @@
 package de.doe300.activerecord.record.association;
 
 import de.doe300.activerecord.FinderMethods;
+import de.doe300.activerecord.RecordBase;
 import de.doe300.activerecord.record.ActiveRecord;
 import java.util.Set;
 import java.util.stream.Stream;
@@ -41,4 +42,9 @@ public interface AssociationSet<T extends ActiveRecord> extends Set<T>, FinderMe
 	{
 		return stream();
 	}
+	
+	/**
+	 * @return the RecordBase of the associated type
+	 */
+	public RecordBase<T> getAssociatedBase();
 }

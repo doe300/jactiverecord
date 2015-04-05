@@ -161,4 +161,10 @@ public class HasManyAssociationSet<T extends ActiveRecord> extends AbstractSet<T
 		Scope newScope = new Scope(new AndCondition(associationCond, scope.getCondition()), scope.getOrder(), scope.getLimit());
 		return destBase.findFirstWithScope( newScope );
 	}
+
+	@Override
+	public RecordBase<T> getAssociatedBase()
+	{
+		return destBase;
+	}
 }

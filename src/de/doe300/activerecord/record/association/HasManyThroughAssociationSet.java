@@ -169,4 +169,10 @@ public class HasManyThroughAssociationSet<T extends ActiveRecord> extends Abstra
 		Scope newScope = new Scope(new AndCondition(new SimpleCondition(destBase.getPrimaryColumn(), keys, Comparison.IN), scope.getCondition()), scope.getOrder(), scope.getLimit());
 		return destBase.findFirstWithScope( newScope);
 	}
+
+	@Override
+	public RecordBase<T> getAssociatedBase()
+	{
+		return destBase;
+	}
 }
