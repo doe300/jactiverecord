@@ -31,12 +31,13 @@ import java.io.InputStream;
 import java.net.MalformedURLException;
 import java.net.URI;
 import java.net.URL;
+import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.sql.Connection;
 import java.sql.SQLException;
 import java.sql.SQLXML;
 import java.sql.Types;
 import java.util.UUID;
-import javax.xml.transform.Result;
 import javax.xml.transform.Source;
 import javax.xml.transform.dom.DOMResult;
 
@@ -111,6 +112,19 @@ public final class TypeMappings
 	 * @see Attribute#typeName() 
 	 */
 	public static final String URI_TYPE_NAME = "VARCHAR(255)";
+	
+	/**
+	 * Type-name for a {@link Path}, limited to 255 characters
+	 * @see Attribute#typeName() 
+	 */
+	public static final String PATH_TYPE_NAME = "VARCHAR(255)";
+	
+	/**
+	 * Type-name for a {@link Enum}, limited to 255 characters
+	 * @see Attribute#typeName() 
+	 * @see Enum#name() 
+	 */
+	public static final String ENUM_TYPE_NAME = "VARCHAR(255)";
 	
 	/**
 	 * To be used in attribute-getters for URLs
@@ -274,6 +288,81 @@ public final class TypeMappings
 		xml.setString( xmlString );
 		
 		record.getBase().getStore().setValue( record.getBase(), record.getPrimaryKey(), columnName, xml);
+	}
+	
+	/**
+	 * To be used in attribute-getters for Path
+	 * @param record
+	 * @param columnName
+	 * @return the Path or <code>null</code>
+	 */
+	public static Path readPath(ActiveRecord record, String columnName)
+	{
+		Object value = record.getBase().getStore().getValue( record.getBase(), record.getPrimaryKey(), columnName);
+		if(value == null)
+		{
+			return null;
+		}
+		if(value instanceof Path)
+		{
+			//maybe some driver has a mapping for Path
+			return (Path)value;
+		}
+		if(value instanceof URI)
+		{
+			//maybe some driver has a mapping for URI
+			return Paths.get((URI)value);
+		}
+		return Paths.get( (String)value);
+	}
+	
+	/**
+	 * To be used in attribute-setters for Paths
+	 * @param path
+	 * @param record
+	 * @param columnName 
+	 */
+	public static void writePath(Path path, ActiveRecord record, String columnName)
+	{
+		record.getBase().getStore().setValue( record.getBase(), record.getPrimaryKey(), columnName, path == null ? null : path.toString());
+	}
+	
+	/**
+	 * This method tries to determine the enum-value from the {@link Enum#name()}-method before using the index of {@link Class#getEnumConstants() }
+	 * @param <T>
+	 * @param enumType
+	 * @param record
+	 * @param columnName
+	 * @return the enum-value or <code>null</code>
+	 */
+	public static <T extends Enum<T>> T readEnumValue(Class<T> enumType, ActiveRecord record, String columnName)
+	{
+		Object value = record.getBase().getStore().getValue( record.getBase(), record.getPrimaryKey(), columnName);
+		if(value == null)
+		{
+			return null;
+		}
+		if(value instanceof String)
+		{
+			return Enum.valueOf( enumType, value.toString());
+		}
+		if(value instanceof Number)
+		{
+			return enumType.getEnumConstants()[((Number)value).intValue()];
+		}
+		throw new IllegalArgumentException("Can't find enum-constant from value: "+value.toString());
+	}
+	
+	/**
+	 * Writes the enum-value by storing its {@link Enum#name() }
+	 * @param <T>
+	 * @param value
+	 * @param record
+	 * @param columnName 
+	 */
+	public static <T extends Enum<T>> void writeEnumValue(T value, ActiveRecord record, String columnName)
+	{
+		record.getBase().getStore().setValue( record.getBase(), record.getPrimaryKey(), columnName, value == null ? null : value.name());
 	}
 }
 

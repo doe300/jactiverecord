@@ -26,9 +26,11 @@ package de.doe300.activerecord.jdbc;
 
 import de.doe300.activerecord.migration.Attribute;
 import de.doe300.activerecord.record.ActiveRecord;
+import java.math.RoundingMode;
 import java.net.MalformedURLException;
 import java.net.URI;
 import java.net.URL;
+import java.nio.file.Path;
 import java.sql.Types;
 import java.util.UUID;
 
@@ -70,4 +72,26 @@ public interface TestTypesInterface extends ActiveRecord
 	{
 		TypeMappings.writeURI( uri, this, "url");
 	}	
+	
+	@Attribute(type =  Types.VARCHAR, typeName = TypeMappings.PATH_TYPE_NAME, name = "path")
+	public default Path getPath()
+	{
+		return TypeMappings.readPath( this, "path");
+	}
+	
+	public default void setPath(Path path)
+	{
+		TypeMappings.writePath( path, this, "path");
+	}
+	
+	@Attribute(type = Types.VARCHAR, typeName = TypeMappings.ENUM_TYPE_NAME, name = "enum")
+	public default RoundingMode getEnum()
+	{
+		return TypeMappings.readEnumValue( RoundingMode.class, this, "enum");
+	}
+	
+	public default void setEnum(RoundingMode mode)
+	{
+		TypeMappings.writeEnumValue( mode, this, "enum");
+	}
 }

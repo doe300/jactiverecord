@@ -28,8 +28,11 @@ import de.doe300.activerecord.RecordBase;
 import de.doe300.activerecord.RecordCore;
 import de.doe300.activerecord.TestServer;
 import de.doe300.activerecord.migration.AutomaticMigration;
+import java.math.RoundingMode;
 import java.net.URI;
 import java.net.URL;
+import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.sql.Connection;
 import java.sql.SQLException;
 import java.util.UUID;
@@ -87,5 +90,23 @@ public class TypeMappingsTest extends Assert
 		URI uri = URI.create( "mailto:test@example.com");
 		record.setURI( uri );
 		assertEquals( uri, record.getURI());
+	}
+
+	@Test
+	public void testPath()
+	{
+		TestTypesInterface record = base.createRecord();
+		Path path = Paths.get( System.getProperty( "user.home") );
+		record.setPath( path );
+		assertEquals( path, record.getPath());
+	}
+
+	@Test
+	public void testEnumValue()
+	{
+		TestTypesInterface record = base.createRecord();
+		RoundingMode mode = RoundingMode.HALF_UP;
+		record.setEnum( mode );
+		assertEquals( mode, record.getEnum());
 	}
 }
