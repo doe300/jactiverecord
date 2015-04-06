@@ -32,7 +32,7 @@ import java.util.function.Predicate;
  *
  * @author doe300
  */
-public interface Condition extends Predicate<Map<String, Object>>, SQLCommand
+public interface Condition extends Predicate<ActiveRecord>, SQLCommand
 {
 	/**
 	 * The wildcards (<code>?</code>) are replaced by the conditions {@link #getValues() values}.
@@ -46,9 +46,17 @@ public interface Condition extends Predicate<Map<String, Object>>, SQLCommand
 	public Object[] getValues();
 	
 	/**
-	 * This method acts as a {@link Predicate Predicate&lt;ActiveRecord&gt;}
 	 * @param record
 	 * @return whether the <code>record</code> matches this condition
 	 */
+	@Override
 	public boolean test(ActiveRecord record);
+	
+	/**
+	 * NOTE: This method is not required to be supported
+	 * @param map
+	 * @return whether the column-map matches this condition
+	 * @throws UnsupportedOperationException if the method is not supported
+	 */
+	public boolean test(Map<String,Object> map);
 }
