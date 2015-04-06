@@ -44,6 +44,7 @@ import de.doe300.activerecord.migration.constraints.ReferenceRule;
 import de.doe300.activerecord.record.ActiveRecord;
 import de.doe300.activerecord.record.RecordType;
 import de.doe300.activerecord.record.TimestampedRecord;
+import de.doe300.activerecord.record.association.AssociationSet;
 import de.doe300.activerecord.record.attributes.AttributeGetter;
 import de.doe300.activerecord.record.attributes.AttributeSetter;
 import de.doe300.activerecord.record.attributes.Attributes;
@@ -322,6 +323,16 @@ public class AutomaticMigration implements Migration
 			{
 				continue;
 			}
+			//skip associations - for POJO records
+			if(AssociationSet.class.isAssignableFrom( method.getReturnType()))
+			{
+				continue;
+			}
+			//skip all methods annotated with ExcludeAttribute
+			if(method.isAnnotationPresent( ExcludeAttribute.class))
+			{
+				continue;
+			}
 			String columnName = null;
 			Class<?> attType = null;
 			//2. get attribute-accessors
@@ -364,7 +375,9 @@ public class AutomaticMigration implements Migration
 		//5. mark or add primary key, add constraints
 		final String primaryColumn = AutomaticMigration.getPrimaryColumn( recordType).toLowerCase();
 		columns.putIfAbsent( primaryColumn, AutomaticMigration.getSQLType( Integer.class));
-		columns.put( primaryColumn, columns.get( primaryColumn)+" IDENTITY PRIMARY KEY");
+		//FIXME mySQL doens't know IDENTITY, its called AUTO_INCREMENT
+		//also how to make sure, reserved keywords are not used as columns or somehow rewrite them
+		columns.put( primaryColumn, columns.get( primaryColumn)+" AUTO_INCREMENT PRIMARY KEY");
 		return columns;
 	}
 
