@@ -28,18 +28,21 @@ import de.doe300.activerecord.migration.AutomaticMigrationTest;
 import de.doe300.activerecord.migration.ManualMigrationTest;
 import java.io.PrintWriter;
 import java.sql.Connection;
+import java.sql.DatabaseMetaData;
 import java.sql.Driver;
 import java.sql.DriverManager;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.Enumeration;
 import org.hsqldb.Server;
+import org.junit.Assert;
+import org.junit.Test;
 
 /**
  * Starts the HSQLDB server for testing
  * @author doe300
  */
-public class TestServer
+public class TestServer extends Assert
 {
 	
 	static 
@@ -50,6 +53,7 @@ public class TestServer
 			{
 				throw new RuntimeException("HSQLDB Driver not found");
 			}
+			Class.forName("org.sqlite.JDBC");
 			Enumeration<Driver> drivers = DriverManager.getDrivers();
 			while(drivers.hasMoreElements())
 			{
@@ -86,16 +90,26 @@ public class TestServer
 			//sa without password is the default user
 			//con = DriverManager.getConnection( "jdbc:hsqldb:hsql://localhost:9999/test", "sa", "" );
 			con = DriverManager.getConnection( "jdbc:hsqldb:mem:test", "sa", "");
+			
+			//FIXME need testing:
+			
+			//start server with "systemctl start mysqld.service"
+//			con = DriverManager.getConnection( "jdbc:mysql://localhost:3306/mysql", "root", "");
+//			con = DriverManager.getConnection("jdbc:sqlite:/tmp/testdb.db");
+//			con = DriverManager.getConnection( "jdbc:postgresql:database");
+			
 		}
 		return con;
 	}
 	
 	public static void printTestTable() throws SQLException
 	{
-		ResultSet set = getTestConnection().prepareCall( "SELECT * FROM TESTTABLE").executeQuery();
-		while(set.next())
+		try(ResultSet set = getTestConnection().prepareCall( "SELECT * FROM TESTTABLE").executeQuery())
 		{
-			System.out.println( set.getInt( 1)+", "+set.getString( 2)+", "+set.getInt( 3)+", "+set.getTimestamp( "created_at")+", "+set.getTimestamp( "updated_at") );
+			while(set.next())
+			{
+				System.out.println( set.getInt( 1)+", "+set.getString( 2)+", "+set.getInt( 3)+", "+set.getTimestamp( "created_at")+", "+set.getTimestamp( "updated_at") );
+			}
 		}
 	}
 	
@@ -112,4 +126,17 @@ public class TestServer
 		AutomaticMigrationTest.testDataMigration.testRevert();
 		new ManualMigrationTest().testRevert();
 	}
+	
+	@Test
+	public void printMetaData() throws SQLException
+	{
+		DatabaseMetaData data = getTestConnection().getMetaData();
+		System.out.println( "Driver:" );
+		System.out.println( "- Name: "+data.getDriverName());
+		System.out.println( "- Version: "+data.getDriverVersion() );
+		
+		System.out.println( "Datenbank: " );
+		System.out.println( "- Name: " +data.getDatabaseProductName() );
+		System.out.println( "- version: "+data.getDatabaseProductVersion() );
+	}	
 }

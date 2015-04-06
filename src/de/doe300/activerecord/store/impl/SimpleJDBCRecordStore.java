@@ -46,6 +46,7 @@ import java.util.stream.StreamSupport;
 import de.doe300.activerecord.RecordBase;
 import de.doe300.activerecord.dsl.Condition;
 import de.doe300.activerecord.dsl.Order;
+import de.doe300.activerecord.jdbc.VendorSpecific;
 import de.doe300.activerecord.logging.Logging;
 import de.doe300.activerecord.migration.AutomaticMigration;
 import de.doe300.activerecord.migration.ManualMigration;
@@ -123,23 +124,7 @@ public class SimpleJDBCRecordStore implements RecordStore
 	 */
 	protected String convertIdentifier(final String input)
 	{
-		try
-		{
-			if(con.getMetaData().storesUpperCaseIdentifiers())
-			{
-				return input.toUpperCase();
-			}
-			if(con.getMetaData().storesLowerCaseIdentifiers())
-			{
-				return input.toLowerCase();
-			}
-
-		}
-		catch ( final SQLException ex )
-		{
-			//TODO do something
-		}
-		return input;
+		return VendorSpecific.convertIdentifier( input, con );
 	}
 	
 	protected void checkTableExists(RecordBase<?> base) throws IllegalStateException
@@ -216,6 +201,11 @@ public class SimpleJDBCRecordStore implements RecordStore
 		}
 		//Don't update ID
 		tmp.remove( base.getPrimaryColumn());
+		if(tmp.isEmpty())
+		{
+			//cancel, if only ID was to be updated
+			return;
+		}
 		final Iterator<Map.Entry<String,Object>> entries = tmp.entrySet().iterator();
 		final String[] columns = new String[tmp.size()];
 		final Object[] values = new Object[tmp.size()];
@@ -566,7 +556,8 @@ public class SimpleJDBCRecordStore implements RecordStore
 				{
 					if (rs.next())
 					{
-						return rs.getInt(base.getPrimaryColumn());
+						//the name of the returned column varies from vendor to vendor, so just return the first column
+						return rs.getInt(1);
 					}
 					Logging.getLogger().error("JDBCStore", "Failed to insert new row!");
 					return -1;

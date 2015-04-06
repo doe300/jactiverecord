@@ -25,6 +25,7 @@
 package de.doe300.activerecord.migration;
 
 import de.doe300.activerecord.RecordBase;
+import de.doe300.activerecord.jdbc.VendorSpecific;
 import java.lang.reflect.Field;
 import java.lang.reflect.Method;
 import java.lang.reflect.Modifier;
@@ -82,6 +83,7 @@ public class AutomaticMigration implements Migration
 {
 	private final Class<? extends ActiveRecord> recordType;
 	private final boolean dropColumnsOnUpdate;
+	private VendorSpecific vendorSpecifics;
 
 	/**
 	 * @param recordType the type to create and drop the table for
@@ -93,6 +95,19 @@ public class AutomaticMigration implements Migration
 		this.dropColumnsOnUpdate = dropColumnsOnUpdate;
 	}
 
+	/**
+	 * @param recordType the type to create and drop the table for
+	 * @param dropColumnsOnUpdate whether to drop obsolete columns on update
+	 * @param vendorSpecifics the vendor-specifics keyword for the vendor used (if known)
+	 */
+	public AutomaticMigration(
+			Class<? extends ActiveRecord> recordType, boolean dropColumnsOnUpdate, VendorSpecific vendorSpecifics )
+	{
+		this.recordType = recordType;
+		this.dropColumnsOnUpdate = dropColumnsOnUpdate;
+		this.vendorSpecifics = vendorSpecifics;
+	}
+
 	@Override
 	public boolean apply( final Connection con ) throws SQLException
 	{
@@ -102,11 +117,15 @@ public class AutomaticMigration implements Migration
 		{
 			return false;
 		}
+		if(vendorSpecifics == null)
+		{
+			vendorSpecifics = VendorSpecific.guessDatabaseVendor( con );
+		}
 		//2. get desired columns and types
-		final Map<String,String> columns = AutomaticMigration.getColumnsFromModel( recordType );
+		final Map<String,String> columns = getColumnsFromModel( recordType );
 		//3. execute statement
 		final String sql = "CREATE TABLE "+tableName+" ("
-				+columns.entrySet().stream().map( (final Map.Entry<String,String> e) -> e.getKey()+" "+e.getValue())
+				+columns.entrySet().stream().map( (final Map.Entry<String,String> e) -> VendorSpecific.convertIdentifier( e.getKey(), con)+" "+e.getValue())
 						.collect( Collectors.joining(", "))
 				+" )";
 		Logging.getLogger().info( recordType.getSimpleName(), "Executing automatic table-creation...");
@@ -159,6 +178,10 @@ public class AutomaticMigration implements Migration
 		{
 			return false;
 		}
+		if(vendorSpecifics == null)
+		{
+			vendorSpecifics = VendorSpecific.guessDatabaseVendor( con );
+		}
 		//2. get existing columns
 		final Map<String,String> hasColumns = new HashMap<>(10);
 		try(ResultSet set = con.getMetaData().getColumns( con.getCatalog(), con.getSchema(), tableName, null))
@@ -169,7 +192,7 @@ public class AutomaticMigration implements Migration
 			}
 		}
 		//3. get desired columns
-		final Map<String,String> desiredColumns = AutomaticMigration.getColumnsFromModel( recordType );
+		final Map<String,String> desiredColumns = getColumnsFromModel( recordType );
 		//4. calculate difference
 		final Map<String,String> removeColumns = hasColumns.entrySet().stream().
 				filter( (final Map.Entry<String,String> e) -> desiredColumns.containsKey( e.getKey())).collect( Collectors.toMap( Map.Entry::getKey, Map.Entry::getValue));
@@ -182,7 +205,7 @@ public class AutomaticMigration implements Migration
 		{
 			final String sql = "ALTER TABLE "+tableName+" ("+
 					"DROP COLUMN "+
-					removeColumns.entrySet().stream().map( (final Map.Entry<String,String> e) -> e.getKey()).collect( Collectors.joining( ", "))+
+					removeColumns.entrySet().stream().map( (final Map.Entry<String,String> e) -> VendorSpecific.convertIdentifier( e.getKey(), con)).collect( Collectors.joining( ", "))+
 					")";
 			Logging.getLogger().info(recordType.getSimpleName(), "Executing automatic table-update...");
 			Logging.getLogger().info(recordType.getSimpleName(), sql);
@@ -195,7 +218,7 @@ public class AutomaticMigration implements Migration
 		{
 			final String sql = "ALTER TABLE "+tableName+" ("+
 					"ADD "+
-					addColumns.entrySet().stream().map( (final Map.Entry<String,String> e) -> e.getKey()+" "+e.getValue()).collect( Collectors.joining( ", "))+
+					addColumns.entrySet().stream().map( (final Map.Entry<String,String> e) -> VendorSpecific.convertIdentifier( e.getKey(), con)+" "+e.getValue()).collect( Collectors.joining( ", "))+
 					")";
 			Logging.getLogger().info(recordType.getSimpleName(), "Executing automatic table-update...");
 			Logging.getLogger().info(recordType.getSimpleName(), sql);
@@ -225,6 +248,10 @@ public class AutomaticMigration implements Migration
 		if(!structureExists( con, tableName))
 		{
 			return false;
+		}
+		if(vendorSpecifics == null)
+		{
+			vendorSpecifics = VendorSpecific.guessDatabaseVendor( con );
 		}
 		//2. drop table
 		final String sql = "DROP TABLE "+tableName;
@@ -270,7 +297,7 @@ public class AutomaticMigration implements Migration
 	 * @param recordType
 	 * @return the columns
 	 */
-	private static Map<String,String> getColumnsFromModel(final Class<? extends ActiveRecord> recordType) throws IllegalArgumentException
+	private Map<String,String> getColumnsFromModel(final Class<? extends ActiveRecord> recordType) throws IllegalArgumentException
 	{
 		//TODO move ID to first column
 		final HashMap<String,String> columns = new HashMap<>(10);
@@ -362,22 +389,21 @@ public class AutomaticMigration implements Migration
 			//convert type (for 2. and 3.)
 			if(columnName!=null && attType!=null)
 			{
-				columns.putIfAbsent(columnName, AutomaticMigration.getSQLType( attType));
+				columns.putIfAbsent(columnName, getSQLType( attType));
 			}
 		}
 		//4. add timestamps, other features
 		if(TimestampedRecord.class.isAssignableFrom( recordType))
 		{
 			//forces the timestamps to be overriden, because they need to be of type Timestamp
-			columns.put(TimestampedRecord.COLUMN_CREATED_AT, AutomaticMigration.getSQLType( java.sql.Timestamp.class));
-			columns.put(TimestampedRecord.COLUMN_UPDATED_AT, AutomaticMigration.getSQLType( java.sql.Timestamp.class));
+			columns.put(TimestampedRecord.COLUMN_CREATED_AT, getSQLType( java.sql.Timestamp.class));
+			columns.put(TimestampedRecord.COLUMN_UPDATED_AT, getSQLType( java.sql.Timestamp.class));
 		}
 		//5. mark or add primary key, add constraints
 		final String primaryColumn = AutomaticMigration.getPrimaryColumn( recordType).toLowerCase();
-		columns.putIfAbsent( primaryColumn, AutomaticMigration.getSQLType( Integer.class));
-		//FIXME mySQL doens't know IDENTITY, its called AUTO_INCREMENT
-		//also how to make sure, reserved keywords are not used as columns or somehow rewrite them
-		columns.put( primaryColumn, columns.get( primaryColumn)+" AUTO_INCREMENT PRIMARY KEY");
+		columns.putIfAbsent( primaryColumn, getSQLType( Integer.class));
+		//FIXME somehow make sure, reserved keywords are not used as columns or rewrite them
+		columns.put( primaryColumn, columns.get( primaryColumn)+" "+vendorSpecifics.getAutoIncrementKeyword()+" PRIMARY KEY");
 		return columns;
 	}
 
@@ -425,11 +451,11 @@ public class AutomaticMigration implements Migration
 	 * @see "http://www.cis.upenn.edu/~bcpierce/courses/629/jdkdocs/guide/jdbc/getstart/mapping.doc.html"
 	 * @see java.sql.Types
 	 */
-	public static String getSQLType(final Class<?> javaType) throws IllegalArgumentException
+	public String getSQLType(final Class<?> javaType) throws IllegalArgumentException
 	{
 		if(javaType.equals( String.class))
 		{
-			return "LONGVARCHAR";
+			return vendorSpecifics.getStringDataType();
 		}
 		if(javaType.equals( java.math.BigDecimal.class))
 		{
