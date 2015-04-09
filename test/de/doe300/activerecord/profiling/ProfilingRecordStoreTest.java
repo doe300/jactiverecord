@@ -24,11 +24,12 @@
  */
 package de.doe300.activerecord.profiling;
 
-import de.doe300.activerecord.profiling.ProfilingRecordStore;
-import de.doe300.activerecord.RecordBase;
 import de.doe300.activerecord.RecordCore;
 import de.doe300.activerecord.TestInterface;
 import de.doe300.activerecord.TestServer;
+import de.doe300.activerecord.dsl.SimpleCondition;
+import de.doe300.activerecord.dsl.Comparison;
+import de.doe300.activerecord.record.association.AssociationHelper;
 import de.doe300.activerecord.store.RecordStore;
 import de.doe300.activerecord.store.impl.CachedJDBCRecordStore;
 import de.doe300.activerecord.store.impl.SimpleJDBCRecordStore;
@@ -47,14 +48,14 @@ import org.junit.runners.Parameterized;
 public class ProfilingRecordStoreTest extends Assert
 {
 	private final ProfilingRecordStore recordStore;
-	private final RecordBase<TestInterface> base;
+	private final ProfilingRecordBase<TestInterface> base;
 	private final String name;
 	
 	public ProfilingRecordStoreTest(String name, RecordStore store)
 	{
 		this.name = name;
 		this.recordStore = new ProfilingRecordStore(store );
-		base = RecordCore.fromStore( name, recordStore ).buildBase( TestInterface.class);
+		base = new ProfilingRecordBase<>(RecordCore.fromStore( name, recordStore ).buildBase( TestInterface.class));
 	}
 	
 	@Parameterized.Parameters
@@ -82,35 +83,54 @@ public class ProfilingRecordStoreTest extends Assert
 	public void testPerformance()
 	{
 		//TODO run several methods
-		for(int i = 0; i< 100; i++)
+		for(int i = 0; i< 200; i++)
 		{
 			TestInterface t = base.createRecord(Collections.singletonMap( "name", "ThisIsAName"));
 			t.setAge( 213);
-			t.getName();
+			assertEquals("ThisIsAName", t.getName());
 			t.save();
 			t.setDirectionOne( t);
-			t.getDirectionOther();
+			assertSame(t, t.getDirectionOther());
 			t.setName( "AnotherName");
 			t.save();
 			t.getTestEnum();
-			t.isSynchronized();
+			assertTrue(t.isSynchronized());
+			AssociationHelper.addHasManyThrough( t, t, "mappingTable", "fk_test1", "fk_test2");
+			AssociationHelper.addHasManyThrough( t, t, "mappingTable", "fk_test2", "fk_test1");
 			t.getPrimaryKey();
 			t.reload();
 			t.setAge( 212);
 			t.setName( "NextName");
 			t.save();
-			t.inRecordStore();
-			t.isSynchronized();
-			//FIXME touch throws 2 errors!!!
-//			t.touch();
+			assertTrue(t.inRecordStore());
+			assertTrue(t.isSynchronized());
+			t.touch();
+			AssociationHelper.getHasManyThroughSet( t, TestInterface.class, "mappingTable", "fk_test1", "fk_test2");
+			AssociationHelper.getHasManySet(t, TestInterface.class, "fk_test_id");
+			assertEquals(t, AssociationHelper.getBelongsTo( t, TestInterface.class, "fk_test_id"));
+			assertEquals(t, AssociationHelper.getHasOne( t, TestInterface.class, "fk_test_id"));
 			t.validate();
+			assertEquals(1, t.getBase().count( new SimpleCondition(base.getPrimaryColumn(), t.getPrimaryKey(), Comparison.IS)));
+			
+			assertNotNull(t.getBase().findFirstFor( "name", "NextName"));
+			base.find( new SimpleCondition("age", 212, Comparison.IS)).forEach( (TestInterface ti) -> ti.touch());
+			
+			assertSame( t, base.getRecord( t.getPrimaryKey()));
+			assertTrue( t.getBase().hasRecord( t.getPrimaryKey()));
+			
 			t.destroy();
+			assertFalse( t.inRecordStore());
 		}
 
-		System.out.println( name );
-		recordStore.printStatistics();
+		System.out.println( name.toUpperCase() );
+		System.out.println( "RecordBase:" );
+		base.getProfiler().printStatistics(true);
+		System.out.println( "" );
+		System.out.println( "RecordStore:" );
+		recordStore.getProfiler().printStatistics(true);
 		System.out.println(  );
-		((ProfilingConnection)recordStore.getConnection()).printStatistics();
+		System.out.println( "Connection:" );
+		((ProfilingConnection)recordStore.getConnection()).getProfiler().printStatistics(true);
 		System.out.println(  );
 		System.out.println(  );
 	}
