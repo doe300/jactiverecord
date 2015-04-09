@@ -56,5 +56,8 @@ public interface TimestampedRecord extends ActiveRecord
 	/**
 	 * Sets the {@link #getUpdatedAt()} timestamp to this instant
 	 */
-	public void touch();
+	public default void touch()
+	{
+		getBase().getStore().touch( getBase(), getPrimaryKey());
+	}
 }

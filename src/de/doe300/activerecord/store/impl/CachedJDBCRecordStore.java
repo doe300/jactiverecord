@@ -312,4 +312,12 @@ public class CachedJDBCRecordStore extends SimpleJDBCRecordStore implements Reco
 		saveAll( base );
 		return super.count( base, condition );
 	}
+
+	@Override
+	public void touch(RecordBase<?> base, int primaryKey )
+	{
+		super.touch( base, primaryKey );
+		//required to touch data in DB
+		save( base, primaryKey );
+	}
 }

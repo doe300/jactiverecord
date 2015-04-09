@@ -28,7 +28,6 @@ import de.doe300.activerecord.RecordBase;
 import de.doe300.activerecord.logging.Logging;
 import de.doe300.activerecord.proxy.handlers.ProxyHandler;
 import de.doe300.activerecord.record.ActiveRecord;
-import de.doe300.activerecord.record.TimestampedRecord;
 import de.doe300.activerecord.record.attributes.AttributeGetter;
 import de.doe300.activerecord.record.attributes.AttributeSetter;
 import de.doe300.activerecord.record.attributes.Attributes;
@@ -52,7 +51,7 @@ public final class RecordHandler<T extends ActiveRecord> implements InvocationHa
 	private final ProxyHandler[] proxyHandlers;
 	private final int primaryKey;
 	
-	private static final Method getPrimaryKey, getBase, hashCode, toString, equals, touch;
+	private static final Method getPrimaryKey, getBase, hashCode, toString, equals;
 	private static final Constructor<MethodHandles.Lookup> constructor;
 	static {
 		try
@@ -62,7 +61,6 @@ public final class RecordHandler<T extends ActiveRecord> implements InvocationHa
 			hashCode = Object.class.getMethod( "hashCode");
 			toString = Object.class.getMethod( "toString");
 			equals = Object.class.getMethod( "equals", Object.class);
-			touch = TimestampedRecord.class.getMethod( "touch");
 		}
 		catch(NoSuchMethodException e)
 		{
@@ -130,10 +128,6 @@ public final class RecordHandler<T extends ActiveRecord> implements InvocationHa
 		if(method.equals( equals))
 		{
 			return args!=null && args.length==1 && args[0] instanceof ActiveRecord && RecordBase.equals(record, ( ActiveRecord ) args[0]);
-		}
-		if(method.equals( touch ))
-		{
-			store.touch( base, primaryKey );
 		}
 		//1. call method-handler
 		//proxy-handlers are checked first to maximize extensibility

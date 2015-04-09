@@ -29,6 +29,7 @@ import de.doe300.activerecord.record.TimestampedRecord;
 import de.doe300.activerecord.dsl.Condition;
 import de.doe300.activerecord.scope.Scope;
 import java.sql.Connection;
+import java.sql.Timestamp;
 import java.util.Map;
 import java.util.Set;
 import java.util.stream.Collectors;
@@ -174,7 +175,7 @@ public interface RecordStore extends AutoCloseable
 	 */
 	public default void touch(RecordBase<?> base, int primaryKey)
 	{
-		setValue( base, primaryKey, TimestampedRecord.COLUMN_UPDATED_AT, System.currentTimeMillis());
+		setValue( base, primaryKey, TimestampedRecord.COLUMN_UPDATED_AT, new Timestamp(System.currentTimeMillis()));
 	}
 	
 	/**
