@@ -50,7 +50,7 @@ public interface Condition extends Predicate<ActiveRecord>, SQLCommand
 	 * @return whether the <code>record</code> matches this condition
 	 */
 	@Override
-	public boolean test(ActiveRecord record);
+	public boolean test(final ActiveRecord record);
 	
 	/**
 	 * NOTE: This method is not required to be supported
@@ -58,5 +58,5 @@ public interface Condition extends Predicate<ActiveRecord>, SQLCommand
 	 * @return whether the column-map matches this condition
 	 * @throws UnsupportedOperationException if the method is not supported
 	 */
-	public boolean test(Map<String,Object> map);
+	public boolean test(final Map<String,Object> map);
 }

@@ -63,6 +63,7 @@ import de.doe300.activerecord.store.RecordStore;
 public class SimpleJDBCRecordStore implements RecordStore
 {
 	protected final Connection con;
+	protected final VendorSpecific vendorSpecifics;
 
 	/**
 	 * @param con
@@ -70,8 +71,15 @@ public class SimpleJDBCRecordStore implements RecordStore
 	public SimpleJDBCRecordStore(final Connection con)
 	{
 		this.con=con;
+		this.vendorSpecifics = VendorSpecific.guessDatabaseVendor( con );
 	}
-
+	
+	public SimpleJDBCRecordStore( Connection con, VendorSpecific vendorSpecifics )
+	{
+		this.con = con;
+		this.vendorSpecifics = vendorSpecifics;
+	}
+	
 	protected String toWhereClause(final Condition condition)
 	{
 		if(condition==null)
@@ -79,7 +87,7 @@ public class SimpleJDBCRecordStore implements RecordStore
 			return "";
 		}
 		String clause =" WHERE ";
-		clause += condition.toSQL();
+		clause += condition.toSQL(vendorSpecifics);
 		return clause;
 	}
 
@@ -336,7 +344,7 @@ public class SimpleJDBCRecordStore implements RecordStore
 	public Map<String, Object> findFirstWithData( final RecordBase<?> base, final String[] columns, final Scope scope )
 	{
 		checkTableExists( base );
-		final String sql = "SELECT "+toColumnsList( columns, base.getPrimaryColumn() )+" FROM "+base.getTableName()+" "+toWhereClause( scope.getCondition() )+" ORDER BY "+toOrder( base, scope ).toSQL()+" LIMIT 1";
+		final String sql = "SELECT "+toColumnsList( columns, base.getPrimaryColumn() )+" FROM "+base.getTableName()+" "+toWhereClause( scope.getCondition() )+" ORDER BY "+toOrder( base, scope ).toSQL(vendorSpecifics)+" LIMIT 1";
 		Logging.getLogger().debug( "JDBCStore", sql);
 		try(PreparedStatement stm = con.prepareStatement(sql))
 		{
@@ -402,7 +410,7 @@ public class SimpleJDBCRecordStore implements RecordStore
 	@Override
 	public Stream<Map<String, Object>> streamAllWithData( final RecordBase<?> base, final String[] columns, final Scope scope )
 	{
-		String sql = "SELECT "+toColumnsList( columns, base.getPrimaryColumn() )+" FROM "+base.getTableName()+" "+toWhereClause( scope.getCondition() )+" ORDER BY "+toOrder( base, scope ).toSQL();
+		String sql = "SELECT "+toColumnsList( columns, base.getPrimaryColumn() )+" FROM "+base.getTableName()+" "+toWhereClause( scope.getCondition() )+" ORDER BY "+toOrder( base, scope ).toSQL(vendorSpecifics);
 		if(scope.getLimit()!=Scope.NO_LIMIT)
 		{
 			sql += " LIMIT "+scope.getLimit();

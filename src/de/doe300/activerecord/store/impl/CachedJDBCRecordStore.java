@@ -36,28 +36,40 @@ import java.util.stream.Stream;
 
 import de.doe300.activerecord.RecordBase;
 import de.doe300.activerecord.dsl.Condition;
+import de.doe300.activerecord.jdbc.VendorSpecific;
 import de.doe300.activerecord.logging.Logging;
 import de.doe300.activerecord.scope.Scope;
-import de.doe300.activerecord.store.RecordStore;
 import de.doe300.activerecord.store.RowCache;
 
 /**
  * Uses write-back cache
  * @author doe300
  */
-public class CachedJDBCRecordStore extends SimpleJDBCRecordStore implements RecordStore
+public class CachedJDBCRecordStore extends SimpleJDBCRecordStore
 {
 	private final Map<RecordBase<?>, Map<Integer, RowCache>> cache;
 	private final Map<String,Set<String>> columnsCache;
+	private final Map<String, Boolean> tableExistsCache;
 
 	/**
 	 * @param con
 	 */
 	public CachedJDBCRecordStore( final Connection con)
 	{
-		super( con );
+		this( con, VendorSpecific.guessDatabaseVendor( con ) );
+	}
+
+	/**
+	 * 
+	 * @param con
+	 * @param vendorSpecifics 
+	 */
+	public CachedJDBCRecordStore( final Connection con, final VendorSpecific vendorSpecifics)
+	{
+		super( con, vendorSpecifics );
 		this.cache=new HashMap<>(10);
 		this.columnsCache = new TreeMap<>();
+		tableExistsCache = new TreeMap<>();
 	}
 
 	private RowCache getCache(final RecordBase<?> base, final Integer primaryKey)
@@ -83,6 +95,18 @@ public class CachedJDBCRecordStore extends SimpleJDBCRecordStore implements Reco
 		return cache.containsKey( base) && cache.get( base).containsKey( primaryKey);
 	}
 
+	@Override
+	public boolean exists(final String tableName)
+	{
+		if(Boolean.TRUE.equals( tableExistsCache.get( tableName)))
+		{
+			return true;
+		}
+		boolean exists = super.exists( tableName );
+		tableExistsCache.put(tableName, exists);
+		return exists;
+	}
+	
 	@Override
 	public boolean containsRecord( final RecordBase<?> base, final Integer primaryKey )
 	{
@@ -241,6 +265,7 @@ public class CachedJDBCRecordStore extends SimpleJDBCRecordStore implements Reco
 	@Override
 	public Map<String, Object> findFirstWithData( final RecordBase<?> base, final String[] columns, final Scope scope )
 	{
+		//TODO optimize: takes 10k ms for 36k invocations -> 0.3ms
 		checkTableExists( base );
 		//1.check in cache for conditions
 		Map<String,Object> res;

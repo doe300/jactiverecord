@@ -24,7 +24,6 @@
  */
 package de.doe300.activerecord;
 
-import de.doe300.activerecord.jdbc.VendorSpecific;
 import de.doe300.activerecord.logging.Logging;
 import de.doe300.activerecord.pojo.POJOBase;
 import de.doe300.activerecord.proxy.ProxyBase;
@@ -55,7 +54,6 @@ public final class RecordCore implements AutoCloseable
 	private final RecordStore store;
 	private final Map<Class<? extends ActiveRecord>, RecordBase<?>> bases;
 	private Map<Class<? extends ActiveRecord>, ProxyHandler[]> handlers;
-	private VendorSpecific vendorSpecifics;
 
 	private RecordCore( RecordStore store )
 	{
@@ -244,23 +242,4 @@ public final class RecordCore implements AutoCloseable
 		this.handlers = handlers;
 	}
 
-	/**
-	 * @return the vendorSpecifics
-	 */
-	public VendorSpecific getVendorSpecifics()
-	{
-		if(vendorSpecifics == null)
-		{
-			vendorSpecifics = VendorSpecific.guessDatabaseVendor( getStore().getConnection());
-		}
-		return vendorSpecifics;
-	}
-
-	/**
-	 * @param vendorSpecifics the vendorSpecifics to set
-	 */
-	public void setVendorSpecifics( VendorSpecific vendorSpecifics )
-	{
-		this.vendorSpecifics = vendorSpecifics;
-	}
 }

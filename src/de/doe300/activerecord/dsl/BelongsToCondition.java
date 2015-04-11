@@ -25,6 +25,7 @@
 package de.doe300.activerecord.dsl;
 
 import de.doe300.activerecord.RecordBase;
+import de.doe300.activerecord.jdbc.VendorSpecific;
 import de.doe300.activerecord.record.ActiveRecord;
 import de.doe300.activerecord.record.association.AssociationHelper;
 import java.util.Map;
@@ -82,13 +83,13 @@ public class BelongsToCondition implements Condition
 	}
 
 	@Override
-	public String toSQL()
+	public String toSQL(VendorSpecific vendorSpecifics)
 	{
 		//TODO which version is more performant??
 		//EXISTS(SELECT associatedKey FROM associatedTable WHERE thisTable.foreignKey = associatedKey AND cond)
 		//foreignKey IN(SELECT associatedKey FROM associatedTable WHERE cond)
 		//for now choosing the seconds, because the subquery is independant and could be cached easier, I think
-		return foreignKeyColumn+" IN (SELECT "+associatedTableKey+" FROM "+associatedTableBase.getTableName()+" WHERE "+associatedTableCond.toSQL()+")";
+		return foreignKeyColumn+" IN (SELECT "+associatedTableKey+" FROM "+associatedTableBase.getTableName()+" WHERE "+associatedTableCond.toSQL(vendorSpecifics)+")";
 	}
 	
 	@Override

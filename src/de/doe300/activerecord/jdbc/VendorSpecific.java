@@ -38,14 +38,16 @@ import java.util.function.Function;
 public enum VendorSpecific
 {
 	//originally the limit is 65535 (the maximum length of the row), but with other columns existing, we need to choose a smaller length
-	MYSQL("AUTO_INCREMENT", "VARCHAR(4096)"),
-	HSQLDB("IDENTITY", "LONGVARCHAR"),
+	MYSQL("AUTO_INCREMENT", "VARCHAR(4096)", "TRUE"),
+	HSQLDB("IDENTITY", "LONGVARCHAR", "TRUE"),
 	//Not strictly required for keeping an unique ID - https://www.sqlite.org/autoinc.html
 	//SQLite has no Limit on VARCHAR - https://www.sqlite.org/faq.html#q9
-	SQLITE("", "VARCHAR(1)");
+	//SQLite has no boolean data-type - https://www.sqlite.org/datatype3.html
+	SQLITE("", "VARCHAR(1)", "1");
 		
 	private final String autoIncrement;
 	private final String stringDataType;
+	private final String alwaysTrueCondition;
 	
 	private static final String[] sql92Keywords = {
 		"absolute", "action", "allocate", "are", "assertion",
@@ -64,10 +66,11 @@ public enum VendorSpecific
 		"year", "zone"
 	};
 
-	private VendorSpecific( String autoIncrement, String stringDefaultType )
+	private VendorSpecific( String autoIncrement, String stringDefaultType, String alwaysTrueCondition )
 	{
 		this.autoIncrement = autoIncrement;
 		this.stringDataType = stringDefaultType;
+		this.alwaysTrueCondition = alwaysTrueCondition;
 	}
 	
 	public static VendorSpecific guessDatabaseVendor(Connection con)
@@ -126,6 +129,14 @@ public enum VendorSpecific
 	public String getStringDataType()
 	{
 		return stringDataType;
+	}
+	
+	/**
+	 * @return the condition which is always true
+	 */
+	public String getAlwaysTrueCondition()
+	{
+		return alwaysTrueCondition;
 	}
 	
 	/**

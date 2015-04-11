@@ -24,6 +24,7 @@
  */
 package de.doe300.activerecord.dsl;
 
+import de.doe300.activerecord.jdbc.VendorSpecific;
 import de.doe300.activerecord.record.ActiveRecord;
 import java.util.Arrays;
 import java.util.Comparator;
@@ -132,12 +133,12 @@ public class Order implements Comparator<Map<String,Object>>, SQLCommand
 	}
 
 	@Override
-	public String toSQL()
+	public String toSQL(VendorSpecific vendorSpecifics)
 	{
 		StringBuilder sb = new StringBuilder(100);
 		for(int i=0;i<columns.length;i++)
 		{
-			sb.append( ", ").append( columns[i]).append( " ").append( types[i].toSQL());
+			sb.append( ", ").append( columns[i]).append( " ").append( types[i].toSQL(vendorSpecifics));
 		}
 		//deletes first ', '
 		sb.delete( 0, 2 );
@@ -147,7 +148,7 @@ public class Order implements Comparator<Map<String,Object>>, SQLCommand
 	@Override
 	public String toString()
 	{
-		return toSQL();
+		return toSQL(null);
 	}
 
 	/**
@@ -178,7 +179,7 @@ public class Order implements Comparator<Map<String,Object>>, SQLCommand
 		ASCENDING {
 
 			@Override
-			public String toSQL()
+			public String toSQL(VendorSpecific vendorSpecifics)
 			{
 				return "ASC";
 			}
@@ -189,13 +190,13 @@ public class Order implements Comparator<Map<String,Object>>, SQLCommand
 		DESCENDING {
 
 			@Override
-			public String toSQL()
+			public String toSQL(VendorSpecific vendorSpecifics)
 			{
 				return "DESC";
 			}
 		};
 		
 		@Override
-		public abstract String toSQL();
+		public abstract String toSQL(VendorSpecific vendorSpecifics);
 	}
 }

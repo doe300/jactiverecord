@@ -32,6 +32,7 @@ import java.util.Map;
 import java.util.Objects;
 
 import de.doe300.activerecord.record.TimestampedRecord;
+import java.util.Collections;
 
 /**
  * Caches one single row of one DB TABLE
@@ -206,12 +207,12 @@ public class RowCache implements Comparable<RowCache>
 	}
 
 	/**
-	 * @return a map with all cached values
+	 * Note: the map returned by this method is not modifiable
+	 * @return the Map backing this cache with all cached values
 	 */
 	public Map<String,Object> toMap()
 	{
-		//needs to be modifiable and a copy
-		return new HashMap<>(columnData);
+		return Collections.unmodifiableMap( columnData );
 	}
 
 	/**

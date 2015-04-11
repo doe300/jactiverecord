@@ -192,7 +192,7 @@ public abstract class RecordBase<T extends ActiveRecord> implements FinderMethod
 			{
 				defaultOrder = new Order(getPrimaryColumn(), Order.OrderType.ASCENDING);
 			}
-			Logging.getLogger().debug( recordType.getSimpleName(), "Using default order: "+defaultOrder.toSQL());
+			Logging.getLogger().debug( recordType.getSimpleName(), "Using default order: "+defaultOrder.toSQL(null));
 		}
 		return defaultOrder;
 	}

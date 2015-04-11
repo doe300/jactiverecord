@@ -24,6 +24,8 @@
  */
 package de.doe300.activerecord.dsl;
 
+import de.doe300.activerecord.jdbc.VendorSpecific;
+
 /**
  *
  * @author doe300
@@ -31,7 +33,8 @@ package de.doe300.activerecord.dsl;
 public interface SQLCommand
 {
 	/**
+	 * @param vendorSpecifics the vendor-specifics, may be <code>null</code>
 	 * @return the sQL representation of this statement
 	 */
-	public String toSQL();
+	public String toSQL(VendorSpecific vendorSpecifics);
 }

@@ -24,6 +24,7 @@
  */
 package de.doe300.activerecord.dsl;
 
+import de.doe300.activerecord.jdbc.VendorSpecific;
 import de.doe300.activerecord.record.ActiveRecord;
 import java.util.Arrays;
 import java.util.Collection;
@@ -115,7 +116,7 @@ public class SimpleCondition implements Condition, SQLCommand
 	}
 
 	@Override
-	public String toSQL()
+	public String toSQL(VendorSpecific vendorSpecifics)
 	{
 		switch(comp)
 		{
@@ -142,7 +143,7 @@ public class SimpleCondition implements Condition, SQLCommand
 				return key+" IN ("+Arrays.stream( (Object[])compValue).map( (Object o) -> "?").collect( Collectors.joining( ", "))+")";
 			case TRUE:
 			default:
-				return "TRUE";
+				return vendorSpecifics.getAlwaysTrueCondition();
 		}
 	}
 	

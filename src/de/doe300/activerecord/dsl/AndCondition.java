@@ -24,6 +24,7 @@
  */
 package de.doe300.activerecord.dsl;
 
+import de.doe300.activerecord.jdbc.VendorSpecific;
 import de.doe300.activerecord.record.ActiveRecord;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -100,9 +101,9 @@ public class AndCondition implements Condition
 	}
 
 	@Override
-	public String toSQL()
+	public String toSQL(VendorSpecific vendorSpecifics)
 	{
-		return "("+ Arrays.stream( conditions ).map( (Condition c) -> c.toSQL() ).collect( Collectors.joining( ") AND ("))+")";
+		return "("+ Arrays.stream( conditions ).map( (Condition c) -> c.toSQL(vendorSpecifics) ).collect( Collectors.joining( ") AND ("))+")";
 	}
 
 }

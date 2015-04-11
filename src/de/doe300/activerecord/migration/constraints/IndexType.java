@@ -25,6 +25,7 @@
 package de.doe300.activerecord.migration.constraints;
 
 import de.doe300.activerecord.dsl.SQLCommand;
+import de.doe300.activerecord.jdbc.VendorSpecific;
 
 /**
  * All supported types of indices.
@@ -39,7 +40,7 @@ public enum IndexType implements SQLCommand
 	NON_UNIQUE()
 	{
 		@Override
-		public String toSQL()
+		public String toSQL(VendorSpecific vendorSpecifics)
 		{
 			return "";
 		}
@@ -52,7 +53,7 @@ public enum IndexType implements SQLCommand
 	UNIQUE()
 	{
 		@Override
-		public String toSQL()
+		public String toSQL(VendorSpecific vendorSpecifics)
 		{
 			return "UNIQUE";
 		}
@@ -64,7 +65,7 @@ public enum IndexType implements SQLCommand
 	CLUSTERED()
 	{
 		@Override
-		public String toSQL()
+		public String toSQL(VendorSpecific vendorSpecifics)
 		{
 			return "CLUSTERED";
 		}
@@ -79,7 +80,7 @@ public enum IndexType implements SQLCommand
 	 */
 	public String toSQL(String tableName, String name, String... columnNames)
 	{
-		return "CREATE "+toSQL()+" INDEX "+(name!=null? name : "")+" ON "+tableName+" ("+String.join( ", ",columnNames)+")";
+		return "CREATE "+toSQL(null)+" INDEX "+(name!=null? name : "")+" ON "+tableName+" ("+String.join( ", ",columnNames)+")";
 	}
 	
 }

@@ -45,7 +45,7 @@ public class OrderTest extends Assert
 	{
 		String src = "name DESC, age ASC, title ASC";
 		Order o = Order.fromSQLString( src );
-		assertEquals( src, o.toSQL() );
+		assertEquals( src, o.toSQL(null) );
 	}
 
 	@Test
@@ -78,6 +78,6 @@ public class OrderTest extends Assert
 	{
 		Order o = new Order(new String[]{"name", "age", "title"}, new Order.OrderType[]{Order.OrderType.ASCENDING,Order.OrderType.ASCENDING,Order.OrderType.DESCENDING} );
 		String sql = "name ASC, age ASC, title DESC";
-		assertEquals( sql, o.toSQL());
+		assertEquals( sql, o.toSQL(null));
 	}
 }
