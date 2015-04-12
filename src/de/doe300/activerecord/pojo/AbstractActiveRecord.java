@@ -33,7 +33,7 @@ import de.doe300.activerecord.record.ActiveRecord;
  */
 public abstract class AbstractActiveRecord implements ActiveRecord
 {
-	private final int primaryKey;
+	protected final int primaryKey;
 	protected final POJOBase<?> base;
 
 	public AbstractActiveRecord( int primaryKey, POJOBase<?> base )

@@ -59,4 +59,7 @@ public interface Condition extends Predicate<ActiveRecord>, SQLCommand
 	 * @throws UnsupportedOperationException if the method is not supported
 	 */
 	public boolean test(final Map<String,Object> map);
+
+	@Override
+	public Condition negate();
 }

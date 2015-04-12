@@ -58,14 +58,14 @@ public class ProfilingRecordBase<T extends ActiveRecord> extends RecordBase<T>
 	{
 		return profiler;
 	}
-	
+
 	@Override
-	protected T createProxy( int primaryKey ) throws RecordException
+	protected T createProxy( int primaryKey, boolean newRecord, Map<String, Object> recordData ) throws RecordException
 	{
 		//not used
 		throw new UnsupportedOperationException();
 	}
-
+	
 	@Override
 	public int count( Condition condition )
 	{

@@ -105,4 +105,9 @@ public class BelongsToCondition implements Condition
 		throw new UnsupportedOperationException( "Can't resolve an AssociationCondition from column-values!" );
 	}
 
+	@Override
+	public Condition negate()
+	{
+		return new InvertedCondition(this );
+	}
 }

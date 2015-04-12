@@ -106,4 +106,9 @@ public class AndCondition implements Condition
 		return "("+ Arrays.stream( conditions ).map( (Condition c) -> c.toSQL(vendorSpecifics) ).collect( Collectors.joining( ") AND ("))+")";
 	}
 
+	@Override
+	public Condition negate()
+	{
+		return new InvertedCondition(this );
+	}
 }

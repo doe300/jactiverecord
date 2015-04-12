@@ -217,5 +217,21 @@ public class CachedJDBCRecordStoreTest extends Assert
 	{
 		assertTrue( store.count( base, new SimpleCondition(base.getPrimaryColumn(), primaryKey, Comparison.IS)) == 1);
 	}
+
+	@Test
+	public void testExists()
+	{
+		assertFalse( store.exists( "noSuchTable"));
+		assertTrue( store.exists( base.getTableName()));
+	}
+
+	@Test
+	public void testTouch()
+	{
+		long start = base.getRecord( primaryKey ).getUpdatedAt();
+		store.touch( base, primaryKey );
+		long end = base.getRecord( primaryKey ).getUpdatedAt();
+		assertTrue( end > start);
+	}
 	
 }

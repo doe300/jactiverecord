@@ -162,6 +162,7 @@ public class SimpleJDBCRecordStore implements RecordStore
 				catch(final Exception e)
 				{
 					Logging.getLogger().error( "JDBCStore", "Failed to create table");
+					Logging.getLogger().error( "JDBCStore", createSQL);
 					throw new RuntimeException("Failed to create table", e);
 				}
 			}
@@ -240,6 +241,7 @@ public class SimpleJDBCRecordStore implements RecordStore
 		catch ( final SQLException ex )
 		{
 			Logging.getLogger().error( "JDBCStore", "Failed to set values!");
+			Logging.getLogger().error( "JDBCStore", sql);
 			Logging.getLogger().error( "JDBCStore", ex);
 			throw new IllegalArgumentException(ex);
 		}
@@ -264,6 +266,7 @@ public class SimpleJDBCRecordStore implements RecordStore
 		catch ( final SQLException ex )
 		{
 			Logging.getLogger().error( "JDBCStore", "Failed to get value!");
+			Logging.getLogger().error( "JDBCStore", sql);
 			Logging.getLogger().error( "JDBCStore", ex);
 			throw new IllegalArgumentException(ex);
 		}
@@ -293,6 +296,7 @@ public class SimpleJDBCRecordStore implements RecordStore
 		catch ( final SQLException ex )
 		{
 			Logging.getLogger().error( "JDBCStore", "Failed to get values!");
+			Logging.getLogger().error( "JDBCStore", sql);
 			Logging.getLogger().error( "JDBCStore", ex);
 			throw new IllegalArgumentException(ex);
 		}
@@ -317,6 +321,7 @@ public class SimpleJDBCRecordStore implements RecordStore
 		catch ( final SQLException ex )
 		{
 			Logging.getLogger().error( "JDBCStore", "Failed to get row!");
+			Logging.getLogger().error( "JDBCStore", sql);
 			Logging.getLogger().error( "JDBCStore", ex);
 			throw new IllegalArgumentException(ex);
 		}
@@ -326,15 +331,16 @@ public class SimpleJDBCRecordStore implements RecordStore
 	public void destroy( final RecordBase<?> base, final int primaryKey )
 	{
 		checkTableExists( base );
+		final String sql = "DELETE FROM "+base.getTableName()+" WHERE "+base.getPrimaryColumn()+" = "+primaryKey;
 		try(Statement stm = con.createStatement())
 		{
-			final String sql = "DELETE FROM "+base.getTableName()+" WHERE "+base.getPrimaryColumn()+" = "+primaryKey;
 			Logging.getLogger().debug( "JDBCStore", sql);
 			stm.executeUpdate( sql);
 		}
 		catch ( final SQLException ex )
 		{
 			Logging.getLogger().error( "JDBCStore", "Failed to destroy row!");
+			Logging.getLogger().error( "JDBCStore", sql);
 			Logging.getLogger().error( "JDBCStore", ex);
 			throw new IllegalArgumentException(ex);
 		}
@@ -370,6 +376,7 @@ public class SimpleJDBCRecordStore implements RecordStore
 		catch ( final SQLException ex )
 		{
 			Logging.getLogger().error( "JDBCStore", "Failed to find matches!");
+			Logging.getLogger().error( "JDBCStore", sql);
 			Logging.getLogger().error( "JDBCStore", ex);
 			throw new IllegalArgumentException(ex);
 		}
@@ -402,6 +409,7 @@ public class SimpleJDBCRecordStore implements RecordStore
 		catch ( final SQLException ex )
 		{
 			Logging.getLogger().error( "JDBCStore", "Failed to count matches!");
+			Logging.getLogger().error( "JDBCStore", sql);
 			Logging.getLogger().error( "JDBCStore", ex);
 			throw new IllegalArgumentException(ex);
 		}
@@ -429,6 +437,7 @@ public class SimpleJDBCRecordStore implements RecordStore
 		catch ( final SQLException ex )
 		{
 			Logging.getLogger().error( "JDBCStore", "Failed to find matches!");
+			Logging.getLogger().error( "JDBCStore", sql);
 			Logging.getLogger().error( "JDBCStore", ex);
 			throw new IllegalArgumentException(ex);
 		}
@@ -603,6 +612,7 @@ public class SimpleJDBCRecordStore implements RecordStore
 		catch ( final SQLException ex )
 		{
 			Logging.getLogger().error( "JDBCStore", "Failed to retrieve values!");
+			Logging.getLogger().error( "JDBCStore", sql);
 			Logging.getLogger().error( "JDBCStore", ex);
 			throw new IllegalArgumentException(ex);
 		}
@@ -691,6 +701,7 @@ public class SimpleJDBCRecordStore implements RecordStore
 		catch ( final SQLException ex )
 		{
 			Logging.getLogger().error( "JDBCStore", "Failed to add row");
+			Logging.getLogger().error( "JDBCStore", sql);
 			Logging.getLogger().error( "JDBCStore", ex);
 			throw new RuntimeException("Failed to insert new row",ex);
 		}
@@ -709,6 +720,7 @@ public class SimpleJDBCRecordStore implements RecordStore
 		catch ( final SQLException ex )
 		{
 			Logging.getLogger().error( "JDBCStore", "Failed to remove row");
+			Logging.getLogger().error( "JDBCStore", sql);
 			Logging.getLogger().error( "JDBCStore", ex);
 			throw new RuntimeException("Failed to insert new row",ex);
 		}

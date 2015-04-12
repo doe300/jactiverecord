@@ -40,6 +40,7 @@ import de.doe300.activerecord.jdbc.VendorSpecific;
 import de.doe300.activerecord.logging.Logging;
 import de.doe300.activerecord.scope.Scope;
 import de.doe300.activerecord.store.RowCache;
+import java.util.Collections;
 
 /**
  * Uses write-back cache
@@ -67,9 +68,9 @@ public class CachedJDBCRecordStore extends SimpleJDBCRecordStore
 	public CachedJDBCRecordStore( final Connection con, final VendorSpecific vendorSpecifics)
 	{
 		super( con, vendorSpecifics );
-		this.cache=new HashMap<>(10);
-		this.columnsCache = new TreeMap<>();
-		tableExistsCache = new TreeMap<>();
+		this.cache=Collections.synchronizedMap( new HashMap<>(10));
+		this.columnsCache = Collections.synchronizedSortedMap( new TreeMap<>());
+		tableExistsCache = Collections.synchronizedSortedMap( new TreeMap<>());
 	}
 
 	private RowCache getCache(final RecordBase<?> base, final Integer primaryKey)
@@ -77,7 +78,7 @@ public class CachedJDBCRecordStore extends SimpleJDBCRecordStore
 		Map<Integer, RowCache> tableCache = cache.get( base);
 		if(tableCache == null)
 		{
-			tableCache = new TreeMap<>();
+			tableCache = Collections.synchronizedSortedMap( new TreeMap<>());
 			cache.put( base, tableCache );
 		}
 		RowCache c = tableCache.get( primaryKey);
@@ -195,6 +196,7 @@ public class CachedJDBCRecordStore extends SimpleJDBCRecordStore
 		catch ( final SQLException ex )
 		{
 			Logging.getLogger().error( "CachedJDBCStore", "Failed to load into cache!");
+			Logging.getLogger().error( "CachedJDBCStore", sql);
 			Logging.getLogger().error( "CachedJDBCStore", ex);
 			throw new IllegalArgumentException(ex);
 		}
@@ -273,7 +275,7 @@ public class CachedJDBCRecordStore extends SimpleJDBCRecordStore
 		{
 			res= cache.get( base).entrySet().stream().filter( (final Map.Entry<Integer,RowCache> e) ->
 			{
-				return scope.getCondition().test( e.getValue().toMap() );
+				return scope.getCondition() == null || scope.getCondition().test( e.getValue().toMap() );
 			}).map( (final Map.Entry<Integer,RowCache> e) -> e.getValue().toMap()).sorted( toOrder( base, scope )).findFirst().orElse( null);
 			if(res!=null)
 			{

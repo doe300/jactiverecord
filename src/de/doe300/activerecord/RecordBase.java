@@ -236,7 +236,7 @@ public abstract class RecordBase<T extends ActiveRecord> implements FinderMethod
 		T record=records.get( primaryKey );
 		if(record==null && store.containsRecord( this, primaryKey))
 		{
-			record = createProxy(primaryKey);
+			record = createProxy(primaryKey, false, null);
 			records.put( primaryKey, record );
 			if(hasCallbacks())
 			{
@@ -263,7 +263,7 @@ public abstract class RecordBase<T extends ActiveRecord> implements FinderMethod
 			Logging.getLogger().error( recordType.getSimpleName(), "Record with primary-key "+primaryKey+" already exists");
 			throw new IllegalArgumentException("Record with primaryKey "+primaryKey+" already exists for table "+getTableName());
 		}
-		final T record = createProxy(primaryKey);
+		final T record = createProxy(primaryKey, true, null);
 		records.put( primaryKey, record );
 		if(hasCallbacks())
 		{
@@ -282,7 +282,7 @@ public abstract class RecordBase<T extends ActiveRecord> implements FinderMethod
 	public T createRecord() throws RecordException
 	{
 		final int key = store.insertNewRecord(this, null);
-		final T record = createProxy(key);
+		final T record = createProxy(key, true, null);
 		records.put( key, record );
 		if(hasCallbacks())
 		{
@@ -304,7 +304,7 @@ public abstract class RecordBase<T extends ActiveRecord> implements FinderMethod
 		//just to make sure, ID is not overridden
 		data.remove( getPrimaryColumn());
 		final int key = store.insertNewRecord(this, data);
-		final T record = createProxy(key);
+		final T record = createProxy(key,true, data);
 		records.put( key, record );
 		if(hasCallbacks())
 		{
@@ -312,12 +312,15 @@ public abstract class RecordBase<T extends ActiveRecord> implements FinderMethod
 		}
 		return record;
 	}
-
+	
 	/**
+	 * Note: it is not the job of the {@link #createProxy(int, boolean, java.util.Map) }-method to store the recordData.
 	 * @param primaryKey
+	 * @param newRecord whether the proxy is for a new record (<code>true</code>) or an existing one (<code>false</code>)
+	 * @param recordData the data to create the record with, may be <code>null</code>
 	 * @return the proxy object mapped to the underlying record-store
 	 */
-	protected abstract T createProxy(int primaryKey) throws RecordException;
+	protected abstract T createProxy(int primaryKey, boolean newRecord, Map<String, Object> recordData) throws RecordException;
 
 	/**
 	 * @param primaryKey

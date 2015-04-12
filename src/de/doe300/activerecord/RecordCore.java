@@ -26,9 +26,11 @@ package de.doe300.activerecord;
 
 import de.doe300.activerecord.logging.Logging;
 import de.doe300.activerecord.pojo.POJOBase;
+import de.doe300.activerecord.pojo.SingleInheritanceBase;
 import de.doe300.activerecord.proxy.ProxyBase;
 import de.doe300.activerecord.proxy.handlers.ProxyHandler;
 import de.doe300.activerecord.record.ActiveRecord;
+import de.doe300.activerecord.record.SingleTableInheritance;
 import de.doe300.activerecord.store.RecordStore;
 import de.doe300.activerecord.store.impl.CachedJDBCRecordStore;
 import de.doe300.activerecord.store.impl.MapRecordStore;
@@ -162,6 +164,10 @@ public final class RecordCore implements AutoCloseable
 			{
 				base = new ProxyBase<T>(Proxy.getProxyClass( type.getClassLoader(), type).asSubclass( type ), type, mergeHandlers( type, handlers ), store, this);
 			}
+			else if(type.isAnnotationPresent( SingleTableInheritance.class))
+			{
+				return new SingleInheritanceBase<T>(type, this, store );
+			}
 			else
 			{
 				base = new POJOBase<T>(type, this, store );
@@ -189,7 +195,14 @@ public final class RecordCore implements AutoCloseable
 			}
 			else if(!type.isInterface())
 			{
-				base = new POJOBase<T>(type, this, store );
+				if(type.isAnnotationPresent( SingleTableInheritance.class))
+				{
+					base =new SingleInheritanceBase<T>(type, this, store );
+				}
+				else
+				{
+					base = new POJOBase<T>(type, this, store );
+				}
 			}
 			if(base != null)
 			{

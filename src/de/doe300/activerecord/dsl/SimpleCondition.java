@@ -180,4 +180,10 @@ public class SimpleCondition implements Condition, SQLCommand
 	{
 		return comp.test(t.getBase().getStore().getValue( t.getBase(), t.getPrimaryKey(), key), compValue);
 	}
+
+	@Override
+	public Condition negate()
+	{
+		return new InvertedCondition(this );
+	}
 }

@@ -51,7 +51,7 @@ public class RowCache implements Comparable<RowCache>
 	{
 		this.primaryKey = primaryKey.toLowerCase();
 		this.tableName = tableName;
-		this.columnData = columnData;
+		this.columnData = Collections.synchronizedMap( columnData);
 		this.isTimestamped = isTimestamped;
 		if(isTimestamped)
 		{

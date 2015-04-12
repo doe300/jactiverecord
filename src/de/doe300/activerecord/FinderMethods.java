@@ -122,7 +122,7 @@ public interface FinderMethods<T extends ActiveRecord>
 	 */
 	public default Stream<T> findAll()
 	{
-		return find( new SimpleCondition(null, null, Comparison.TRUE));
+		return find( null);
 	}
 	
 	/**

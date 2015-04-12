@@ -105,4 +105,9 @@ public class OrCondition implements Condition
 		return "("+ Arrays.stream( conditions ).map( (Condition c) -> c.toSQL(vendorSpecifics) ).collect( Collectors.joining( ") OR ("))+")";
 	}
 
+	@Override
+	public Condition negate()
+	{
+		return new InvertedCondition(this );
+	}
 }

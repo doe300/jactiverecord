@@ -31,6 +31,7 @@ import de.doe300.activerecord.proxy.handlers.ProxyHandler;
 import de.doe300.activerecord.record.ActiveRecord;
 import de.doe300.activerecord.store.RecordStore;
 import java.lang.reflect.InvocationHandler;
+import java.util.Map;
 
 /**
  * Base for one table and all its records
@@ -58,7 +59,7 @@ public final class ProxyBase<T extends ActiveRecord> extends RecordBase<T>
 	}
 	
 	@Override
-	protected T createProxy(int primaryKey) throws RecordException
+	protected T createProxy(int primaryKey, boolean newRecord, Map<String, Object> recordData) throws RecordException
 	{
 		try
 		{

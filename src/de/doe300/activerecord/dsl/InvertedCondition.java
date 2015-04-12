@@ -76,4 +76,9 @@ public class InvertedCondition implements Condition
 		return "NOT("+invertedCondition.toSQL( vendorSpecifics )+")";
 	}
 
+	@Override
+	public Condition negate()
+	{
+		return invertedCondition;
+	}
 }

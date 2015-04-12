@@ -29,6 +29,7 @@ import de.doe300.activerecord.RecordCore;
 import de.doe300.activerecord.RecordException;
 import de.doe300.activerecord.record.ActiveRecord;
 import de.doe300.activerecord.store.RecordStore;
+import java.util.Map;
 
 /**
  * Any POJO-based ActiveRecord is required to have a constructor accepting the primaryKey (int) and this POJOBase as parameters
@@ -48,7 +49,7 @@ public class POJOBase<T extends ActiveRecord> extends RecordBase<T>
 	}
 
 	@Override
-	protected T createProxy( final int primaryKey ) throws RecordException
+	protected T createProxy( final int primaryKey, boolean newRecord, Map<String, Object> recordData ) throws RecordException
 	{
 		try
 		{

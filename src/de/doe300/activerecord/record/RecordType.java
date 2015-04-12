@@ -70,6 +70,8 @@ public @interface RecordType
 	 * NOTE: the creation is only guaranteed, if the data-store is accessed via its RecordBase.
 	 * NOTE: if no {@link #autoCreateSQL() } is given, the table will be created via {@link AutomaticMigration} so all of its limitations apply
 	 * @return whether to automatically create the corresponding table
+	 * @see AutomaticMigration
+	 * @see #autoCreateSQL() 
 	 */
 	public boolean autoCreate() default false;
 	
