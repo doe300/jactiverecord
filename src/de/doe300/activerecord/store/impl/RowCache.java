@@ -22,8 +22,9 @@
  * SOFTWARE.
  *
  */
-package de.doe300.activerecord.store;
+package de.doe300.activerecord.store.impl;
 
+import de.doe300.activerecord.RecordBase;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Timestamp;
@@ -38,7 +39,7 @@ import java.util.Collections;
  * Caches one single row of one DB TABLE
  * @author doe300
  */
-public class RowCache implements Comparable<RowCache>
+class RowCache implements Comparable<RowCache>
 {
 	private final Map<String,Object> columnData;
 	private boolean dataChanged = false;
@@ -68,7 +69,8 @@ public class RowCache implements Comparable<RowCache>
 	 * @param isTimestamped
 	 * @return the newly created cache-entry
 	 */
-	public static RowCache fromMap(final String tableName, final String primaryKey, final Map<String,Object> map, final boolean isTimestamped)
+	@Deprecated
+	static RowCache fromMap(final String tableName, final String primaryKey, final Map<String,Object> map, final boolean isTimestamped)
 	{
 		return new RowCache(primaryKey,tableName,new HashMap<>(map ),false, isTimestamped );
 	}
@@ -79,7 +81,7 @@ public class RowCache implements Comparable<RowCache>
 	 * @param isTimestamped
 	 * @return a new created empty cache-row
 	 */
-	public static RowCache emptyCache(final String tableName, final String primaryKey, final boolean isTimestamped)
+	static RowCache emptyCache(final String tableName, final String primaryKey, final boolean isTimestamped)
 	{
 		return new RowCache(primaryKey, tableName, new HashMap<>(10),false, isTimestamped);
 	}
@@ -226,6 +228,18 @@ public class RowCache implements Comparable<RowCache>
 		{
 			setData( e.getKey().toLowerCase(), e.getValue(),updateTimestamp);
 		}
+	}
+	
+	public synchronized boolean writeBack(CachedJDBCRecordStore store, RecordBase<?> base, int primaryKey)
+	{
+		if(!dataChanged)
+		{
+			return false;
+		}
+		//XXX could optimize to only write changed values, but how to know?
+		store.setDBValues(base, primaryKey, columnData );
+		dataChanged = false;
+		return true;
 	}
 
 	@Override

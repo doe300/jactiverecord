@@ -22,8 +22,9 @@
  * SOFTWARE.
  *
  */
-package de.doe300.activerecord.store;
+package de.doe300.activerecord.store.impl;
 
+import de.doe300.activerecord.store.impl.RowCache;
 import java.sql.Timestamp;
 import java.util.Collections;
 

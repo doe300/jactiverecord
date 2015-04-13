@@ -143,7 +143,7 @@ public class SimpleCondition implements Condition, SQLCommand
 				return key+" IN ("+Arrays.stream( (Object[])compValue).map( (Object o) -> "?").collect( Collectors.joining( ", "))+")";
 			case TRUE:
 			default:
-				return vendorSpecifics.getAlwaysTrueCondition();
+				return vendorSpecifics.convertBooleanToDB( true );
 		}
 	}
 	

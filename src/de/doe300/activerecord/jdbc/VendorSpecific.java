@@ -38,16 +38,39 @@ import java.util.function.Function;
 public enum VendorSpecific
 {
 	//originally the limit is 65535 (the maximum length of the row), but with other columns existing, we need to choose a smaller length
-	MYSQL("AUTO_INCREMENT", "VARCHAR(4096)", "TRUE"),
-	HSQLDB("IDENTITY", "LONGVARCHAR", "TRUE"),
+	MYSQL("AUTO_INCREMENT", "VARCHAR(4096)"),
+	HSQLDB("IDENTITY", "LONGVARCHAR"),
 	//Not strictly required for keeping an unique ID - https://www.sqlite.org/autoinc.html
 	//SQLite has no Limit on VARCHAR - https://www.sqlite.org/faq.html#q9
 	//SQLite has no boolean data-type - https://www.sqlite.org/datatype3.html
-	SQLITE("", "VARCHAR(1)", "1");
+	SQLITE("", "VARCHAR(1)")
+	{
+		@Override
+		public String convertBooleanToDB( boolean value )
+		{
+			return value ? "1" : "0";
+		}
+
+		@Override
+		public boolean convertDBToBoolean( Object value )
+		{
+			int val;
+			if(value instanceof Number)
+			{
+				val = ((Number)value).intValue();
+			}
+			else
+			{
+				val = Integer.valueOf( value.toString() );
+			}
+			//value of 1 is true, 0 is false
+			return val != 0;
+		}
+		
+	};
 		
 	private final String autoIncrement;
 	private final String stringDataType;
-	private final String alwaysTrueCondition;
 	
 	private static final String[] sql92Keywords = {
 		"absolute", "action", "allocate", "are", "assertion",
@@ -66,11 +89,10 @@ public enum VendorSpecific
 		"year", "zone"
 	};
 
-	private VendorSpecific( String autoIncrement, String stringDefaultType, String alwaysTrueCondition )
+	private VendorSpecific( String autoIncrement, String stringDefaultType)
 	{
 		this.autoIncrement = autoIncrement;
 		this.stringDataType = stringDefaultType;
-		this.alwaysTrueCondition = alwaysTrueCondition;
 	}
 	
 	public static VendorSpecific guessDatabaseVendor(Connection con)
@@ -130,14 +152,25 @@ public enum VendorSpecific
 	{
 		return stringDataType;
 	}
+
+	/**
+	 * @param value
+	 * @return the value to write into the DB
+	 */
+	public String convertBooleanToDB(boolean value)
+	{
+		return Boolean.toString( value );
+	}
 	
 	/**
-	 * @return the condition which is always true
+	 * @param value
+	 * @return the boolean-value from the DB
 	 */
-	public String getAlwaysTrueCondition()
+	public boolean convertDBToBoolean(Object value)
 	{
-		return alwaysTrueCondition;
+		return ( boolean ) value;
 	}
+	
 	
 	/**
 	 * Converts the input identifier to the case used in the DB

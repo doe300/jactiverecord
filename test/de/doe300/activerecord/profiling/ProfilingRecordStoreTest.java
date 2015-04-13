@@ -82,7 +82,6 @@ public class ProfilingRecordStoreTest extends Assert
 	@Test
 	public void testPerformance()
 	{
-		//TODO run several methods
 		for(int i = 0; i< 200; i++)
 		{
 			TestInterface t = base.createRecord(Collections.singletonMap( "name", "ThisIsAName"));

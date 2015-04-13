@@ -39,7 +39,6 @@ import de.doe300.activerecord.dsl.Condition;
 import de.doe300.activerecord.jdbc.VendorSpecific;
 import de.doe300.activerecord.logging.Logging;
 import de.doe300.activerecord.scope.Scope;
-import de.doe300.activerecord.store.RowCache;
 import java.util.Collections;
 
 /**
@@ -209,12 +208,8 @@ public class CachedJDBCRecordStore extends SimpleJDBCRecordStore
 		if(hasCache( base, primaryKey ))
 		{
 			final RowCache c = getCache(base, primaryKey );
-			if(!c.isSynchronized())
+			if(c.writeBack( this, base, primaryKey ))
 			{
-				final Map<String,Object> values = c.toMap();
-				super.setValues( base, primaryKey, values );
-				Logging.getLogger().debug( "CachedJDBCStore", "Cache entry saved!");
-				c.setSynchronized();
 				return true;
 			}
 		}
@@ -224,19 +219,16 @@ public class CachedJDBCRecordStore extends SimpleJDBCRecordStore
 	@Override
 	public boolean saveAll(final RecordBase<?> base)
 	{
-		if(!cache.containsKey( base) || cache.get( base).isEmpty())
+		Map<Integer, RowCache> baseCache = cache.get( base);
+		if(baseCache == null || baseCache.isEmpty())
 		{
 			return false;
 		}
 		boolean changed = false;
-		for(final Map.Entry<Integer,RowCache> c : cache.get( base).entrySet())
+		for(final Map.Entry<Integer,RowCache> c : baseCache.entrySet())
 		{
-			if(!c.getValue().isSynchronized())
+			if(c.getValue().writeBack( this, base, c.getKey()))
 			{
-				//XXX see #save
-				final Map<String,Object> values = c.getValue().toMap();
-				super.setValues( base, c.getKey(), values);
-				c.getValue().setSynchronized();
 				changed = true;
 			}
 		}
@@ -245,6 +237,17 @@ public class CachedJDBCRecordStore extends SimpleJDBCRecordStore
 			Logging.getLogger().debug( "CachedJDBCStore", "Cache entries saved!");
 		}
 		return changed;
+	}
+	
+	/**
+	 * This method is only to be used to write cache back to the DB
+	 * @param base
+	 * @param primaryKey
+	 * @param values 
+	 */
+	void setDBValues(RecordBase<?> base, int primaryKey, Map<String, Object> values)
+	{
+		super.setValues( base, primaryKey, values );
 	}
 
 	@Override
@@ -267,23 +270,9 @@ public class CachedJDBCRecordStore extends SimpleJDBCRecordStore
 	@Override
 	public Map<String, Object> findFirstWithData( final RecordBase<?> base, final String[] columns, final Scope scope )
 	{
-		//TODO optimize: takes 10k ms for 36k invocations -> 0.3ms
-		checkTableExists( base );
-		//1.check in cache for conditions
-		Map<String,Object> res;
-		if(cache.containsKey( base))
-		{
-			res= cache.get( base).entrySet().stream().filter( (final Map.Entry<Integer,RowCache> e) ->
-			{
-				return scope.getCondition() == null || scope.getCondition().test( e.getValue().toMap() );
-			}).map( (final Map.Entry<Integer,RowCache> e) -> e.getValue().toMap()).sorted( toOrder( base, scope )).findFirst().orElse( null);
-			if(res!=null)
-			{
-				return res;
-			}
-		}
-		//TODO is wrong, if a matching record is in cache could still be first in DB
-		//1.1 load from DB if not found
+		//0. write cache into DB
+		saveAll( base );
+		//1 load from DB
 		final Map<String,Object> map = super.findFirstWithData( base, columns, scope );
 		//2. store in cache
 		if(map!=null && !map.isEmpty())
