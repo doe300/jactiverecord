@@ -364,5 +364,64 @@ public final class TypeMappings
 	{
 		record.getBase().getStore().setValue( record.getBase(), record.getPrimaryKey(), columnName, value == null ? null : value.name());
 	}
+	
+	/**
+	 * The <code>objectType</code> is required to have a default constructor
+	 * @param <T> the type of the attribute
+	 * @param objectType
+	 * @param record
+	 * @param columnName
+	 * @return the read DB-mappable attribute
+	 */
+	public static <T extends DBMappable> T readDBMappable(Class<T> objectType, ActiveRecord record, String columnName)
+	{
+		Object value = record.getBase().getStore().getValue( record.getBase(), record.getPrimaryKey(), columnName);
+		if(value == null)
+		{
+			return null;
+		}
+		if(objectType.isInstance( value ))
+		{
+			return objectType.cast( value );
+		}
+		try
+		{
+			T result = objectType.newInstance();
+			result.readFromDBValue( value );
+			return result;
+		}
+		catch(ReflectiveOperationException roe)
+		{
+			throw new RuntimeException(roe);
+		}
+	}
+	
+	/**
+	 * Reads the DBMappable {@link DBMappable#readFromDBValue(java.lang.Object) reading} into <code>attribute</code>
+	 * @param attribute the DBMappable to read into
+	 * @param record
+	 * @param columnName 
+	 */
+	public static void readDBMappable(DBMappable attribute, ActiveRecord record, String columnName)
+	{
+		Object value = record.getBase().getStore().getValue( record.getBase(), record.getPrimaryKey(), columnName);
+		if(value == null)
+		{
+			return;
+		}
+		attribute.readFromDBValue( value );
+	}
+	
+	/**
+	 * Writes the DBMappable by storing the {@link DBMappable#toDBValue() db-mapped Object}
+	 * @param attribute
+	 * @param record
+	 * @param columnName 
+	 */
+	public static void writeDBMappable(DBMappable attribute, ActiveRecord record, String columnName)
+	{
+		Object dbMapped = attribute == null ? null : attribute.toDBValue();
+		record.getBase().getStore().setValue( record.getBase(), record.getPrimaryKey(), columnName, dbMapped);
+	}
 }
 

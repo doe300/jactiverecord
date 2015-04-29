@@ -109,4 +109,16 @@ public class TypeMappingsTest extends Assert
 		record.setEnum( mode );
 		assertEquals( mode, record.getEnum());
 	}
+	
+	@Test
+	public void testDBMappable()
+	{
+		TestTypesInterface record = base.createRecord();
+		TestTypesInterface.TestDBMappableImpl impl = new TestTypesInterface.TestDBMappableImpl();
+		impl.testString = "Test123";
+		impl.testInteger = 456;
+		record.setDBMappable( impl );
+		assertEquals( impl.testString, record.getDBMappable().testString);
+		assertEquals( impl.testInteger, record.getDBMappable().testInteger);
+	}
 }

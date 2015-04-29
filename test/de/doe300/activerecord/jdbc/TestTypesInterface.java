@@ -94,4 +94,44 @@ public interface TestTypesInterface extends ActiveRecord
 	{
 		TypeMappings.writeEnumValue( mode, this, "enum");
 	}
+	
+	@Attribute(type = Types.VARCHAR, typeName = "VARCHAR(100)", name = "db_mappable")
+	public default TestDBMappableImpl getDBMappable()
+	{
+		return TypeMappings.readDBMappable( TestDBMappableImpl.class, this, "db_mappable");
+	}
+	
+	public default void setDBMappable(TestDBMappableImpl obj)
+	{
+		TypeMappings.writeDBMappable( obj, this, "db_mappable");
+	}
+			
+	static class TestDBMappableImpl implements DBMappable
+	{
+		 String testString;
+		int testInteger;
+
+		public TestDBMappableImpl()
+		{
+		}
+
+		/*
+		Our db-value is a string separated by semicolon ';'
+		*/
+		@Override
+		public void readFromDBValue( Object dbValue )
+		{
+			String[] parts = ((String)dbValue).split( "\\;");
+			testString = parts[0];
+			testInteger = Integer.valueOf( parts[1]);
+		}
+
+		@Override
+		public Object toDBValue()
+		{
+			return testString+";"+testInteger;
+		}
+		
+	}
 }
+
