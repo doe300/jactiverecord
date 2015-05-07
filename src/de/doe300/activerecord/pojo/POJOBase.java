@@ -27,6 +27,7 @@ package de.doe300.activerecord.pojo;
 import de.doe300.activerecord.RecordBase;
 import de.doe300.activerecord.RecordCore;
 import de.doe300.activerecord.RecordException;
+import de.doe300.activerecord.jdbc.TypeMappings;
 import de.doe300.activerecord.record.ActiveRecord;
 import de.doe300.activerecord.store.RecordStore;
 import java.util.Map;
@@ -76,9 +77,25 @@ public class POJOBase<T extends ActiveRecord> extends RecordBase<T>
 	 * @param primaryKey
 	 * @param name
 	 * @return the value for the given property from the underlying store
+	 * @deprecated use {@link #getProperty(int, java.lang.String, java.lang.Class) } instead
 	 */
+	@Deprecated
 	public Object getProperty(final int primaryKey, final String name)
 	{
 		return store.getValue( this, primaryKey, name );
+	}
+	
+	/**
+	 * 
+	 * @param <T> 
+	 * @param primaryKey
+	 * @param name
+	 * @param type the expected type
+	 * @return the value of the given type
+	 */
+	public <T> T getProperty(final int primaryKey, final String name, final Class<T> type) throws ClassCastException
+	{
+		Object obj = store.getValue( this, primaryKey, name );
+		return TypeMappings.coerceToType( obj, type );
 	}
 }

@@ -37,6 +37,8 @@ import java.sql.Connection;
 import java.sql.SQLException;
 import java.sql.SQLXML;
 import java.sql.Types;
+import java.util.HashMap;
+import java.util.Map;
 import java.util.UUID;
 import javax.xml.transform.Source;
 import javax.xml.transform.dom.DOMResult;
@@ -49,6 +51,52 @@ public final class TypeMappings
 {
 	private TypeMappings()
 	{
+	}
+	
+	private static final Map<Class<?>, Class<?>> primitivesToWrapper= new HashMap<>(10);
+	static 
+	{
+		primitivesToWrapper.put(boolean.class, Boolean.class);
+		primitivesToWrapper.put(byte.class, Byte.class);
+		primitivesToWrapper.put(char.class, Character.class);
+		primitivesToWrapper.put(double.class, Double.class);
+		primitivesToWrapper.put(float.class, Float.class);
+		primitivesToWrapper.put(int.class, Integer.class);
+		primitivesToWrapper.put(long.class, Long.class);
+		primitivesToWrapper.put(short.class, Short.class);
+		primitivesToWrapper.put(void.class, Void.class);
+	}
+	
+	////
+	// General
+	////
+	
+	/**
+	 * Coerces the object to the given type. This method will run some vendor-specific conversions
+	 * @param <T>
+	 * @param obj
+	 * @param type
+	 * @return the coerced object
+	 * @throws ClassCastException 
+	 */
+	public static <T> T coerceToType(final Object obj, final Class<T> type) throws ClassCastException
+	{
+		//TODO still far from perfect solution -> find some better way for implicit casting
+		if(type.isInstance( obj ))
+		{
+			return type.cast( obj );
+		}
+		//there is no int.cast(Integer), so just implicitly cast it
+		if(type.isPrimitive() && primitivesToWrapper.get( type).isInstance( obj ))
+		{
+			return ( T ) obj;
+		}
+		//for SQLite, where Booleans are represented as Integer
+		if(obj instanceof Number && (Boolean.class.equals( type) || Boolean.TYPE.equals( type)))
+		{
+			return ( T ) (((Number)obj).intValue() == 0 ? Boolean.FALSE : Boolean.TRUE);
+		}
+		throw new ClassCastException("Can't cast Object of type '"+obj.getClass()+"' to type '"+type+"'");
 	}
 	
 	////

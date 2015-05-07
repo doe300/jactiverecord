@@ -44,46 +44,19 @@ class RowCache implements Comparable<RowCache>
 	private final Map<String,Object> columnData;
 	private boolean dataChanged = false;
 	private final String primaryKey;
-	private boolean isInDB;
 	private final boolean isTimestamped;
-	private final String tableName;
+	private final BaseCache parent;
 
-	private RowCache(final String primaryKey, final String tableName, final Map<String,Object> columnData, final boolean inDB, final boolean isTimestamped)
+	RowCache(final BaseCache parent, final String primaryKey, final boolean isTimestamped)
 	{
+		this.parent = parent;
 		this.primaryKey = primaryKey.toLowerCase();
-		this.tableName = tableName;
-		this.columnData = Collections.synchronizedMap( columnData);
+		this.columnData = Collections.synchronizedMap( new HashMap<>(20));
 		this.isTimestamped = isTimestamped;
 		if(isTimestamped)
 		{
 			columnData.put( TimestampedRecord.COLUMN_CREATED_AT, new Timestamp(System.currentTimeMillis()));
 		}
-		this.isInDB = inDB;
-	}
-
-	/**
-	 * Creates a new cache-entry and fills it with the values from the given map.
-	 * @param tableName
-	 * @param primaryKey
-	 * @param map
-	 * @param isTimestamped
-	 * @return the newly created cache-entry
-	 */
-	@Deprecated
-	static RowCache fromMap(final String tableName, final String primaryKey, final Map<String,Object> map, final boolean isTimestamped)
-	{
-		return new RowCache(primaryKey,tableName,new HashMap<>(map ),false, isTimestamped );
-	}
-
-	/**
-	 * @param tableName
-	 * @param primaryKey
-	 * @param isTimestamped
-	 * @return a new created empty cache-row
-	 */
-	static RowCache emptyCache(final String tableName, final String primaryKey, final boolean isTimestamped)
-	{
-		return new RowCache(primaryKey, tableName, new HashMap<>(10),false, isTimestamped);
 	}
 
 	/**
@@ -98,7 +71,7 @@ class RowCache implements Comparable<RowCache>
 		{
 			return value;
 		}
-		dataChanged = true;
+		setModified();
 		if(isTimestamped && updateTimestamp)
 		{
 			columnData.put( TimestampedRecord.COLUMN_UPDATED_AT, new Timestamp(System.currentTimeMillis()));
@@ -121,7 +94,7 @@ class RowCache implements Comparable<RowCache>
 		{
 			columnData.put( TimestampedRecord.COLUMN_UPDATED_AT, new Timestamp(System.currentTimeMillis()));
 		}
-		dataChanged = true;
+		setModified();
 	}
 
 	/**
@@ -148,22 +121,6 @@ class RowCache implements Comparable<RowCache>
 	public int getPrimaryKey()
 	{
 		return ( int ) columnData.get( primaryKey );
-	}
-
-	/**
-	 * @return the name of the associated table
-	 */
-	public String getTableName()
-	{
-		return tableName;
-	}
-
-	/**
-	 * @return whether this row is represented in the DB
-	 */
-	public boolean isInDB()
-	{
-		return isInDB;
 	}
 
 	/**
@@ -204,17 +161,7 @@ class RowCache implements Comparable<RowCache>
 		{
 				setData( set.getMetaData().getColumnLabel( i).toLowerCase(), set.getObject( i ),updateTimestamp);
 		}
-		isInDB = true;
 		dataChanged =false;
-	}
-
-	/**
-	 * Note: the map returned by this method is not modifiable
-	 * @return the Map backing this cache with all cached values
-	 */
-	public Map<String,Object> toMap()
-	{
-		return Collections.unmodifiableMap( columnData );
 	}
 
 	/**
@@ -230,22 +177,28 @@ class RowCache implements Comparable<RowCache>
 		}
 	}
 	
-	public synchronized boolean writeBack(CachedJDBCRecordStore store, RecordBase<?> base, int primaryKey)
+	public synchronized boolean writeBack(CachedJDBCRecordStore store, RecordBase<?> base)
 	{
 		if(!dataChanged)
 		{
 			return false;
 		}
 		//XXX could optimize to only write changed values, but how to know?
-		store.setDBValues(base, primaryKey, columnData );
+		store.setDBValues(base, getPrimaryKey(), columnData );
 		dataChanged = false;
 		return true;
+	}
+	
+	public void setModified()
+	{
+		dataChanged = true;
+		parent.setModified();
 	}
 
 	@Override
 	public String toString()
 	{
-		return tableName+"@"+getPrimaryKey();
+		return "RowCache@"+getPrimaryKey();
 	}
 
 	@Override
@@ -263,10 +216,6 @@ class RowCache implements Comparable<RowCache>
 	@Override
 	public int compareTo( final RowCache o )
 	{
-		if(o.getTableName().equals( getTableName()))
-		{
-			return Integer.compare( getPrimaryKey(), o.getPrimaryKey());
-		}
-		return getTableName().compareTo( o.getTableName());
+		return Integer.compare( getPrimaryKey(), o.getPrimaryKey());
 	}
 }

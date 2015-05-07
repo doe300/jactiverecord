@@ -25,6 +25,7 @@
 package de.doe300.activerecord.proxy;
 
 import de.doe300.activerecord.RecordBase;
+import de.doe300.activerecord.jdbc.TypeMappings;
 import de.doe300.activerecord.logging.Logging;
 import de.doe300.activerecord.proxy.handlers.ProxyHandler;
 import de.doe300.activerecord.record.ActiveRecord;
@@ -161,7 +162,7 @@ public final class RecordHandler<T extends ActiveRecord> implements InvocationHa
 			Method converterMethod = Attributes.getConverterMethod( method);
 			if(converterMethod==null)
 			{
-				return store.getValue(base, primaryKey, column );
+				return TypeMappings.coerceToType( store.getValue(base, primaryKey, column ), method.getReturnType());
 			}
 			return converterMethod.invoke( proxy, store.getValue(base, primaryKey, column ) );
 		}
@@ -205,7 +206,7 @@ public final class RecordHandler<T extends ActiveRecord> implements InvocationHa
 			}
 			if(args==null||args.length==0&&Attributes.isGetter( method, false ))
 			{
-				return store.getValue(base, primaryKey, property );
+				return TypeMappings.coerceToType( store.getValue(base, primaryKey, property ), method.getReturnType());
 			}
 		}
 		//method not handled

@@ -47,7 +47,7 @@ import java.util.Collections;
  */
 public class CachedJDBCRecordStore extends SimpleJDBCRecordStore
 {
-	private final Map<RecordBase<?>, Map<Integer, RowCache>> cache;
+	private final Map<RecordBase<?>, BaseCache> cache;
 	private final Map<String,Set<String>> columnsCache;
 	private final Map<String, Boolean> tableExistsCache;
 
@@ -74,25 +74,18 @@ public class CachedJDBCRecordStore extends SimpleJDBCRecordStore
 
 	private RowCache getCache(final RecordBase<?> base, final Integer primaryKey)
 	{
-		Map<Integer, RowCache> tableCache = cache.get( base);
+		BaseCache tableCache = cache.get( base);
 		if(tableCache == null)
 		{
-			tableCache = Collections.synchronizedSortedMap( new TreeMap<>());
+			tableCache = new BaseCache(base);
 			cache.put( base, tableCache );
 		}
-		RowCache c = tableCache.get( primaryKey);
-		if(c == null)
-		{
-			c = RowCache.emptyCache( base.getTableName(), base.getPrimaryColumn(), base.isTimestamped() );
-			c.setData( base.getPrimaryColumn(), primaryKey, false);
-			tableCache.put( primaryKey, c );
-		}
-		return c;
+		return tableCache.getOrCreateRow(primaryKey);
 	}
 
 	private boolean hasCache(final RecordBase<?> base, final int primaryKey)
 	{
-		return cache.containsKey( base) && cache.get( base).containsKey( primaryKey);
+		return cache.containsKey( base) && cache.get( base).containsRow(primaryKey);
 	}
 
 	@Override
@@ -208,7 +201,7 @@ public class CachedJDBCRecordStore extends SimpleJDBCRecordStore
 		if(hasCache( base, primaryKey ))
 		{
 			final RowCache c = getCache(base, primaryKey );
-			if(c.writeBack( this, base, primaryKey ))
+			if(c.writeBack( this, base ))
 			{
 				return true;
 			}
@@ -219,19 +212,12 @@ public class CachedJDBCRecordStore extends SimpleJDBCRecordStore
 	@Override
 	public boolean saveAll(final RecordBase<?> base)
 	{
-		Map<Integer, RowCache> baseCache = cache.get( base);
-		if(baseCache == null || baseCache.isEmpty())
+		BaseCache baseCache = cache.get( base);
+		if(baseCache == null)
 		{
 			return false;
 		}
-		boolean changed = false;
-		for(final Map.Entry<Integer,RowCache> c : baseCache.entrySet())
-		{
-			if(c.getValue().writeBack( this, base, c.getKey()))
-			{
-				changed = true;
-			}
-		}
+		boolean changed = baseCache.writeAllBack( this );
 		if(changed)
 		{
 			Logging.getLogger().debug( "CachedJDBCStore", "Cache entries saved!");
@@ -261,7 +247,7 @@ public class CachedJDBCRecordStore extends SimpleJDBCRecordStore
 	{
 		if(hasCache(base, primaryKey ))
 		{
-			cache.get( base).remove(primaryKey );
+			cache.get( base).removeRow(primaryKey );
 			Logging.getLogger().debug( "CachedJDBCStore", "Cache entry destroyed!");
 		}
 		super.destroy( base,primaryKey );
@@ -311,7 +297,7 @@ public class CachedJDBCRecordStore extends SimpleJDBCRecordStore
 	{
 		if(hasCache( base, primaryKey ))
 		{
-			cache.get( base).get( primaryKey).clear();
+			cache.get( base).getRow(primaryKey).clear();
 		}
 	}
 
