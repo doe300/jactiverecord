@@ -32,6 +32,7 @@ import de.doe300.activerecord.dsl.Comparison;
 import de.doe300.activerecord.dsl.Order;
 import de.doe300.activerecord.dsl.SimpleCondition;
 import de.doe300.activerecord.scope.Scope;
+import java.sql.Timestamp;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.Map;
@@ -228,10 +229,10 @@ public class CachedJDBCRecordStoreTest extends Assert
 	@Test
 	public void testTouch()
 	{
-		long start = base.getRecord( primaryKey ).getUpdatedAt();
+		Timestamp start = base.getRecord( primaryKey ).getUpdatedAt();
 		store.touch( base, primaryKey );
-		long end = base.getRecord( primaryKey ).getUpdatedAt();
-		assertTrue( end > start);
+		Timestamp end = base.getRecord( primaryKey ).getUpdatedAt();
+		assertTrue( end.compareTo( start) > 0);
 	}
 	
 }

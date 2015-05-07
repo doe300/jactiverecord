@@ -32,6 +32,7 @@ import de.doe300.activerecord.record.Searchable;
 import de.doe300.activerecord.record.TimestampedRecord;
 import de.doe300.activerecord.validation.Validate;
 import de.doe300.activerecord.validation.ValidationType;
+import java.sql.Timestamp;
 
 /**
  *
@@ -112,15 +113,15 @@ public class TestPOJO implements ActiveRecord, TestInterface
 	}
 
 	@Override
-	public long getCreatedAt()
+	public Timestamp getCreatedAt()
 	{
-		return ( long ) base.getProperty( primaryKey, TimestampedRecord.COLUMN_CREATED_AT);
+		return ( Timestamp ) base.getProperty( primaryKey, TimestampedRecord.COLUMN_CREATED_AT);
 	}
 
 	@Override
-	public long getUpdatedAt()
+	public Timestamp getUpdatedAt()
 	{
-		return ( long ) base.getProperty( primaryKey, TimestampedRecord.COLUMN_UPDATED_AT);
+		return ( Timestamp ) base.getProperty( primaryKey, TimestampedRecord.COLUMN_UPDATED_AT);
 	}
 
 	@Override
