@@ -67,6 +67,9 @@ public class AssociationHelperTest extends Assert
 		TestInterface i = base.createRecord();
 		base.getStore().setValue( base, i.getPrimaryKey(), "fk_test_id", i.getPrimaryKey());
 		assertEquals( i, AssociationHelper.getBelongsTo( i, TestInterface.class, "fk_test_id"));
+		//negative test
+		TestInterface j = base.createRecord();
+		assertNull( AssociationHelper.getBelongsTo( j, TestInterface.class, "fk_test_id"));
 	}
 
 	@Test
@@ -106,6 +109,12 @@ public class AssociationHelperTest extends Assert
 	@Test
 	public void testGetHasManyThrough()
 	{
+		TestInterface i = base.createRecord(), m1 = base.createRecord(), m2 = base.createRecord();
+		AssociationHelper.addHasManyThrough(i, m1, "mappingTable", "fk_test1", "fk_test2");
+		AssociationHelper.addHasManyThrough(i, m2, "mappingTable", "fk_test1", "fk_test2");
+		assertTrue( AssociationHelper.getHasManyThrough( i, TestInterface.class, "mappingTable", "fk_test1", "fk_test2").count() == 2);
+		//negative test
+		assertTrue( AssociationHelper.getHasManyThrough( m1, TestInterface.class, "mappingTable", "fk_test1", "fk_test2").count() == 0);
 	}
 
 	@Test

@@ -88,26 +88,38 @@ public class SimpleJDBCRecordStoreTest extends Assert
 		assertEquals( 10000, store.getValue( base, primaryKey, "age"));
 	}
 
-	@Test
+	@Test(expected = IllegalArgumentException.class)
 	public void testSetValues_3args()
 	{
 		store.setValues( base, primaryKey, Collections.singletonMap( "age", 13));
 		assertSame( 13, store.getValue( base, primaryKey, "age"));
+		//set empty values
+		store.setValues( base, primaryKey, Collections.emptyMap());
+		//negative test - throws exception
+		store.setValues( base, primaryKey, Collections.singletonMap( "no_column", base) );
 	}
 
-	@Test
+	@Test(expected = IllegalArgumentException.class)
 	public void testGetValue()
 	{
 		assertEquals( primaryKey, store.getValue( base, primaryKey, base.getPrimaryColumn()));
+		//no results
+		assertNull( store.getValue( base, primaryKey+1000, base.getPrimaryColumn()) );
+		//negative test - throws exception
+		store.getValue( base, primaryKey, "no_column");
 	}
 
-	@Test
+	@Test(expected = IllegalArgumentException.class)
 	public void testGetValues_3args()
 	{
 		store.setValue( base, primaryKey, "name", "Max");
 		Map<String,Object> m = store.getValues( base, primaryKey, new String[]{base.getPrimaryColumn(), "name"});
 		assertEquals( "Max", m.get( "name"));
 		assertEquals( primaryKey, m.get( base.getPrimaryColumn()));
+		//no results
+		assertEquals( 0, store.getValues( base, primaryKey+1000, base.getDefaultColumns() ).size());
+		//negative test - throws exception
+		store.getValues( base, primaryKey, new String[]{"no_column"});
 	}
 
 	@Test
@@ -132,20 +144,31 @@ public class SimpleJDBCRecordStoreTest extends Assert
 		assertFalse( store.containsRecord( base, key));
 	}
 
-	@Test
+	@Test(expected = IllegalArgumentException.class)
 	public void testFindFirstWithData()
 	{
 		Scope scope = new Scope(new SimpleCondition(base.getPrimaryColumn(), primaryKey, Comparison.IS), null, Scope.NO_LIMIT );
 		assertTrue(store.findFirstWithData( base, base.getDefaultColumns(), scope).size()>=base.getDefaultColumns().length);
+		//test for empty results
+		scope = new Scope(new SimpleCondition(base.getPrimaryColumn(), null, Comparison.IS_NULL), null, Scope.NO_LIMIT);
+		assertEquals( 0, store.findFirstWithData( base, new String[]{base.getPrimaryColumn()}, scope).size());
+		//negative test - throws exception
+		scope  = new Scope(new SimpleCondition("no_column", "112", Comparison.IS), null, Scope.NO_LIMIT);
+		store.findFirstWithData( base, base.getDefaultColumns(), scope);
+		
 	}
 
-	@Test
+	@Test(expected = IllegalArgumentException.class)
 	public void testCount()
 	{
 		assertTrue( store.count( base, new SimpleCondition(base.getPrimaryColumn(), primaryKey, Comparison.IS)) == 1);
+		//test no results
+		assertEquals( 0, store.count( base, new SimpleCondition(base.getPrimaryColumn(), null, Comparison.IS_NULL)));
+		//negative test - throws exception
+		store.count( base, new SimpleCondition("no_column", base, Comparison.IS));
 	}
 
-	@Test
+	@Test(expected = IllegalArgumentException.class)
 	public void testStreamAllWithData()
 	{
 		Scope scope = new Scope(new SimpleCondition(base.getPrimaryColumn(), primaryKey, Comparison.IS), null, 2 );
@@ -157,6 +180,13 @@ public class SimpleJDBCRecordStoreTest extends Assert
 		base.createRecord().setAge( 123);
 		base.createRecord().setAge( 123);
 		assertTrue( store.streamAllWithData( base, base.getDefaultColumns(), scope2).count() == 2);
+		
+		//test empty condition
+		Scope scope3 = new Scope(null, null, 2);
+		assertEquals( 2, store.streamAllWithData( base, base.getDefaultColumns(), scope3).count());
+		
+		//negative test - throws exception
+		store.streamAllWithData( base, new String[]{"id", "no_colunm"}, scope);
 	}
 
 	@Test
@@ -169,21 +199,28 @@ public class SimpleJDBCRecordStoreTest extends Assert
 	@Test
 	public void testGetAllColumnNames()
 	{
-		assertTrue( Arrays.asList( new String[]{"id", "name", "age", "fk_test_id", "other", "created_at", "updated_at"}).containsAll( store.getAllColumnNames( base.getTableName()) ) );
-		assertTrue( ( store.getAllColumnNames( base.getTableName()) ).containsAll( Arrays.asList( new String[]{"id", "name", "age", "fk_test_id", "other", "created_at", "updated_at"})) );
+		assertTrue( Arrays.asList( new String[]{"id", "name", "age", "fk_test_id", "other", "created_at", "updated_at", "test_enum"}).containsAll( store.getAllColumnNames( base.getTableName()) ) );
+		assertTrue( ( store.getAllColumnNames( base.getTableName()) ).containsAll( Arrays.asList( new String[]{"id", "name", "age", "fk_test_id", "other", "created_at", "updated_at", "test_enum"})) );
 	}
 
-	@Test
+	@Test(expected = IllegalArgumentException.class)
 	public void testInsertNewRecord()
 	{
 		assertTrue( store.insertNewRecord(base, null ) > 0);
+		//negative test - throws exception
+		store.insertNewRecord( base, Collections.singletonMap( "no_column", "Dummy"));
 	}
 
-	@Test
+	@Test(expected = IllegalArgumentException.class)
 	public void testGetValues_4args()
 	{
 		store.setValue( base, primaryKey, "name", "Heinz");
 		assertEquals("Heinz", store.getValues( base.getTableName(), "name", base.getPrimaryColumn(), primaryKey).findFirst().get());
+		//no results
+		assertEquals( 0, store.getValues( base.getTableName(), "name", base.getPrimaryColumn(), primaryKey+1000 ).count());
+		//negative test - throws exception
+		store.getValues( base.getTableName(), "no_column", base.getPrimaryColumn(), primaryKey);
+		
 	}
 
 
@@ -205,15 +242,22 @@ public class SimpleJDBCRecordStoreTest extends Assert
 		assertFalse( store.saveAll( base));
 	}
 
-	@Test
+	@Test(expected = IllegalArgumentException.class)
 	public void testAddRow()
 	{
 		assertTrue( store.addRow( "mappingTable", new String[]{"fk_test1", "fk_test2"}, new Object[]{primaryKey,primaryKey} ));
+		//negative test - adding already existing row - throws exception
+		store.addRow( base.getTableName(), new String[]{"id", "name"}, new Object[]{primaryKey,"Test"} );
 	}
 
-	@Test
+	@Test(expected = IllegalArgumentException.class)
 	public void testRemoveRow()
 	{
+		assertTrue( store.addRow( "mappingTable", new String[]{"fk_test1", "fk_test2"}, new Object[]{primaryKey,primaryKey} ));
 		assertTrue( store.removeRow( "mappingTable", new SimpleCondition("fk_test1", primaryKey, Comparison.IS)));
+		//removing not existing row
+		assertFalse( store.removeRow( "mappingTable", new SimpleCondition("fk_test1", primaryKey, Comparison.IS)));
+		//negative test - throws exception
+		store.removeRow( "noSuchTable", new SimpleCondition("fk_test1", primaryKey, Comparison.IS));
 	}
 }

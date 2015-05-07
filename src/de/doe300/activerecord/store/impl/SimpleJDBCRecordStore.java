@@ -260,7 +260,7 @@ public class SimpleJDBCRecordStore implements RecordStore
 			{
 				return res.getObject( name );
 			}
-			Logging.getLogger().debug( "JDBCStore", "no value found");
+			Logging.getLogger().debug( "JDBCStore", "No value found");
 			return null;
 		}
 		catch ( final SQLException ex )
@@ -369,7 +369,7 @@ public class SimpleJDBCRecordStore implements RecordStore
 					}
 					return values;
 				}
-				Logging.getLogger().debug("JDBCStore", "no matching rows found");
+				Logging.getLogger().debug("JDBCStore", "No matching rows found");
 				return Collections.emptyMap();
 			}
 		}
@@ -401,8 +401,8 @@ public class SimpleJDBCRecordStore implements RecordStore
 				{
 					return res.getInt("size");
 				}
-				Logging.getLogger().debug("JDBCStore", "no matching rows found");
-				return -1;
+				Logging.getLogger().debug("JDBCStore", "No matching rows found");
+				return 0;
 			}
 
 		}
@@ -516,7 +516,7 @@ public class SimpleJDBCRecordStore implements RecordStore
 	@Override
 	public Set<String> getAllColumnNames( final String tableName )
 	{
-		try(ResultSet set = con.getMetaData().getColumns(con.getCatalog(), con.getSchema(), convertIdentifier( tableName ), null))
+		try(ResultSet set = con.getMetaData().getColumns(con.getCatalog(), con.getSchema(), VendorSpecific.convertIdentifierWithoutQuote(tableName, con), null))
 		{
 			final Set<String> columns = new HashSet<>(10);
 			while(set.next())
@@ -586,7 +586,7 @@ public class SimpleJDBCRecordStore implements RecordStore
 		{
 			Logging.getLogger().error( "JDBCStore", "Failed to insert new row!");
 			Logging.getLogger().error( "JDBCStore", ex);
-			throw new RuntimeException("Failed to insert new row",ex);
+			throw new IllegalArgumentException("Failed to insert new row",ex);
 		}
 	}
 
@@ -703,7 +703,7 @@ public class SimpleJDBCRecordStore implements RecordStore
 			Logging.getLogger().error( "JDBCStore", "Failed to add row");
 			Logging.getLogger().error( "JDBCStore", sql);
 			Logging.getLogger().error( "JDBCStore", ex);
-			throw new RuntimeException("Failed to insert new row",ex);
+			throw new IllegalArgumentException("Failed to insert new row",ex);
 		}
 	}
 
@@ -722,7 +722,7 @@ public class SimpleJDBCRecordStore implements RecordStore
 			Logging.getLogger().error( "JDBCStore", "Failed to remove row");
 			Logging.getLogger().error( "JDBCStore", sql);
 			Logging.getLogger().error( "JDBCStore", ex);
-			throw new RuntimeException("Failed to insert new row",ex);
+			throw new IllegalArgumentException("Failed to insert new row",ex);
 		}
 	}
 }

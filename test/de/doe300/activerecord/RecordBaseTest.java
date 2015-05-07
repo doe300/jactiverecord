@@ -170,6 +170,14 @@ public class RecordBaseTest<T extends TestInterface> extends Assert
 	@Test
 	public void testSaveAll()
 	{
+		//make sure all records are savable(validated)
+		base.find( new SimpleCondition("name", null, Comparison.IS_NULL)).forEach( (T t) -> t.setName( "Dummy"));
+		base.saveAll();
+		//no data has changed since last save
+		assertFalse( base.saveAll() );
+		T t = base.createRecord();
+		t.setName( "Idiot");
+		assertTrue( base.saveAll());
 	}
 
 	@Test
@@ -306,7 +314,7 @@ public class RecordBaseTest<T extends TestInterface> extends Assert
 	public void testIsValid() throws Exception
 	{
 		T t = base.createRecord();
-		assertFalse( t.isValid());
+		assertFalse( base.isValid(t));
 	}
 
 	@Test(expected = ValidationFailed.class)
@@ -315,7 +323,7 @@ public class RecordBaseTest<T extends TestInterface> extends Assert
 		T t = base.createRecord();
 		t.setName( "Name");
 		assertNotNull( t.getName());
-		t.validate();
+		base.validate( t);
 		try{
 			t.setName( null );
 		}
@@ -324,7 +332,7 @@ public class RecordBaseTest<T extends TestInterface> extends Assert
 			//TODO fix, so ValidationFailed is thrown
 			throw new ValidationFailed("name", t);
 		}
-		t.validate();
+		base.validate( t);
 	}
 	
 	@Test
@@ -407,5 +415,11 @@ public class RecordBaseTest<T extends TestInterface> extends Assert
 		QueryResult<T> res = base.withScope(scope);
 		assertNotNull( res );
 		assertEquals( base.getDefaultOrder(), res.getOrder());
+	}
+
+	@Test
+	public void testIsAutoCreate()
+	{
+		assertFalse( base.isAutoCreate());
 	}
 }

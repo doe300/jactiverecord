@@ -174,7 +174,7 @@ public enum VendorSpecific
 	
 	/**
 	 * Converts the input identifier to the case used in the DB
-	 * Also adds
+	 * Also adds quotes, if the database-vendor supports them
 	 * @param input
 	 * @param con
 	 * @return the input in the correct case
@@ -199,17 +199,45 @@ public enum VendorSpecific
 			}
 			if(meta.storesUpperCaseIdentifiers())
 			{
-				return quoteFunc.apply( input.toUpperCase());
+				return quoteFunc.apply( convertIdentifierWithoutQuote(input, con ));
 			}
 			if(meta.storesLowerCaseIdentifiers())
 			{
-				return quoteFunc.apply( input.toLowerCase());
+				return quoteFunc.apply( convertIdentifierWithoutQuote( input, con ));
 			}
 
 		}
 		catch ( final SQLException ex )
 		{
-			//TODO do something
+			throw new RuntimeException(ex);
+		}
+		return input;
+	}
+	
+	/**
+	 * Converts the input identifier to the case used in the DB. Does not quote the input string
+	 * @param input
+	 * @param con
+	 * @return the input in the correct case
+	 */
+	public static String convertIdentifierWithoutQuote(String input, Connection con)
+	{
+		try
+		{
+			DatabaseMetaData meta = con.getMetaData();
+			
+			if(meta.storesUpperCaseIdentifiers())
+			{
+				return input.toUpperCase();
+			}
+			if(meta.storesLowerCaseIdentifiers())
+			{
+				return input.toLowerCase();
+			}
+		}
+		catch ( final SQLException ex )
+		{
+			throw new RuntimeException(ex);
 		}
 		return input;
 	}

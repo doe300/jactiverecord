@@ -172,4 +172,11 @@ public class HasManyThroughAssociationSetTest extends Assert
 	{
 		assertEquals( a2, set.findFirst( new SimpleCondition(a2.getBase().getPrimaryColumn(), a2.getPrimaryKey(), Comparison.IS)));
 	}
+
+	@Test
+	public void testGetAssociatedBase()
+	{
+		assertNotNull( set.getAssociatedBase());
+		assertSame( base, set.getAssociatedBase());
+	}
 }
