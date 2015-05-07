@@ -53,8 +53,12 @@ public class QueryResultTest extends Assert
 		TestInterface i = base.createRecord();
 		i.setName( "Alfons");
 		i.setAge( 20);
-		base.createRecord().setName( "Johhny");
-		base.createRecord().setName( "Adam");
+		i = base.createRecord();
+		i.setName( "Johhny");
+		i.setAge( 23);
+		i = base.createRecord();
+		i.setName( "Adam");
+		i.setAge( -123);
 	}
 	
 	@AfterClass
@@ -72,8 +76,8 @@ public class QueryResultTest extends Assert
 	@Test
 	public void testWhere()
 	{
-		assertTrue( base.where( new SimpleCondition("age", base, Comparison.IS_NOT_NULL)).where( new SimpleCondition("age", 20,
-				Comparison.SMALLER_EQUALS)).stream().count() == 1);
+		assertEquals(2, base.where( new SimpleCondition("age", base, Comparison.IS_NOT_NULL)).where( new SimpleCondition("age", 20,
+				Comparison.SMALLER_EQUALS)).stream().count());
 	}
 
 	@Test
@@ -103,6 +107,14 @@ public class QueryResultTest extends Assert
 	@Test
 	public void testGetOrder()
 	{
+		assertSame( base.getDefaultOrder(), base.where( new SimpleCondition("name", null, Comparison.IS_NOT_NULL)).getOrder());
 	}
 	
-}
+	@Test
+	public void testOrder()
+	{
+		assertEquals( -123, base.where( new SimpleCondition("name", null, Comparison.IS_NOT_NULL)).order( Order.
+				fromSQLString( "age ASC")).findFirst( null ).getAge());
+		assertEquals( 23, base.where( new SimpleCondition("name", null, Comparison.IS_NOT_NULL)).order( new Order("age", Order.OrderType.DESCENDING)).findFirst( null ).getAge());
+	}
+}	

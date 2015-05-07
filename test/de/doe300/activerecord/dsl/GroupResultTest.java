@@ -50,9 +50,15 @@ public class GroupResultTest extends Assert
 	{
 		TestServer.buildTestTables();
 		base = RecordCore.fromDatabase( TestServer.getTestConnection(), true).buildBase(TestInterface.class);
-		base.createRecord().setName( "Adam5");
-		base.createRecord().setName( "Adam5");
-		base.createRecord().setName( "Adam5");
+		TestInterface t = base.createRecord();
+		t.setName( "Adam5");
+		t.setAge( 145);
+		t = base.createRecord();
+		t.setName( "Adam5");
+		t.setAge( 123);
+		t = base.createRecord();
+		t.setName( "Adam5");
+		t.setAge( 122);
 	}
 	
 	@AfterClass
@@ -64,9 +70,7 @@ public class GroupResultTest extends Assert
 	@Test
 	public void testStream()
 	{
-		assertTrue(base.where( new SimpleCondition("name", null, Comparison.IS_NOT_NULL)).
-				groupBy( "name").filter( (GroupResult<Object,TestInterface> r) -> r.getKey().equals( "Adam5")).
-				anyMatch( (GroupResult<Object,TestInterface> r) -> r.stream().count() == 3));
+		assertTrue( getGroup().stream().count() == 3);
 	}
 
 	@Test
@@ -86,8 +90,18 @@ public class GroupResultTest extends Assert
 	@Test
 	public void testGetOrder()
 	{
-		assertTrue(base.where( new SimpleCondition("name", null, Comparison.IS_NOT_NULL)).groupBy( "name").filter( (GroupResult<Object,TestInterface> r) -> r.getKey().equals( "Adam5")).
-				allMatch( (GroupResult<Object,TestInterface> r) -> r.getOrder().equals( base.getDefaultOrder())));
+		assertTrue( getGroup().getOrder().equals( base.getDefaultOrder()));
 	}
 	
+	@Test
+	public void testOrder()
+	{
+		assertEquals(122, getGroup().order( Order.fromSQLString( "age ASC")).findFirst( null ).getAge() );
+		assertEquals(145, getGroup().order( Order.fromSQLString( "age DESC")).findFirst( null ).getAge() );
+	}
+	
+	private GroupResult<Object, TestInterface> getGroup()
+	{
+		return base.where( new SimpleCondition("name", null, Comparison.IS_NOT_NULL) ).groupBy( "name").filter( (GroupResult<Object,TestInterface> r) -> r.getKey().equals( "Adam5")).findAny().get();
+	}
 }

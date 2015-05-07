@@ -28,6 +28,7 @@ import de.doe300.activerecord.RecordBase;
 import de.doe300.activerecord.RecordCore;
 import de.doe300.activerecord.TestInterface;
 import de.doe300.activerecord.TestServer;
+import java.util.Collections;
 import org.junit.AfterClass;
 import org.junit.Assert;
 import org.junit.BeforeClass;
@@ -93,5 +94,30 @@ public class InvertedConditionTest extends Assert
 		//matches t2 and t3
 		assertTrue( base.find( new InvertedCondition(cond)).count() >= 2 );
 		assertFalse( base.find( new InvertedCondition(cond)).anyMatch( (TestInterface i) -> i.equals( t1)));
+	}
+
+	@Test
+	public void testTest_ActiveRecord()
+	{
+		Condition cond = new InvertedCondition(new SimpleCondition("age", 913, Comparison.IS));
+		//t1 has age of non-913
+		assertTrue( cond.test( t1));
+		assertFalse( cond.test( t2));
+	}
+
+	@Test
+	public void testTest_Map()
+	{
+		Condition cond = new InvertedCondition(new SimpleCondition("age", 913, Comparison.IS));
+		assertTrue( cond.test( Collections.singletonMap( "age", 912)));
+		assertFalse( cond.test( Collections.singletonMap( "age", 913)));
+	}
+
+	@Test
+	public void testNegate()
+	{
+		Condition cond = new SimpleCondition("age", 913, Comparison.IS);
+		Condition invCond = new InvertedCondition(cond);
+		assertSame( cond, invCond.negate());
 	}
 }

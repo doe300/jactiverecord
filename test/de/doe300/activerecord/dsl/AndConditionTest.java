@@ -31,86 +31,85 @@ import de.doe300.activerecord.TestServer;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
-import org.junit.AfterClass;
 import org.junit.Assert;
 import org.junit.BeforeClass;
 import org.junit.Test;
 
-/**
- *
- * @author daniel
- */
-public class OrConditionTest extends Assert
+public class AndConditionTest extends Assert
 {
-	
 	private static RecordBase<TestInterface> base;
 	private static TestInterface t1, t2,t3;
-	private static OrCondition cond;
+	
+	public AndConditionTest()
+	{
+	}
 	
 	@BeforeClass
-	public static void createTables() throws Exception
+	public static void setUpClass() throws Exception
 	{
 		TestServer.buildTestTables();
-		
 		base = RecordCore.fromDatabase( TestServer.getTestConnection(), false).buildBase( TestInterface.class);
 		t1 = base.createRecord();
 		t1.setName( "123Name1");
-		t1.setAge( -912);
+		t1.setAge( 912);
 		t2 = base.createRecord();
 		t2.setName( "123Name1");
-		t2.setAge( -913);
+		t2.setAge( 913);
 		t3 = base.createRecord();
 		t3.setName( "123Name4");
-		t3.setAge( -913);
-		
-		cond = new OrCondition(new SimpleCondition("name", "123Name4", Comparison.IS), new SimpleCondition("age",
-				-913, Comparison.SMALLER_EQUALS));
-	}
-	
-	@AfterClass
-	public static void destroyTables() throws Exception
-	{
-		TestServer.destroyTestTables();
+		t3.setAge( 914);
 	}
 
 	@Test
 	public void testHasWildcards()
 	{
-		assertTrue( cond.hasWildcards());
-		Condition c = new OrCondition(new SimpleCondition("name", null, Comparison.IS_NOT_NULL), new SimpleCondition("age", null, Comparison.IS_NULL));
-		assertFalse( c.hasWildcards());
+		Condition condition = new AndCondition(new SimpleCondition("age", null, Comparison.IS_NOT_NULL), new SimpleCondition("name", null, Comparison.IS_NOT_NULL));
+		assertFalse( condition.hasWildcards());
+		Condition condition1 = new AndCondition(condition, new SimpleCondition("name", "123Name1", Comparison.IS));
+		assertTrue( condition1.hasWildcards());
 	}
 
 	@Test
 	public void testGetValues()
 	{
-		assertArrayEquals( new Object[]{"123Name4", -913}, cond.getValues());
+		Condition condition = new AndCondition(
+				new SimpleCondition("age", 913, Comparison.IS),
+				new SimpleCondition("name", "123Name1", Comparison.IS));
+		assertArrayEquals( new Object[]{913, "123Name1"}, condition.getValues() );
 	}
 
 	@Test
 	public void testTest_ActiveRecord()
 	{
-		assertFalse(cond.test( t1));
-		assertTrue( cond.test( t2));
-		assertTrue( cond.test( t3));
+		Condition condition = new AndCondition(
+				new SimpleCondition("age", 913, Comparison.IS),
+				new SimpleCondition("name", "123Name1", Comparison.IS));
+		assertFalse( condition.test( t1));
+		assertTrue( condition.test( t2));
 	}
 
 	@Test
 	public void testTest_Map()
 	{
+		Condition condition = new AndCondition(
+				new SimpleCondition("age", 913, Comparison.IS),
+				new SimpleCondition("name", "123Name1", Comparison.IS));
 		Map<String,Object> map = new HashMap<>(2);
-		map.put( "name", "Adam");
-		map.put( "age", 100);
-		assertFalse( cond.test( map));
-		assertTrue( cond.test( Collections.singletonMap( "age", -1000)));
+		map.put( "age", 913);
+		map.put( "name", "123Name1");
+		assertTrue( condition.test( map ) );
+		assertFalse( condition.test( Collections.singletonMap( "age", 913)));
 	}
 
 	@Test
 	public void testNegate()
 	{
-		Condition invCond = cond.negate();
-		assertTrue(invCond.test( t1));
-		assertFalse(invCond.test( t2));
-		assertFalse( invCond.test( t3));
+		Condition condition = new AndCondition(
+				new SimpleCondition("age", 913, Comparison.IS),
+				new SimpleCondition("name", "123Name1", Comparison.IS));
+		condition = condition.negate();
+		assertTrue( condition.test( t1));
+		assertFalse( condition.test( t2));
 	}
+	
 }

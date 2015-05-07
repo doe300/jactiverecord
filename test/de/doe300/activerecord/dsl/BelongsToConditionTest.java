@@ -112,5 +112,15 @@ public class BelongsToConditionTest extends Assert
 	{
 		cond1.test( new HashMap<String, Object>(0) );
 	}
+
+	@Test
+	public void testNegate()
+	{
+		Condition invCond = cond3.negate();
+		
+		assertTrue( invCond.test( t1));
+		assertFalse( invCond.test( t2));
+		assertFalse( invCond.test( t3));
+	}
 	
 }

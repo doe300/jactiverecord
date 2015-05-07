@@ -80,4 +80,11 @@ public class OrderTest extends Assert
 		String sql = "name ASC, age ASC, title DESC";
 		assertEquals( sql, o.toSQL(null));
 	}
+	
+	@Test
+	public void testLevelTypes()
+	{
+		Order o = new Order(new String[]{"name", "age", "id"}, new Order.OrderType[]{Order.OrderType.DESCENDING});
+		assertEquals( "name DESC, age ASC, id ASC", o.toString());
+	}
 }

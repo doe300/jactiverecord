@@ -95,7 +95,7 @@ public class Order implements Comparator<Map<String,Object>>, SQLCommand
 		return new Order(columns, types );
 	}
 	
-	private OrderType[] levelTypes(int num, OrderType[] types)
+	private static OrderType[] levelTypes(int num, OrderType[] types)
 	{
 		if(types!=null && num==types.length)
 		{
