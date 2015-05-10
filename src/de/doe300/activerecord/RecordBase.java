@@ -429,7 +429,7 @@ public abstract class RecordBase<T extends ActiveRecord> implements FinderMethod
 	@Override
 	public Stream<T> findWithScope(final Scope scope)
 	{
-		return getStore().findAll(this, scope ).stream().map( (final Integer i) ->
+		return getStore().streamAll(this, scope ).map( (final Integer i) ->
 		{
 			try
 			{

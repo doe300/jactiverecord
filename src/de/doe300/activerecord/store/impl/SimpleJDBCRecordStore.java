@@ -424,13 +424,15 @@ public class SimpleJDBCRecordStore implements RecordStore
 			sql += " LIMIT "+scope.getLimit();
 		}
 		Logging.getLogger().debug( "JDBCStore", sql);
-		try(PreparedStatement stm = con.prepareStatement(sql))
+		try
 		{
+			//this statement can't be try-with-resource because it would close the result-set
+			PreparedStatement stm = con.prepareStatement(sql);
 			if(scope.getCondition()!=null)
 			{
 				fillStatement( stm, scope.getCondition() );
 			}
-			//this result-set can't be try-with-resource because it is required to stay open
+			//this result-set can't be try-with-resource because it is required to stay open for asynchronous call
 			final ResultSet res = stm.executeQuery();
 			return allWithDataStream(columns, res);
 		}
@@ -455,6 +457,8 @@ public class SimpleJDBCRecordStore implements RecordStore
 				{
 					if(!res.next())
 					{
+						//result-set is no longer needed, can be closed
+						res.close();
 						return false;
 					}
 					final Map<String,Object> values=new HashMap<>(columns.length);

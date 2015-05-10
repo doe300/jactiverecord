@@ -81,7 +81,7 @@ public class SingleInheritanceBase<T extends ActiveRecord> extends POJOBase<T>
 		if(!newRecord && typeKey == null)
 		{
 			//no new record - read type from storage
-			typeKey = getProperty( primaryKey, inheritance.typeColumnName());
+			typeKey = getProperty( primaryKey, inheritance.typeColumnName(), Object.class);
 		}
 		if(typeKey == null)
 		{

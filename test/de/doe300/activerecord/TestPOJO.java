@@ -78,7 +78,7 @@ public class TestPOJO implements ActiveRecord, TestInterface
 	@Override
 	public String getName()
 	{
-		return ( String ) base.getProperty( primaryKey, "name");
+		return base.getProperty( primaryKey, "name", String.class);
 	}
 
 	@Override
@@ -90,7 +90,7 @@ public class TestPOJO implements ActiveRecord, TestInterface
 	@Override
 	public int getAge()
 	{
-		return ( int ) base.getProperty( primaryKey, "age");
+		return base.getProperty( primaryKey, "age", Integer.class);
 	}
 
 	@Override
@@ -98,9 +98,9 @@ public class TestPOJO implements ActiveRecord, TestInterface
 	{
 		try
 		{
-			return base.getCore().buildBase( TestInterface.class).getRecord(( int ) base.getProperty( primaryKey, "fk_test_id"));
+			return base.getCore().buildBase( TestInterface.class).getRecord(base.getProperty( primaryKey, "fk_test_id", Integer.class));
 		}
-		catch ( final Exception ex )
+		catch ( final ClassCastException | RecordException ex )
 		{
 			throw new RuntimeException(ex);
 		}
@@ -115,13 +115,13 @@ public class TestPOJO implements ActiveRecord, TestInterface
 	@Override
 	public Timestamp getCreatedAt()
 	{
-		return ( Timestamp ) base.getProperty( primaryKey, TimestampedRecord.COLUMN_CREATED_AT);
+		return base.getProperty( primaryKey, TimestampedRecord.COLUMN_CREATED_AT, Timestamp.class);
 	}
 
 	@Override
 	public Timestamp getUpdatedAt()
 	{
-		return ( Timestamp ) base.getProperty( primaryKey, TimestampedRecord.COLUMN_UPDATED_AT);
+		return base.getProperty( primaryKey, TimestampedRecord.COLUMN_UPDATED_AT, Timestamp.class);
 	}
 
 	@Override
