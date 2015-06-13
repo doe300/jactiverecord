@@ -124,7 +124,8 @@ public final class RecordHandler<T extends ActiveRecord> implements InvocationHa
 		}
 		if(method.equals( toString))
 		{
-			return "ActiveRecord{"+primaryKey+"@"+base.getRecordType().getCanonicalName()+"}";
+			//redirect to overriding toString()-method
+			return record.toStringOverride();
 		}
 		if(method.equals( equals))
 		{

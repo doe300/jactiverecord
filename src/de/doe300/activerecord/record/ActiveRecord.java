@@ -97,4 +97,17 @@ public interface ActiveRecord extends Comparable<ActiveRecord>
 	{
 		getBase().reload( this );
 	}
+
+	/**
+	 * <code>default</code>-Methods in interfaces can't override {@link Object#toString() toString()}.
+	 * 
+	 * So this custom method can be overridden and is called for proxy-based records on call to {@link #toString() }
+	 * 
+	 * @return a string representing this Object
+	 * @see Object#toString() 
+	 */
+	public default String toStringOverride()
+	{
+		return "ActiveRecord{"+getPrimaryKey()+"@"+getBase().getRecordType().getCanonicalName()+"}";
+	}
 }
