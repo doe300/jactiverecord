@@ -606,10 +606,11 @@ public class SimpleJDBCRecordStore implements RecordStore
 	{
 		final String sql = "SELECT "+column+" FROM " +tableName+ " WHERE "+condColumn+" = ?";
 		Logging.getLogger().debug( "JDBCStore", sql);
-		try(PreparedStatement stmt = con.prepareStatement( sql))
+		try
 		{
-			stmt.setObject( 1, condValue);
 			//can't use try-with-resource here, because result-set is required to stay open
+			PreparedStatement stmt = con.prepareStatement( sql);
+			stmt.setObject( 1, condValue);
 			final ResultSet res = stmt.executeQuery();
 			return valuesStream(res);
 		}

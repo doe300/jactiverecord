@@ -96,8 +96,8 @@ public class BelongsToCondition implements Condition
 	public boolean test( ActiveRecord record )
 	{
 		ActiveRecord associatedRecord = AssociationHelper.getBelongsTo( record, associatedTableBase.getRecordType(), foreignKeyColumn);
-		return associatedTableCond.test( associatedRecord);
-	}
+			return associatedTableCond.test( associatedRecord);
+		}
 
 	@Override
 	public boolean test( Map<String, Object> map )

@@ -81,6 +81,10 @@ public final class TypeMappings
 	 */
 	public static <T> T coerceToType(final Object obj, final Class<T> type) throws ClassCastException
 	{
+		if(obj == null)
+		{
+			return null;
+		}
 		//TODO still far from perfect solution -> find some better way for implicit casting
 		if(type.isInstance( obj ))
 		{

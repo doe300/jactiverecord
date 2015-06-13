@@ -168,7 +168,7 @@ public class CollectionHandler implements ProxyHandler
 			final Iterator<String> it = columnNames.iterator();
 			for(int i=0;i<columnNames.size()&&it.hasNext();i++)
 			{
-				res[i] = ( T ) store.getValue( base, primaryKey, it.next());
+				res[i] = (T) store.getValue( base, primaryKey, it.next());
 			}
 			return res;
 		}

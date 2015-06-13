@@ -117,11 +117,14 @@ class BaseCache
 			return false;
 		}
 		boolean changed = false;
-		for(RowCache cache : cachedRows.values())
+		synchronized(cachedRows)
 		{
-			if(cache.writeBack( store, base ))
+			for(RowCache cache : cachedRows.values())
 			{
-				changed = true;
+				if(cache.writeBack( store, base ))
+				{
+					changed = true;
+				}
 			}
 		}
 		dataChanged = false;
