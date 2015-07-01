@@ -81,12 +81,12 @@ public class HasManyThroughAssociationSet<T extends ActiveRecord> extends Abstra
 	@Override
 	public boolean contains( Object o )
 	{
-		if(!destBase.getRecordType().isInstance(o))
+		if(o == null || !destBase.getRecordType().isInstance( o))
 		{
 			return false;
 		}
-		T t = destBase.getRecordType().cast( o );
-		return getAssocationKeys().anyMatch( (Integer i) -> i == t.getPrimaryKey() );
+		T otherRecord = destBase.getRecordType().cast( o );
+		return getAssocationKeys().anyMatch( (Integer i) -> i == otherRecord.getPrimaryKey() );
 	}
 
 	@Override

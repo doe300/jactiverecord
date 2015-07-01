@@ -242,6 +242,27 @@ public final class AssociationHelper
 		return record.getBase().getStore().removeRow( associationTable, cond );
 	}
 	
+	/**
+	 * Creates a set containing all matching records of the given type
+	 * @param <T> the record-type
+	 * @param base the record-base
+	 * @param conditionColumn the column to check
+	 * @param conditionValue the value to match (exact)
+	 * @param resetValue the value to set for any record, to be removed from this Set
+	 * @return the set containing all matching records
+	 */
+	public static <T extends ActiveRecord> RecordSet<T> getConditionSet(RecordBase<T> base, String conditionColumn, Object conditionValue, Object resetValue)
+	{
+		Consumer<T> setCondFunc = (T t) -> {
+			base.getStore().setValue( base, t.getPrimaryKey(), conditionColumn, conditionValue);
+		};
+		Consumer<T> unsetCondFunc = (T t) -> {
+			base.getStore().setValue( base, t.getPrimaryKey(), conditionColumn, resetValue);
+		};
+		Condition cond = new SimpleCondition(conditionColumn, conditionValue, Comparison.IS);
+		return new ConditionSet<T>(base, cond, setCondFunc, unsetCondFunc);
+	}
+	
 	private AssociationHelper()
 	{
 	}

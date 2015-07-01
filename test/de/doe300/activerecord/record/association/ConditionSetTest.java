@@ -33,22 +33,28 @@ import de.doe300.activerecord.dsl.SimpleCondition;
 import java.util.Arrays;
 import org.junit.AfterClass;
 import org.junit.Assert;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertSame;
+import static org.junit.Assert.assertTrue;
 import org.junit.BeforeClass;
 import org.junit.Test;
 
 /**
  *
- * @author daniel
+ * @author doe300
  */
-public class HasManyAssociationSetTest extends Assert
+
+
+public class ConditionSetTest extends Assert
 {
-	private static RecordSet<TestInterface> set;
 	private static RecordBase<TestInterface> base;
-	private static TestInterface assocI;
+	private static RecordSet<TestInterface> set;
 	private static TestInterface a1, a2, a3;
 	private static TestInterface n1, n2;
 	
-	public HasManyAssociationSetTest()
+	public ConditionSetTest()
 	{
 	}
 	
@@ -57,18 +63,19 @@ public class HasManyAssociationSetTest extends Assert
 	{
 		TestServer.buildTestTables();
 		base = RecordCore.fromDatabase( TestServer.getTestConnection(), true).buildBase( TestInterface.class );
-		assocI = base.createRecord();
-		set = AssociationHelper.getHasManySet( assocI, TestInterface.class, "fk_test_id" );
+		set = AssociationHelper.getConditionSet( base, "age", 23, 12);
 		
 		//fill set
 		a1 = base.createRecord();
-		a1.setDirectionOne(assocI );
+		a1.setAge( 23);
 		a2 = base.createRecord();
-		a2.setDirectionOne( assocI );
+		a2.setAge( 23);
 		a3 = base.createRecord();
-		a3.setDirectionOne( assocI );
+		a3.setAge( 23);
 		n1 = base.createRecord();
+		n1.setAge( 10);
 		n2 = base.createRecord();
+		n2.setAge( 24);
 	}
 	
 	@AfterClass

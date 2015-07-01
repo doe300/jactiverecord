@@ -69,7 +69,12 @@ public class HasManyAssociationSet<T extends ActiveRecord> extends AbstractSet<T
 	@Override
 	public boolean contains( Object o )
 	{
-		return stream().anyMatch( (T t)-> t.equals( o) );
+		if(o == null || !destBase.getRecordType().isInstance( o))
+		{
+			return false;
+		}
+		T otherRecord = destBase.getRecordType().cast( o );
+		return associationCond.test( otherRecord);
 	}
 
 	@Override
@@ -81,18 +86,18 @@ public class HasManyAssociationSet<T extends ActiveRecord> extends AbstractSet<T
 	@Override
 	public boolean add( T e )
 	{
-		if(associationCond.test( e ))
+		if(contains(e ))
 		{
 			return false;
 		}
 		setAssociationFunc.accept( e );
-		return associationCond.test( e );
+		return contains( e );
 	}
 
 	@Override
 	public boolean remove( Object o )
 	{
-		if(destBase.getRecordType().isInstance( o ) && associationCond.test(( ActiveRecord ) o))
+		if(contains( o))
 		{
 			unsetAssociationFunc.accept(destBase.getRecordType().cast( o));
 			return true;
@@ -101,29 +106,11 @@ public class HasManyAssociationSet<T extends ActiveRecord> extends AbstractSet<T
 	}
 
 	@Override
-	public boolean containsAll(Collection<?> c )
-	{
-		return c.stream().allMatch( (Object o) -> destBase.getRecordType().isInstance( o ) && associationCond.test(( ActiveRecord ) o));
-	}
-
-	@Override
-	public boolean addAll(Collection<? extends T> c )
-	{
-		//select all object not already added as association
-		return c.stream().filter( (T t) -> !associationCond.test( t) ).
-				//add assocation
-				peek( setAssociationFunc).
-				//if there are any, associations was changed
-				count() > 0;
-				
-	}
-
-	@Override
 	public boolean retainAll(Collection<?> c )
 	{
 		//select all associated objects not in the other collection and remove association
 		return stream().filter( (T t )-> !c.contains( t)).peek( unsetAssociationFunc).
-				//if there are any, the associations were cahnged
+				//if there are any, the associations were changed
 				count() > 0;
 	}
 
