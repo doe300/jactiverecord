@@ -24,21 +24,56 @@
  */
 package de.doe300.activerecord.record.attachment;
 
-import java.lang.annotation.Documented;
-import java.lang.annotation.ElementType;
-import java.lang.annotation.Retention;
-import java.lang.annotation.RetentionPolicy;
-import java.lang.annotation.Target;
+import de.doe300.activerecord.record.ActiveRecord;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.OutputStream;
 
 /**
- *
+ * ActiveRecord which provides has some kind of attached resource
  * @author doe300
  */
-@Documented
-@Retention(RetentionPolicy.RUNTIME)
-@Target(ElementType.TYPE)
-public @interface HasAttachment
+public interface HasAttachment extends ActiveRecord
 {
-	//TODO bind resources to tables, via extra table or filesystem
-	//or make interface and #getAttachment(Object key): Object
+	/**
+	 * @return the associated attachment-handler
+	 */
+	public default AttachmentHandler getAttachmentHandler()
+	{
+		return Attachments.getHander( getClass());
+	}
+	
+	/**
+	 * @return the name of the column storing the attachment-key
+	 */
+	public String getAttachmentColumn();
+	
+	/**
+	 * @return whether a attachment exists for this record
+	 * @see AttachmentHandler#attachmentExists(de.doe300.activerecord.record.attachment.HasAttachment) 
+	 */
+	public default boolean attachmentExists()
+	{
+		return getAttachmentHandler().attachmentExists( this );
+	}
+	
+	/**
+	 * @return an InputStream to the attachment
+	 * @throws IOException if no such attachment exists or an IO error occurs
+	 * @see AttachmentHandler#readAttachment(de.doe300.activerecord.record.attachment.HasAttachment) 
+	 */
+	public default InputStream readAttachment() throws IOException
+	{
+		return getAttachmentHandler().readAttachment( this );
+	}
+	
+	/**
+	 * @return an OutputStream to the attachment
+	 * @throws IOException if no such attachment exists and is not created or any other IO error occurs
+	 * @see AttachmentHandler#writeAttachment(de.doe300.activerecord.record.attachment.HasAttachment) 
+	 */
+	public default OutputStream writeAttachment() throws IOException
+	{
+		return getAttachmentHandler().writeAttachment( this );
+	}
 }

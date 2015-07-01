@@ -44,7 +44,7 @@ import org.junit.Test;
  */
 public class HasManyThroughAssociationSetTest extends Assert
 {
-	private static AssociationSet<TestInterface> set;
+	private static RecordSet<TestInterface> set;
 	private static RecordBase<TestInterface> base;
 	private static TestInterface assocI;
 	private static TestInterface a1, a2, a3;
@@ -176,7 +176,7 @@ public class HasManyThroughAssociationSetTest extends Assert
 	@Test
 	public void testGetAssociatedBase()
 	{
-		assertNotNull( set.getAssociatedBase());
-		assertSame( base, set.getAssociatedBase());
+		assertNotNull( set.getRecordBase());
+		assertSame( base, set.getRecordBase());
 	}
 }

@@ -31,11 +31,11 @@ import java.util.Set;
 import java.util.stream.Stream;
 
 /**
- * Base interface for association-based sets
+ * Base interface for record-based sets
  * @author doe300
  * @param <T>
  */
-public interface AssociationSet<T extends ActiveRecord> extends Set<T>, FinderMethods<T>
+public interface RecordSet<T extends ActiveRecord> extends Set<T>, FinderMethods<T>
 {
 	@Override
 	public default Stream<T> findAll()
@@ -44,7 +44,7 @@ public interface AssociationSet<T extends ActiveRecord> extends Set<T>, FinderMe
 	}
 	
 	/**
-	 * @return the RecordBase of the associated type
+	 * @return the RecordBase of the record-type
 	 */
-	public RecordBase<T> getAssociatedBase();
+	public RecordBase<T> getRecordBase();
 }

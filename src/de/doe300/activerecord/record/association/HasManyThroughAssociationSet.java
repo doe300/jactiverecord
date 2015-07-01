@@ -43,7 +43,7 @@ import java.util.stream.Stream;
  * @author doe300
  * @param <T>
  */
-public class HasManyThroughAssociationSet<T extends ActiveRecord> extends AbstractSet<T> implements AssociationSet<T>
+public class HasManyThroughAssociationSet<T extends ActiveRecord> extends AbstractSet<T> implements RecordSet<T>
 {
 	private final RecordBase<T> destBase;
 	private final String mappingTableName, thisMappingKey, foreignMappingKey;
@@ -171,7 +171,7 @@ public class HasManyThroughAssociationSet<T extends ActiveRecord> extends Abstra
 	}
 
 	@Override
-	public RecordBase<T> getAssociatedBase()
+	public RecordBase<T> getRecordBase()
 	{
 		return destBase;
 	}

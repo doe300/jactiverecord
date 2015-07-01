@@ -45,7 +45,7 @@ import de.doe300.activerecord.migration.constraints.ReferenceRule;
 import de.doe300.activerecord.record.ActiveRecord;
 import de.doe300.activerecord.record.RecordType;
 import de.doe300.activerecord.record.TimestampedRecord;
-import de.doe300.activerecord.record.association.AssociationSet;
+import de.doe300.activerecord.record.association.RecordSet;
 import de.doe300.activerecord.record.attributes.AttributeGetter;
 import de.doe300.activerecord.record.attributes.AttributeSetter;
 import de.doe300.activerecord.record.attributes.Attributes;
@@ -351,7 +351,7 @@ public class AutomaticMigration implements Migration
 				continue;
 			}
 			//skip associations - for POJO records
-			if(AssociationSet.class.isAssignableFrom( method.getReturnType()))
+			if(RecordSet.class.isAssignableFrom( method.getReturnType()))
 			{
 				continue;
 			}
