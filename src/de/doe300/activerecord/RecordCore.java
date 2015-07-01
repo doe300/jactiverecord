@@ -42,8 +42,10 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 /**
  * Core class for the active record API
@@ -56,11 +58,13 @@ public final class RecordCore implements AutoCloseable
 	private final RecordStore store;
 	private final Map<Class<? extends ActiveRecord>, RecordBase<?>> bases;
 	private Map<Class<? extends ActiveRecord>, ProxyHandler[]> handlers;
+	private final Map<Class<? extends ActiveRecord>, Set<RecordListener>> recordListeners;
 
 	private RecordCore( RecordStore store )
 	{
 		this.store = store;
 		this.bases = new HashMap<Class<? extends ActiveRecord>, RecordBase<?>>(10);
+		this.recordListeners = Collections.synchronizedMap(new HashMap<>(10));
 	}
 
 	/**
@@ -255,4 +259,58 @@ public final class RecordCore implements AutoCloseable
 		this.handlers = handlers;
 	}
 
+	/**
+	 * Adds a new RecordListener for this record-type
+	 * @param recordType
+	 * @param l 
+	 */
+	public void addRecordListener(Class<? extends ActiveRecord> recordType, RecordListener l)
+	{
+		if(!this.recordListeners.containsKey( recordType))
+		{
+			this.recordListeners.put( recordType, new HashSet<>(5));
+		}
+		this.recordListeners.get( recordType).add( l );
+	}
+	
+	/**
+	 * Removes a record-listener for this record-type
+	 * @param recordType
+	 * @param l 
+	 */
+	public void removeRecordListener(Class<? extends ActiveRecord> recordType, RecordListener l)
+	{
+		if(this.recordListeners.containsKey( recordType))
+		{
+			this.recordListeners.get( recordType).remove( l );
+		}
+	}
+	
+	/**
+	 * Fires a RecordEvent to all RecordListeners registered to the base's {@link RecordBase#getRecordType() record-type}
+	 * @param eventType
+	 * @param base
+	 * @param record 
+	 */
+	public void fireRecordEvent(RecordListener.RecordEvent eventType, RecordBase<?> base, ActiveRecord record)
+	{
+		if(recordListeners.containsKey( base.getRecordType()))
+		{
+			for(RecordListener l: recordListeners.get( base.getRecordType()))
+			{
+				l.notifyRecordEvent( eventType, base, record );
+			}
+		}
+	}
+	
+	/**
+	 * Saves all records for all RecordBases in this core
+	 */
+	public void saveAllRecords()
+	{
+		for(RecordBase<?> b : bases.values())
+		{
+			b.saveAll();
+		}
+	}
 }

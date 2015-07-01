@@ -269,6 +269,7 @@ public abstract class RecordBase<T extends ActiveRecord> implements FinderMethod
 		{
 			((RecordCallbacks)record).afterCreate();
 		}
+		core.fireRecordEvent( RecordListener.RecordEvent.RECORD_CREATED, this, record );
 		return record;
 	}
 
@@ -288,6 +289,7 @@ public abstract class RecordBase<T extends ActiveRecord> implements FinderMethod
 		{
 			((RecordCallbacks)record).afterCreate();
 		}
+		core.fireRecordEvent( RecordListener.RecordEvent.RECORD_CREATED, this, record );
 		return record;
 	}
 
@@ -310,6 +312,7 @@ public abstract class RecordBase<T extends ActiveRecord> implements FinderMethod
 		{
 			((RecordCallbacks)record).afterCreate();
 		}
+		core.fireRecordEvent( RecordListener.RecordEvent.RECORD_CREATED, this, record );
 		return record;
 	}
 	
@@ -409,6 +412,7 @@ public abstract class RecordBase<T extends ActiveRecord> implements FinderMethod
 		{
 			((RecordCallbacks)record).onDestroy();
 		}
+		core.fireRecordEvent( RecordListener.RecordEvent.RECORD_DESTROYED, this, record);
 		getStore().destroy(this, primaryKey );
 	}
 
