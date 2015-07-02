@@ -108,6 +108,9 @@ public interface RecordStore extends AutoCloseable
 	/**
 	 * This method is for usage only if the table has no mapped model, i.e. for association-tables.
 	 * Requests made with this method are not required to be cached and should therefore be only used if no model applies to the requested table.
+	 * 
+	 * NOTE: if the performance of this method is bad, consider adding an index to the <code>condColumn</code>
+	 * 
 	 * @param tableName
 	 * @param column the column to retrieve
 	 * @param condColumn the column to match to the <code>condValue</code>

@@ -41,8 +41,7 @@ import java.util.Collections;
  */
 class RowCache implements Comparable<RowCache>
 {
-	private final Map<String,Object> columnData;
-	private boolean dataChanged = false;
+	private final Map<String,Object> columnData, modifiedData;
 	private final String primaryKey;
 	private final boolean isTimestamped;
 	private final BaseCache parent;
@@ -51,11 +50,14 @@ class RowCache implements Comparable<RowCache>
 	{
 		this.parent = parent;
 		this.primaryKey = primaryKey.toLowerCase();
-		this.columnData = Collections.synchronizedMap( new HashMap<>(20));
+		this.columnData = Collections.synchronizedMap( new HashMap<>(10));
+		this.modifiedData = new HashMap<>(10);
 		this.isTimestamped = isTimestamped;
 		if(isTimestamped)
 		{
-			columnData.put( TimestampedRecord.COLUMN_CREATED_AT, new Timestamp(System.currentTimeMillis()));
+			Timestamp stamp = new Timestamp(System.currentTimeMillis());
+			columnData.put( TimestampedRecord.COLUMN_CREATED_AT, stamp);
+			modifiedData.put( TimestampedRecord.COLUMN_CREATED_AT, stamp);
 		}
 	}
 
@@ -67,14 +69,14 @@ class RowCache implements Comparable<RowCache>
 	 */
 	public synchronized Object setData(final String columnName, final Object value, final boolean updateTimestamp)
 	{
-		if(Objects.equals( RowCache.this.getData( columnName.toLowerCase()), value))
+		if(Objects.equals(getData( columnName.toLowerCase()), value))
 		{
 			return value;
 		}
-		setModified();
+		modifiedData.put( columnName.toLowerCase(), value);
 		if(isTimestamped && updateTimestamp)
 		{
-			columnData.put( TimestampedRecord.COLUMN_UPDATED_AT, new Timestamp(System.currentTimeMillis()));
+			updateModifiedTimestamp();
 		}
 		return columnData.put( columnName.toLowerCase(), value );
 	}
@@ -88,13 +90,17 @@ class RowCache implements Comparable<RowCache>
 	{
 		for(int i=0;i<names.length;i++)
 		{
+			if(Objects.equals( getData( names[i].toLowerCase()), values[i]))
+			{
+				continue;
+			}
+			modifiedData.put( names[i].toLowerCase(), values[i]);
 			columnData.put( names[i].toLowerCase(), values[i]);
 		}
 		if(isTimestamped && updateTimestamp)
 		{
-			columnData.put( TimestampedRecord.COLUMN_UPDATED_AT, new Timestamp(System.currentTimeMillis()));
+			updateModifiedTimestamp();
 		}
-		setModified();
 	}
 
 	/**
@@ -129,15 +135,7 @@ class RowCache implements Comparable<RowCache>
 	 */
 	public boolean isSynchronized()
 	{
-		return !dataChanged;
-	}
-
-	/**
-	 * Sets this cache to a synchronized state
-	 */
-	public synchronized void setSynchronized()
-	{
-		dataChanged = false;
+		return modifiedData.isEmpty();
 	}
 
 	/**
@@ -146,7 +144,7 @@ class RowCache implements Comparable<RowCache>
 	public synchronized void clear()
 	{
 		columnData.clear();
-		dataChanged = false;
+		modifiedData.clear();
 	}
 
 	/**
@@ -159,42 +157,41 @@ class RowCache implements Comparable<RowCache>
 	{
 		for(int i=1;i<=set.getMetaData().getColumnCount();i++)
 		{
-				setData( set.getMetaData().getColumnLabel( i).toLowerCase(), set.getObject( i ),updateTimestamp);
+			setData( set.getMetaData().getColumnLabel( i).toLowerCase(), set.getObject( i ),updateTimestamp);
 		}
-		dataChanged =false;
+		//reset modified data, because the data come from DB
+		modifiedData.clear();
 	}
 
 	/**
 	 * Sets all cached values to the values given by <code>map</code>
 	 * @param map
-	 * @param updateTimestamp
+	 * @param updateValues
 	 */
-	public synchronized void update(final Map<String,Object> map, final boolean updateTimestamp)
+	public synchronized void update(final Map<String,Object> map, final boolean updateValues)
 	{
 		for(final Map.Entry<String,Object> e:map.entrySet())
 		{
-			setData( e.getKey().toLowerCase(), e.getValue(),updateTimestamp);
+			setData( e.getKey().toLowerCase(), e.getValue(), updateValues);
+		}
+		if(!updateValues)
+		{
+			//data comes from DB
+			modifiedData.clear();
 		}
 	}
 	
 	public synchronized boolean writeBack(CachedJDBCRecordStore store, RecordBase<?> base)
 	{
-		if(!dataChanged)
+		if(modifiedData.isEmpty())
 		{
 			return false;
 		}
-		//XXX could optimize to only write changed values, but how to know?
-		store.setDBValues(base, getPrimaryKey(), columnData );
-		dataChanged = false;
+		store.setDBValues(base, getPrimaryKey(), modifiedData );
+		modifiedData.clear();
 		return true;
 	}
 	
-	public void setModified()
-	{
-		dataChanged = true;
-		parent.setModified();
-	}
-
 	@Override
 	public String toString()
 	{
@@ -217,5 +214,17 @@ class RowCache implements Comparable<RowCache>
 	public int compareTo( final RowCache o )
 	{
 		return Integer.compare( getPrimaryKey(), o.getPrimaryKey());
+	}
+	
+	private void updateModifiedTimestamp()
+	{
+		//if no other data was changed, don't update modified
+		if(!isTimestamped || modifiedData.isEmpty())
+		{
+			return;
+		}
+		final Timestamp stamp = new Timestamp(System.currentTimeMillis());
+		columnData.put( TimestampedRecord.COLUMN_UPDATED_AT, stamp);
+		modifiedData.put( TimestampedRecord.COLUMN_UPDATED_AT, stamp);
 	}
 }

@@ -43,6 +43,7 @@ import java.util.Collections;
 
 /**
  * Uses write-back cache
+ *
  * @author doe300
  */
 public class CachedJDBCRecordStore extends SimpleJDBCRecordStore
@@ -60,9 +61,9 @@ public class CachedJDBCRecordStore extends SimpleJDBCRecordStore
 	}
 
 	/**
-	 * 
+	 *
 	 * @param con
-	 * @param vendorSpecifics 
+	 * @param vendorSpecifics
 	 */
 	public CachedJDBCRecordStore( final Connection con, final VendorSpecific vendorSpecifics)
 	{
@@ -99,7 +100,7 @@ public class CachedJDBCRecordStore extends SimpleJDBCRecordStore
 		tableExistsCache.put(tableName, exists);
 		return exists;
 	}
-	
+
 	@Override
 	public boolean containsRecord( final RecordBase<?> base, final Integer primaryKey )
 	{
@@ -125,7 +126,7 @@ public class CachedJDBCRecordStore extends SimpleJDBCRecordStore
 	@Override
 	public void setValues( final RecordBase<?> base, final int primaryKey, final Map<String, Object> values ) throws IllegalArgumentException
 	{
-		getCache( base,primaryKey).update( values, base.isTimestamped() );
+		getCache( base, primaryKey ).update( values, true );
 	}
 
 	@Override
@@ -224,12 +225,13 @@ public class CachedJDBCRecordStore extends SimpleJDBCRecordStore
 		}
 		return changed;
 	}
-	
+
 	/**
 	 * This method is only to be used to write cache back to the DB
+	 *
 	 * @param base
 	 * @param primaryKey
-	 * @param values 
+	 * @param values
 	 */
 	void setDBValues(RecordBase<?> base, int primaryKey, Map<String, Object> values)
 	{

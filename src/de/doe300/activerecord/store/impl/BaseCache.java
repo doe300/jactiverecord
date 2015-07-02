@@ -112,7 +112,7 @@ class BaseCache
 	 */
 	public boolean writeAllBack(CachedJDBCRecordStore store)
 	{
-		if(cachedRows.isEmpty() || !dataChanged)
+		if(!dataChanged || cachedRows.isEmpty())
 		{
 			return false;
 		}

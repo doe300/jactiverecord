@@ -634,6 +634,8 @@ public class SimpleJDBCRecordStore implements RecordStore
 				{
 					if(!res.next())
 					{
+						//result-set is no longer needed, can be closed
+						res.close();
 						return false;
 					}
 					action.accept( res.getObject( 1));
