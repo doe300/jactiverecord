@@ -46,7 +46,20 @@ public class OrCondition implements Condition
 	 */
 	public OrCondition( Condition... conditions )
 	{
-		this.conditions = Objects.requireNonNull( conditions);
+		this.conditions = clearNulls( Objects.requireNonNull( conditions));
+	}
+	
+	private static Condition[] clearNulls(Condition... conds)
+	{
+		ArrayList<Condition> list = new ArrayList<>(conds.length);
+		for(Condition cond: conds)
+		{
+			if(cond != null)
+			{
+				list.add( cond );
+			}
+		}
+		return list.toArray( new Condition[list.size()]);
 	}
 
 	@Override

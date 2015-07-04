@@ -34,7 +34,7 @@ import java.util.Objects;
 import java.util.stream.Collectors;
 
 /**
- * Class for SQL cond1 AND cond2 (AND cond3 ...) conditions
+ * Class for SQL cond1 AND cond2 AND cond3 ... conditions
  * @author doe300
  */
 public class AndCondition implements Condition
@@ -47,7 +47,20 @@ public class AndCondition implements Condition
 	 */
 	public AndCondition( Condition... conditions )
 	{
-		this.conditions = Objects.requireNonNull( conditions );
+		this.conditions = clearNulls( Objects.requireNonNull( conditions ));
+	}
+	
+	private static Condition[] clearNulls(Condition... conds)
+	{
+		ArrayList<Condition> list = new ArrayList<>(conds.length);
+		for(Condition cond: conds)
+		{
+			if(cond != null)
+			{
+				list.add( cond );
+			}
+		}
+		return list.toArray( new Condition[list.size()]);
 	}
 	
 	@Override
