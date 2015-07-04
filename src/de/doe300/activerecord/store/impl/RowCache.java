@@ -57,25 +57,25 @@ class RowCache implements Comparable<RowCache>
 		{
 			Timestamp stamp = new Timestamp(System.currentTimeMillis());
 			columnData.put( TimestampedRecord.COLUMN_CREATED_AT, stamp);
-			modifiedData.put( TimestampedRecord.COLUMN_CREATED_AT, stamp);
 		}
 	}
 
 	/**
 	 * @param columnName
 	 * @param value
-	 * @param updateTimestamp
+	 * @param updateValues
 	 * @return the previous value or <code>null</code>
 	 */
-	public synchronized Object setData(final String columnName, final Object value, final boolean updateTimestamp)
+	public synchronized Object setData(final String columnName, final Object value, final boolean updateValues)
 	{
 		if(Objects.equals(getData( columnName.toLowerCase()), value))
 		{
 			return value;
 		}
-		modifiedData.put( columnName.toLowerCase(), value);
-		if(isTimestamped && updateTimestamp)
+		if(updateValues)
 		{
+			modifiedData.put( columnName.toLowerCase(), value);	
+			parent.setModified( this );
 			updateModifiedTimestamp();
 		}
 		return columnData.put( columnName.toLowerCase(), value );
@@ -86,7 +86,7 @@ class RowCache implements Comparable<RowCache>
 	 * @param values
 	 * @param updateTimestamp
 	 */
-	public synchronized void setData(final String[] names, final Object[] values, final boolean updateTimestamp)
+	public synchronized void setData(final String[] names, final Object[] values)
 	{
 		for(int i=0;i<names.length;i++)
 		{
@@ -95,9 +95,10 @@ class RowCache implements Comparable<RowCache>
 				continue;
 			}
 			modifiedData.put( names[i].toLowerCase(), values[i]);
+			parent.setModified( this );
 			columnData.put( names[i].toLowerCase(), values[i]);
 		}
-		if(isTimestamped && updateTimestamp)
+		if(isTimestamped)
 		{
 			updateModifiedTimestamp();
 		}
@@ -153,14 +154,12 @@ class RowCache implements Comparable<RowCache>
 	 * @param updateTimestamp
 	 * @throws SQLException
 	 */
-	public synchronized void update(final ResultSet set, final boolean updateTimestamp) throws SQLException
+	public synchronized void update(final ResultSet set) throws SQLException
 	{
 		for(int i=1;i<=set.getMetaData().getColumnCount();i++)
 		{
-			setData( set.getMetaData().getColumnLabel( i).toLowerCase(), set.getObject( i ),updateTimestamp);
+			setData( set.getMetaData().getColumnLabel( i).toLowerCase(), set.getObject( i ),false);
 		}
-		//reset modified data, because the data come from DB
-		modifiedData.clear();
 	}
 
 	/**
@@ -173,11 +172,6 @@ class RowCache implements Comparable<RowCache>
 		for(final Map.Entry<String,Object> e:map.entrySet())
 		{
 			setData( e.getKey().toLowerCase(), e.getValue(), updateValues);
-		}
-		if(!updateValues)
-		{
-			//data comes from DB
-			modifiedData.clear();
 		}
 	}
 	
@@ -226,5 +220,6 @@ class RowCache implements Comparable<RowCache>
 		final Timestamp stamp = new Timestamp(System.currentTimeMillis());
 		columnData.put( TimestampedRecord.COLUMN_UPDATED_AT, stamp);
 		modifiedData.put( TimestampedRecord.COLUMN_UPDATED_AT, stamp);
+		parent.setModified( this );
 	}
 }

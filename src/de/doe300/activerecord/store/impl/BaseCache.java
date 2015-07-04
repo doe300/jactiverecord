@@ -26,7 +26,9 @@ package de.doe300.activerecord.store.impl;
 
 import de.doe300.activerecord.RecordBase;
 import java.util.Collections;
+import java.util.HashSet;
 import java.util.Map;
+import java.util.Set;
 import java.util.TreeMap;
 
 /**
@@ -36,14 +38,15 @@ import java.util.TreeMap;
 class BaseCache
 {
 	private final Map<Integer, RowCache> cachedRows;
-	private boolean dataChanged;
 	private final RecordBase<?> base;
+	
+	private final Set<RowCache> modifiedRows;
 
 	BaseCache(RecordBase<?> base)
 	{
 		this.cachedRows = Collections.synchronizedSortedMap( new TreeMap<>());
-		this.dataChanged = false;
 		this.base = base;
+		this.modifiedRows = Collections.synchronizedSet( new HashSet<>(10));
 	}
 
 	/**
@@ -60,7 +63,6 @@ class BaseCache
 		RowCache cache = new RowCache(this, base.getPrimaryColumn(), base.isTimestamped() );
 		cache.setData( base.getPrimaryColumn(), primaryKey, false);
 		cachedRows.put( primaryKey, cache );
-		dataChanged = true;
 		return cache;
 	}
 	
@@ -94,15 +96,14 @@ class BaseCache
 	public void removeRow(int primaryKey)
 	{
 		cachedRows.remove( primaryKey );
-		dataChanged = true;
 	}
 	
 	/**
 	 * Called by RowCache to invalidate the BaseCache
 	 */
-	public void setModified()
+	public void setModified(RowCache row)
 	{
-		dataChanged = true;
+		modifiedRows.add( row );
 	}
 	
 	/**
@@ -112,22 +113,22 @@ class BaseCache
 	 */
 	public boolean writeAllBack(CachedJDBCRecordStore store)
 	{
-		if(!dataChanged || cachedRows.isEmpty())
+		if(modifiedRows.isEmpty())
 		{
 			return false;
 		}
 		boolean changed = false;
-		synchronized(cachedRows)
+		synchronized(modifiedRows)
 		{
-			for(RowCache cache : cachedRows.values())
+			for(RowCache cache : modifiedRows)
 			{
 				if(cache.writeBack( store, base ))
 				{
 					changed = true;
 				}
 			}
+			modifiedRows.clear();
 		}
-		dataChanged = false;
 		return changed;
 	}
 }

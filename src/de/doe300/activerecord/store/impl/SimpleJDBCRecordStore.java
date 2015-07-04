@@ -694,6 +694,10 @@ public class SimpleJDBCRecordStore implements RecordStore
 	@Override
 	public boolean addRow( final String tableName, final String[] rows, final Object[] values ) throws IllegalArgumentException
 	{
+		if(!exists( tableName ))
+		{
+			throw new IllegalArgumentException("Table doesn't exists: "+tableName);
+		}
 		final String sql = "INSERT INTO "+tableName+" ("+Arrays.stream( rows).collect( Collectors.joining(", "))+") VALUES ("+
 				Arrays.stream( values ).map( (final Object obj) -> "?").collect( Collectors.joining(", "))+")";
 		Logging.getLogger().debug( "JDBCStore", sql);

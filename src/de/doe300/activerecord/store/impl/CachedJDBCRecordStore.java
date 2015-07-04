@@ -114,13 +114,13 @@ public class CachedJDBCRecordStore extends SimpleJDBCRecordStore
 	@Override
 	public void setValue( final RecordBase<?> base, final int primaryKey, final String name, final Object value ) throws IllegalArgumentException
 	{
-		getCache(base, primaryKey ).setData( name, value, base.isTimestamped());
+		getCache(base, primaryKey ).setData( name, value, true);
 	}
 
 	@Override
 	public void setValues( final RecordBase<?> base, final int primaryKey, final String[] names, final Object[] values ) throws IllegalArgumentException
 	{
-		getCache(base, primaryKey ).setData( names, values, base.isTimestamped() );
+		getCache(base, primaryKey ).setData( names, values );
 	}
 
 	@Override
@@ -181,7 +181,7 @@ public class CachedJDBCRecordStore extends SimpleJDBCRecordStore
 		{
 			if(res.next())
 			{
-				cache.update( res, false);
+				cache.update( res);
 				return cache.getData( name );
 			}
 			return null;
@@ -259,6 +259,7 @@ public class CachedJDBCRecordStore extends SimpleJDBCRecordStore
 	public Map<String, Object> findFirstWithData( final RecordBase<?> base, final String[] columns, final Scope scope )
 	{
 		//0. write cache into DB
+		//TODO need to change this, its very slow and called often
 		saveAll( base );
 		//1 load from DB
 		final Map<String,Object> map = super.findFirstWithData( base, columns, scope );
