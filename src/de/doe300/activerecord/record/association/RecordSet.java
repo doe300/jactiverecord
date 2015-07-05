@@ -43,6 +43,9 @@ public interface RecordSet<T extends ActiveRecord> extends SortedSet<T>, FinderM
 	{
 		return stream();
 	}
+
+	@Override
+	public Stream<T> stream();
 	
 	/**
 	 * @return the RecordBase of the record-type
