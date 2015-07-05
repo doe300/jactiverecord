@@ -38,6 +38,9 @@ public class FileAttachmentHandler implements AttachmentHandler
 {
 	private final Path rootDirectory;
 
+	/**
+	 * @param rootDirectory The root directory to find all attachments inside
+	 */
 	public FileAttachmentHandler( Path rootDirectory )
 	{
 		this.rootDirectory = rootDirectory;
@@ -61,6 +64,14 @@ public class FileAttachmentHandler implements AttachmentHandler
 		return Files.newOutputStream( getAttachmentPath( record));
 	}
 
+	/**
+	 * By default, this method will look for attachments according to the following file-hierarchy:
+	 * <p>
+	 * <code>&lt;root-path&gt;/&lt;record type-name&gt;/&lt;attachment-column&gt;&lt;primary-key&gt;</code>
+	 * </p>
+	 * @param record
+	 * @return the Path for requested attachment
+	 */
 	protected Path getAttachmentPath(HasAttachment record)
 	{
 		return rootDirectory.resolve( record.getClass().getSimpleName()).resolve( record.getAttachmentColumn()+record.getPrimaryKey());

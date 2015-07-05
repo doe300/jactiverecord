@@ -74,6 +74,12 @@ public class URLAttachmentHandler implements AttachmentHandler
 	 */
 	public static interface URLConverter
 	{
+		/**
+		 * Maps the HasAttachment to the URL containing the attachment
+		 * @param record
+		 * @return the URL for the attachment
+		 * @throws IOException if any IO error occurs
+		 */
 		public URL getAttachmentPath(HasAttachment record) throws IOException;
 	}
 }

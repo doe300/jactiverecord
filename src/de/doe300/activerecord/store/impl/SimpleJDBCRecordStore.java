@@ -135,6 +135,14 @@ public class SimpleJDBCRecordStore implements RecordStore
 		return VendorSpecific.convertIdentifier( input, con );
 	}
 	
+	/**
+	 * Checks whether the table for this RecordBase exists.
+	 * 
+	 * If the base is {@link RecordBase#isAutoCreate() auto-create}, the table is created, if necessary
+	 * 
+	 * @param base
+	 * @throws IllegalStateException 
+	 */
 	protected void checkTableExists(RecordBase<?> base) throws IllegalStateException
 	{
 		if(!exists( base.getTableName()))

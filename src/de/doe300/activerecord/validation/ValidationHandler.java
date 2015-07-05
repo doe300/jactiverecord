@@ -44,13 +44,6 @@ public class ValidationHandler implements ProxyHandler
 	private static final Map<Class<? extends ActiveRecord>, Predicate<ActiveRecord>> validationChecks = new HashMap<>(10);
 	private static final Map<Class<? extends ActiveRecord>, Consumer<ActiveRecord>> validationEnforcements = new HashMap<>(10);
 
-	/**
-	 * 
-	 */
-	public ValidationHandler()
-	{
-	}
-	
 	@Override
 	public boolean handlesMethod( ActiveRecord record, Method method, Object[] args ) throws IllegalArgumentException
 	{

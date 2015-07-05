@@ -34,6 +34,7 @@ import java.sql.Connection;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Objects;
 import java.util.Set;
 import java.util.TreeMap;
 import java.util.stream.Stream;
@@ -44,14 +45,15 @@ import java.util.stream.Stream;
  */
 public class MapRecordStore implements RecordStore
 {
-	protected final Map<RecordBase<?>, Map<Integer, Map<String,Object>>> data;
+	//TODO needs testing
+	private final Map<String, Map<Integer, Map<String,Object>>> data;
 
 	public MapRecordStore()
 	{
 		this.data = new HashMap<>(10);
 	}
 
-	public MapRecordStore( Map<RecordBase<?>, Map<Integer, Map<String, Object>>> data )
+	public MapRecordStore( Map<String, Map<Integer, Map<String, Object>>> data )
 	{
 		this.data = data;
 	}
@@ -65,33 +67,33 @@ public class MapRecordStore implements RecordStore
 	@Override
 	public void setValue( RecordBase<?> base, int primaryKey, String name, Object value ) throws IllegalArgumentException
 	{
-		getRow( base, primaryKey ).put( name, value );
+		getRow( base.getTableName(), primaryKey ).put( name, value );
 		if(base.isTimestamped())
 		{
-			getRow( base, primaryKey ).put( TimestampedRecord.COLUMN_UPDATED_AT, System.currentTimeMillis());
+			getRow( base.getTableName(), primaryKey ).put( TimestampedRecord.COLUMN_UPDATED_AT, System.currentTimeMillis());
 		}
 	}
 
 	@Override
 	public Object getValue( RecordBase<?> base, int primaryKey, String name ) throws IllegalArgumentException
 	{
-		Object ret = getRow( base, primaryKey ).get( name );
+		Object ret = getRow( base.getTableName(), primaryKey ).get( name );
 		return ret;
 	}
 
 	@Override
 	public Map<String, Object> getValues( RecordBase<?> base, int primaryKey, String[] columns ) throws IllegalArgumentException
 	{
-		return getRow( base, primaryKey );
+		return getRow( base.getTableName(), primaryKey );
 	}
 	
-	protected Map<String,Object> getRow(RecordBase<?> base, int primaryKey)
+	protected Map<String,Object> getRow(String tableName, int primaryKey)
 	{
-		Map<Integer,Map<String,Object>> table = data.get( base );
+		Map<Integer,Map<String,Object>> table = data.get( tableName);
 		if(table == null)
 		{
 			table = new TreeMap<>();
-			data.put( base, table );
+			data.put( tableName, table );
 		}
 		if(table.containsKey( primaryKey))
 		{
@@ -111,24 +113,24 @@ public class MapRecordStore implements RecordStore
 	@Override
 	public boolean containsRecord( RecordBase<?> base, Integer primaryKey )
 	{
-		return data.containsKey( base ) && data.get( base ).containsKey( primaryKey);
+		return data.containsKey( base.getTableName() ) && data.get( base.getTableName() ).containsKey( primaryKey);
 	}
 
 	@Override
 	public void destroy( RecordBase<?> base, int primaryKey )
 	{
-		if(data.containsKey( base ))
+		if(data.containsKey( base.getTableName() ))
 		{
-			data.get( base ).remove( primaryKey);
+			data.get( base.getTableName() ).remove( primaryKey);
 		}
 	}
 
 	@Override
 	public int count(RecordBase<?> base, Condition condition )
 	{
-		if(data.containsKey( base))
+		if(data.containsKey( base.getTableName()))
 		{
-			return (int) data.get(base).values().stream().filter( (Map<String,Object>m )-> condition.test( m ) ).count();
+			return (int) data.get(base.getTableName()).values().stream().filter( (Map<String,Object>m )-> condition.test( m ) ).count();
 		}
 		return 0;
 	}
@@ -136,9 +138,9 @@ public class MapRecordStore implements RecordStore
 	@Override
 	public Map<String, Object> findFirstWithData( RecordBase<?> base, String[] columns, Scope scope )
 	{
-		if(data.containsKey( base))
+		if(data.containsKey( base.getTableName()))
 		{
-			return data.get(base).entrySet().stream().filter((Map.Entry<Integer,Map<String,Object>> e)->
+			return data.get(base.getTableName()).entrySet().stream().filter((Map.Entry<Integer,Map<String,Object>> e)->
 			{
 				return scope.getCondition().test( e.getValue());
 			}).map( (Map.Entry<Integer,Map<String,Object>> e)->e.getValue()).sorted( base.getDefaultOrder()).findFirst().orElse( null );
@@ -149,9 +151,9 @@ public class MapRecordStore implements RecordStore
 	@Override
 	public Stream<Map<String, Object>> streamAllWithData( RecordBase<?> base, String[] columns, Scope scope )
 	{
-		if(data.containsKey( base))
+		if(data.containsKey( base.getTableName()))
 		{
-			return data.get(base).entrySet().stream().filter((Map.Entry<Integer,Map<String,Object>> e)->
+			return data.get(base.getTableName()).entrySet().stream().filter((Map.Entry<Integer,Map<String,Object>> e)->
 			{
 				return scope.getCondition().test( e.getValue());
 			}).map( (Map.Entry<Integer,Map<String,Object>> e)->e.getValue()).sorted( base.getDefaultOrder());
@@ -162,7 +164,7 @@ public class MapRecordStore implements RecordStore
 	@Override
 	public boolean exists( String tableName )
 	{
-		return data.keySet().stream().anyMatch( (RecordBase<?> b) -> b.getTableName().equalsIgnoreCase( tableName ));
+		return data.keySet().stream().anyMatch( (String name) -> name.equalsIgnoreCase( tableName ));
 	}
 
 	@Override
@@ -174,15 +176,15 @@ public class MapRecordStore implements RecordStore
 	@Override
 	public int insertNewRecord(RecordBase<?> base, Map<String,Object> columns )
 	{
-		if(!data.containsKey( base))
+		if(!data.containsKey( base.getTableName()))
 		{
-			data.put( base, new TreeMap<>());
+			data.put( base.getTableName(), new TreeMap<>());
 		}
-		int key = data.get( base ).size();
-		data.get( base ).put( key, new HashMap<>(columns != null ? columns.size() : 10));
+		int key = data.get( base.getTableName() ).size();
+		data.get( base.getTableName() ).put( key, new HashMap<>(columns != null ? columns.size() : 10));
 		if(columns != null)
 		{
-			data.get( base ).get( key ).putAll( columns );
+			data.get( base.getTableName() ).get( key ).putAll( columns );
 		}
 		return key;
 	}
@@ -195,8 +197,12 @@ public class MapRecordStore implements RecordStore
 	@Override
 	public Stream<Object> getValues( String tableName, String column, String condColumn, Object condValue ) throws IllegalArgumentException
 	{
-		//TODO how to implement??
-		return Stream.empty();
+		if(!data.containsKey( tableName))
+		{
+			throw new IllegalArgumentException("Table does not exists: "+tableName);
+		}
+		return data.get( tableName).values().stream().filter( (Map<String, Object> row) -> Objects.equals( row.get( 
+				condColumn),condValue)).map( (Map<String, Object> row) -> row.get( column));
 	}
 
 	@Override
@@ -217,10 +223,10 @@ public class MapRecordStore implements RecordStore
 	@Override
 	public void setValues(RecordBase<?> base, int primaryKey, Map<String, Object> values ) throws IllegalArgumentException
 	{
-		getRow( base, primaryKey ).putAll(values );
+		getRow( base.getTableName(), primaryKey ).putAll(values );
 		if(base.isTimestamped())
 		{
-			getRow( base, primaryKey ).put( TimestampedRecord.COLUMN_UPDATED_AT, System.currentTimeMillis());
+			getRow( base.getTableName(), primaryKey ).put( TimestampedRecord.COLUMN_UPDATED_AT, System.currentTimeMillis());
 		}
 	}
 
@@ -242,14 +248,32 @@ public class MapRecordStore implements RecordStore
 	}
 
 	@Override
-	public boolean addRow( String tableName, String[] rows, Object[] values ) throws IllegalArgumentException
+	public boolean addRow( String tableName, String[] columns, Object[] values ) throws IllegalArgumentException
 	{
-		throw new UnsupportedOperationException( "Not supported yet." ); //To change body of generated methods, choose Tools | Templates.
+		if(!data.containsKey( tableName))
+		{
+			data.put( tableName, new TreeMap<>());
+		}
+		int key = data.get( tableName).size();
+		Map<String, Object> row = new HashMap<>(columns != null ? columns.length : 10);
+		data.get( tableName ).put( key, row);
+		if(columns != null)
+		{
+			for(int i = 0; i<columns.length;i++)
+			{
+				row.put( columns[i], values[i]);
+			}
+		}
+		return true;
 	}
 
 	@Override
 	public boolean removeRow( String tableName, Condition cond ) throws IllegalArgumentException
 	{
-		throw new UnsupportedOperationException( "Not supported yet." ); //To change body of generated methods, choose Tools | Templates.
+		if(!data.containsKey( tableName))
+		{
+			throw new IllegalArgumentException("Table does not exist: "+tableName);
+		}
+		return data.get( tableName).values().removeIf( cond::test);
 	}
 }

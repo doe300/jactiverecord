@@ -44,12 +44,7 @@ import de.doe300.activerecord.store.RecordStore;
  */
 public class MapHandler implements ProxyHandler
 {
-	private final Map<ActiveRecord, HandlerMap> maps;
-
-	public MapHandler()
-	{
-		maps = new TreeMap<>();
-	}
+	private final Map<ActiveRecord, HandlerMap> maps = new TreeMap<>();
 
 	@Override
 	public boolean handlesMethod( final ActiveRecord record, final Method method, final Object[] args ) throws IllegalArgumentException

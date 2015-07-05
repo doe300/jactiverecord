@@ -50,6 +50,10 @@ public class TableSet<T extends ActiveRecord> extends AbstractSet<T> implements 
 	private final RecordBase<T> base;
 	private final int fromKey, toKey;
 
+	/**
+	 * Standard constructor for creating a set containing all records in the {@link RecordBase}
+	 * @param base 
+	 */
 	public TableSet( RecordBase<T> base )
 	{
 		this.base = base;
@@ -57,6 +61,13 @@ public class TableSet<T extends ActiveRecord> extends AbstractSet<T> implements 
 		toKey = Integer.MAX_VALUE;
 	}
 	
+	/**
+	 * This constructor creates a set containing all records with their primary-key greater than <code>fromKey</code>
+	 * and smaller than <code>toKey</code>
+	 * @param base
+	 * @param fromKey the minimum key, excluded
+	 * @param toKey the maximum key, excluded
+	 */
 	public TableSet(RecordBase<T> base, int fromKey, int toKey)
 	{
 		this.base = base;
@@ -64,7 +75,7 @@ public class TableSet<T extends ActiveRecord> extends AbstractSet<T> implements 
 		this.toKey = toKey;
 	}
 	
-	protected Condition createRangeCondition(Condition additionalCond)
+	private Condition createRangeCondition(Condition additionalCond)
 	{
 		if(fromKey < 0 && toKey == Integer.MAX_VALUE)
 		{

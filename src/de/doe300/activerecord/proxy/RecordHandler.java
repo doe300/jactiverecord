@@ -119,8 +119,10 @@ public final class RecordHandler<T extends ActiveRecord> implements InvocationHa
 		}
 		if(method.equals( hashCode))
 		{
-			//TODO not a real hash
-			return (base.getTableName().hashCode() << 7) + primaryKey;
+			int hash = 3;
+			hash = 79 * hash + this.primaryKey;
+			hash = 79 * hash + this.base.hashCode();
+			return hash;
 		}
 		if(method.equals( toString))
 		{

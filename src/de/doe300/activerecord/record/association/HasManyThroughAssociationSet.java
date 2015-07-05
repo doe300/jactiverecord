@@ -107,7 +107,7 @@ public class HasManyThroughAssociationSet<T extends ActiveRecord> extends Abstra
 		return destBase.getStore().addRow( mappingTableName, new String[]{thisMappingKey,foreignMappingKey}, new Object[]{thisPrimaryKey,e.getPrimaryKey()} );
 	}
 	
-	protected boolean remove0(Integer key)
+	private boolean remove0(Integer key)
 	{
 		Condition cond = new AndCondition(
 				new SimpleCondition(thisMappingKey, thisPrimaryKey, Comparison.IS),

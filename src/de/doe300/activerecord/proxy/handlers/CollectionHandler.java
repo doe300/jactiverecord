@@ -47,15 +47,7 @@ import de.doe300.activerecord.store.RecordStore;
  */
 public class CollectionHandler implements ProxyHandler
 {
-	private final Map<ActiveRecord, HandlerCollection> collections;
-
-	/**
-	 *
-	 */
-	public CollectionHandler()
-	{
-		this.collections = new TreeMap<>();
-	}
+	private final Map<ActiveRecord, HandlerCollection> collections = new TreeMap<>();
 
 	@Override
 	public boolean handlesMethod( final ActiveRecord record, final Method method, final Object[] args ) throws IllegalArgumentException

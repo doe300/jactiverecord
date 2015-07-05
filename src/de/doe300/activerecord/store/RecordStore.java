@@ -125,12 +125,12 @@ public interface RecordStore extends AutoCloseable
 	 * Access made with this method is not required to be cached and should therefore be only used if no model applies to the requested table.
 	 * 
 	 * @param tableName
-	 * @param rows
+	 * @param columns
 	 * @param values
 	 * @return whether the row was added
 	 * @throws IllegalArgumentException if the <code>tableName</code> does not exist or the <code>condValue</code> does not match the type for <code>condColumn</code>
 	 */
-	public boolean addRow(String tableName, String[] rows, Object[] values) throws IllegalArgumentException;
+	public boolean addRow(String tableName, String[] columns, Object[] values) throws IllegalArgumentException;
 	
 	/**
 	 * This method is for usage only if the table has no mapped model, i.e. for association-tables.

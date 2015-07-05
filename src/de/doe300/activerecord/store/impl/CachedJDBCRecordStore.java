@@ -259,7 +259,6 @@ public class CachedJDBCRecordStore extends SimpleJDBCRecordStore
 	public Map<String, Object> findFirstWithData( final RecordBase<?> base, final String[] columns, final Scope scope )
 	{
 		//0. write cache into DB
-		//TODO need to change this, its very slow and called often
 		saveAll( base );
 		//1 load from DB
 		final Map<String,Object> map = super.findFirstWithData( base, columns, scope );
