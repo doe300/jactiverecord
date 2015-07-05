@@ -24,7 +24,7 @@
  */
 package de.doe300.activerecord.record.association;
 
-import de.doe300.activerecord.RecordBase;
+import de.doe300.activerecord.ReadOnlyRecordBase;
 import de.doe300.activerecord.dsl.AndCondition;
 import de.doe300.activerecord.dsl.Comparison;
 import de.doe300.activerecord.dsl.Condition;
@@ -45,7 +45,7 @@ import java.util.stream.Stream;
  */
 public class ConditionSet<T extends ActiveRecord> extends AbstractSet<T> implements RecordSet<T>
 {
-	private final RecordBase<T> base;
+	private final ReadOnlyRecordBase<T> base;
 	private final Condition condition;
 	private final Consumer<T> setConditionFunc, unsetConditionFunc;
 
@@ -56,7 +56,7 @@ public class ConditionSet<T extends ActiveRecord> extends AbstractSet<T> impleme
 	 * @param setCondFunc a function manipulating the records to match the condition, used for add-operations
 	 * @param removeCondFunc a function changing the record to not match the condition, used for remove-operations
 	 */
-	public ConditionSet( RecordBase<T> base, Condition condition, Consumer<T> setCondFunc, Consumer<T> removeCondFunc )
+	public ConditionSet( ReadOnlyRecordBase<T> base, Condition condition, Consumer<T> setCondFunc, Consumer<T> removeCondFunc )
 	{
 		this.base = base;
 		this.condition = condition;
@@ -65,7 +65,7 @@ public class ConditionSet<T extends ActiveRecord> extends AbstractSet<T> impleme
 	}
 
 	@Override
-	public RecordBase<T> getRecordBase()
+	public ReadOnlyRecordBase<T> getRecordBase()
 	{
 		return base;
 	}

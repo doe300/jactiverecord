@@ -24,6 +24,7 @@
  */
 package de.doe300.activerecord.record.association;
 
+import de.doe300.activerecord.ReadOnlyRecordBase;
 import de.doe300.activerecord.RecordBase;
 import de.doe300.activerecord.dsl.AndCondition;
 import de.doe300.activerecord.dsl.Comparison;
@@ -172,7 +173,7 @@ public class HasManyThroughAssociationSet<T extends ActiveRecord> extends Abstra
 	}
 
 	@Override
-	public RecordBase<T> getRecordBase()
+	public ReadOnlyRecordBase<T> getRecordBase()
 	{
 		return destBase;
 	}
@@ -288,7 +289,7 @@ public class HasManyThroughAssociationSet<T extends ActiveRecord> extends Abstra
 		}
 
 		@Override
-		public RecordBase<T> getRecordBase()
+		public ReadOnlyRecordBase<T> getRecordBase()
 		{
 			return destBase;
 		}

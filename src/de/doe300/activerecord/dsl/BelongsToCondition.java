@@ -24,6 +24,7 @@
  */
 package de.doe300.activerecord.dsl;
 
+import de.doe300.activerecord.ReadOnlyRecordBase;
 import de.doe300.activerecord.RecordBase;
 import de.doe300.activerecord.jdbc.VendorSpecific;
 import de.doe300.activerecord.record.ActiveRecord;
@@ -38,7 +39,7 @@ public class BelongsToCondition implements Condition
 {
 	private final String foreignKeyColumn, associatedTableKey;
 	private final Condition associatedTableCond;
-	private final RecordBase<?> associatedTableBase;
+	private final ReadOnlyRecordBase<?> associatedTableBase;
 
 	/**
 	 * 
@@ -47,7 +48,7 @@ public class BelongsToCondition implements Condition
 	 * @param associatedTableKey the column of the associated table referenced by the foreign key
 	 * @param associatedTableCond the condition to test in the associated table
 	 */
-	public BelongsToCondition( String foreignKeyColumn, RecordBase<?> associatedTableBase, String associatedTableKey,
+	public BelongsToCondition( String foreignKeyColumn, ReadOnlyRecordBase<?> associatedTableBase, String associatedTableKey,
 			Condition associatedTableCond )
 	{
 		this.foreignKeyColumn = foreignKeyColumn;

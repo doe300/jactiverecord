@@ -25,7 +25,7 @@
 package de.doe300.activerecord.record.association;
 
 import de.doe300.activerecord.FinderMethods;
-import de.doe300.activerecord.RecordBase;
+import de.doe300.activerecord.ReadOnlyRecordBase;
 import de.doe300.activerecord.record.ActiveRecord;
 import java.util.Comparator;
 import java.util.SortedSet;
@@ -47,7 +47,7 @@ public interface RecordSet<T extends ActiveRecord> extends SortedSet<T>, FinderM
 	/**
 	 * @return the RecordBase of the record-type
 	 */
-	public RecordBase<T> getRecordBase();
+	public ReadOnlyRecordBase<T> getRecordBase();
 
 	@Override
 	public default Comparator<? super T> comparator()

@@ -51,7 +51,7 @@ import java.util.Arrays;
  * @author doe300
  * @param <T>
  */
-public abstract class RecordBase<T extends ActiveRecord> implements FinderMethods<T>
+public abstract class RecordBase<T extends ActiveRecord> implements ReadOnlyRecordBase<T>
 {
 	protected final Class<T> recordType;
 	protected final RecordCore core;
@@ -93,20 +93,13 @@ public abstract class RecordBase<T extends ActiveRecord> implements FinderMethod
 		return core;
 	}
 
-	/**
-	 * @return the data-type of the records
-	 */
+	@Override
 	public Class<T> getRecordType()
 	{
 		return recordType;
 	}
 
-	/**
-	 * The table name is retrieved from {@link RecordType#typeName() }.
-	 * If this name is not set, the {@link Class#getSimpleName() simple-name} of the record-class is used.
-	 * @return the tableName
-	 * @see RecordType#typeName()
-	 */
+	@Override
 	public String getTableName()
 	{
 		if(tableName == null)
@@ -124,12 +117,7 @@ public abstract class RecordBase<T extends ActiveRecord> implements FinderMethod
 		return tableName;
 	}
 
-	/**
-	 * Uses the {@link RecordType#primaryKey() }. If this key is not set, {@link ActiveRecord#DEFAULT_PRIMARY_COLUMN id} is used.
-	 * @return the name of the primary Column
-	 * @see RecordType#primaryKey()
-	 * @see ActiveRecord#DEFAULT_PRIMARY_COLUMN
-	 */
+	@Override
 	public String getPrimaryColumn()
 	{
 		if(primaryColumn==null)
@@ -170,16 +158,7 @@ public abstract class RecordBase<T extends ActiveRecord> implements FinderMethod
 		return defaultColumns;
 	}
 
-	/**
-	 * The default order is looked up in {@link RecordType#defaultOrder() }. If
-	 * this value is not set, the records are ordered by
-	 * {@link #getPrimaryColumn() primary-key}
-	 * {@link de.doe300.activerecord.dsl.Order.OrderType#ASCENDING ascending}.
-	 * 
-	 * @return the default ordering of records
-	 * @see RecordType#defaultOrder()
-	 * @see de.doe300.activerecord.dsl.Order.OrderType
-	 */
+	@Override
 	public Order getDefaultOrder()
 	{
 		if(defaultOrder == null)
@@ -226,11 +205,7 @@ public abstract class RecordBase<T extends ActiveRecord> implements FinderMethod
 		return false;
 	}
 
-	/**
-	 * @param primaryKey
-	 * @return the record, if it exists or <code>null</code>
-	 * @throws RecordException
-	 */
+	@Override
 	public T getRecord(final int primaryKey) throws RecordException
 	{
 		T record=records.get( primaryKey );
@@ -325,10 +300,7 @@ public abstract class RecordBase<T extends ActiveRecord> implements FinderMethod
 	 */
 	protected abstract T createProxy(int primaryKey, boolean newRecord, Map<String, Object> recordData) throws RecordException;
 
-	/**
-	 * @param primaryKey
-	 * @return whether the record is stored in the underlying record-store
-	 */
+	@Override
 	public boolean hasRecord(final int primaryKey)
 	{
 		return getStore().containsRecord( this, primaryKey);
@@ -383,10 +355,7 @@ public abstract class RecordBase<T extends ActiveRecord> implements FinderMethod
 		return store.save(this, record.getPrimaryKey() );
 	}
 
-	/**
-	 * @param record
-	 * @return whether the attributes of the record are in sync with the underlying store
-	 */
+	@Override
 	public boolean isSynchronized(final ActiveRecord record)
 	{
 		return store.isSynchronized(this, record.getPrimaryKey());
@@ -464,10 +433,7 @@ public abstract class RecordBase<T extends ActiveRecord> implements FinderMethod
 		return null;
 	}
 
-	/**
-	 * @param condition
-	 * @return the number of records matching these conditions
-	 */
+	@Override
 	public int count(final Condition condition)
 	{
 		return store.count( this, condition);
@@ -477,20 +443,13 @@ public abstract class RecordBase<T extends ActiveRecord> implements FinderMethod
 	// Query-Methods
 	////
 
-	/**
-	 * @param condition
-	 * @return the result for this query
-	 */
+	@Override
 	public QueryResult<T> where( final Condition condition )
 	{
 		return new QueryResult<T>(find( condition), count( condition ) ,getDefaultOrder());
 	}
-	
-	/**
-	 * 
-	 * @param scope
-	 * @return the result of this query
-	 */
+
+	@Override
 	public QueryResult<T> withScope(Scope scope)
 	{
 		return new QueryResult<T>(findWithScope( scope), Math.min(scope.getLimit(), count( scope.getCondition())), scope.getOrder()!= null ? scope.getOrder() : getDefaultOrder());
@@ -500,21 +459,13 @@ public abstract class RecordBase<T extends ActiveRecord> implements FinderMethod
 	// Searchable
 	////
 
-	/**
-	 * @return whether this record is searchable
-	 * @see Searchable
-	 */
+	@Override
 	public boolean isSearchable()
 	{
 		return recordType.isAnnotationPresent( Searchable.class);
 	}
 
-	/**
-	 * @param term
-	 * @return the matching records
-	 * @throws UnsupportedOperationException if the record-type is not annotated with {@link Searchable}
-	 * @see Searchable
-	 */
+	@Override
 	public Stream<T> search(final String term)
 	{
 		if(!isSearchable())
@@ -526,12 +477,7 @@ public abstract class RecordBase<T extends ActiveRecord> implements FinderMethod
 		return find( RecordBase.toSearchClause( term, columns ) );
 	}
 
-	/**
-	 * @param term
-	 * @return the first matching record
-	 * @throws UnsupportedOperationException if the record-type is not annotated with {@link Searchable}
-	 * @see Searchable
-	 */
+	@Override
 	public T searchFirst(final String term)
 	{
 		if(!isSearchable())
@@ -557,9 +503,7 @@ public abstract class RecordBase<T extends ActiveRecord> implements FinderMethod
 	// TimestampedRecord
 	////
 
-	/**
-	 * @return whether the record supports creation and update timestamps
-	 */
+	@Override
 	public boolean isTimestamped()
 	{
 		return TimestampedRecord.class.isAssignableFrom( recordType );
@@ -569,20 +513,13 @@ public abstract class RecordBase<T extends ActiveRecord> implements FinderMethod
 	//	ValidatedRecord
 	////
 
-	/**
-	 * @return whether the record-type is {@link ValidatedRecord validated}
-	 */
+	@Override
 	public boolean isValidated()
 	{
 		return ValidatedRecord.class.isAssignableFrom( recordType);
 	}
 
-	/**
-	 * A non-validated record type always returns true for {@link #isValid(de.doe300.activerecord.record.ActiveRecord) }
-	 * @param record
-	 * @return whether the record is valid
-	 * @see ValidatedRecord#isValid()
-	 */
+	@Override
 	public boolean isValid(final ActiveRecord record)
 	{
 		if(isValidated())

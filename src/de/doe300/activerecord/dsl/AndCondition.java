@@ -30,7 +30,6 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
-import java.util.Objects;
 import java.util.stream.Collectors;
 
 /**
@@ -47,10 +46,10 @@ public class AndCondition implements Condition
 	 */
 	public AndCondition( Condition... conditions )
 	{
-		this.conditions = clearNulls( Objects.requireNonNull( conditions ));
+		this.conditions = clearNulls( conditions );
 	}
 	
-	private static Condition[] clearNulls(Condition... conds)
+	private static Condition[] clearNulls(Condition[] conds)
 	{
 		ArrayList<Condition> list = new ArrayList<>(conds.length);
 		for(Condition cond: conds)

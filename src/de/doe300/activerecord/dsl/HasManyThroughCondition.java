@@ -24,7 +24,7 @@
  */
 package de.doe300.activerecord.dsl;
 
-import de.doe300.activerecord.RecordBase;
+import de.doe300.activerecord.ReadOnlyRecordBase;
 import de.doe300.activerecord.jdbc.VendorSpecific;
 import de.doe300.activerecord.record.ActiveRecord;
 import de.doe300.activerecord.record.association.AssociationHelper;
@@ -38,7 +38,7 @@ public class HasManyThroughCondition implements Condition
 {
 	private final String associationTable, associationTableThisForeignKey, associationTableOtherForeignKey;
 	private final String associationKeyColumn;
-	private final RecordBase<?> associatedBase;
+	private final ReadOnlyRecordBase<?> associatedBase;
 	private final Condition associatedBaseCondition;
 
 	/**
@@ -52,7 +52,7 @@ public class HasManyThroughCondition implements Condition
 	 */
 	public HasManyThroughCondition( String associationTable, String associationTableThisForeignKey,
 			String associationTableOtherForeignKey, String associationKeyColumn,
-			RecordBase<?> associatedBase, Condition associatedBaseCondition )
+			ReadOnlyRecordBase<?> associatedBase, Condition associatedBaseCondition )
 	{
 		this.associationTable = associationTable;
 		this.associationTableThisForeignKey = associationTableThisForeignKey;

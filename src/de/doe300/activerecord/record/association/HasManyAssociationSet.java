@@ -24,7 +24,7 @@
  */
 package de.doe300.activerecord.record.association;
 
-import de.doe300.activerecord.RecordBase;
+import de.doe300.activerecord.ReadOnlyRecordBase;
 import de.doe300.activerecord.dsl.AndCondition;
 import de.doe300.activerecord.dsl.Comparison;
 import de.doe300.activerecord.dsl.Condition;
@@ -45,7 +45,7 @@ import java.util.stream.Stream;
  */
 public class HasManyAssociationSet<T extends ActiveRecord> extends AbstractSet<T> implements RecordSet<T>
 {
-	private final RecordBase<T> destBase;
+	private final ReadOnlyRecordBase<T> destBase;
 	private final Condition associationCond;
 	private final Consumer<T> setAssociationFunc, unsetAssociationFunc;
 
@@ -55,7 +55,7 @@ public class HasManyAssociationSet<T extends ActiveRecord> extends AbstractSet<T
 	 * @param setAssociationFunction the function to set the association
 	 * @param unsetAssociationFunction the function to unset the association
 	 */
-	public HasManyAssociationSet(RecordBase<T> destBase, Condition associationCondition, Consumer<T> setAssociationFunction, Consumer<T> unsetAssociationFunction)
+	public HasManyAssociationSet(ReadOnlyRecordBase<T> destBase, Condition associationCondition, Consumer<T> setAssociationFunction, Consumer<T> unsetAssociationFunction)
 	{
 		this.destBase = destBase;
 		this.associationCond = associationCondition;
@@ -153,7 +153,7 @@ public class HasManyAssociationSet<T extends ActiveRecord> extends AbstractSet<T
 	}
 
 	@Override
-	public RecordBase<T> getRecordBase()
+	public ReadOnlyRecordBase<T> getRecordBase()
 	{
 		return destBase;
 	}
