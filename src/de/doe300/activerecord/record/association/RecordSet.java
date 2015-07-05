@@ -27,7 +27,8 @@ package de.doe300.activerecord.record.association;
 import de.doe300.activerecord.FinderMethods;
 import de.doe300.activerecord.RecordBase;
 import de.doe300.activerecord.record.ActiveRecord;
-import java.util.Set;
+import java.util.Comparator;
+import java.util.SortedSet;
 import java.util.stream.Stream;
 
 /**
@@ -35,7 +36,7 @@ import java.util.stream.Stream;
  * @author doe300
  * @param <T>
  */
-public interface RecordSet<T extends ActiveRecord> extends Set<T>, FinderMethods<T>
+public interface RecordSet<T extends ActiveRecord> extends SortedSet<T>, FinderMethods<T>
 {
 	@Override
 	public default Stream<T> findAll()
@@ -47,4 +48,23 @@ public interface RecordSet<T extends ActiveRecord> extends Set<T>, FinderMethods
 	 * @return the RecordBase of the record-type
 	 */
 	public RecordBase<T> getRecordBase();
+
+	@Override
+	public default Comparator<? super T> comparator()
+	{
+		//uses natural ordering
+		return null;
+	}
+
+	@Override
+	public default T first()
+	{
+		return stream().findFirst().get();
+	}
+
+	@Override
+	public default T last()
+	{
+		return stream().sorted( getRecordBase().getDefaultOrder().toRecordComparator().reversed()).findFirst().get();
+	}
 }

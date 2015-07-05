@@ -26,12 +26,15 @@ package de.doe300.activerecord.record.association;
 
 import de.doe300.activerecord.RecordBase;
 import de.doe300.activerecord.dsl.AndCondition;
+import de.doe300.activerecord.dsl.Comparison;
 import de.doe300.activerecord.dsl.Condition;
+import de.doe300.activerecord.dsl.SimpleCondition;
 import de.doe300.activerecord.record.ActiveRecord;
 import de.doe300.activerecord.scope.Scope;
 import java.util.AbstractSet;
 import java.util.Collection;
 import java.util.Iterator;
+import java.util.SortedSet;
 import java.util.function.Consumer;
 import java.util.stream.Stream;
 
@@ -46,6 +49,13 @@ public class ConditionSet<T extends ActiveRecord> extends AbstractSet<T> impleme
 	private final Condition condition;
 	private final Consumer<T> setConditionFunc, unsetConditionFunc;
 
+	/**
+	 * 
+	 * @param base the record-base for this record-type
+	 * @param condition the Condition to match
+	 * @param setCondFunc a function manipulating the records to match the condition, used for add-operations
+	 * @param removeCondFunc a function changing the record to not match the condition, used for remove-operations
+	 */
 	public ConditionSet( RecordBase<T> base, Condition condition, Consumer<T> setCondFunc, Consumer<T> removeCondFunc )
 	{
 		this.base = base;
@@ -149,4 +159,24 @@ public class ConditionSet<T extends ActiveRecord> extends AbstractSet<T> impleme
 		return base.findFirstWithScope( newScope );
 	}
 
+	@Override
+	public SortedSet<T> headSet( T toElement )
+	{
+		return new ConditionSet<T>(base, new AndCondition(condition, new SimpleCondition(base.getPrimaryColumn(), toElement.getPrimaryKey(), Comparison.SMALLER)), setConditionFunc, unsetConditionFunc);
+	}
+
+	@Override
+	public SortedSet<T> tailSet( T fromElement )
+	{
+		return new ConditionSet<T>(base, new AndCondition(condition, new SimpleCondition(base.getPrimaryColumn(), fromElement.getPrimaryKey(), Comparison.LARGER)), setConditionFunc, unsetConditionFunc);
+	}
+
+	@Override
+	public SortedSet<T> subSet( T fromElement, T toElement )
+	{
+		return new ConditionSet<T>(base, new AndCondition(condition, 
+				new SimpleCondition(base.getPrimaryColumn(), fromElement.getPrimaryKey(), Comparison.LARGER),
+				new SimpleCondition(base.getPrimaryColumn(), toElement.getPrimaryKey(), Comparison.SMALLER)
+		), setConditionFunc, unsetConditionFunc);
+	}
 }

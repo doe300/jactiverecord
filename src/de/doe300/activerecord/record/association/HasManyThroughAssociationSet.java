@@ -35,6 +35,7 @@ import java.util.AbstractSet;
 import java.util.Collection;
 import java.util.Iterator;
 import java.util.Set;
+import java.util.SortedSet;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
@@ -174,5 +175,146 @@ public class HasManyThroughAssociationSet<T extends ActiveRecord> extends Abstra
 	public RecordBase<T> getRecordBase()
 	{
 		return destBase;
+	}
+
+	@Override
+	public SortedSet<T> headSet( T toElement )
+	{
+		return new HasManyThroughSubSet(-1, toElement.getPrimaryKey());
+	}
+
+	@Override
+	public SortedSet<T> tailSet( T fromElement )
+	{
+		return new HasManyThroughSubSet(fromElement.getPrimaryKey(), Integer.MAX_VALUE);
+	}
+
+	@Override
+	public SortedSet<T> subSet( T fromElement, T toElement )
+	{
+		return new HasManyThroughSubSet(fromElement.getPrimaryKey(), toElement.getPrimaryKey());
+	}
+
+	private class HasManyThroughSubSet extends AbstractSet<T> implements RecordSet<T>
+	{
+		private final int fromKey, toKey;
+		
+		HasManyThroughSubSet(int fromKey, int toKey)
+		{
+			this.fromKey = fromKey;
+			this.toKey = toKey;
+		}
+
+		@Override
+		public SortedSet<T> subSet( T fromElement, T toElement )
+		{
+			return new HasManyThroughSubSet(Math.max( fromKey, fromElement.getPrimaryKey()), Math.min( toKey, toElement.getPrimaryKey()));
+		}
+
+		@Override
+		public SortedSet<T> headSet( T toElement )
+		{
+			return new HasManyThroughSubSet(fromKey, Math.min( toKey, toElement.getPrimaryKey()));
+		}
+
+		@Override
+		public SortedSet<T> tailSet( T fromElement )
+		{
+			return new HasManyThroughSubSet(Math.max( fromKey, fromElement.getPrimaryKey()), toKey);
+		}
+
+		@Override
+		public Stream<T> stream()
+		{
+			return getAssocationKeys().filter( (Integer key) -> key > fromKey && key < toKey).map( destBase::getRecord);
+		}
+		
+		@Override
+		public int size()
+		{
+			return ( int ) stream().count();
+		}
+
+		@Override
+		public boolean contains( Object o )
+		{
+			return HasManyThroughAssociationSet.this.contains( o ) && ((ActiveRecord)o).getPrimaryKey() > fromKey && ((ActiveRecord)o).getPrimaryKey() < toKey;
+		}
+
+		@Override
+		public Iterator<T> iterator()
+		{
+			return stream().iterator();
+		}
+
+		@Override
+		public boolean add( T e )
+		{
+			if(e.getPrimaryKey() <= fromKey || e.getPrimaryKey() >= toKey)
+			{
+				return false;
+			}
+			return HasManyThroughAssociationSet.this.add( e );
+		}
+
+		@Override
+		public boolean remove( Object o )
+		{
+			return contains( o ) && HasManyThroughAssociationSet.this.remove( o );
+		}
+
+		@Override
+		public boolean retainAll(Collection<?> c )
+		{
+			return stream().filter( (T t ) -> !c.contains( t)).peek( (T t)->
+			{
+				remove0( t.getPrimaryKey() );
+			} ).count() > 0;
+		}
+
+		@Override
+		public boolean removeAll(Collection<?> c )
+		{
+			return stream().filter( c::contains).peek( (T t)->
+			{
+				remove0( t.getPrimaryKey() );
+			} ).count() > 0;
+		}
+
+		@Override
+		public void clear()
+		{
+			getAssocationKeys().filter( (Integer key) -> key > fromKey && key < toKey).forEach( (Integer i) -> {remove0( i );} );
+		}
+
+		@Override
+		public RecordBase<T> getRecordBase()
+		{
+			return destBase;
+		}
+
+		@Override
+		public Stream<T> findWithScope( final Scope scope)
+		{
+			Set<Integer> keys = getAssocationKeys().filter( (Integer key) -> key > fromKey && key < toKey).collect( Collectors.toSet());
+			Scope newScope = new Scope(
+					new AndCondition(
+							new SimpleCondition(destBase.getPrimaryColumn(), keys, Comparison.IN), 
+							scope.getCondition()
+					), scope.getOrder(), scope.getLimit());
+			return destBase.findWithScope( newScope );
+		}
+
+		@Override
+		public T findFirstWithScope( Scope scope)
+		{
+			Set<Integer> keys = getAssocationKeys().filter( (Integer key) -> key > fromKey && key < toKey).collect( Collectors.toSet());
+			Scope newScope = new Scope(
+					new AndCondition(
+							new SimpleCondition(destBase.getPrimaryColumn(), keys, Comparison.IN),
+							scope.getCondition()
+					), scope.getOrder(), scope.getLimit());
+			return destBase.findFirstWithScope( newScope);
+		}
 	}
 }

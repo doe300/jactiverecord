@@ -31,8 +31,11 @@ import de.doe300.activerecord.TestServer;
 import de.doe300.activerecord.dsl.Comparison;
 import de.doe300.activerecord.dsl.SimpleCondition;
 import java.util.Arrays;
+import java.util.SortedSet;
 import org.junit.AfterClass;
 import org.junit.Assert;
+import static org.junit.Assert.assertNull;
+import static org.junit.Assert.assertSame;
 import org.junit.BeforeClass;
 import org.junit.Test;
 
@@ -171,10 +174,63 @@ public class HasManyAssociationSetTest extends Assert
 	}
 
 	@Test
-	public void testRecordBase()
+	public void testGetRecordBase()
 	{
 		assertNotNull( set.getRecordBase());
 		assertSame( base, set.getRecordBase());
 	}
 	
+	@Test
+	public void testComparator()
+	{
+		assertNull( set.comparator());
+	}
+	
+	@Test
+	public void testHeadSet()
+	{
+		SortedSet<TestInterface> headSet = set.headSet( a3);
+		assertSame( 2, headSet.size());
+		assertSame( a2, headSet.last());
+		assertSame( a1, headSet.first());
+	}
+	
+	@Test
+	public void testTailSet()
+	{
+		SortedSet<TestInterface> tailSet = set.tailSet( a1);
+		assertSame( 2, tailSet.size());
+		assertSame( a2, tailSet.first());
+		assertSame( a3, tailSet.last());
+	}
+	
+	@Test
+	public void testSubSet()
+	{
+		SortedSet<TestInterface> subSet = set.subSet(a1, a3);
+		assertSame( 1, subSet.size());
+		assertSame( a2, subSet.first());
+		assertSame( a2, subSet.last());
+		//test backing
+		set.remove( a2);
+		assertSame( 0, subSet.size());
+		set.add( a2);
+		assertSame( 1, subSet.size());
+		subSet.clear();
+		assertSame( 2, set.size());
+		subSet.add( a2);
+		assertSame( 3, set.size());
+	}
+	
+	@Test
+	public void testFirst()
+	{
+		assertSame( a1, set.first());
+	}
+	
+	@Test
+	public void testLast()
+	{
+		assertSame( a3, set.last());
+	}
 }
