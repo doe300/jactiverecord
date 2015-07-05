@@ -114,7 +114,7 @@ public interface FinderMethods<T extends ActiveRecord>
 		{
 			return findFirst( conds.get( 0));
 		}
-		return findFirst( new AndCondition(new Condition[conds.size()]) );
+		return findFirst( new AndCondition(conds.toArray( new Condition[conds.size()]) ));
 	}
 	
 	/**
