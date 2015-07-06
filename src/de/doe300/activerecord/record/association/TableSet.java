@@ -26,16 +26,12 @@ package de.doe300.activerecord.record.association;
 
 import de.doe300.activerecord.ReadOnlyRecordBase;
 import de.doe300.activerecord.RecordBase;
-import de.doe300.activerecord.dsl.AndCondition;
-import de.doe300.activerecord.dsl.Comparison;
 import de.doe300.activerecord.dsl.Condition;
-import de.doe300.activerecord.dsl.SimpleCondition;
 import de.doe300.activerecord.record.ActiveRecord;
 import de.doe300.activerecord.scope.Scope;
 import java.util.AbstractSet;
 import java.util.Collection;
 import java.util.Iterator;
-import java.util.SortedSet;
 import java.util.stream.Stream;
 
 /**
@@ -48,7 +44,6 @@ import java.util.stream.Stream;
 public class TableSet<T extends ActiveRecord> extends AbstractSet<T> implements RecordSet<T>
 {
 	private final RecordBase<T> base;
-	private final int fromKey, toKey;
 
 	/**
 	 * Standard constructor for creating a set containing all records in the {@link RecordBase}
@@ -57,53 +52,6 @@ public class TableSet<T extends ActiveRecord> extends AbstractSet<T> implements 
 	public TableSet( RecordBase<T> base )
 	{
 		this.base = base;
-		fromKey = -1;
-		toKey = Integer.MAX_VALUE;
-	}
-	
-	/**
-	 * This constructor creates a set containing all records with their primary-key greater than <code>fromKey</code>
-	 * and smaller than <code>toKey</code>
-	 * @param base
-	 * @param fromKey the minimum key, excluded
-	 * @param toKey the maximum key, excluded
-	 */
-	public TableSet(RecordBase<T> base, int fromKey, int toKey)
-	{
-		this.base = base;
-		this.fromKey = fromKey;
-		this.toKey = toKey;
-	}
-	
-	private Condition createRangeCondition(Condition additionalCond)
-	{
-		if(fromKey < 0 && toKey == Integer.MAX_VALUE)
-		{
-			if(additionalCond == null)
-			{
-				return new SimpleCondition(base.getPrimaryColumn(), true, Comparison.TRUE);
-			}
-			return additionalCond;
-		}
-		if(fromKey < 0)
-		{
-			return new AndCondition(
-					new SimpleCondition(base.getPrimaryColumn(), toKey, Comparison.SMALLER ),
-					additionalCond
-			);
-		}
-		if(toKey == Integer.MAX_VALUE)
-		{
-			return new AndCondition(
-					new SimpleCondition(base.getPrimaryColumn(), fromKey, Comparison.LARGER),
-					additionalCond
-			);
-		}
-		return new AndCondition(
-				new SimpleCondition(base.getPrimaryColumn(), fromKey, Comparison.LARGER),
-				new SimpleCondition(base.getPrimaryColumn(), toKey, Comparison.SMALLER ),
-				additionalCond
-		);
 	}
 	
 	@Override
@@ -113,39 +61,21 @@ public class TableSet<T extends ActiveRecord> extends AbstractSet<T> implements 
 	}
 
 	@Override
-	public SortedSet<T> subSet( T fromElement, T toElement )
-	{
-		return new TableSet<T>(base, fromElement.getPrimaryKey(), toElement.getPrimaryKey() );
-	}
-
-	@Override
-	public SortedSet<T> headSet( T toElement )
-	{
-		return new TableSet<T>(base, -1, toElement.getPrimaryKey());
-	}
-
-	@Override
-	public SortedSet<T> tailSet( T fromElement )
-	{
-		return new TableSet<T>(base, fromElement.getPrimaryKey(), Integer.MAX_VALUE);
-	}
-	
-	@Override
 	public Stream<T> stream()
 	{
-		return base.find( createRangeCondition( null));
+		return base.find( null);
 	}
 
 	@Override
 	public int size()
 	{
-		return base.count( createRangeCondition( null ));
+		return base.count( null);
 	}
 
 	@Override
 	public boolean contains( Object o )
 	{
-		return base.getRecordType().isInstance( o ) && base.hasRecord( ((ActiveRecord)o).getPrimaryKey() ) && createRangeCondition( null ).test( ((ActiveRecord)o));
+		return base.getRecordType().isInstance( o ) && base.hasRecord( ((ActiveRecord)o).getPrimaryKey() );
 	}
 
 	@Override
@@ -199,12 +129,18 @@ public class TableSet<T extends ActiveRecord> extends AbstractSet<T> implements 
 	@Override
 	public Stream<T> findWithScope( Scope scope )
 	{
-		return base.findWithScope( new Scope(createRangeCondition( scope.getCondition()), scope.getOrder(), scope.getLimit()) );
+		return base.findWithScope( new Scope(scope.getCondition(), scope.getOrder(), scope.getLimit()) );
 	}
 
 	@Override
 	public T findFirstWithScope( Scope scope )
 	{
-		return base.findFirstWithScope( new Scope(createRangeCondition( scope.getCondition()), scope.getOrder(), scope.getLimit()) );
+		return base.findFirstWithScope( new Scope(scope.getCondition(), scope.getOrder(), scope.getLimit()) );
+	}
+
+	@Override
+	public RecordSet<T> getForCondition( Condition cond )
+	{
+		return new ConditionSet<T>(base, cond );
 	}
 }

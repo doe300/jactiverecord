@@ -26,20 +26,18 @@ package de.doe300.activerecord.record.association;
 
 import de.doe300.activerecord.ReadOnlyRecordBase;
 import de.doe300.activerecord.dsl.AndCondition;
-import de.doe300.activerecord.dsl.Comparison;
 import de.doe300.activerecord.dsl.Condition;
-import de.doe300.activerecord.dsl.SimpleCondition;
 import de.doe300.activerecord.record.ActiveRecord;
 import de.doe300.activerecord.scope.Scope;
 import java.util.AbstractSet;
 import java.util.Collection;
 import java.util.Iterator;
-import java.util.SortedSet;
 import java.util.function.Consumer;
 import java.util.stream.Stream;
 
 /**
- * A RecordSet containing of records matching the given Condition
+ * A RecordSet containing of records matching the given Condition. 
+ * This set can optionally be made immutable by passing <code>null</code> for the set- and unset-functions.
  * @author doe300
  * @param <T>
  */
@@ -50,6 +48,18 @@ public class ConditionSet<T extends ActiveRecord> extends AbstractSet<T> impleme
 	private final Consumer<T> setConditionFunc, unsetConditionFunc;
 
 	/**
+	 * This constructor creates a immutable or read-only ConditionSet throwing UnsupportedOperationExcpetion on any mutating methods
+	 * 
+	 * @param base the RecordBase for this record-type
+	 * @param condition the Condition to match
+	 */
+	public ConditionSet( ReadOnlyRecordBase<T> base, Condition condition)
+	{
+		this(base, condition, null, null);
+	}
+	
+	/**
+	 * If the <code>setCondFunc</code> or <code>removeCondFunc</code> is <code>null</code>, this set will be immutable
 	 * 
 	 * @param base the record-base for this record-type
 	 * @param condition the Condition to match
@@ -62,6 +72,14 @@ public class ConditionSet<T extends ActiveRecord> extends AbstractSet<T> impleme
 		this.condition = condition;
 		this.setConditionFunc = setCondFunc;
 		this.unsetConditionFunc = removeCondFunc;
+	}
+	
+	private void checkFunctions() throws UnsupportedOperationException
+	{
+		if(setConditionFunc == null || unsetConditionFunc == null)
+		{
+			throw new UnsupportedOperationException("This ConditionSet is immutable");
+		}
 	}
 
 	@Override
@@ -96,6 +114,7 @@ public class ConditionSet<T extends ActiveRecord> extends AbstractSet<T> impleme
 	@Override
 	public boolean add( T e )
 	{
+		checkFunctions();
 		if(contains( e ))
 		{
 			return false;
@@ -107,6 +126,7 @@ public class ConditionSet<T extends ActiveRecord> extends AbstractSet<T> impleme
 	@Override
 	public boolean remove( Object o )
 	{
+		checkFunctions();
 		if(contains( o ))
 		{
 			unsetConditionFunc.accept( base.getRecordType().cast( o ));
@@ -118,6 +138,7 @@ public class ConditionSet<T extends ActiveRecord> extends AbstractSet<T> impleme
 	@Override
 	public boolean retainAll(Collection<?> c )
 	{
+		checkFunctions();
 		//select all records not in the other collection and remove association
 		return stream().filter( (T t )-> !c.contains( t)).peek( unsetConditionFunc).
 				//if there are any, the recors were changed
@@ -127,6 +148,7 @@ public class ConditionSet<T extends ActiveRecord> extends AbstractSet<T> impleme
 	@Override
 	public boolean removeAll(Collection<?> c )
 	{
+		checkFunctions();
 		//select all records, which are in the other collection and remove the record
 		return stream().filter( c::contains).peek( unsetConditionFunc).
 				//if there are any, records set have changed
@@ -136,6 +158,7 @@ public class ConditionSet<T extends ActiveRecord> extends AbstractSet<T> impleme
 	@Override
 	public void clear()
 	{
+		checkFunctions();
 		stream().forEach( unsetConditionFunc);
 	}
 
@@ -160,23 +183,8 @@ public class ConditionSet<T extends ActiveRecord> extends AbstractSet<T> impleme
 	}
 
 	@Override
-	public SortedSet<T> headSet( T toElement )
+	public RecordSet<T> getForCondition( Condition cond )
 	{
-		return new ConditionSet<T>(base, new AndCondition(condition, new SimpleCondition(base.getPrimaryColumn(), toElement.getPrimaryKey(), Comparison.SMALLER)), setConditionFunc, unsetConditionFunc);
-	}
-
-	@Override
-	public SortedSet<T> tailSet( T fromElement )
-	{
-		return new ConditionSet<T>(base, new AndCondition(condition, new SimpleCondition(base.getPrimaryColumn(), fromElement.getPrimaryKey(), Comparison.LARGER)), setConditionFunc, unsetConditionFunc);
-	}
-
-	@Override
-	public SortedSet<T> subSet( T fromElement, T toElement )
-	{
-		return new ConditionSet<T>(base, new AndCondition(condition, 
-				new SimpleCondition(base.getPrimaryColumn(), fromElement.getPrimaryKey(), Comparison.LARGER),
-				new SimpleCondition(base.getPrimaryColumn(), toElement.getPrimaryKey(), Comparison.SMALLER)
-		), setConditionFunc, unsetConditionFunc);
+		return new ConditionSet<T>(base, new AndCondition(cond, condition), setConditionFunc, unsetConditionFunc);
 	}
 }

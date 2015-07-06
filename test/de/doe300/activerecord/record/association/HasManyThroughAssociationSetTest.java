@@ -70,8 +70,10 @@ public class HasManyThroughAssociationSetTest extends Assert
 		AssociationHelper.addHasManyThrough( assocI, a1, "mappingTable", "fk_test1", "fk_test2");
 		a2 = base.createRecord();
 		AssociationHelper.addHasManyThrough( assocI, a2, "mappingTable", "fk_test1", "fk_test2");
+		a2.setName( "hans");
 		a3 = base.createRecord();
 		AssociationHelper.addHasManyThrough( assocI, a3, "mappingTable", "fk_test1", "fk_test2");
+		a3.setName( "Hans");
 		n1 = base.createRecord();
 		n2 = base.createRecord();
 	}
@@ -231,5 +233,19 @@ public class HasManyThroughAssociationSetTest extends Assert
 	public void testLast()
 	{
 		assertSame( a3, set.last());
+	}
+	
+	@Test
+	public void testGetForCondition()
+	{
+		SortedSet<TestInterface> subSet = set.getForCondition( new SimpleCondition("name", "Hans", Comparison.IS) );
+		assertSame( 2, subSet.size());
+		assertSame( a2, subSet.first());
+		assertSame( a3, subSet.last());
+		//test backing
+		set.remove( a2);
+		assertSame( 1, subSet.size());
+		set.add( a2);
+		assertSame( 2, subSet.size());
 	}
 }

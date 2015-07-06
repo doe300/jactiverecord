@@ -71,8 +71,10 @@ public class ConditionSetTest extends Assert
 		a1.setAge( 23);
 		a2 = base.createRecord();
 		a2.setAge( 23);
+		a2.setName( "Hans");
 		a3 = base.createRecord();
 		a3.setAge( 23);
+		a3.setName( "Hans");
 		n1 = base.createRecord();
 		n1.setAge( 10);
 		n2 = base.createRecord();
@@ -237,5 +239,23 @@ public class ConditionSetTest extends Assert
 	public void testLast()
 	{
 		assertSame( a3, set.last());
+	}
+
+	@Test
+	public void testGetForCondition()
+	{
+		SortedSet<TestInterface> subSet = set.getForCondition(new SimpleCondition("name", "Hans", Comparison.IS ));
+		assertSame( 2, subSet.size());
+		assertSame( a2, subSet.first());
+		assertSame( a3, subSet.last());
+		//test backing
+		set.remove( a2);
+		assertSame( 1, subSet.size());
+		set.add( a2);
+		assertSame( 2, subSet.size());
+		subSet.clear();
+		assertSame( 1, set.size());
+		subSet.add( a2);
+		assertSame( 2, set.size());
 	}
 }

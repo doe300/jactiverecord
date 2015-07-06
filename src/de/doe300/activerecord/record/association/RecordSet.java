@@ -26,6 +26,10 @@ package de.doe300.activerecord.record.association;
 
 import de.doe300.activerecord.FinderMethods;
 import de.doe300.activerecord.ReadOnlyRecordBase;
+import de.doe300.activerecord.dsl.AndCondition;
+import de.doe300.activerecord.dsl.Comparison;
+import de.doe300.activerecord.dsl.Condition;
+import de.doe300.activerecord.dsl.SimpleCondition;
 import de.doe300.activerecord.record.ActiveRecord;
 import java.util.Comparator;
 import java.util.SortedSet;
@@ -51,6 +55,17 @@ public interface RecordSet<T extends ActiveRecord> extends SortedSet<T>, FinderM
 	 * @return the RecordBase of the record-type
 	 */
 	public ReadOnlyRecordBase<T> getRecordBase();
+	
+	/**
+	 * Returns result-set backed by this set for the given Condition
+	 * 
+	 * NOTE: the returned set may be immutable
+	 * 
+	 * @param cond
+	 * @return a sub-set for the given condition
+	 * @see #subSet(java.lang.Object, java.lang.Object) 
+	 */
+	public RecordSet<T> getForCondition(Condition cond);
 
 	@Override
 	public default Comparator<? super T> comparator()
@@ -59,6 +74,27 @@ public interface RecordSet<T extends ActiveRecord> extends SortedSet<T>, FinderM
 		return null;
 	}
 
+	@Override
+	public default SortedSet<T> headSet( T toElement )
+	{
+		return getForCondition( new SimpleCondition(getRecordBase().getPrimaryColumn(), toElement.getPrimaryKey(), Comparison.SMALLER) );
+	}
+
+	@Override
+	public default SortedSet<T> tailSet( T fromElement )
+	{
+		return getForCondition( new SimpleCondition(getRecordBase().getPrimaryColumn(), fromElement.getPrimaryKey(), Comparison.LARGER));
+	}
+
+	@Override
+	public default SortedSet<T> subSet( T fromElement, T toElement )
+	{
+		return getForCondition( new AndCondition(
+				new SimpleCondition(getRecordBase().getPrimaryColumn(), fromElement.getPrimaryKey(), Comparison.LARGER),
+				new SimpleCondition(getRecordBase().getPrimaryColumn(), toElement.getPrimaryKey(), Comparison.SMALLER)
+		));
+	}
+	
 	@Override
 	public default T first()
 	{

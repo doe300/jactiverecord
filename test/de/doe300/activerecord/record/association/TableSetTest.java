@@ -69,7 +69,9 @@ public class TableSetTest extends Assert
 		//fill set
 		a1 = base.createRecord();
 		a2 = base.createRecord();
+		a2.setName( "Hans");
 		a3 = base.createRecord();
+		a3.setName( "Hans");
 		a4 = base.createRecord();
 		a5 = base.createRecord();
 	}
@@ -220,5 +222,14 @@ public class TableSetTest extends Assert
 	public void testLast()
 	{
 		assertSame( a5, set.last());
+	}
+	
+	@Test
+	public void testGetForCondition()
+	{
+		SortedSet<TestInterface> subSet = set.getForCondition(new SimpleCondition("name", "Hans", Comparison.IS ));
+		assertSame( 2, subSet.size());
+		assertSame( a2, subSet.first());
+		assertSame( a3, subSet.last());
 	}
 }

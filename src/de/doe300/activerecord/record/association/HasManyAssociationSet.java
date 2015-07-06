@@ -26,15 +26,12 @@ package de.doe300.activerecord.record.association;
 
 import de.doe300.activerecord.ReadOnlyRecordBase;
 import de.doe300.activerecord.dsl.AndCondition;
-import de.doe300.activerecord.dsl.Comparison;
 import de.doe300.activerecord.dsl.Condition;
-import de.doe300.activerecord.dsl.SimpleCondition;
 import de.doe300.activerecord.record.ActiveRecord;
 import de.doe300.activerecord.scope.Scope;
 import java.util.AbstractSet;
 import java.util.Collection;
 import java.util.Iterator;
-import java.util.SortedSet;
 import java.util.function.Consumer;
 import java.util.stream.Stream;
 
@@ -159,25 +156,8 @@ public class HasManyAssociationSet<T extends ActiveRecord> extends AbstractSet<T
 	}
 
 	@Override
-	public SortedSet<T> headSet( T toElement )
+	public RecordSet<T> getForCondition( Condition cond )
 	{
-		return new HasManyAssociationSet<T>(destBase, new AndCondition(associationCond, new SimpleCondition(destBase.getPrimaryColumn(),
-				toElement.getPrimaryKey(), Comparison.SMALLER)), setAssociationFunc, unsetAssociationFunc);
-	}
-
-	@Override
-	public SortedSet<T> tailSet( T fromElement )
-	{
-		return new HasManyAssociationSet<T>(destBase, new AndCondition(associationCond, new SimpleCondition(destBase.getPrimaryColumn(),
-				fromElement.getPrimaryKey(), Comparison.LARGER)), setAssociationFunc, unsetAssociationFunc);
-	}
-
-	@Override
-	public SortedSet<T> subSet( T fromElement, T toElement )
-	{
-		return new HasManyAssociationSet<T>(destBase, new AndCondition(associationCond, 
-				new SimpleCondition(destBase.getPrimaryColumn(), toElement.getPrimaryKey(), Comparison.SMALLER),
-				new SimpleCondition(destBase.getPrimaryColumn(), fromElement.getPrimaryKey(), Comparison.LARGER)
-		), setAssociationFunc, unsetAssociationFunc);
+		return new HasManyAssociationSet<T>(destBase, new AndCondition(associationCond, cond), setAssociationFunc, unsetAssociationFunc);
 	}
 }

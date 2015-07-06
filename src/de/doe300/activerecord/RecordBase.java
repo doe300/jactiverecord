@@ -40,6 +40,9 @@ import de.doe300.activerecord.record.RecordCallbacks;
 import de.doe300.activerecord.record.RecordType;
 import de.doe300.activerecord.record.Searchable;
 import de.doe300.activerecord.record.TimestampedRecord;
+import de.doe300.activerecord.record.association.ConditionSet;
+import de.doe300.activerecord.record.association.RecordSet;
+import de.doe300.activerecord.record.association.TableSet;
 import de.doe300.activerecord.scope.Scope;
 import de.doe300.activerecord.store.RecordStore;
 import de.doe300.activerecord.validation.ValidatedRecord;
@@ -553,5 +556,24 @@ public abstract class RecordBase<T extends ActiveRecord> implements ReadOnlyReco
 	public boolean hasCallbacks()
 	{
 		return RecordCallbacks.class.isAssignableFrom( recordType);
+	}
+	
+	////
+	// Record-Sets
+	////
+	
+	public RecordSet<T> getAll()
+	{
+		return new TableSet<T>(this );
+	}
+	
+	/**
+	 * NOTE: this result-set will be immutable
+	 * @param cond
+	 * @return a ResultSet for the given condition
+	 */
+	public RecordSet<T> getForCondition(Condition cond)
+	{
+		return new ConditionSet<T>(this, cond, null, null );
 	}
 }
