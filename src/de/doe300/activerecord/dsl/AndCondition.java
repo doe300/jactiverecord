@@ -46,18 +46,26 @@ public class AndCondition implements Condition
 	 */
 	public AndCondition( Condition... conditions )
 	{
-		this.conditions = clearNulls( conditions );
+		this.conditions = simplifyChildren( conditions );
 	}
 	
-	private static Condition[] clearNulls(Condition[] conds)
+	private static Condition[] simplifyChildren(Condition[] conds)
 	{
 		ArrayList<Condition> list = new ArrayList<>(conds.length);
 		for(Condition cond: conds)
 		{
-			if(cond != null)
+			//remove nulls
+			if(cond == null)
 			{
-				list.add( cond );
+				continue;
 			}
+			//unroll ANDs
+			if(cond instanceof AndCondition)
+			{
+				list.addAll( Arrays.asList( ((AndCondition)cond).conditions));
+				continue;
+			}
+			list.add( cond );
 		}
 		return list.toArray( new Condition[list.size()]);
 	}

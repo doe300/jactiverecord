@@ -28,6 +28,7 @@ import de.doe300.activerecord.RecordBase;
 import de.doe300.activerecord.RecordCore;
 import de.doe300.activerecord.TestInterface;
 import de.doe300.activerecord.TestServer;
+import de.doe300.activerecord.jdbc.VendorSpecific;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
@@ -71,6 +72,13 @@ public class OrConditionTest extends Assert
 	public static void destroyTables() throws Exception
 	{
 		TestServer.destroyTestTables();
+	}
+	
+	@Test
+	public void testOrUnrolling()
+	{
+		Condition c1 = new OrCondition(cond);
+		assertEquals( cond.toSQL( VendorSpecific.HSQLDB), c1.toSQL( VendorSpecific.HSQLDB ));
 	}
 
 	@Test

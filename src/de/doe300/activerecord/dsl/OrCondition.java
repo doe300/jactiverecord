@@ -46,22 +46,30 @@ public class OrCondition implements Condition
 	 */
 	public OrCondition( Condition... conditions )
 	{
-		this.conditions = clearNulls( Objects.requireNonNull( conditions));
+		this.conditions = simplifyChildren( Objects.requireNonNull( conditions));
 	}
 	
-	private static Condition[] clearNulls(Condition... conds)
+	private static Condition[] simplifyChildren(Condition... conds)
 	{
 		ArrayList<Condition> list = new ArrayList<>(conds.length);
 		for(Condition cond: conds)
 		{
-			if(cond != null)
+			//clears nulls
+			if(cond == null)
 			{
-				list.add( cond );
+				continue;
 			}
+			//unrolls or-conditions
+			if(cond instanceof OrCondition)
+			{
+				list.addAll( Arrays.asList( ((OrCondition)cond).conditions));
+				continue;
+			}
+			list.add( cond );
 		}
 		return list.toArray( new Condition[list.size()]);
 	}
-
+	
 	@Override
 	public boolean hasWildcards()
 	{

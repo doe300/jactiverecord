@@ -28,6 +28,7 @@ import de.doe300.activerecord.RecordBase;
 import de.doe300.activerecord.RecordCore;
 import de.doe300.activerecord.TestInterface;
 import de.doe300.activerecord.TestServer;
+import de.doe300.activerecord.jdbc.VendorSpecific;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
@@ -58,6 +59,15 @@ public class AndConditionTest extends Assert
 		t3 = base.createRecord();
 		t3.setName( "123Name4");
 		t3.setAge( 914);
+	}
+	
+	@Test
+	public void testAndUnrolling()
+	{
+		Condition simpleCond = new SimpleCondition(base.getPrimaryColumn(), 3, Comparison.SMALLER_EQUALS);
+		Condition c1 = new AndCondition(simpleCond );
+		Condition c2 = new AndCondition(c1);
+		assertEquals( c1.toSQL( VendorSpecific.MYSQL), c2.toSQL( VendorSpecific.MYSQL));
 	}
 
 	@Test
