@@ -134,6 +134,15 @@ public final class RecordCore implements AutoCloseable
 	{
 		store.close();
 		Logging.getLogger().info( "RecordCore", "RecordCore closed");
+		//remove Core from mappings
+		for(Map.Entry<String, RecordCore> entry:cores.entrySet())
+		{
+			if(entry.getValue().equals( this ))
+			{
+				cores.remove( entry.getKey());
+				return;
+			}
+		}
 	}
 	
 	/**
