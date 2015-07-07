@@ -38,12 +38,30 @@ public class InvertedCondition implements Condition
 {
 	private final Condition invertedCondition;
 
-	/**
-	 * @param invertedCondition the Condition to be inverted
-	 */
-	public InvertedCondition( Condition invertedCondition )
+	private InvertedCondition( Condition invertedCondition )
 	{
 		this.invertedCondition = invertedCondition;
+	}
+	
+	/**
+	 * Inverts the <code>cond</code>.
+	 * 
+	 * This method optimizes by unwrapping a twice inverted condition, because <code>NOT(NOT(a))</code> is the same as </code>a</code>
+	 * 
+	 * @param cond
+	 * @return the inverted Condition
+	 */
+	public static Condition invertCondition(Condition cond)
+	{
+		if(cond == null)
+		{
+			throw new IllegalArgumentException();
+		}
+		if(cond instanceof InvertedCondition)
+		{
+			return cond.negate();
+		}
+		return new InvertedCondition(cond );
 	}
 
 	@Override

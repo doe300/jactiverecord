@@ -499,7 +499,7 @@ public abstract class RecordBase<T extends ActiveRecord> implements ReadOnlyReco
 		{
 			conds[i] = new SimpleCondition(columns[i], "%"+term+"%", Comparison.LIKE);
 		}
-		return new OrCondition(conds );
+		return OrCondition.orConditions(conds );
 	}
 
 	////

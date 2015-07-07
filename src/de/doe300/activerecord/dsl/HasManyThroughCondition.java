@@ -91,7 +91,7 @@ public class HasManyThroughCondition implements Condition
 	@Override
 	public Condition negate()
 	{
-		return new InvertedCondition(this);
+		return InvertedCondition.invertCondition(this);
 	}
 
 	@Override

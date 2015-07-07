@@ -184,6 +184,6 @@ public class SimpleCondition implements Condition, SQLCommand
 	@Override
 	public Condition negate()
 	{
-		return new InvertedCondition(this );
+		return InvertedCondition.invertCondition(this );
 	}
 }

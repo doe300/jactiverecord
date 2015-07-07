@@ -108,7 +108,7 @@ public class HasManyThroughAssociationSet<T extends ActiveRecord> extends Abstra
 	
 	private boolean remove0(Integer key)
 	{
-		Condition cond = new AndCondition(
+		Condition cond = AndCondition.andConditions(
 				new SimpleCondition(thisMappingKey, thisPrimaryKey, Comparison.IS),
 				new SimpleCondition(foreignMappingKey, key, Comparison.IS)
 		);
@@ -159,7 +159,7 @@ public class HasManyThroughAssociationSet<T extends ActiveRecord> extends Abstra
 	public Stream<T> findWithScope( final Scope scope)
 	{
 		Set<Integer> keys = getAssocationKeys().collect( Collectors.toSet());
-		Scope newScope = new Scope(new AndCondition(new SimpleCondition(destBase.getPrimaryColumn(), keys, Comparison.IN), scope.getCondition()), scope.getOrder(), scope.getLimit());
+		Scope newScope = new Scope(AndCondition.andConditions(new SimpleCondition(destBase.getPrimaryColumn(), keys, Comparison.IN), scope.getCondition()), scope.getOrder(), scope.getLimit());
 		return destBase.findWithScope( newScope );
 	}
 
@@ -167,7 +167,7 @@ public class HasManyThroughAssociationSet<T extends ActiveRecord> extends Abstra
 	public T findFirstWithScope( Scope scope)
 	{
 		Set<Integer> keys = getAssocationKeys().collect( Collectors.toSet());
-		Scope newScope = new Scope(new AndCondition(new SimpleCondition(destBase.getPrimaryColumn(), keys, Comparison.IN), scope.getCondition()), scope.getOrder(), scope.getLimit());
+		Scope newScope = new Scope(AndCondition.andConditions(new SimpleCondition(destBase.getPrimaryColumn(), keys, Comparison.IN), scope.getCondition()), scope.getOrder(), scope.getLimit());
 		return destBase.findFirstWithScope( newScope);
 	}
 
@@ -266,7 +266,7 @@ public class HasManyThroughAssociationSet<T extends ActiveRecord> extends Abstra
 		public Stream<T> findWithScope( final Scope scope)
 		{
 			Scope newScope = new Scope(
-					new AndCondition(subCondition, scope.getCondition()),
+					AndCondition.andConditions(subCondition, scope.getCondition()),
 					scope.getOrder(), scope.getLimit());
 			return destBase.findWithScope( newScope );
 		}
@@ -275,7 +275,7 @@ public class HasManyThroughAssociationSet<T extends ActiveRecord> extends Abstra
 		public T findFirstWithScope( Scope scope)
 		{
 			Scope newScope = new Scope(
-					new AndCondition(subCondition,scope.getCondition()),
+					AndCondition.andConditions(subCondition,scope.getCondition()),
 					scope.getOrder(), scope.getLimit());
 			return destBase.findFirstWithScope( newScope);
 		}
@@ -283,7 +283,7 @@ public class HasManyThroughAssociationSet<T extends ActiveRecord> extends Abstra
 		@Override
 		public RecordSet<T> getForCondition( Condition cond )
 		{
-			return new HasManyThroughSubSet(new AndCondition(subCondition,cond));
+			return new HasManyThroughSubSet(AndCondition.andConditions(subCondition,cond));
 		}
 	}
 }

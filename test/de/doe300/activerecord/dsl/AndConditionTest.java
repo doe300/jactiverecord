@@ -65,24 +65,24 @@ public class AndConditionTest extends Assert
 	public void testAndUnrolling()
 	{
 		Condition simpleCond = new SimpleCondition(base.getPrimaryColumn(), 3, Comparison.SMALLER_EQUALS);
-		Condition c1 = new AndCondition(simpleCond );
-		Condition c2 = new AndCondition(c1);
+		Condition c1 = AndCondition.andConditions(simpleCond );
+		Condition c2 = AndCondition.andConditions(c1);
 		assertEquals( c1.toSQL( VendorSpecific.MYSQL), c2.toSQL( VendorSpecific.MYSQL));
 	}
 
 	@Test
 	public void testHasWildcards()
 	{
-		Condition condition = new AndCondition(new SimpleCondition("age", null, Comparison.IS_NOT_NULL), new SimpleCondition("name", null, Comparison.IS_NOT_NULL));
+		Condition condition = AndCondition.andConditions(new SimpleCondition("age", null, Comparison.IS_NOT_NULL), new SimpleCondition("name", null, Comparison.IS_NOT_NULL));
 		assertFalse( condition.hasWildcards());
-		Condition condition1 = new AndCondition(condition, new SimpleCondition("name", "123Name1", Comparison.IS));
+		Condition condition1 = AndCondition.andConditions(condition, new SimpleCondition("name", "123Name1", Comparison.IS));
 		assertTrue( condition1.hasWildcards());
 	}
 
 	@Test
 	public void testGetValues()
 	{
-		Condition condition = new AndCondition(
+		Condition condition = AndCondition.andConditions(
 				new SimpleCondition("age", 913, Comparison.IS),
 				new SimpleCondition("name", "123Name1", Comparison.IS));
 		assertArrayEquals( new Object[]{913, "123Name1"}, condition.getValues() );
@@ -91,7 +91,7 @@ public class AndConditionTest extends Assert
 	@Test
 	public void testTest_ActiveRecord()
 	{
-		Condition condition = new AndCondition(
+		Condition condition = AndCondition.andConditions(
 				new SimpleCondition("age", 913, Comparison.IS),
 				new SimpleCondition("name", "123Name1", Comparison.IS));
 		assertFalse( condition.test( t1));
@@ -101,7 +101,7 @@ public class AndConditionTest extends Assert
 	@Test
 	public void testTest_Map()
 	{
-		Condition condition = new AndCondition(
+		Condition condition = AndCondition.andConditions(
 				new SimpleCondition("age", 913, Comparison.IS),
 				new SimpleCondition("name", "123Name1", Comparison.IS));
 		Map<String,Object> map = new HashMap<>(2);
@@ -114,7 +114,7 @@ public class AndConditionTest extends Assert
 	@Test
 	public void testNegate()
 	{
-		Condition condition = new AndCondition(
+		Condition condition = AndCondition.andConditions(
 				new SimpleCondition("age", 913, Comparison.IS),
 				new SimpleCondition("name", "123Name1", Comparison.IS));
 		condition = condition.negate();

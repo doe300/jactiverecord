@@ -89,7 +89,7 @@ public interface RecordSet<T extends ActiveRecord> extends SortedSet<T>, FinderM
 	@Override
 	public default SortedSet<T> subSet( T fromElement, T toElement )
 	{
-		return getForCondition( new AndCondition(
+		return getForCondition( AndCondition.andConditions(
 				new SimpleCondition(getRecordBase().getPrimaryColumn(), fromElement.getPrimaryKey(), Comparison.LARGER),
 				new SimpleCondition(getRecordBase().getPrimaryColumn(), toElement.getPrimaryKey(), Comparison.SMALLER)
 		));

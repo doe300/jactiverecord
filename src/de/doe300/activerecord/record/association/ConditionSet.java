@@ -171,20 +171,20 @@ public class ConditionSet<T extends ActiveRecord> extends AbstractSet<T> impleme
 	@Override
 	public Stream<T> findWithScope( Scope scope )
 	{
-		Scope newScope = new Scope(new AndCondition(condition, scope.getCondition()), scope.getOrder(), scope.getLimit());
+		Scope newScope = new Scope(AndCondition.andConditions(condition, scope.getCondition()), scope.getOrder(), scope.getLimit());
 		return base.findWithScope(newScope );
 	}
 
 	@Override
 	public T findFirstWithScope( Scope scope )
 	{
-		Scope newScope = new Scope(new AndCondition(condition, scope.getCondition()), scope.getOrder(), scope.getLimit());
+		Scope newScope = new Scope(AndCondition.andConditions(condition, scope.getCondition()), scope.getOrder(), scope.getLimit());
 		return base.findFirstWithScope( newScope );
 	}
 
 	@Override
 	public RecordSet<T> getForCondition( Condition cond )
 	{
-		return new ConditionSet<T>(base, new AndCondition(cond, condition), setConditionFunc, unsetConditionFunc);
+		return new ConditionSet<T>(base, AndCondition.andConditions(cond, condition), setConditionFunc, unsetConditionFunc);
 	}
 }

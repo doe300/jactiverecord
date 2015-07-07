@@ -40,17 +40,29 @@ public class AndCondition implements Condition
 {
 	private final Condition[] conditions;
 
-	/**
-	 * Default constructor, concatenating all arguments with AND
-	 * @param conditions 
-	 */
-	public AndCondition( Condition... conditions )
+	private AndCondition( Condition[] conditions )
 	{
-		this.conditions = simplifyChildren( conditions );
+		this.conditions = conditions;
 	}
 	
-	private static Condition[] simplifyChildren(Condition[] conds)
+	/**
+	 * Combines the <code>conds</code> and optimizes according to the following rules:
+	 * <ul>
+	 * <li>Removes all <code>null</code>-conditions</li>
+	 * <li>Unrolls all children AND-conditions, because <code>a AND (b AND c)</code> is the same as <code>a AND b AND c</code></li>
+	 * <li>If any condition results in the SQL-symbol <code>TRUE</code>, the condition does not contribute to the result and can be removed</li>
+	 * <li>Skips conditions which are already in the list</li>
+	 * <li>Returns the single condition, if only one passes all other tests</li>
+	 * </ul>
+	 * @param conds
+	 * @return the combined Condition
+	 */
+	public static Condition andConditions(Condition... conds)
 	{
+		if(conds == null || conds.length == 0)
+		{
+			throw new IllegalArgumentException();
+		}
 		ArrayList<Condition> list = new ArrayList<>(conds.length);
 		for(Condition cond: conds)
 		{
@@ -65,9 +77,27 @@ public class AndCondition implements Condition
 				list.addAll( Arrays.asList( ((AndCondition)cond).conditions));
 				continue;
 			}
+			//remove non-false rules
+			if(cond instanceof SimpleCondition && ((SimpleCondition)cond).getComparison() == Comparison.TRUE)
+			{
+				continue;
+			}
+			//if condition is already in list, skip
+			if(list.contains( cond ))
+			{
+				continue;
+			}
 			list.add( cond );
 		}
-		return list.toArray( new Condition[list.size()]);
+		if(list.size() == 0)
+		{
+			//TODO what to return??
+		}
+		if(list.size() == 1)
+		{
+			return list.get( 0);
+		}
+		return new AndCondition(list.toArray( new Condition[list.size()]));
 	}
 	
 	@Override
@@ -129,6 +159,6 @@ public class AndCondition implements Condition
 	@Override
 	public Condition negate()
 	{
-		return new InvertedCondition(this );
+		return InvertedCondition.invertCondition(this );
 	}
 }

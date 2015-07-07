@@ -96,7 +96,7 @@ public interface FinderMethods<T extends ActiveRecord>
 		{
 			return find( conds.get( 0));
 		}
-		return find( new AndCondition( new Condition[conds.size()]) );
+		return find( AndCondition.andConditions( new Condition[conds.size()]) );
 	}
 	
 	/**
@@ -114,7 +114,7 @@ public interface FinderMethods<T extends ActiveRecord>
 		{
 			return findFirst( conds.get( 0));
 		}
-		return findFirst( new AndCondition(conds.toArray( new Condition[conds.size()]) ));
+		return findFirst( AndCondition.andConditions(conds.toArray( new Condition[conds.size()]) ));
 	}
 	
 	/**

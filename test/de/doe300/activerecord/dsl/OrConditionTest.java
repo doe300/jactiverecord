@@ -46,7 +46,7 @@ public class OrConditionTest extends Assert
 	
 	private static RecordBase<TestInterface> base;
 	private static TestInterface t1, t2,t3;
-	private static OrCondition cond;
+	private static Condition cond;
 	
 	@BeforeClass
 	public static void createTables() throws Exception
@@ -64,7 +64,7 @@ public class OrConditionTest extends Assert
 		t3.setName( "123Name4");
 		t3.setAge( -913);
 		
-		cond = new OrCondition(new SimpleCondition("name", "123Name4", Comparison.IS), new SimpleCondition("age",
+		cond = OrCondition.orConditions(new SimpleCondition("name", "123Name4", Comparison.IS), new SimpleCondition("age",
 				-913, Comparison.SMALLER_EQUALS));
 	}
 	
@@ -77,15 +77,27 @@ public class OrConditionTest extends Assert
 	@Test
 	public void testOrUnrolling()
 	{
-		Condition c1 = new OrCondition(cond);
+		Condition c1 = OrCondition.orConditions(cond);
+		//test OR-unrolling
 		assertEquals( cond.toSQL( VendorSpecific.HSQLDB), c1.toSQL( VendorSpecific.HSQLDB ));
+		//test skip duplicates
+		Condition s1 = new SimpleCondition("test", "dummy", Comparison.IS);
+		Condition c2 = OrCondition.orConditions(s1, s1);
+		assertArrayEquals( s1.getValues(), c2.getValues());
+		//test skip non-false
+		Condition s2 = new SimpleCondition("test", null, Comparison.TRUE);
+		Condition c3 = OrCondition.orConditions(s1, s2);
+		assertEquals( s2.getValues(), c3.getValues());
+		//test unwrap single condition
+		Condition c4 = OrCondition.orConditions(s2);
+		assertEquals( s2.toSQL( VendorSpecific.MYSQL ), c4.toSQL( VendorSpecific.MYSQL ));
 	}
 
 	@Test
 	public void testHasWildcards()
 	{
 		assertTrue( cond.hasWildcards());
-		Condition c = new OrCondition(new SimpleCondition("name", null, Comparison.IS_NOT_NULL), new SimpleCondition("age", null, Comparison.IS_NULL));
+		Condition c = OrCondition.orConditions(new SimpleCondition("name", null, Comparison.IS_NOT_NULL), new SimpleCondition("age", null, Comparison.IS_NULL));
 		assertFalse( c.hasWildcards());
 	}
 

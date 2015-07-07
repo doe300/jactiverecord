@@ -30,7 +30,6 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
-import java.util.Objects;
 import java.util.stream.Collectors;
 
 /**
@@ -41,16 +40,29 @@ public class OrCondition implements Condition
 {
 	private final Condition[] conditions;
 
-	/**
-	 * @param conditions 
-	 */
-	public OrCondition( Condition... conditions )
+	private OrCondition( Condition[] conditions )
 	{
-		this.conditions = simplifyChildren( Objects.requireNonNull( conditions));
+		this.conditions = conditions;
 	}
 	
-	private static Condition[] simplifyChildren(Condition... conds)
+	/**
+	 * Combines the <code>conds</code> and optimizes according to the following rules:
+	 * <ul>
+	 * <li>Removes all <code>null</code>-conditions</li>
+	 * <li>Unrolls all children OR-conditions, because <code>a OR (b OR c)</code> is the same as <code>a OR b OR c</code></li>
+	 * <li>If any condition produces the SQL-symbol <code>TRUE</code> this condition will always be <code>true</code> and therefore any other condition can be discarded</li>
+	 * <li>Skips conditions which are already in the list</li>
+	 * <li>Returns the single condition, if only one passes all other tests</li>
+	 * </ul>
+	 * @param conds
+	 * @return the combined Condition
+	 */
+	public static Condition orConditions(Condition... conds)
 	{
+		if(conds == null || conds.length == 0)
+		{
+			throw new IllegalArgumentException();
+		}
 		ArrayList<Condition> list = new ArrayList<>(conds.length);
 		for(Condition cond: conds)
 		{
@@ -65,9 +77,28 @@ public class OrCondition implements Condition
 				list.addAll( Arrays.asList( ((OrCondition)cond).conditions));
 				continue;
 			}
+			//check for non-false condition
+			if(cond instanceof SimpleCondition && ((SimpleCondition)cond).getComparison() == Comparison.TRUE)
+			{
+				//this condition is non-false, no other conditions matter
+				return cond;
+			}
+			//if condition is already in list, skip
+			if(list.contains( cond ))
+			{
+				continue;
+			}
 			list.add( cond );
 		}
-		return list.toArray( new Condition[list.size()]);
+		if(list.size() == 0)
+		{
+			//TODO what to return??
+		}
+		if(list.size() == 1)
+		{
+			return list.get( 0);
+		}
+		return new OrCondition(list.toArray( new Condition[list.size()]));
 	}
 	
 	@Override
@@ -129,6 +160,6 @@ public class OrCondition implements Condition
 	@Override
 	public Condition negate()
 	{
-		return new InvertedCondition(this );
+		return InvertedCondition.invertCondition(this );
 	}
 }

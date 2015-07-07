@@ -235,7 +235,7 @@ public final class AssociationHelper
 	 */
 	public static boolean removeHasManyThrough(ActiveRecord record, ActiveRecord otherRecord, String associationTable, String thisForeignKeyColumn, String otherForeignKeyColumn)
 	{
-		Condition cond = new AndCondition(
+		Condition cond = AndCondition.andConditions(
 				new SimpleCondition(thisForeignKeyColumn, record.getPrimaryKey(), Comparison.IS),
 				new SimpleCondition(otherForeignKeyColumn, otherRecord.getPrimaryKey(), Comparison.IS)
 		);

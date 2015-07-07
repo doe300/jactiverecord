@@ -138,14 +138,14 @@ public class HasManyAssociationSet<T extends ActiveRecord> extends AbstractSet<T
 	@Override
 	public Stream<T> findWithScope(final Scope scope)
 	{
-		Scope newScope = new Scope(new AndCondition(associationCond, scope.getCondition()), scope.getOrder(), scope.getLimit());
+		Scope newScope = new Scope(AndCondition.andConditions(associationCond, scope.getCondition()), scope.getOrder(), scope.getLimit());
 		return destBase.findWithScope(newScope );
 	}
 
 	@Override
 	public T findFirstWithScope( final Scope scope )
 	{
-		Scope newScope = new Scope(new AndCondition(associationCond, scope.getCondition()), scope.getOrder(), scope.getLimit());
+		Scope newScope = new Scope(AndCondition.andConditions(associationCond, scope.getCondition()), scope.getOrder(), scope.getLimit());
 		return destBase.findFirstWithScope( newScope );
 	}
 
@@ -158,6 +158,6 @@ public class HasManyAssociationSet<T extends ActiveRecord> extends AbstractSet<T
 	@Override
 	public RecordSet<T> getForCondition( Condition cond )
 	{
-		return new HasManyAssociationSet<T>(destBase, new AndCondition(associationCond, cond), setAssociationFunc, unsetAssociationFunc);
+		return new HasManyAssociationSet<T>(destBase, AndCondition.andConditions(associationCond, cond), setAssociationFunc, unsetAssociationFunc);
 	}
 }
