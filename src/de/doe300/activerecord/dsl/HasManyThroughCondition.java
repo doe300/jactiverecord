@@ -31,33 +31,54 @@ import de.doe300.activerecord.record.association.AssociationHelper;
 import java.util.Map;
 
 /**
- * A Condition on a table referenced by a has-many-through association
+ * A Condition on a table referenced by a has-many-through association.
+ * 
+ * <p>
+ * This condition matches any record in table <code>thisTable</code> which has at least one record 
+ * of table <code>associatedTable</code> - associated via a third table <code>associationTable</code>
+ * - that matches the <code>associatedBaseCondition</code>.
+ * </p>
+ * 
+ * <pre>
+ * Example:
+ * |    A    |				|           C          |				|            B           |
+ * -----------				------------------------				--------------------------
+ * | id = 20 |		->		| fk_a = 20 | fk_b = 1 |		->		| id = 1 | name = "Adam" |
+ * | id = 21 |		->		| fk_a = 21 | fk_b = 2 |		->		| id = 2 | name = "Rolf" |
+ * In this example, A would be the <code>thisTable</code>, C the <code>associationTable</code> and B the <code>associatedTable</code>.
+ * Furthermore, the <code>associationTableThisForeignKey</code> is <code>fk_a</code> and the <code>associationTableOtherForeignKey</code> is <code>fk_b</code>.
+ * <code>thisBaseAssociationKey</code> is the column <code>id</code> of table A.
+ * If the <code>associatedBaseCondition</code> matches only the first entry in B, this condition will only match the first entry in A.
+ * </pre>
+ * 
  * @author doe300
  */
 public class HasManyThroughCondition implements Condition
 {
+	//FIXME doesn't work if source- and association-table are the same
 	private final String associationTable, associationTableThisForeignKey, associationTableOtherForeignKey;
-	private final String associationKeyColumn;
-	private final ReadOnlyRecordBase<?> associatedBase;
+	private final String thisBaseAssociationKey;
+	private final ReadOnlyRecordBase<?> associatedBase, thisBase;
 	private final Condition associatedBaseCondition;
 
 	/**
-	 * 
+	 * @param thisBase the RecordBase for this table
 	 * @param associationTable the name of the association-table
 	 * @param associationTableThisForeignKey the column in the <code>associationTable</code> matching this record <code>associationKeyColumn</code>
 	 * @param associationTableOtherForeignKey the column in the <code>associationTable</code> matching the other records primary key
-	 * @param associationKeyColumn the column in this records table to match
+	 * @param thisBaseAssociationKey the column in this records table to match
 	 * @param associatedBase the RecordBase for the associated record
 	 * @param associatedBaseCondition the Condition to match in the associated table
 	 */
-	public HasManyThroughCondition( String associationTable, String associationTableThisForeignKey,
-			String associationTableOtherForeignKey, String associationKeyColumn,
+	public HasManyThroughCondition(ReadOnlyRecordBase<?> thisBase, String associationTable, String associationTableThisForeignKey,
+			String associationTableOtherForeignKey, String thisBaseAssociationKey,
 			ReadOnlyRecordBase<?> associatedBase, Condition associatedBaseCondition )
 	{
+		this.thisBase = thisBase;
 		this.associationTable = associationTable;
 		this.associationTableThisForeignKey = associationTableThisForeignKey;
 		this.associationTableOtherForeignKey = associationTableOtherForeignKey;
-		this.associationKeyColumn = associationKeyColumn;
+		this.thisBaseAssociationKey = thisBaseAssociationKey;
 		this.associatedBase = associatedBase;
 		this.associatedBaseCondition = associatedBaseCondition;
 	}
@@ -102,7 +123,7 @@ public class HasManyThroughCondition implements Condition
 		// AND cond)
 		return "EXISTS("
 				+ "SELECT " + associatedBase.getPrimaryColumn() + " FROM " + associatedBase.getTableName()+" WHERE " + associatedBase.getPrimaryColumn()+" IN ("
-					+ "SELECT " + associationTableOtherForeignKey + " FROM " + associationTable + " WHERE " + associationTable + "." + associationTableThisForeignKey + " = " + associationKeyColumn
+					+ "SELECT " + associationTableOtherForeignKey + " FROM " + associationTable + " WHERE " + associationTable + "." + associationTableThisForeignKey + " = "+ thisBase.getTableName()+ "." + thisBaseAssociationKey
 				+ ") AND " + associatedBaseCondition.toSQL( vendorSpecifics ) + ")";
 	}
 
