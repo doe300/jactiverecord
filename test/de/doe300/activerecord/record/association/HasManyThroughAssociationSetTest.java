@@ -70,7 +70,7 @@ public class HasManyThroughAssociationSetTest extends Assert
 		AssociationHelper.addHasManyThrough( assocI, a1, "mappingTable", "fk_test1", "fk_test2");
 		a2 = base.createRecord();
 		AssociationHelper.addHasManyThrough( assocI, a2, "mappingTable", "fk_test1", "fk_test2");
-		a2.setName( "hans");
+		a2.setName( "Hans");
 		a3 = base.createRecord();
 		AssociationHelper.addHasManyThrough( assocI, a3, "mappingTable", "fk_test1", "fk_test2");
 		a3.setName( "Hans");
