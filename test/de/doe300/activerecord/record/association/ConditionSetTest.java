@@ -86,6 +86,14 @@ public class ConditionSetTest extends Assert
 	{
 		TestServer.destroyTestTables();
 	}
+	
+	@Test(expected = UnsupportedOperationException.class)
+	public void testUnmodifiableSet()
+	{
+		RecordSet<TestInterface> set1 = new ConditionSet<TestInterface>(base, new SimpleCondition("age", 23,Comparison.IS));
+		assertTrue( set1.containsAll( Arrays.asList( a1,a2,a3)) );
+		set1.remove( a1 );
+	}
 
 	@Test
 	public void testSize()
@@ -98,6 +106,8 @@ public class ConditionSetTest extends Assert
 	{
 		assertTrue( set.contains( a1));
 		assertFalse( set.contains( n1));
+		assertFalse( set.contains( null));
+		assertFalse( set.contains( "A"));
 	}
 
 	@Test
@@ -149,6 +159,7 @@ public class ConditionSetTest extends Assert
 	public void testRemoveAll()
 	{
 		assertTrue( set.removeAll( Arrays.asList( a1,a2,a3)));
+		assertFalse( set.removeAll( Arrays.asList( a1,a2,a3)));
 		assertTrue( set.isEmpty());
 		assertTrue( set.addAll( Arrays.asList( a1,a2,a3)));
 	}

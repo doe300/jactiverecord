@@ -92,6 +92,8 @@ public class TableSetTest extends Assert
 	public void testContains()
 	{
 		assertTrue( set.contains( a1));
+		assertFalse( set.contains( null));
+		assertFalse( set.contains( "Hans"));
 	}
 
 	@Test

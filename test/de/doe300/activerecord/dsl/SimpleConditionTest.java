@@ -99,6 +99,8 @@ public class SimpleConditionTest extends Assert
 		assertSame( t3, base.findFirst( new SimpleCondition("name", "123Name4", Comparison.IS)));
 		//test SQL
 		assertEquals( (Integer)t3.getPrimaryKey(), base.getStore().findFirst( base, toScope( new SimpleCondition("name", "123Name4", Comparison.IS))));
+		//test "a = null" optimization
+		assertSame( Comparison.IS_NULL, new SimpleCondition("id", null, Comparison.IS).getComparison());
 	}
 	
 	@Test
@@ -108,6 +110,8 @@ public class SimpleConditionTest extends Assert
 		assertSame( t1, base.findFirst( new SimpleCondition("other", null, Comparison.IS_NULL)));
 		//test SQL
 		assertEquals( (Integer)t1.getPrimaryKey(), base.getStore().findFirst( base, toScope( new SimpleCondition("other", null,Comparison.IS_NULL))));
+		//test "a != null" optimization
+		assertSame( Comparison.IS_NOT_NULL, new SimpleCondition("id", null, Comparison.IS_NOT).getComparison());
 	}
 	
 	@Test
@@ -180,5 +184,18 @@ public class SimpleConditionTest extends Assert
 		assertSame( t1, base.findFirst( new SimpleCondition("age", new Integer[]{-912,-913}, Comparison.IN)));
 		//test SQL
 		assertEquals( (Integer)t1.getPrimaryKey(), base.getStore().findFirst( base, toScope( new SimpleCondition("age", new Integer[]{-912,-913}, Comparison.IN))));
+	}
+	
+	@Test(expected = IllegalArgumentException.class)
+	public void testInConditionError()
+	{
+		assertNotNull( new SimpleCondition("id", "Dummy", Comparison.IN));
+	}
+	
+	@Test
+	public void testNegate()
+	{
+		SimpleCondition s1 = new SimpleCondition("id", "dummy", Comparison.IS);
+		assertSame( s1, s1.negate().negate() );
 	}
 }

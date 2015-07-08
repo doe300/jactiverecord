@@ -96,6 +96,8 @@ public class HasManyThroughAssociationSetTest extends Assert
 	{
 		assertTrue( set.contains( a1));
 		assertFalse( set.contains( n1));
+		assertFalse( set.contains( null));
+		assertFalse( set.contains( "b"));
 	}
 
 	@Test
@@ -147,6 +149,7 @@ public class HasManyThroughAssociationSetTest extends Assert
 	public void testRemoveAll()
 	{
 		assertTrue( set.removeAll( Arrays.asList( a1,a2,a3)));
+		assertFalse( set.removeAll( Arrays.asList( a1,a2,a3)));
 		assertTrue( set.isEmpty());
 		assertTrue( set.addAll( Arrays.asList( a1,a2,a3)));
 	}

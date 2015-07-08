@@ -61,15 +61,32 @@ public class AndConditionTest extends Assert
 		t3.setAge( 914);
 	}
 	
+	@Test(expected = IllegalArgumentException.class)
+	public void testAndError()
+	{
+		assertNotNull( AndCondition.andConditions( new Condition[0]));
+	}
+	
 	@Test
-	public void testAndUnrolling()
+	public void testAndOptimization()
 	{
 		Condition simpleCond = new SimpleCondition(base.getPrimaryColumn(), 3, Comparison.SMALLER_EQUALS);
 		Condition c1 = AndCondition.andConditions(simpleCond );
 		Condition c2 = AndCondition.andConditions(c1);
+		//unrolls inner ANDs
 		assertEquals( c1.toSQL( VendorSpecific.MYSQL), c2.toSQL( VendorSpecific.MYSQL));
+		//removes non-false conditions
+		Condition simpleCond2 = new SimpleCondition("id", null, Comparison.TRUE);
+		Condition c3 = AndCondition.andConditions( simpleCond, simpleCond2);
+		assertSame( c3, simpleCond);
+		//removes nulls
+		Condition c4 = AndCondition.andConditions( simpleCond, null, null, null);
+		assertSame( c4, simpleCond);
+		//removes duplicates
+		Condition c5 = AndCondition.andConditions( simpleCond, simpleCond, simpleCond, simpleCond2, c1);
+		assertSame( c5, simpleCond);
 	}
-
+	
 	@Test
 	public void testHasWildcards()
 	{

@@ -562,16 +562,13 @@ public abstract class RecordBase<T extends ActiveRecord> implements ReadOnlyReco
 	// Record-Sets
 	////
 	
+	@Override
 	public RecordSet<T> getAll()
 	{
 		return new TableSet<T>(this );
 	}
 	
-	/**
-	 * NOTE: this result-set will be immutable
-	 * @param cond
-	 * @return a ResultSet for the given condition
-	 */
+	@Override
 	public RecordSet<T> getForCondition(Condition cond)
 	{
 		return new ConditionSet<T>(this, cond, null, null );

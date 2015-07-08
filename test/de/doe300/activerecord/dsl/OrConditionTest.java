@@ -74,8 +74,14 @@ public class OrConditionTest extends Assert
 		TestServer.destroyTestTables();
 	}
 	
+	@Test(expected = IllegalArgumentException.class)
+	public void testOrError()
+	{
+		assertNotNull( OrCondition.orConditions( new Condition[0]));
+	}
+	
 	@Test
-	public void testOrUnrolling()
+	public void testOrOptimization()
 	{
 		Condition c1 = OrCondition.orConditions(cond);
 		//test OR-unrolling
@@ -83,14 +89,16 @@ public class OrConditionTest extends Assert
 		//test skip duplicates
 		Condition s1 = new SimpleCondition("test", "dummy", Comparison.IS);
 		Condition c2 = OrCondition.orConditions(s1, s1);
-		assertArrayEquals( s1.getValues(), c2.getValues());
+		assertSame( s1, c2);
 		//test skip non-false
 		Condition s2 = new SimpleCondition("test", null, Comparison.TRUE);
 		Condition c3 = OrCondition.orConditions(s1, s2);
-		assertEquals( s2.getValues(), c3.getValues());
+		assertSame( s2, c3);
 		//test unwrap single condition
 		Condition c4 = OrCondition.orConditions(s2);
-		assertEquals( s2.toSQL( VendorSpecific.MYSQL ), c4.toSQL( VendorSpecific.MYSQL ));
+		assertSame( s2, c4);
+		//test skip nulls
+		assertSame( s1, OrCondition.orConditions( s1, null, null, null));
 	}
 
 	@Test

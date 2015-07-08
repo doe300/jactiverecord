@@ -28,6 +28,7 @@ import de.doe300.activerecord.dsl.Condition;
 import de.doe300.activerecord.dsl.Order;
 import de.doe300.activerecord.dsl.QueryResult;
 import de.doe300.activerecord.record.ActiveRecord;
+import de.doe300.activerecord.record.association.RecordSet;
 import de.doe300.activerecord.scope.Scope;
 import java.util.stream.Stream;
 
@@ -148,4 +149,17 @@ public interface ReadOnlyRecordBase<T extends ActiveRecord> extends FinderMethod
 	 * @see ValidatedRecord#isValid()
 	 */
 	public boolean isValid(final ActiveRecord record);
+	
+	/**
+	 * NOTE: this result-set will be immutable
+	 * @return a ResultSet containing all records in this base
+	 */
+	public RecordSet<T> getAll();
+	
+	/**
+	 * NOTE: this result-set will be immutable
+	 * @param cond
+	 * @return a ResultSet for the given condition
+	 */
+	public RecordSet<T> getForCondition(Condition cond);
 }
