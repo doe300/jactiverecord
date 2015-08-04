@@ -32,6 +32,12 @@ import de.doe300.activerecord.record.ActiveRecord;
  */
 public interface RecordListener
 {
+	/**
+	 * This method is called to notify the listener about an record-event
+	 * @param eventType the event-type thrown
+	 * @param base the record-base which threw the event
+	 * @param record the record created/destroyed
+	 */
 	public void notifyRecordEvent(RecordEvent eventType, RecordBase<?> base, ActiveRecord record);
 	
 	public static enum RecordEvent

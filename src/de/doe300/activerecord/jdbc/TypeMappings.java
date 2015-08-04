@@ -36,7 +36,9 @@ import java.nio.file.Paths;
 import java.sql.Connection;
 import java.sql.SQLException;
 import java.sql.SQLXML;
+import java.sql.Timestamp;
 import java.sql.Types;
+import java.util.Date;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.UUID;
@@ -99,6 +101,16 @@ public final class TypeMappings
 		if(obj instanceof Number && (Boolean.class.equals( type) || Boolean.TYPE.equals( type)))
 		{
 			return ( T ) (((Number)obj).intValue() == 0 ? Boolean.FALSE : Boolean.TRUE);
+		}
+		//implicit conversion date/timestamp -> long
+		if(obj instanceof Date && (Long.class.equals( type) || Long.TYPE.equals( type)))
+		{
+			return (T) Long.valueOf(((Date)obj).getTime());
+		}
+		//implicit conversion long/Long -> timestamp
+		if(obj instanceof Long && Timestamp.class.equals( type) )
+		{
+			return type.cast( new Timestamp((Long)obj));
 		}
 		throw new ClassCastException("Can't cast Object of type '"+obj.getClass()+"' to type '"+type+"'");
 	}

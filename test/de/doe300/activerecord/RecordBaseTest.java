@@ -135,15 +135,24 @@ public class RecordBaseTest<T extends TestInterface> extends Assert
 	public void testNewRecord() throws Exception
 	{
 		base.destroy( 50);
-		assertNotNull( base.newRecord( 50));
-		assertFalse(base.getStore().containsRecord( base, 50));
+		TestInterface i = base.newRecord( 50);
+		assertNotNull(i);
+		assertFalse( i.inRecordStore() );
+		assertFalse( i.isSynchronized());
+		i.setName( "Adam");
+		//throws exception
 		base.newRecord( 50);
 	}
 
 	@Test
 	public void testCreateRecord() throws Exception
 	{
-		assertNotNull( base.createRecord());
+		TestInterface i = base.createRecord();
+		assertNotNull( i );
+		assertTrue( i.inRecordStore());
+		i.destroy();
+		assertFalse( i.inRecordStore());
+		assertFalse( i.isSynchronized());
 	}
 
 	@Test

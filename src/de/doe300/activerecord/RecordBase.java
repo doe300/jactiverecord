@@ -48,6 +48,7 @@ import de.doe300.activerecord.store.RecordStore;
 import de.doe300.activerecord.validation.ValidatedRecord;
 import de.doe300.activerecord.validation.ValidationFailed;
 import java.util.Arrays;
+import java.util.function.Consumer;
 
 /**
  * Common base for mapped objects
@@ -260,15 +261,7 @@ public abstract class RecordBase<T extends ActiveRecord> implements ReadOnlyReco
 	 */
 	public T createRecord() throws RecordException
 	{
-		final int key = store.insertNewRecord(this, null);
-		final T record = createProxy(key, true, null);
-		records.put( key, record );
-		if(hasCallbacks())
-		{
-			((RecordCallbacks)record).afterCreate();
-		}
-		core.fireRecordEvent( RecordListener.RecordEvent.RECORD_CREATED, this, record );
-		return record;
+		return createRecord(null, null );
 	}
 
 	/**
@@ -281,11 +274,37 @@ public abstract class RecordBase<T extends ActiveRecord> implements ReadOnlyReco
 	 */
 	public T createRecord(final Map<String,Object> data) throws RecordException
 	{
-		//just to make sure, ID is not overridden
-		data.remove( getPrimaryColumn());
+		return createRecord( data, null );
+	}
+
+	/**
+	 * Unlike {@link #newRecord(int)}, this method creates a new entry in the
+	 * underlying record-store.
+	 * <p>
+	 * If <code>onCreation</code> is not <code>null</code>, it will be called with the newly created record
+	 * before any {@link RecordCallbacks#afterCreate() callbacks} or {@link RecordListener} are called.
+	 * Thus providing the caller an opportunity to initialize additional values or associated records for the record.
+	 * </p>
+	 * @param data the row-data to set
+	 * @param onCreation the callback, may be <code>null</code>
+	 * @return the newly created record
+	 * @throws RecordException 
+	 * @see #createRecord() 
+	 */
+	public T createRecord(final Map<String,Object> data, Consumer<T> onCreation) throws RecordException
+	{
+		if(data != null)
+		{
+			//just to make sure, ID is not overridden
+			data.remove( getPrimaryColumn());
+		}
 		final int key = store.insertNewRecord(this, data);
-		final T record = createProxy(key,true, data);
+		final T record = createProxy(key, true, data);
 		records.put( key, record );
+		if(onCreation != null)
+		{
+			onCreation.accept( record );
+		}
 		if(hasCallbacks())
 		{
 			((RecordCallbacks)record).afterCreate();

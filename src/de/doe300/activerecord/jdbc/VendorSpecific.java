@@ -37,12 +37,41 @@ import java.util.function.Function;
  */
 public enum VendorSpecific
 {
-	//originally the limit is 65535 (the maximum length of the row), but with other columns existing, we need to choose a smaller length
+	/**
+	 * Vendor-specific settings for MySQL Databases
+	 * <br>
+	 * These settings include:
+	 * <ul>
+	 * <li>The keyword for the auto-increment primary key is set to <code>AUTO_INCREMENT</code></li>
+	 * <li>The default data-type for strings is set to <code>VARCHAR(4096)</code>. 
+	 * The maximum limit for a cell width is 65535 which is simultaneously the maximum width for all columns in a row.
+	 * Since we don't know how much cells a row will have, I set the limit to 4096 which allows for up to 16 such string-column.
+	 * </li>
+	 * </ul>
+	 */
 	MYSQL("AUTO_INCREMENT", "VARCHAR(4096)"),
+	/**
+	 * Vendor-specific settings for the HSQLDB driver, including
+	 * <ul>
+	 * <li>The keyword for the auto-increment primary key is set to <code>IDENTITY</code></li>
+	 * <li>The default data-type for strings is set to <code>LONGVARCHAR</code></li>.
+	 * </ul>
+	 */
 	HSQLDB("IDENTITY", "LONGVARCHAR"),
-	//Not strictly required for keeping an unique ID - https://www.sqlite.org/autoinc.html
-	//SQLite has no Limit on VARCHAR - https://www.sqlite.org/faq.html#q9
-	//SQLite has no boolean data-type - https://www.sqlite.org/datatype3.html
+	/**
+	 * Vendor-specific settings for the SQLite database, including:
+	 * <ul>
+	 * <li>According to the official documentation (<a href="https://www.sqlite.org/autoinc.html">SQLite doc autoincrement</a>),
+	 * the <code>AUTOINCREMENT</code> keyword should be avoided and <code>INTEGER PRIMARY KEY</code> implies an automatic increment.
+	 * </li>
+	 * <li>According to the official documentation (<a href="https://www.sqlite.org/faq.html#q9">SQLite FAQ</a>),
+	 * the length of a <code>VARCHAR</code> is not limited and the length-value is ignored.
+	 * </li>
+	 * <li>SQLite has no <code>boolean</code>-type (<a href="https://www.sqlite.org/datatype3.html">SQLite data-types</a>),
+	 * so the <code>boolean</code> values are stored as integers, zero (0) for <code>false</code>, one (1) for <code>true</code>
+	 * </li>
+	 * </ul>
+	 */
 	SQLITE("", "VARCHAR(1)")
 	{
 		@Override
@@ -95,6 +124,12 @@ public enum VendorSpecific
 		this.stringDataType = stringDefaultType;
 	}
 	
+	/**
+	 * This method tries to guess the vendor-specific settings from reading the 
+	 * {@link DatabaseMetaData#getDatabaseProductName() database product-name}.
+	 * @param con
+	 * @return the database vendor specific settings
+	 */
 	public static VendorSpecific guessDatabaseVendor(Connection con)
 	{
 		try

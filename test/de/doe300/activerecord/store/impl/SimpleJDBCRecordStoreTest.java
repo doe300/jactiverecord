@@ -118,6 +118,8 @@ public class SimpleJDBCRecordStoreTest extends Assert
 		assertEquals( primaryKey, m.get( base.getPrimaryColumn()));
 		//no results
 		assertEquals( 0, store.getValues( base, primaryKey+1000, base.getDefaultColumns() ).size());
+		//select all
+		assertTrue( store.getValues( base, primaryKey, new String[]{"*", "id"} ).size() >= 3);
 		//negative test - throws exception
 		store.getValues( base, primaryKey, new String[]{"no_column"});
 	}
