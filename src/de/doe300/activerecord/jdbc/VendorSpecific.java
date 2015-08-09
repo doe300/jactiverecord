@@ -24,12 +24,15 @@
  */
 package de.doe300.activerecord.jdbc;
 
-import de.doe300.activerecord.logging.Logging;
 import java.sql.Connection;
 import java.sql.DatabaseMetaData;
 import java.sql.SQLException;
 import java.util.Arrays;
 import java.util.function.Function;
+
+import javax.annotation.Nonnull;
+
+import de.doe300.activerecord.logging.Logging;
 
 /**
  *
@@ -43,7 +46,7 @@ public enum VendorSpecific
 	 * These settings include:
 	 * <ul>
 	 * <li>The keyword for the auto-increment primary key is set to <code>AUTO_INCREMENT</code></li>
-	 * <li>The default data-type for strings is set to <code>VARCHAR(4096)</code>. 
+	 * <li>The default data-type for strings is set to <code>VARCHAR(4096)</code>.
 	 * The maximum limit for a cell width is 65535 which is simultaneously the maximum width for all columns in a row.
 	 * Since we don't know how much cells a row will have, I set the limit to 4096 which allows for up to 16 such string-column.
 	 * </li>
@@ -75,13 +78,13 @@ public enum VendorSpecific
 	SQLITE("", "VARCHAR(1)")
 	{
 		@Override
-		public String convertBooleanToDB( boolean value )
+		public String convertBooleanToDB( final boolean value )
 		{
 			return value ? "1" : "0";
 		}
 
 		@Override
-		public boolean convertDBToBoolean( Object value )
+		public boolean convertDBToBoolean( final Object value )
 		{
 			int val;
 			if(value instanceof Number)
@@ -95,12 +98,13 @@ public enum VendorSpecific
 			//value of 1 is true, 0 is false
 			return val != 0;
 		}
-		
+
 	};
-		
+	@Nonnull
 	private final String autoIncrement;
+	@Nonnull
 	private final String stringDataType;
-	
+
 	private static final String[] sql92Keywords = {
 		"absolute", "action", "allocate", "are", "assertion",
 		"bit", "bit_length", "both", "cascaded", "case", "cast", "catalog", "char", "char_length", "character",
@@ -118,23 +122,23 @@ public enum VendorSpecific
 		"year", "zone"
 	};
 
-	private VendorSpecific( String autoIncrement, String stringDefaultType)
+	private VendorSpecific(@Nonnull final String autoIncrement, @Nonnull final String stringDefaultType)
 	{
 		this.autoIncrement = autoIncrement;
 		this.stringDataType = stringDefaultType;
 	}
-	
+
 	/**
-	 * This method tries to guess the vendor-specific settings from reading the 
+	 * This method tries to guess the vendor-specific settings from reading the
 	 * {@link DatabaseMetaData#getDatabaseProductName() database product-name}.
 	 * @param con
 	 * @return the database vendor specific settings
 	 */
-	public static VendorSpecific guessDatabaseVendor(Connection con)
+	public static VendorSpecific guessDatabaseVendor(final Connection con)
 	{
 		try
 		{
-			String productName = con.getMetaData().getDatabaseProductName();
+			final String productName = con.getMetaData().getDatabaseProductName();
 			if(productName.contains( "HSQL"))
 			{
 				return HSQLDB;
@@ -149,40 +153,42 @@ public enum VendorSpecific
 			}
 			//TODO postgres
 		}
-		catch(SQLException e)
+		catch(final SQLException e)
 		{
 			Logging.getLogger().error( "VendorSpecific", e);
 		}
 		return null;
 	}
-	
+
 	/**
 	 * @param con
 	 * @param term
 	 * @return whether the therm is a reserved keyword, either in SQL92 or vendor-specific
-	 * @throws SQLException 
+	 * @throws SQLException
 	 */
-	public boolean isReservedKeyword(Connection con, String term) throws SQLException
+	public boolean isReservedKeyword(final Connection con, final String term) throws SQLException
 	{
-		if(Arrays.stream( sql92Keywords ).anyMatch( (String s) -> s.equalsIgnoreCase( term)))
+		if(Arrays.stream( VendorSpecific.sql92Keywords ).anyMatch( (final String s) -> s.equalsIgnoreCase( term)))
 		{
 			return true;
 		}
-		String[] keyWords = con.getMetaData().getSQLKeywords().split( "\\s*,\\s*");
-		return Arrays.stream( keyWords ).anyMatch( (String s) -> s.equalsIgnoreCase( term));
+		final String[] keyWords = con.getMetaData().getSQLKeywords().split( "\\s*,\\s*");
+		return Arrays.stream( keyWords ).anyMatch( (final String s) -> s.equalsIgnoreCase( term));
 	}
-	
+
 	/**
 	 * @return the keyword for an auto-incremental column
 	 */
+	@Nonnull
 	public String getAutoIncrementKeyword()
 	{
 		return autoIncrement;
 	}
-	
+
 	/**
 	 * @return the default data-type for strings
 	 */
+	@Nonnull
 	public String getStringDataType()
 	{
 		return stringDataType;
@@ -192,21 +198,22 @@ public enum VendorSpecific
 	 * @param value
 	 * @return the value to write into the DB
 	 */
-	public String convertBooleanToDB(boolean value)
+	@Nonnull
+	public String convertBooleanToDB(final boolean value)
 	{
 		return Boolean.toString( value );
 	}
-	
+
 	/**
 	 * @param value
 	 * @return the boolean-value from the DB
 	 */
-	public boolean convertDBToBoolean(Object value)
+	public boolean convertDBToBoolean(final Object value)
 	{
 		return ( boolean ) value;
 	}
-	
-	
+
+
 	/**
 	 * Converts the input identifier to the case used in the DB
 	 * Also adds quotes, if the database-vendor supports them
@@ -218,27 +225,31 @@ public enum VendorSpecific
 	{
 		try
 		{
-			DatabaseMetaData meta = con.getMetaData();
-			
+			final DatabaseMetaData meta = con.getMetaData();
+
 			//check for identifier quote string
-			String quote = meta.getIdentifierQuoteString();
+			final String quote = meta.getIdentifierQuoteString();
 			Function<String,String> quoteFunc;
 			if(" ".equals( quote))
 			{
 				//do not enquote
-				quoteFunc = (String id) -> id;
+				quoteFunc = (final String id) -> id;
 			}
 			else
 			{
-				quoteFunc = (String id) -> quote+id+quote;
+				quoteFunc = (final String id) -> quote+id+quote;
+			}
+			if(meta.storesMixedCaseIdentifiers())
+			{
+				return quoteFunc.apply( input);
 			}
 			if(meta.storesUpperCaseIdentifiers())
 			{
-				return quoteFunc.apply( convertIdentifierWithoutQuote(input, con ));
+				return quoteFunc.apply( VendorSpecific.convertIdentifierWithoutQuote(input, con ));
 			}
 			if(meta.storesLowerCaseIdentifiers())
 			{
-				return quoteFunc.apply( convertIdentifierWithoutQuote( input, con ));
+				return quoteFunc.apply( VendorSpecific.convertIdentifierWithoutQuote( input, con ));
 			}
 
 		}
@@ -248,19 +259,19 @@ public enum VendorSpecific
 		}
 		return input;
 	}
-	
+
 	/**
 	 * Converts the input identifier to the case used in the DB. Does not quote the input string
 	 * @param input
 	 * @param con
 	 * @return the input in the correct case
 	 */
-	public static String convertIdentifierWithoutQuote(String input, Connection con)
+	public static String convertIdentifierWithoutQuote(final String input, final Connection con)
 	{
 		try
 		{
-			DatabaseMetaData meta = con.getMetaData();
-			
+			final DatabaseMetaData meta = con.getMetaData();
+
 			if(meta.storesUpperCaseIdentifiers())
 			{
 				return input.toUpperCase();

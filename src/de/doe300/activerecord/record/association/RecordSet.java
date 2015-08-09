@@ -34,6 +34,8 @@ import de.doe300.activerecord.record.ActiveRecord;
 import java.util.Comparator;
 import java.util.SortedSet;
 import java.util.stream.Stream;
+import javax.annotation.Nonnull;
+import javax.annotation.Nullable;
 
 /**
  * Base interface for record-based sets
@@ -43,17 +45,20 @@ import java.util.stream.Stream;
 public interface RecordSet<T extends ActiveRecord> extends SortedSet<T>, FinderMethods<T>
 {
 	@Override
+	@Nonnull
 	public default Stream<T> findAll()
 	{
 		return stream();
 	}
 
 	@Override
+	@Nonnull
 	public Stream<T> stream();
 	
 	/**
 	 * @return the RecordBase of the record-type
 	 */
+	@Nonnull
 	public ReadOnlyRecordBase<T> getRecordBase();
 	
 	/**
@@ -65,9 +70,11 @@ public interface RecordSet<T extends ActiveRecord> extends SortedSet<T>, FinderM
 	 * @return a sub-set for the given condition
 	 * @see #subSet(java.lang.Object, java.lang.Object) 
 	 */
-	public RecordSet<T> getForCondition(Condition cond);
+	@Nonnull
+	public RecordSet<T> getForCondition(@Nullable final Condition cond);
 
 	@Override
+	@Nullable
 	public default Comparator<? super T> comparator()
 	{
 		//uses natural ordering
@@ -75,19 +82,22 @@ public interface RecordSet<T extends ActiveRecord> extends SortedSet<T>, FinderM
 	}
 
 	@Override
-	public default SortedSet<T> headSet( T toElement )
+	@Nonnull
+	public default RecordSet<T> headSet(@Nonnull final T toElement )
 	{
 		return getForCondition( new SimpleCondition(getRecordBase().getPrimaryColumn(), toElement.getPrimaryKey(), Comparison.SMALLER) );
 	}
 
 	@Override
-	public default SortedSet<T> tailSet( T fromElement )
+	@Nonnull
+	public default RecordSet<T> tailSet(@Nonnull final T fromElement )
 	{
 		return getForCondition( new SimpleCondition(getRecordBase().getPrimaryColumn(), fromElement.getPrimaryKey(), Comparison.LARGER));
 	}
 
 	@Override
-	public default SortedSet<T> subSet( T fromElement, T toElement )
+	@Nonnull
+	public default RecordSet<T> subSet(@Nonnull final T fromElement,@Nonnull final T toElement )
 	{
 		return getForCondition( AndCondition.andConditions(
 				new SimpleCondition(getRecordBase().getPrimaryColumn(), fromElement.getPrimaryKey(), Comparison.LARGER),
@@ -96,12 +106,14 @@ public interface RecordSet<T extends ActiveRecord> extends SortedSet<T>, FinderM
 	}
 	
 	@Override
+	@Nullable
 	public default T first()
 	{
 		return stream().findFirst().get();
 	}
 
 	@Override
+	@Nullable
 	public default T last()
 	{
 		return stream().sorted( getRecordBase().getDefaultOrder().toRecordComparator().reversed()).findFirst().get();

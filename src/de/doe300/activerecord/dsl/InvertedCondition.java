@@ -24,34 +24,39 @@
  */
 package de.doe300.activerecord.dsl;
 
+import java.util.Map;
+
+import javax.annotation.Nonnull;
+
 import de.doe300.activerecord.jdbc.VendorSpecific;
 import de.doe300.activerecord.record.ActiveRecord;
-import java.util.Map;
 
 /**
  * Inverts the given condition (returns <code>false</code> if the condition returns <code>true</code>).
  * Equivalent to the SQL keyword NOT
- * 
+ *
  * @author doe300
  */
 public class InvertedCondition implements Condition
 {
+	@Nonnull
 	private final Condition invertedCondition;
 
-	private InvertedCondition( Condition invertedCondition )
+	private InvertedCondition(@Nonnull final Condition invertedCondition)
 	{
 		this.invertedCondition = invertedCondition;
 	}
-	
+
 	/**
 	 * Inverts the <code>cond</code>.
-	 * 
+	 *
 	 * This method optimizes by unwrapping a twice inverted condition, because <code>NOT(NOT(a))</code> is the same as </code>a</code>
-	 * 
+	 *
 	 * @param cond
 	 * @return the inverted Condition
 	 */
-	public static Condition invertCondition(Condition cond)
+	@Nonnull
+	public static Condition invertCondition(final Condition cond)
 	{
 		if(cond == null)
 		{
@@ -77,19 +82,19 @@ public class InvertedCondition implements Condition
 	}
 
 	@Override
-	public boolean test( ActiveRecord record )
+	public boolean test( final ActiveRecord record )
 	{
 		return !invertedCondition.test( record );
 	}
 
 	@Override
-	public boolean test( Map<String, Object> map )
+	public boolean test( final Map<String, Object> map )
 	{
 		return !invertedCondition.test( map );
 	}
 
 	@Override
-	public String toSQL( VendorSpecific vendorSpecifics )
+	public String toSQL( final VendorSpecific vendorSpecifics )
 	{
 		return "NOT("+invertedCondition.toSQL( vendorSpecifics )+")";
 	}

@@ -87,15 +87,24 @@ public class TestServer extends Assert
 	{
 		if(con == null || con.isClosed())
 		{
-			//sa without password is the default user
-			//con = DriverManager.getConnection( "jdbc:hsqldb:hsql://localhost:9999/test", "sa", "" );
-			con = DriverManager.getConnection( "jdbc:hsqldb:mem:test", "sa", "");
-			
-			//FIXME need testing:
-			
+//			con = DriverManager.getConnection( "jdbc:hsqldb:mem:test", "sa", "");
+			//FIXME SQLite errors:
+			/**
+			 * - Can't find column '*' -> does not interpret as all-columns
+			 * - At AutomaticMigration#revert throws "database table is locked"
+			 *		Some Query not yet closed? Perhaps some query with stream, they could stay open if not read to the end
+			 */
+//			con = DriverManager.getConnection("jdbc:sqlite::memory:");
+			//FIXME MySQL errors:
+			/**
+			 * - Table-names are case-sensitive, so all access must use same case
+			 *		Fails at creation of testTable and trying to write/read TESTTABLE
+			 *		But method calls are exactly the same for different test, which do no fail?!?
+			 */
 			//start server with "systemctl start mysqld.service"
 //			con = DriverManager.getConnection( "jdbc:mysql://localhost:3306/mysql", "root", "");
-//			con = DriverManager.getConnection("jdbc:sqlite:/tmp/testdb.db");
+			
+			//FIXME need testing:
 //			con = DriverManager.getConnection( "jdbc:postgresql:database");
 			
 		}
@@ -118,6 +127,14 @@ public class TestServer extends Assert
 		AutomaticMigrationTest.testDataMigration.testApply();
 		ManualMigrationTest.init();
 		new ManualMigrationTest().testApply();
+		//print existing tables
+		try(ResultSet set = getTestConnection().getMetaData().getTables( null, null, null, null))
+		{
+			while(set.next())
+			{
+				System.out.println( set.getString( "TABLE_CAT" ) + " " + set.getString( "TABLE_SCHEM") + " " + set.getString( "TABLE_NAME" ));
+			}
+		}
 		
 	}
 	

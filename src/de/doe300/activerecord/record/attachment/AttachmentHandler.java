@@ -27,6 +27,7 @@ package de.doe300.activerecord.record.attachment;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
+import javax.annotation.Nonnull;
 
 /**
  * Handles a set of attachments, e.g. stores them in files or the DB
@@ -38,7 +39,7 @@ public interface AttachmentHandler
 	 * @param record
 	 * @return whether an attachment for this record exists
 	 */
-	public boolean attachmentExists(HasAttachment record);
+	public boolean attachmentExists(@Nonnull final HasAttachment record);
 	
 	/**
 	 * 
@@ -46,12 +47,14 @@ public interface AttachmentHandler
 	 * @return an InputStream to read from this attachment
 	 * @throws IOException if the attachment doesn't exists or any other IO error occurs
 	 */
-	public InputStream readAttachment(HasAttachment record) throws IOException;
+	 @Nonnull
+	public InputStream readAttachment(@Nonnull final HasAttachment record) throws IOException;
 	
 	/**
 	 * @param record
 	 * @return an OutputStream to write to the attachment
 	 * @throws IOException if the attachment can't be written or any other IO error occurs
 	 */
-	public OutputStream writeAttachment(HasAttachment record) throws IOException;
+	@Nonnull
+	public OutputStream writeAttachment(@Nonnull final HasAttachment record) throws IOException;
 }

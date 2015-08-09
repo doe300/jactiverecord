@@ -26,6 +26,7 @@ package de.doe300.activerecord.record;
 
 import de.doe300.activerecord.RecordBase;
 import de.doe300.activerecord.store.RecordStore;
+import javax.annotation.Nonnull;
 
 /**
  *
@@ -70,6 +71,7 @@ public interface ActiveRecord extends Comparable<ActiveRecord>
 	/**
 	 * @return the base for this record
 	 */
+	@Nonnull
 	public RecordBase<?> getBase();
 	
 	/**

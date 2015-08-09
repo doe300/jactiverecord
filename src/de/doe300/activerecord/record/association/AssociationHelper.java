@@ -24,14 +24,18 @@
  */
 package de.doe300.activerecord.record.association;
 
+import java.util.function.Consumer;
+import java.util.stream.Stream;
+
+import javax.annotation.Nonnull;
+import javax.annotation.Nullable;
+
 import de.doe300.activerecord.RecordBase;
 import de.doe300.activerecord.dsl.AndCondition;
-import de.doe300.activerecord.record.ActiveRecord;
 import de.doe300.activerecord.dsl.Comparison;
 import de.doe300.activerecord.dsl.Condition;
 import de.doe300.activerecord.dsl.SimpleCondition;
-import java.util.function.Consumer;
-import java.util.stream.Stream;
+import de.doe300.activerecord.record.ActiveRecord;
 
 /**
  * Helper methods to be used by {@link ActiveRecord} implementations for mapping associations
@@ -47,27 +51,30 @@ public final class AssociationHelper
 	 * @param foreignKeyColumn the column (of this model), the foreign-key for the other model is stored
 	 * @return the associated record or <code>null</code>
 	 */
-	public static <T extends ActiveRecord> T getBelongsTo(ActiveRecord record, Class<T> type, String foreignKeyColumn)
+	@Nullable
+	public static <T extends ActiveRecord> T getBelongsTo(@Nonnull final ActiveRecord record,
+		@Nonnull final Class<T> type, @Nonnull final String foreignKeyColumn)
 	{
-		Integer foreignKey = ( Integer ) record.getBase().getStore().getValue( record.getBase(), record.getPrimaryKey(), foreignKeyColumn);
+		final Integer foreignKey = ( Integer ) record.getBase().getStore().getValue( record.getBase(), record.getPrimaryKey(), foreignKeyColumn);
 		if(foreignKey==null)
 		{
 			return null;
 		}
 		return record.getBase().getCore().buildBase( type).getRecord(foreignKey);
 	}
-	
+
 	/**
 	 * In a belongs-to association, the foreign key is stored in the table represented by <code>record</code>
 	 * @param record
 	 * @param otherRecord
 	 * @param foreignKeyColumn the column (of this model), the foreign key of <code>otherRecord</code> is stored
 	 */
-	public static void setBelongsTo(ActiveRecord record, ActiveRecord otherRecord, String foreignKeyColumn)
+	public static void setBelongsTo(@Nonnull final ActiveRecord record, @Nonnull final ActiveRecord otherRecord,
+		@Nonnull final String foreignKeyColumn)
 	{
 		record.getBase().getStore().setValue( record.getBase(), record.getPrimaryKey(), foreignKeyColumn, otherRecord.getPrimaryKey());
 	}
-	
+
 	/**
 	 * In a has-one association, the other model represented by <code>type</code> stores the foreign-key to this model represented by <code>record</code>
 	 * @param <T>
@@ -76,23 +83,26 @@ public final class AssociationHelper
 	 * @param foreignKeyColumn the column in the other model storing the foreign-key for the given <code>record</code> of this model
 	 * @return the associated record or <code>null</code>
 	 */
-	public static <T extends ActiveRecord> T getHasOne(ActiveRecord record, Class<T> type, String foreignKeyColumn)
+	@Nullable
+	public static <T extends ActiveRecord> T getHasOne(@Nonnull final ActiveRecord record, @Nonnull final Class<T> type,
+		@Nonnull final String foreignKeyColumn)
 	{
-		RecordBase<T> base = record.getBase().getCore().buildBase( type);
+		final RecordBase<T> base = record.getBase().getCore().buildBase( type);
 		return base.findFirst( new SimpleCondition(foreignKeyColumn, record.getPrimaryKey(), Comparison.IS));
 	}
-	
+
 	/**
 	 * In a has-one association, the other model represented by <code>otherRecord</code> stores the foreign-key to this model represented by <code>record</code>
 	 * @param record
 	 * @param otherRecord
 	 * @param foreignKeyColumn the column in the other model storing the foreign-key for the given <code>record</code> of this model
 	 */
-	public static void setHasOne(ActiveRecord record, ActiveRecord otherRecord, String foreignKeyColumn )
+	public static void setHasOne(@Nonnull final ActiveRecord record, @Nonnull final ActiveRecord otherRecord,
+		@Nonnull final String foreignKeyColumn)
 	{
 		otherRecord.getBase().getStore().setValue( otherRecord.getBase(), otherRecord.getPrimaryKey(), foreignKeyColumn, record.getPrimaryKey());
 	}
-	
+
 	/**
 	 * The given record has an associated record matching the conditions applied in the other model
 	 * @param <T>
@@ -101,7 +111,9 @@ public final class AssociationHelper
 	 * @param cond
 	 * @return the associated record or <code>null</code>
 	 */
-	public static <T extends ActiveRecord> T getHasOne(ActiveRecord record, Class<T> type, Condition cond)
+	@Nullable
+	public static <T extends ActiveRecord> T getHasOne(@Nonnull final ActiveRecord record, @Nonnull final Class<T> type,
+		@Nullable final Condition cond)
 	{
 		return record.getBase().getCore().buildBase( type ).findFirst( cond );
 	}
@@ -114,12 +126,14 @@ public final class AssociationHelper
 	 * @param foreignKeyColumn the name of the column of the other model holding the primary key
 	 * @return the associated records
 	 */
-	public static <T extends ActiveRecord> Stream<T> getHasMany(ActiveRecord record, Class<T> type, String foreignKeyColumn)
+	@Nonnull
+	public static <T extends ActiveRecord> Stream<T> getHasMany(@Nonnull final ActiveRecord record,
+		@Nonnull final Class<T> type, @Nonnull final String foreignKeyColumn)
 	{
-		RecordBase<T> base = record.getBase().getCore().buildBase( type);
+		final RecordBase<T> base = record.getBase().getCore().buildBase( type);
 		return base.find( new SimpleCondition(foreignKeyColumn, record.getPrimaryKey(), Comparison.IS));
 	}
-	
+
 	/**
 	 * This given <code>record</code> has many associated records having this record's primary-key in the column specified in <code>foreignKeyColumn</code>
 	 * @param <T>
@@ -128,26 +142,29 @@ public final class AssociationHelper
 	 * @param foreignKeyColumn the name of the column of the other model holding the primary key
 	 * @return the associated records as modifiable set
 	 */
-	public static <T extends ActiveRecord> RecordSet<T> getHasManySet(ActiveRecord record, Class<T> type, String foreignKeyColumn)
+	@Nonnull
+	public static <T extends ActiveRecord> RecordSet<T> getHasManySet(@Nonnull final ActiveRecord record,
+		@Nonnull final Class<T> type, @Nonnull final String foreignKeyColumn)
 	{
 		final RecordBase<T> base = record.getBase().getCore().buildBase( type);
 		final Condition cond = new SimpleCondition(foreignKeyColumn, record.getPrimaryKey(), Comparison.IS);
-		final Consumer<T> setAssoc = (T t) -> base.getStore().setValue( base, t.getPrimaryKey(), foreignKeyColumn, record.getPrimaryKey() );
-		final Consumer<T> unsetAssoc = (T t) -> base.getStore().setValue( base, t.getPrimaryKey(), foreignKeyColumn, null );
+		final Consumer<T> setAssoc = (final T t) -> base.getStore().setValue( base, t.getPrimaryKey(), foreignKeyColumn, record.getPrimaryKey() );
+		final Consumer<T> unsetAssoc = (final T t) -> base.getStore().setValue( base, t.getPrimaryKey(), foreignKeyColumn, null );
 		return new HasManyAssociationSet<T>(base, cond, setAssoc, unsetAssoc );
 	}
-	
+
 	/**
 	 * This method sets the column <code>foreignKeyColumn</code> of the <code>otherRecord</code> to the primary-key of <code>record</code>
 	 * @param record
 	 * @param otherRecord
 	 * @param foreignKey the name of the column of the other model holding the primary key
 	 */
-	public static void addHasMany(ActiveRecord record, ActiveRecord otherRecord, String foreignKey)
+	public static void addHasMany(@Nonnull final ActiveRecord record, @Nonnull final ActiveRecord otherRecord,
+		@Nonnull final String foreignKey)
 	{
 		otherRecord.getBase().getStore().setValue( otherRecord.getBase(), otherRecord.getPrimaryKey(), foreignKey, record.getPrimaryKey());
 	}
-	
+
 	/**
 	 * This given <code>record</code> has many associated records applying to the given conditions
 	 * @param <T>
@@ -156,11 +173,13 @@ public final class AssociationHelper
 	 * @param cond
 	 * @return the associated records
 	 */
-	public static <T extends ActiveRecord> Stream<T> getHasMany(ActiveRecord record, Class<T> type, Condition cond)
+	@Nonnull
+	public static <T extends ActiveRecord> Stream<T> getHasMany(@Nonnull final ActiveRecord record,
+		@Nonnull final Class<T> type, @Nullable final Condition cond)
 	{
 		return record.getBase().getCore().getBase( type ).find( cond );
 	}
-	
+
 	/**
 	 * This helper is used to retrieve all associated records of the other model defined by <code>type</code> in a has-many through (the <code>associationTable</code>) association.
 	 * @param <T>
@@ -171,29 +190,28 @@ public final class AssociationHelper
 	 * @param otherForeignKeyColumn the name of the column in the <code>associationTable</code> storing the foreign key to the other model defined by <code>type</code>
 	 * @return all matching associations or an empty stream
 	 */
-	public static <T extends ActiveRecord> Stream<T> getHasManyThrough(ActiveRecord record, Class<T> type, String associationTable, String thisForeignKeyColumn, String otherForeignKeyColumn)
+	@Nonnull
+	public static <T extends ActiveRecord> Stream<T> getHasManyThrough(@Nonnull final ActiveRecord record,
+		@Nonnull final Class<T> type, @Nonnull final String associationTable,
+		@Nonnull final String thisForeignKeyColumn, @Nonnull final String otherForeignKeyColumn)
 	{
-		RecordBase<T> otherBase = record.getBase().getCore().getBase( type );
-		Stream<Object> foreignKeys = record.getBase().getStore().getValues( associationTable, otherForeignKeyColumn,
+		final RecordBase<T> otherBase = record.getBase().getCore().getBase( type );
+		final Stream<Object> foreignKeys = record.getBase().getStore().getValues( associationTable, otherForeignKeyColumn,
 				thisForeignKeyColumn, record.getPrimaryKey());
-		if(foreignKeys!=null)
+		return foreignKeys.filter((final Object obj) -> obj != null).map((final Object obj) ->
 		{
-			return foreignKeys.filter( (Object obj) -> obj!=null ).map( (Object obj)->
+			try
 			{
-				try
-				{
-					return otherBase.getRecord( (Integer)obj);
-				}
-				catch ( Exception ex )
-				{
-					return null;
-				}
-			}).filter( (T t) -> t!=null);
-		}
-		return Stream.empty();
+				return otherBase.getRecord((Integer) obj);
+			}
+			catch (final Exception ex)
+			{
+				return null;
+			}
+		}).filter((final T t) -> t != null);
 	}
-	
-	
+
+
 	/**
 	 * This helper is used to retrieve all associated records of the other model defined by <code>type</code> in a has-many through (the <code>associationTable</code>) association.
 	 * @param <T>
@@ -204,12 +222,15 @@ public final class AssociationHelper
 	 * @param otherForeignKeyColumn the name of the column in the <code>associationTable</code> storing the foreign key to the other model defined by <code>type</code>
 	 * @return all matching associations as a modifiable Set
 	 */
-	public static <T extends ActiveRecord> RecordSet<T> getHasManyThroughSet(ActiveRecord record, Class<T> type, String associationTable, String thisForeignKeyColumn, String otherForeignKeyColumn)
+	@Nonnull
+	public static <T extends ActiveRecord> RecordSet<T> getHasManyThroughSet(@Nonnull final ActiveRecord record,
+		@Nonnull final Class<T> type, @Nonnull final String associationTable,
+		@Nonnull final String thisForeignKeyColumn, @Nonnull final String otherForeignKeyColumn)
 	{
-		RecordBase<T> otherBase = record.getBase().getCore().getBase( type );
+		final RecordBase<T> otherBase = record.getBase().getCore().getBase( type );
 		return new HasManyThroughAssociationSet<T>(otherBase, record.getPrimaryKey(), associationTable, thisForeignKeyColumn,otherForeignKeyColumn);
 	}
-	
+
 	/**
 	 * This helper is used to set the record <code>otherRecord</code> associated with <code>record</code> in a has-many through (the <code>associationTable</code>) association.
 	 * @param record
@@ -219,11 +240,13 @@ public final class AssociationHelper
 	 * @param otherForeignKeyColumn the name of the column in the <code>associationTable</code> storing the foreign key to the other model defined by <code>type</code>
 	 * @return whether the association was added
 	 */
-	public static boolean addHasManyThrough(ActiveRecord record, ActiveRecord otherRecord, String associationTable, String thisForeignKeyColumn, String otherForeignKeyColumn)
+	public static boolean addHasManyThrough(@Nonnull final ActiveRecord record, @Nonnull final ActiveRecord otherRecord,
+		@Nonnull final String associationTable, @Nonnull final String thisForeignKeyColumn,
+		@Nonnull final String otherForeignKeyColumn)
 	{
 		return record.getBase().getStore().addRow( associationTable, new String[]{thisForeignKeyColumn,otherForeignKeyColumn}, new Object[]{record.getPrimaryKey(),otherRecord.getPrimaryKey()});
 	}
-	
+
 	/**
 	 * This helper is used to remove the association between the two records in a has-many through (the <code>associationTable</code>) association.
 	 * @param record
@@ -233,15 +256,17 @@ public final class AssociationHelper
 	 * @param otherForeignKeyColumn the name of the column in the <code>associationTable</code> storing the foreign key to the other model defined by <code>type</code>
 	 * @return whether the association was removed
 	 */
-	public static boolean removeHasManyThrough(ActiveRecord record, ActiveRecord otherRecord, String associationTable, String thisForeignKeyColumn, String otherForeignKeyColumn)
+	public static boolean removeHasManyThrough(@Nonnull final ActiveRecord record,
+		@Nonnull final ActiveRecord otherRecord, @Nonnull final String associationTable,
+		@Nonnull final String thisForeignKeyColumn, @Nonnull final String otherForeignKeyColumn)
 	{
-		Condition cond = AndCondition.andConditions(
+		final Condition cond = AndCondition.andConditions(
 				new SimpleCondition(thisForeignKeyColumn, record.getPrimaryKey(), Comparison.IS),
 				new SimpleCondition(otherForeignKeyColumn, otherRecord.getPrimaryKey(), Comparison.IS)
 		);
 		return record.getBase().getStore().removeRow( associationTable, cond );
 	}
-	
+
 	/**
 	 * Creates a set containing all matching records of the given type
 	 * @param <T> the record-type
@@ -251,18 +276,20 @@ public final class AssociationHelper
 	 * @param resetValue the value to set for any record, to be removed from this Set
 	 * @return the set containing all matching records
 	 */
-	public static <T extends ActiveRecord> RecordSet<T> getConditionSet(RecordBase<T> base, String conditionColumn, Object conditionValue, Object resetValue)
+	@Nonnull
+	public static <T extends ActiveRecord> RecordSet<T> getConditionSet(@Nonnull final RecordBase<T> base,
+		@Nonnull final String conditionColumn, @Nullable final Object conditionValue, @Nullable final Object resetValue)
 	{
-		Consumer<T> setCondFunc = (T t) -> {
+		final Consumer<T> setCondFunc = (final T t) -> {
 			base.getStore().setValue( base, t.getPrimaryKey(), conditionColumn, conditionValue);
 		};
-		Consumer<T> unsetCondFunc = (T t) -> {
+		final Consumer<T> unsetCondFunc = (final T t) -> {
 			base.getStore().setValue( base, t.getPrimaryKey(), conditionColumn, resetValue);
 		};
-		Condition cond = new SimpleCondition(conditionColumn, conditionValue, Comparison.IS);
+		final Condition cond = new SimpleCondition(conditionColumn, conditionValue, Comparison.IS);
 		return new ConditionSet<T>(base, cond, setCondFunc, unsetCondFunc);
 	}
-	
+
 	private AssociationHelper()
 	{
 	}

@@ -24,56 +24,61 @@
  */
 package de.doe300.activerecord.record.association;
 
-import de.doe300.activerecord.ReadOnlyRecordBase;
-import de.doe300.activerecord.dsl.AndCondition;
-import de.doe300.activerecord.dsl.Condition;
-import de.doe300.activerecord.record.ActiveRecord;
-import de.doe300.activerecord.scope.Scope;
 import java.util.AbstractSet;
 import java.util.Collection;
 import java.util.Iterator;
 import java.util.function.Consumer;
 import java.util.stream.Stream;
 
+import javax.annotation.Nonnull;
+
+import de.doe300.activerecord.ReadOnlyRecordBase;
+import de.doe300.activerecord.dsl.AndCondition;
+import de.doe300.activerecord.dsl.Condition;
+import de.doe300.activerecord.record.ActiveRecord;
+import de.doe300.activerecord.scope.Scope;
+
 /**
- * A RecordSet containing of records matching the given Condition. 
+ * A RecordSet containing of records matching the given Condition.
  * This set can optionally be made immutable by passing <code>null</code> for the set- and unset-functions.
  * @author doe300
  * @param <T>
  */
 public class ConditionSet<T extends ActiveRecord> extends AbstractSet<T> implements RecordSet<T>
 {
+	@Nonnull
 	private final ReadOnlyRecordBase<T> base;
 	private final Condition condition;
 	private final Consumer<T> setConditionFunc, unsetConditionFunc;
 
 	/**
 	 * This constructor creates a immutable or read-only ConditionSet throwing UnsupportedOperationExcpetion on any mutating methods
-	 * 
+	 *
 	 * @param base the RecordBase for this record-type
 	 * @param condition the Condition to match
 	 */
-	public ConditionSet( ReadOnlyRecordBase<T> base, Condition condition)
+	public ConditionSet(@Nonnull final ReadOnlyRecordBase<T> base, final Condition condition)
 	{
 		this(base, condition, null, null);
 	}
-	
+
 	/**
 	 * If the <code>setCondFunc</code> or <code>removeCondFunc</code> is <code>null</code>, this set will be immutable
-	 * 
+	 *
 	 * @param base the record-base for this record-type
 	 * @param condition the Condition to match
 	 * @param setCondFunc a function manipulating the records to match the condition, used for add-operations
 	 * @param removeCondFunc a function changing the record to not match the condition, used for remove-operations
 	 */
-	public ConditionSet( ReadOnlyRecordBase<T> base, Condition condition, Consumer<T> setCondFunc, Consumer<T> removeCondFunc )
+	public ConditionSet(@Nonnull final ReadOnlyRecordBase<T> base, final Condition condition,
+		final Consumer<T> setCondFunc, final Consumer<T> removeCondFunc)
 	{
 		this.base = base;
 		this.condition = condition;
 		this.setConditionFunc = setCondFunc;
 		this.unsetConditionFunc = removeCondFunc;
 	}
-	
+
 	private void checkFunctions() throws UnsupportedOperationException
 	{
 		if(setConditionFunc == null || unsetConditionFunc == null)
@@ -95,13 +100,13 @@ public class ConditionSet<T extends ActiveRecord> extends AbstractSet<T> impleme
 	}
 
 	@Override
-	public boolean contains( Object o )
+	public boolean contains( final Object o )
 	{
 		if(o == null || !base.getRecordType().isInstance( o))
 		{
 			return false;
 		}
-		T otherRecord = base.getRecordType().cast( o );
+		final T otherRecord = base.getRecordType().cast( o );
 		return condition.test( otherRecord );
 	}
 
@@ -112,7 +117,7 @@ public class ConditionSet<T extends ActiveRecord> extends AbstractSet<T> impleme
 	}
 
 	@Override
-	public boolean add( T e )
+	public boolean add( final T e )
 	{
 		checkFunctions();
 		if(contains( e ))
@@ -124,7 +129,7 @@ public class ConditionSet<T extends ActiveRecord> extends AbstractSet<T> impleme
 	}
 
 	@Override
-	public boolean remove( Object o )
+	public boolean remove( final Object o )
 	{
 		checkFunctions();
 		if(contains( o ))
@@ -136,17 +141,17 @@ public class ConditionSet<T extends ActiveRecord> extends AbstractSet<T> impleme
 	}
 
 	@Override
-	public boolean retainAll(Collection<?> c )
+	public boolean retainAll(final Collection<?> c )
 	{
 		checkFunctions();
 		//select all records not in the other collection and remove association
-		return stream().filter( (T t )-> !c.contains( t)).peek( unsetConditionFunc).
+		return stream().filter( (final T t )-> !c.contains( t)).peek( unsetConditionFunc).
 				//if there are any, the recors were changed
 				count() > 0;
 	}
 
 	@Override
-	public boolean removeAll(Collection<?> c )
+	public boolean removeAll(final Collection<?> c )
 	{
 		checkFunctions();
 		//select all records, which are in the other collection and remove the record
@@ -169,21 +174,21 @@ public class ConditionSet<T extends ActiveRecord> extends AbstractSet<T> impleme
 	}
 
 	@Override
-	public Stream<T> findWithScope( Scope scope )
+	public Stream<T> findWithScope( final Scope scope )
 	{
-		Scope newScope = new Scope(AndCondition.andConditions(condition, scope.getCondition()), scope.getOrder(), scope.getLimit());
+		final Scope newScope = new Scope(AndCondition.andConditions(condition, scope.getCondition()), scope.getOrder(), scope.getLimit());
 		return base.findWithScope(newScope );
 	}
 
 	@Override
-	public T findFirstWithScope( Scope scope )
+	public T findFirstWithScope( final Scope scope )
 	{
-		Scope newScope = new Scope(AndCondition.andConditions(condition, scope.getCondition()), scope.getOrder(), scope.getLimit());
+		final Scope newScope = new Scope(AndCondition.andConditions(condition, scope.getCondition()), scope.getOrder(), scope.getLimit());
 		return base.findFirstWithScope( newScope );
 	}
 
 	@Override
-	public RecordSet<T> getForCondition( Condition cond )
+	public RecordSet<T> getForCondition( final Condition cond )
 	{
 		return new ConditionSet<T>(base, AndCondition.andConditions(cond, condition), setConditionFunc, unsetConditionFunc);
 	}

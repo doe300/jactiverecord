@@ -25,6 +25,7 @@
 package de.doe300.activerecord.jdbc;
 
 import de.doe300.activerecord.migration.Attribute;
+import javax.annotation.Nullable;
 
 /**
  * An interface to map custom types to db-types.
@@ -44,11 +45,12 @@ public interface DBMappable
 	 * 
 	 * @param dbValue 
 	 */
-	public void readFromDBValue(Object dbValue);
+	public void readFromDBValue(@Nullable final Object dbValue);
 	
 	/**
 	 * The return-type must be compatible to the JDBC-mapped java-type for the {@link Attribute#type() SQL-type}
 	 * @return the db-value containing the attributes of this object
 	 */
+	@Nullable
 	public Object toDBValue();
 }

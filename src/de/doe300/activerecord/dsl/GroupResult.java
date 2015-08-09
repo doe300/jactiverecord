@@ -24,9 +24,12 @@
  */
 package de.doe300.activerecord.dsl;
 
+import java.util.stream.Stream;
+
+import javax.annotation.Nonnull;
+
 import de.doe300.activerecord.record.ActiveRecord;
 import de.doe300.activerecord.scope.Scope;
-import java.util.stream.Stream;
 
 /**
  *
@@ -36,7 +39,9 @@ import java.util.stream.Stream;
  */
 public class GroupResult<R, T extends ActiveRecord> implements QueryMethods<T>
 {
+	@Nonnull
 	private final R key;
+	@Nonnull
 	private final Stream<T> baseStream;
 	private final int size;
 	private final Order order;
@@ -47,20 +52,20 @@ public class GroupResult<R, T extends ActiveRecord> implements QueryMethods<T>
 	 * @param size the size of the group
 	 * @param order the ordering of the elements
 	 */
-	public GroupResult( R key, Stream<T> baseStream, int size, Order order )
+	public GroupResult(@Nonnull final R key, @Nonnull final Stream<T> baseStream, final int size, final Order order)
 	{
 		this.key = key;
 		this.baseStream = order!=null? baseStream.sorted( order.toRecordComparator()) : baseStream;
 		this.size = size;
 		this.order = order;
 	}
-	
+
 	@Override
 	public Stream<T> stream()
 	{
 		return baseStream;
 	}
-	
+
 	/**
 	 * @return the key, all elements in this group have in common
 	 */
@@ -70,10 +75,10 @@ public class GroupResult<R, T extends ActiveRecord> implements QueryMethods<T>
 	}
 
 	@Override
-	public QueryResult<T> withScope( Scope scope )
+	public QueryResult<T> withScope( final Scope scope )
 	{
 		Stream<T> stream = baseStream;
-		int limit = SIZE_UNKNOWN;
+		int limit = QueryMethods.SIZE_UNKNOWN;
 		Order sorting = order;
 		if(scope.getCondition()!=null)
 		{

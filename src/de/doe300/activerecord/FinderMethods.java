@@ -24,15 +24,19 @@
  */
 package de.doe300.activerecord;
 
-import de.doe300.activerecord.dsl.AndCondition;
-import de.doe300.activerecord.record.ActiveRecord;
-import de.doe300.activerecord.dsl.Comparison;
-import de.doe300.activerecord.dsl.Condition;
-import de.doe300.activerecord.dsl.SimpleCondition;
-import de.doe300.activerecord.scope.Scope;
 import java.util.ArrayList;
 import java.util.Map;
 import java.util.stream.Stream;
+
+import javax.annotation.Nonnull;
+import javax.annotation.Nullable;
+
+import de.doe300.activerecord.dsl.AndCondition;
+import de.doe300.activerecord.dsl.Comparison;
+import de.doe300.activerecord.dsl.Condition;
+import de.doe300.activerecord.dsl.SimpleCondition;
+import de.doe300.activerecord.record.ActiveRecord;
+import de.doe300.activerecord.scope.Scope;
 
 /**
  * A collection of finder-methods for {@link ActiveRecord records}
@@ -46,49 +50,54 @@ public interface FinderMethods<T extends ActiveRecord>
 	 * @param condition
 	 * @return all records matching the given condition or an empty Stream
 	 */
-	public default Stream<T> find(Condition condition)
+	@Nonnull
+	public default Stream<T> find(@Nullable final Condition condition)
 	{
 		return findWithScope( new Scope(condition, null, Scope.NO_LIMIT));
 	}
-	
+
 	/**
 	 * Finds the first record for the given condition
 	 * @param condition
 	 * @return the first record matching the condition or <code>null</code>
 	 */
-	public default T findFirst(Condition condition)
+	@Nullable
+	public default T findFirst(@Nullable final Condition condition)
 	{
 		return findFirstWithScope( new Scope(condition, null, Scope.NO_LIMIT));
 	}
-	
+
 	/**
 	 * @param column
 	 * @param value
 	 * @return all records for the given value or an empty Stream
 	 */
-	public default Stream<T> findFor(String column, Object value)
+	@Nonnull
+	public default Stream<T> findFor(@Nonnull final String column, @Nullable final Object value)
 	{
 		return find( new SimpleCondition(column, value, Comparison.IS));
 	}
-	
+
 	/**
 	 * @param column
 	 * @param value
 	 * @return the first record for the given value or <code>null</code>
 	 */
-	public default T findFirstFor(String column, Object value)
+	@Nullable
+	public default T findFirstFor(@Nonnull final String column, @Nullable final Object value)
 	{
 		return findFirst( new SimpleCondition(column, value, Comparison.IS));
 	}
-	
+
 	/**
 	 * @param data
 	 * @return all records matching all the given values or an empty Stream
 	 */
-	public default Stream<T> findFor(Map<String,Object> data)
+	@Nonnull
+	public default Stream<T> findFor(@Nonnull final Map<String,Object> data)
 	{
-		ArrayList<Condition> conds = new ArrayList<>(data.size());
-		for(Map.Entry<String,Object> e :data.entrySet())
+		final ArrayList<Condition> conds = new ArrayList<>(data.size());
+		for(final Map.Entry<String,Object> e :data.entrySet())
 		{
 			conds.add( new SimpleCondition(e.getKey(), e.getValue(), Comparison.IS));
 		}
@@ -98,15 +107,16 @@ public interface FinderMethods<T extends ActiveRecord>
 		}
 		return find( AndCondition.andConditions( new Condition[conds.size()]) );
 	}
-	
+
 	/**
 	 * @param data
 	 * @return the first record matching all given values or <code>null</code>
 	 */
-	public default T findFirstFor(Map<String,Object> data)
+	@Nullable
+	public default T findFirstFor(@Nonnull final Map<String,Object> data)
 	{
-		ArrayList<Condition> conds = new ArrayList<>(data.size());
-		for(Map.Entry<String,Object> e :data.entrySet())
+		final ArrayList<Condition> conds = new ArrayList<>(data.size());
+		for(final Map.Entry<String,Object> e :data.entrySet())
 		{
 			conds.add( new SimpleCondition(e.getKey(), e.getValue(), Comparison.IS));
 		}
@@ -116,25 +126,28 @@ public interface FinderMethods<T extends ActiveRecord>
 		}
 		return findFirst( AndCondition.andConditions(conds.toArray( new Condition[conds.size()]) ));
 	}
-	
+
 	/**
 	 * @return all records
 	 */
+	@Nonnull
 	public default Stream<T> findAll()
 	{
 		return find( null);
 	}
-	
+
 	/**
 	 * The most flexible finder-method
 	 * @param scope
 	 * @return the stream of results
 	 */
-	public Stream<T> findWithScope(final Scope scope);
-	
+	@Nonnull
+	public Stream<T> findWithScope(@Nonnull final Scope scope);
+
 	/**
 	 * @param scope
 	 * @return the first record according to the scope or <code>null</code>
 	 */
-	public T findFirstWithScope(final Scope scope);
+	@Nullable
+	public T findFirstWithScope(@Nonnull final Scope scope);
 }

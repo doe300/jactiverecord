@@ -24,9 +24,6 @@
  */
 package de.doe300.activerecord.jdbc;
 
-import de.doe300.activerecord.RecordException;
-import de.doe300.activerecord.migration.Attribute;
-import de.doe300.activerecord.record.ActiveRecord;
 import java.io.InputStream;
 import java.net.MalformedURLException;
 import java.net.URI;
@@ -42,8 +39,15 @@ import java.util.Date;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.UUID;
+
+import javax.annotation.Nonnull;
+import javax.annotation.Nullable;
 import javax.xml.transform.Source;
 import javax.xml.transform.dom.DOMResult;
+
+import de.doe300.activerecord.RecordException;
+import de.doe300.activerecord.migration.Attribute;
+import de.doe300.activerecord.record.ActiveRecord;
 
 /**
  * Utility class to provide type mappings for commonly used types
@@ -54,34 +58,35 @@ public final class TypeMappings
 	private TypeMappings()
 	{
 	}
-	
+
 	private static final Map<Class<?>, Class<?>> primitivesToWrapper= new HashMap<>(10);
-	static 
+	static
 	{
-		primitivesToWrapper.put(boolean.class, Boolean.class);
-		primitivesToWrapper.put(byte.class, Byte.class);
-		primitivesToWrapper.put(char.class, Character.class);
-		primitivesToWrapper.put(double.class, Double.class);
-		primitivesToWrapper.put(float.class, Float.class);
-		primitivesToWrapper.put(int.class, Integer.class);
-		primitivesToWrapper.put(long.class, Long.class);
-		primitivesToWrapper.put(short.class, Short.class);
-		primitivesToWrapper.put(void.class, Void.class);
+		TypeMappings.primitivesToWrapper.put(boolean.class, Boolean.class);
+		TypeMappings.primitivesToWrapper.put(byte.class, Byte.class);
+		TypeMappings.primitivesToWrapper.put(char.class, Character.class);
+		TypeMappings.primitivesToWrapper.put(double.class, Double.class);
+		TypeMappings.primitivesToWrapper.put(float.class, Float.class);
+		TypeMappings.primitivesToWrapper.put(int.class, Integer.class);
+		TypeMappings.primitivesToWrapper.put(long.class, Long.class);
+		TypeMappings.primitivesToWrapper.put(short.class, Short.class);
+		TypeMappings.primitivesToWrapper.put(void.class, Void.class);
 	}
-	
+
 	////
 	// General
 	////
-	
+
 	/**
 	 * Coerces the object to the given type. This method will run some vendor-specific conversions
 	 * @param <T>
 	 * @param obj
 	 * @param type
 	 * @return the coerced object
-	 * @throws ClassCastException 
+	 * @throws ClassCastException
 	 */
-	public static <T> T coerceToType(final Object obj, final Class<T> type) throws ClassCastException
+	@Nullable
+	public static <T> T coerceToType(@Nullable final Object obj, @Nonnull final Class<T> type) throws ClassCastException
 	{
 		if(obj == null)
 		{
@@ -93,7 +98,7 @@ public final class TypeMappings
 			return type.cast( obj );
 		}
 		//there is no int.cast(Integer), so just implicitly cast it
-		if(type.isPrimitive() && primitivesToWrapper.get( type).isInstance( obj ))
+		if(type.isPrimitive() && TypeMappings.primitivesToWrapper.get( type).isInstance( obj ))
 		{
 			return ( T ) obj;
 		}
@@ -114,26 +119,27 @@ public final class TypeMappings
 		}
 		throw new ClassCastException("Can't cast Object of type '"+obj.getClass()+"' to type '"+type+"'");
 	}
-	
+
 	////
 	//	UUID
 	////
-	
+
 	/**
 	 * Type-name for the {@link UUID}.
 	 *  @see Attribute#typeName()
 	 */
 	public static final String UUID_TYPE_NAME = "CHAR(36)";	//8-4-4-4-12 characters
-	
+
 	/**
 	 * To be used in the getter-method for UUIDs
 	 * @param record
 	 * @param columnName
 	 * @return the UUID or <code>null</code>
 	 */
-	public static UUID readUUID(ActiveRecord record, String columnName)
+	@Nullable
+	public static UUID readUUID(@Nonnull final ActiveRecord record, @Nonnull final String columnName)
 	{
-		Object value = record.getBase().getStore().getValue( record.getBase(), record.getPrimaryKey(), columnName);
+		final Object value = record.getBase().getStore().getValue( record.getBase(), record.getPrimaryKey(), columnName);
 		if(value == null)
 		{
 			return null;
@@ -149,14 +155,15 @@ public final class TypeMappings
 		}
 		return UUID.fromString( value.toString());
 	}
-	
+
 	/**
 	 * To be used in setter-methods for UUID
 	 * @param uuid
 	 * @param record
 	 * @param columnName
 	 */
-	public static void writeUUID(UUID uuid, ActiveRecord record, String columnName)
+	public static void writeUUID(@Nullable final UUID uuid, @Nonnull final ActiveRecord record,
+		@Nonnull final String columnName)
 	{
 		record.getBase().getStore().setValue( record.getBase(), record.getPrimaryKey(), columnName, uuid == null ? null : uuid.toString());
 	}
@@ -164,42 +171,44 @@ public final class TypeMappings
 	////
 	// URL / URI
 	////
-	
+
 	/**
 	 * Type-name for a {@link URL}, limited to 255 characters
-	 * @see Attribute#typeName() 
+	 * @see Attribute#typeName()
 	 */
 	public static final String URL_TYPE_NAME = "VARCHAR(255)";
-	
+
 	/**
 	 * Type-name for a {@link URI}, limited to 255 characters
-	 * @see Attribute#typeName() 
+	 * @see Attribute#typeName()
 	 */
 	public static final String URI_TYPE_NAME = "VARCHAR(255)";
-	
+
 	/**
 	 * Type-name for a {@link Path}, limited to 255 characters
-	 * @see Attribute#typeName() 
+	 * @see Attribute#typeName()
 	 */
 	public static final String PATH_TYPE_NAME = "VARCHAR(255)";
-	
+
 	/**
 	 * Type-name for a {@link Enum}, limited to 255 characters
-	 * @see Attribute#typeName() 
-	 * @see Enum#name() 
+	 * @see Attribute#typeName()
+	 * @see Enum#name()
 	 */
 	public static final String ENUM_TYPE_NAME = "VARCHAR(255)";
-	
+
 	/**
 	 * To be used in attribute-getters for URLs
 	 * @param record
 	 * @param columnName
 	 * @return the URL or <code>null</code>
-	 * @throws MalformedURLException 
+	 * @throws MalformedURLException
 	 */
-	public static URL readURL(ActiveRecord record, String columnName) throws MalformedURLException
+	@Nullable
+	public static URL readURL(@Nonnull final ActiveRecord record, @Nonnull final String columnName)
+		throws MalformedURLException
 	{
-		Object value = record.getBase().getStore().getValue( record.getBase(), record.getPrimaryKey(), columnName);
+		final Object value = record.getBase().getStore().getValue( record.getBase(), record.getPrimaryKey(), columnName);
 		if(value == null)
 		{
 			return null;
@@ -211,16 +220,17 @@ public final class TypeMappings
 		}
 		return new URL(value.toString());
 	}
-	
+
 	/**
 	 * To be used in attribute-getter for URIs
 	 * @param record
 	 * @param columnName
 	 * @return the URI or <code>null</code>
 	 */
-	public static URI readURI(ActiveRecord record, String columnName)
+	@Nullable
+	public static URI readURI(@Nonnull final ActiveRecord record, @Nonnull final String columnName)
 	{
-		Object value = record.getBase().getStore().getValue( record.getBase(), record.getPrimaryKey(), columnName);
+		final Object value = record.getBase().getStore().getValue( record.getBase(), record.getPrimaryKey(), columnName);
 		if(value == null)
 		{
 			return null;
@@ -232,53 +242,57 @@ public final class TypeMappings
 		}
 		return URI.create( value.toString());
 	}
-	
+
 	/**
 	 * To be used in attribute-setters for URLs
 	 * @param url
 	 * @param record
-	 * @param columnName 
+	 * @param columnName
 	 */
-	public static void writeURL(URL url, ActiveRecord record, String columnName)
+	public static void writeURL(@Nullable final URL url, @Nonnull final ActiveRecord record,
+		@Nonnull final String columnName)
 	{
 		record.getBase().getStore().setValue( record.getBase(), record.getPrimaryKey(), columnName, url == null ? null : url.toExternalForm());
 	}
-	
+
 	/**
 	 * To be used in attribute-setters for URIs
 	 * @param uri
 	 * @param record
 	 * @param columnName
 	 */
-	public static void writeURI(URI uri, ActiveRecord record, String columnName)
+	public static void writeURI(@Nullable final URI uri, @Nonnull final ActiveRecord record,
+		@Nonnull final String columnName)
 	{
 		record.getBase().getStore().setValue( record.getBase(), record.getPrimaryKey(), columnName, uri == null ? null : uri.toString());
 	}
-	
+
 	////
 	//	XML
 	////
-	
+
 	/**
 	 * Type for XML
-	 * @see Attribute#type() 
+	 * @see Attribute#type()
 	 * @see Types#SQLXML
 	 */
 	public static final int XML_TYPE = Types.SQLXML;
-	
+
 	/**
 	 * To be used in attribute-getters for XML Sources
-	 * @param <T> 
+	 * @param <T>
 	 * @param sourceType the type of the source
 	 * @param record
 	 * @param columnName
 	 * @return the Source or <code>null</code>
-	 * @throws SQLException 
-	 * @see SQLXML#getSource(java.lang.Class) 
+	 * @throws SQLException
+	 * @see SQLXML#getSource(java.lang.Class)
 	 */
-	public static <T extends Source> T readXML(Class<T> sourceType, ActiveRecord record, String columnName) throws SQLException
+	@Nullable
+	public static <T extends Source> T readXML(@Nonnull final Class<T> sourceType, @Nonnull final ActiveRecord record,
+		@Nonnull final String columnName) throws SQLException
 	{
-		Object value = record.getBase().getStore().getValue( record.getBase(), record.getPrimaryKey(), columnName);
+		final Object value = record.getBase().getStore().getValue( record.getBase(), record.getPrimaryKey(), columnName);
 		if(value == null)
 		{
 			return null;
@@ -289,17 +303,19 @@ public final class TypeMappings
 		}
 		return null;
 	}
-	
+
 	/**
 	 * To be used in attribute-getters for XML InputStreams
 	 * @param record
 	 * @param columnName
 	 * @return the InputStream or <code>null</code>
-	 * @throws SQLException 
+	 * @throws SQLException
 	 */
-	public static InputStream readXML(ActiveRecord record, String columnName) throws SQLException
+	@Nullable
+	public static InputStream readXML(@Nonnull final ActiveRecord record, @Nonnull final String columnName)
+		throws SQLException
 	{
-		Object value = record.getBase().getStore().getValue( record.getBase(), record.getPrimaryKey(), columnName);
+		final Object value = record.getBase().getStore().getValue( record.getBase(), record.getPrimaryKey(), columnName);
 		if(value == null)
 		{
 			return null;
@@ -310,59 +326,67 @@ public final class TypeMappings
 		}
 		return null;
 	}
-	
+
 	/**
 	 * To be used in attribute-setters for XML DOMResults
 	 * @param result the result to copy the content from
 	 * @param record
 	 * @param columnName
-	 * @throws SQLException 
+	 * @throws SQLException
 	 */
-	public static void writeXML(DOMResult result, ActiveRecord record, String columnName) throws SQLException
+	public static void writeXML(@Nullable final DOMResult result, @Nonnull final ActiveRecord record,
+		@Nonnull final String columnName) throws SQLException
 	{
-		Connection con = record.getBase().getStore().getConnection();
+		final Connection con = record.getBase().getStore().getConnection();
 		if(con == null || con.isClosed())
 		{
 			throw new RecordException(record, "no JDBC-Connection for this database");
 		}
-		SQLXML xml = con.createSQLXML();
-		DOMResult writeResult = xml.setResult( DOMResult.class);
+		if (result == null)
+		{
+			record.getBase().getStore().setValue(record.getBase(), record.getPrimaryKey(), columnName, null);
+			return;
+		}
+		final SQLXML xml = con.createSQLXML();
+		final DOMResult writeResult = xml.setResult( DOMResult.class);
 		writeResult.setNextSibling( result.getNextSibling());
 		writeResult.setNode( result.getNode());
 		writeResult.setSystemId( result.getSystemId());
-		
+
 		record.getBase().getStore().setValue( record.getBase(), record.getPrimaryKey(), columnName, xml);
 	}
-	
+
 	/**
 	 * To be used in attribute-setters for XML-Strings
 	 * @param xmlString the XML to store
 	 * @param record
 	 * @param columnName
-	 * @throws SQLException 
+	 * @throws SQLException
 	 */
-	public static void writeXML(String xmlString, ActiveRecord record, String columnName) throws SQLException
+	public static void writeXML(@Nullable final String xmlString, @Nonnull final ActiveRecord record,
+		@Nonnull final String columnName) throws SQLException
 	{
-		Connection con = record.getBase().getStore().getConnection();
+		final Connection con = record.getBase().getStore().getConnection();
 		if(con == null || con.isClosed())
 		{
 			throw new RecordException(record, "no JDBC-Connection for this database");
 		}
-		SQLXML xml = con.createSQLXML();
+		final SQLXML xml = con.createSQLXML();
 		xml.setString( xmlString );
-		
+
 		record.getBase().getStore().setValue( record.getBase(), record.getPrimaryKey(), columnName, xml);
 	}
-	
+
 	/**
 	 * To be used in attribute-getters for Path
 	 * @param record
 	 * @param columnName
 	 * @return the Path or <code>null</code>
 	 */
-	public static Path readPath(ActiveRecord record, String columnName)
+	@Nullable
+	public static Path readPath(@Nonnull final ActiveRecord record, @Nonnull final String columnName)
 	{
-		Object value = record.getBase().getStore().getValue( record.getBase(), record.getPrimaryKey(), columnName);
+		final Object value = record.getBase().getStore().getValue( record.getBase(), record.getPrimaryKey(), columnName);
 		if(value == null)
 		{
 			return null;
@@ -379,18 +403,19 @@ public final class TypeMappings
 		}
 		return Paths.get( (String)value);
 	}
-	
+
 	/**
 	 * To be used in attribute-setters for Paths
 	 * @param path
 	 * @param record
-	 * @param columnName 
+	 * @param columnName
 	 */
-	public static void writePath(Path path, ActiveRecord record, String columnName)
+	public static void writePath(@Nullable final Path path, @Nonnull final ActiveRecord record,
+		@Nonnull final String columnName)
 	{
 		record.getBase().getStore().setValue( record.getBase(), record.getPrimaryKey(), columnName, path == null ? null : path.toString());
 	}
-	
+
 	/**
 	 * This method tries to determine the enum-value from the {@link Enum#name()}-method before using the index of {@link Class#getEnumConstants() }
 	 * @param <T>
@@ -399,9 +424,11 @@ public final class TypeMappings
 	 * @param columnName
 	 * @return the enum-value or <code>null</code>
 	 */
-	public static <T extends Enum<T>> T readEnumValue(Class<T> enumType, ActiveRecord record, String columnName)
+	@Nullable
+	public static <T extends Enum<T>> T readEnumValue(@Nonnull final Class<T> enumType,
+		@Nonnull final ActiveRecord record, @Nonnull final String columnName)
 	{
-		Object value = record.getBase().getStore().getValue( record.getBase(), record.getPrimaryKey(), columnName);
+		final Object value = record.getBase().getStore().getValue( record.getBase(), record.getPrimaryKey(), columnName);
 		if(value == null)
 		{
 			return null;
@@ -416,19 +443,20 @@ public final class TypeMappings
 		}
 		throw new IllegalArgumentException("Can't find enum-constant from value: "+value.toString());
 	}
-	
+
 	/**
 	 * Writes the enum-value by storing its {@link Enum#name() }
 	 * @param <T>
 	 * @param value
 	 * @param record
-	 * @param columnName 
+	 * @param columnName
 	 */
-	public static <T extends Enum<T>> void writeEnumValue(T value, ActiveRecord record, String columnName)
+	public static <T extends Enum<T>> void writeEnumValue(@Nullable final T value, @Nonnull final ActiveRecord record,
+		@Nonnull final String columnName)
 	{
 		record.getBase().getStore().setValue( record.getBase(), record.getPrimaryKey(), columnName, value == null ? null : value.name());
 	}
-	
+
 	/**
 	 * The <code>objectType</code> is required to have a default constructor
 	 * @param <T> the type of the attribute
@@ -437,9 +465,11 @@ public final class TypeMappings
 	 * @param columnName
 	 * @return the read DB-mappable attribute
 	 */
-	public static <T extends DBMappable> T readDBMappable(Class<T> objectType, ActiveRecord record, String columnName)
+	@Nullable
+	public static <T extends DBMappable> T readDBMappable(@Nonnull final Class<T> objectType,
+		@Nonnull final ActiveRecord record, @Nonnull final String columnName)
 	{
-		Object value = record.getBase().getStore().getValue( record.getBase(), record.getPrimaryKey(), columnName);
+		final Object value = record.getBase().getStore().getValue( record.getBase(), record.getPrimaryKey(), columnName);
 		if(value == null)
 		{
 			return null;
@@ -450,41 +480,43 @@ public final class TypeMappings
 		}
 		try
 		{
-			T result = objectType.newInstance();
+			final T result = objectType.newInstance();
 			result.readFromDBValue( value );
 			return result;
 		}
-		catch(ReflectiveOperationException roe)
+		catch(final ReflectiveOperationException roe)
 		{
 			throw new RuntimeException(roe);
 		}
 	}
-	
+
 	/**
 	 * Reads the DBMappable {@link DBMappable#readFromDBValue(java.lang.Object) reading} into <code>attribute</code>
 	 * @param attribute the DBMappable to read into
 	 * @param record
-	 * @param columnName 
+	 * @param columnName
 	 */
-	public static void readDBMappable(DBMappable attribute, ActiveRecord record, String columnName)
+	public static void readDBMappable(@Nonnull final DBMappable attribute, @Nonnull final ActiveRecord record,
+		@Nonnull final String columnName)
 	{
-		Object value = record.getBase().getStore().getValue( record.getBase(), record.getPrimaryKey(), columnName);
+		final Object value = record.getBase().getStore().getValue( record.getBase(), record.getPrimaryKey(), columnName);
 		if(value == null)
 		{
 			return;
 		}
 		attribute.readFromDBValue( value );
 	}
-	
+
 	/**
 	 * Writes the DBMappable by storing the {@link DBMappable#toDBValue() db-mapped Object}
 	 * @param attribute
 	 * @param record
-	 * @param columnName 
+	 * @param columnName
 	 */
-	public static void writeDBMappable(DBMappable attribute, ActiveRecord record, String columnName)
+	public static void writeDBMappable(@Nullable final DBMappable attribute, @Nonnull final ActiveRecord record,
+		@Nonnull final String columnName)
 	{
-		Object dbMapped = attribute == null ? null : attribute.toDBValue();
+		final Object dbMapped = attribute == null ? null : attribute.toDBValue();
 		record.getBase().getStore().setValue( record.getBase(), record.getPrimaryKey(), columnName, dbMapped);
 	}
 }

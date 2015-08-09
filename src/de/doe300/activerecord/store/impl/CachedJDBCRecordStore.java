@@ -28,18 +28,20 @@ import java.sql.Connection;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Set;
 import java.util.TreeMap;
 import java.util.stream.Stream;
 
+import javax.annotation.Nonnull;
+
 import de.doe300.activerecord.RecordBase;
 import de.doe300.activerecord.dsl.Condition;
 import de.doe300.activerecord.jdbc.VendorSpecific;
 import de.doe300.activerecord.logging.Logging;
 import de.doe300.activerecord.scope.Scope;
-import java.util.Collections;
 
 /**
  * Uses write-back cache
@@ -55,7 +57,7 @@ public class CachedJDBCRecordStore extends SimpleJDBCRecordStore
 	/**
 	 * @param con
 	 */
-	public CachedJDBCRecordStore( final Connection con)
+	public CachedJDBCRecordStore(@Nonnull final Connection con)
 	{
 		this( con, VendorSpecific.guessDatabaseVendor( con ) );
 	}
@@ -65,7 +67,7 @@ public class CachedJDBCRecordStore extends SimpleJDBCRecordStore
 	 * @param con
 	 * @param vendorSpecifics
 	 */
-	public CachedJDBCRecordStore( final Connection con, final VendorSpecific vendorSpecifics)
+	public CachedJDBCRecordStore(@Nonnull final Connection con, final VendorSpecific vendorSpecifics)
 	{
 		super( con, vendorSpecifics );
 		this.cache=Collections.synchronizedMap( new HashMap<>(10));
@@ -81,6 +83,8 @@ public class CachedJDBCRecordStore extends SimpleJDBCRecordStore
 			tableCache = new BaseCache(base);
 			cache.put( base, tableCache );
 		}
+		//TODO currently, if a record is created and data is set before read the cache can't check if the data was modified
+		//because it is not yet filled with the DB-data
 		return tableCache.getOrCreateRow(primaryKey);
 	}
 
@@ -96,13 +100,13 @@ public class CachedJDBCRecordStore extends SimpleJDBCRecordStore
 		{
 			return true;
 		}
-		boolean exists = super.exists( tableName );
+		final boolean exists = super.exists( tableName );
 		tableExistsCache.put(tableName, exists);
 		return exists;
 	}
 
 	@Override
-	public boolean containsRecord( final RecordBase<?> base, final Integer primaryKey )
+	public boolean containsRecord( final RecordBase<?> base, final int primaryKey )
 	{
 		if(hasCache( base, primaryKey ))
 		{
@@ -213,12 +217,12 @@ public class CachedJDBCRecordStore extends SimpleJDBCRecordStore
 	@Override
 	public boolean saveAll(final RecordBase<?> base)
 	{
-		BaseCache baseCache = cache.get( base);
+		final BaseCache baseCache = cache.get( base);
 		if(baseCache == null)
 		{
 			return false;
 		}
-		boolean changed = baseCache.writeAllBack( this );
+		final boolean changed = baseCache.writeAllBack( this );
 		if(changed)
 		{
 			Logging.getLogger().debug( "CachedJDBCStore", "Cache entries saved!");
@@ -233,7 +237,8 @@ public class CachedJDBCRecordStore extends SimpleJDBCRecordStore
 	 * @param primaryKey
 	 * @param values
 	 */
-	void setDBValues(RecordBase<?> base, int primaryKey, Map<String, Object> values)
+		void setDBValues(@Nonnull final RecordBase<?> base, final int primaryKey,
+			@Nonnull final Map<String, Object> values)
 	{
 		super.setValues( base, primaryKey, values );
 	}
@@ -263,7 +268,7 @@ public class CachedJDBCRecordStore extends SimpleJDBCRecordStore
 		//1 load from DB
 		final Map<String,Object> map = super.findFirstWithData( base, columns, scope );
 		//2. store in cache
-		if(map!=null && !map.isEmpty())
+		if (!map.isEmpty())
 		{
 			getCache(base, ( Integer ) map.get( base.getPrimaryColumn())).update( map, false );
 		}
@@ -318,7 +323,7 @@ public class CachedJDBCRecordStore extends SimpleJDBCRecordStore
 	}
 
 	@Override
-	public void touch(RecordBase<?> base, int primaryKey )
+	public void touch(final RecordBase<?> base, final int primaryKey )
 	{
 		super.touch( base, primaryKey );
 		//required to touch data in DB

@@ -24,16 +24,19 @@
  */
 package de.doe300.activerecord.record.association;
 
-import de.doe300.activerecord.ReadOnlyRecordBase;
-import de.doe300.activerecord.dsl.AndCondition;
-import de.doe300.activerecord.dsl.Condition;
-import de.doe300.activerecord.record.ActiveRecord;
-import de.doe300.activerecord.scope.Scope;
 import java.util.AbstractSet;
 import java.util.Collection;
 import java.util.Iterator;
 import java.util.function.Consumer;
 import java.util.stream.Stream;
+
+import javax.annotation.Nonnull;
+
+import de.doe300.activerecord.ReadOnlyRecordBase;
+import de.doe300.activerecord.dsl.AndCondition;
+import de.doe300.activerecord.dsl.Condition;
+import de.doe300.activerecord.record.ActiveRecord;
+import de.doe300.activerecord.scope.Scope;
 
 /**
  * Mapping of the has-many association into a modifiable Set writing all changes into the backing record-store
@@ -42,6 +45,7 @@ import java.util.stream.Stream;
  */
 public class HasManyAssociationSet<T extends ActiveRecord> extends AbstractSet<T> implements RecordSet<T>
 {
+	@Nonnull
 	private final ReadOnlyRecordBase<T> destBase;
 	private final Condition associationCond;
 	private final Consumer<T> setAssociationFunc, unsetAssociationFunc;
@@ -52,7 +56,8 @@ public class HasManyAssociationSet<T extends ActiveRecord> extends AbstractSet<T
 	 * @param setAssociationFunction the function to set the association
 	 * @param unsetAssociationFunction the function to unset the association
 	 */
-	public HasManyAssociationSet(ReadOnlyRecordBase<T> destBase, Condition associationCondition, Consumer<T> setAssociationFunction, Consumer<T> unsetAssociationFunction)
+	public HasManyAssociationSet(@Nonnull final ReadOnlyRecordBase<T> destBase, final Condition associationCondition,
+		final Consumer<T> setAssociationFunction, final Consumer<T> unsetAssociationFunction)
 	{
 		this.destBase = destBase;
 		this.associationCond = associationCondition;
@@ -67,13 +72,13 @@ public class HasManyAssociationSet<T extends ActiveRecord> extends AbstractSet<T
 	}
 
 	@Override
-	public boolean contains( Object o )
+	public boolean contains( final Object o )
 	{
 		if(o == null || !destBase.getRecordType().isInstance( o))
 		{
 			return false;
 		}
-		T otherRecord = destBase.getRecordType().cast( o );
+		final T otherRecord = destBase.getRecordType().cast( o );
 		return associationCond.test( otherRecord);
 	}
 
@@ -84,7 +89,7 @@ public class HasManyAssociationSet<T extends ActiveRecord> extends AbstractSet<T
 	}
 
 	@Override
-	public boolean add( T e )
+	public boolean add( final T e )
 	{
 		if(contains(e ))
 		{
@@ -95,7 +100,7 @@ public class HasManyAssociationSet<T extends ActiveRecord> extends AbstractSet<T
 	}
 
 	@Override
-	public boolean remove( Object o )
+	public boolean remove( final Object o )
 	{
 		if(contains( o))
 		{
@@ -106,18 +111,19 @@ public class HasManyAssociationSet<T extends ActiveRecord> extends AbstractSet<T
 	}
 
 	@Override
-	public boolean retainAll(Collection<?> c )
+	public boolean retainAll(final Collection<?> c )
 	{
 		//select all associated objects not in the other collection and remove association
-		return stream().filter( (T t )-> !c.contains( t)).peek( unsetAssociationFunc).
+		return stream().filter( (final T t )-> !c.contains( t)).peek( unsetAssociationFunc).
 				//if there are any, the associations were changed
 				count() > 0;
 	}
 
 	@Override
-	public boolean removeAll(Collection<?> c )
+	public boolean removeAll(final Collection<?> c )
 	{
-		//select all associations, which are in the other collection and remove the assoication
+		// select all associations, which are in the other collection and remove
+		// the association
 		return stream().filter( c::contains).peek( unsetAssociationFunc).
 				//if there are any, associated set has changed
 				count() > 0;
@@ -138,14 +144,14 @@ public class HasManyAssociationSet<T extends ActiveRecord> extends AbstractSet<T
 	@Override
 	public Stream<T> findWithScope(final Scope scope)
 	{
-		Scope newScope = new Scope(AndCondition.andConditions(associationCond, scope.getCondition()), scope.getOrder(), scope.getLimit());
+		final Scope newScope = new Scope(AndCondition.andConditions(associationCond, scope.getCondition()), scope.getOrder(), scope.getLimit());
 		return destBase.findWithScope(newScope );
 	}
 
 	@Override
 	public T findFirstWithScope( final Scope scope )
 	{
-		Scope newScope = new Scope(AndCondition.andConditions(associationCond, scope.getCondition()), scope.getOrder(), scope.getLimit());
+		final Scope newScope = new Scope(AndCondition.andConditions(associationCond, scope.getCondition()), scope.getOrder(), scope.getLimit());
 		return destBase.findFirstWithScope( newScope );
 	}
 
@@ -156,7 +162,7 @@ public class HasManyAssociationSet<T extends ActiveRecord> extends AbstractSet<T
 	}
 
 	@Override
-	public RecordSet<T> getForCondition( Condition cond )
+	public RecordSet<T> getForCondition( final Condition cond )
 	{
 		return new HasManyAssociationSet<T>(destBase, AndCondition.andConditions(associationCond, cond), setAssociationFunc, unsetAssociationFunc);
 	}

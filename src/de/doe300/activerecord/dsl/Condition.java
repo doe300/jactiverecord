@@ -24,9 +24,13 @@
  */
 package de.doe300.activerecord.dsl;
 
-import de.doe300.activerecord.record.ActiveRecord;
 import java.util.Map;
 import java.util.function.Predicate;
+
+import javax.annotation.Nonnull;
+import javax.annotation.Nullable;
+
+import de.doe300.activerecord.record.ActiveRecord;
 
 /**
  *
@@ -39,27 +43,29 @@ public interface Condition extends Predicate<ActiveRecord>, SQLCommand
 	 * @return whether this conditions uses wildcards in its SQL statement
 	 */
 	public boolean hasWildcards();
-	
+
 	/**
 	 * @return the values to match
 	 */
+	@Nullable
 	public Object[] getValues();
-	
+
 	/**
 	 * @param record
 	 * @return whether the <code>record</code> matches this condition
 	 */
 	@Override
-	public boolean test(final ActiveRecord record);
-	
+	public boolean test(@Nonnull final ActiveRecord record);
+
 	/**
 	 * NOTE: This method is not required to be supported
 	 * @param map
 	 * @return whether the column-map matches this condition
 	 * @throws UnsupportedOperationException if the method is not supported
 	 */
-	public boolean test(final Map<String,Object> map);
+	public boolean test(@Nonnull final Map<String, Object> map);
 
 	@Override
+	@Nonnull
 	public Condition negate();
 }

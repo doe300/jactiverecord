@@ -24,17 +24,6 @@
  */
 package de.doe300.activerecord;
 
-import de.doe300.activerecord.logging.Logging;
-import de.doe300.activerecord.pojo.POJOBase;
-import de.doe300.activerecord.pojo.SingleInheritanceBase;
-import de.doe300.activerecord.proxy.ProxyBase;
-import de.doe300.activerecord.proxy.handlers.ProxyHandler;
-import de.doe300.activerecord.record.ActiveRecord;
-import de.doe300.activerecord.record.SingleTableInheritance;
-import de.doe300.activerecord.store.RecordStore;
-import de.doe300.activerecord.store.impl.CachedJDBCRecordStore;
-import de.doe300.activerecord.store.impl.MapRecordStore;
-import de.doe300.activerecord.store.impl.SimpleJDBCRecordStore;
 import java.lang.reflect.Proxy;
 import java.sql.Connection;
 import java.sql.SQLException;
@@ -47,6 +36,20 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
+import javax.annotation.Nonnull;
+
+import de.doe300.activerecord.logging.Logging;
+import de.doe300.activerecord.pojo.POJOBase;
+import de.doe300.activerecord.pojo.SingleInheritanceBase;
+import de.doe300.activerecord.proxy.ProxyBase;
+import de.doe300.activerecord.proxy.handlers.ProxyHandler;
+import de.doe300.activerecord.record.ActiveRecord;
+import de.doe300.activerecord.record.SingleTableInheritance;
+import de.doe300.activerecord.store.RecordStore;
+import de.doe300.activerecord.store.impl.CachedJDBCRecordStore;
+import de.doe300.activerecord.store.impl.MapRecordStore;
+import de.doe300.activerecord.store.impl.SimpleJDBCRecordStore;
+
 /**
  * Core class for the active record API
  * @author doe300
@@ -54,13 +57,13 @@ import java.util.Set;
 public final class RecordCore implements AutoCloseable
 {
 	private final static Map<String, RecordCore> cores = Collections.synchronizedMap( new HashMap<String, RecordCore>(5));
-	
+
 	private final RecordStore store;
 	private final Map<Class<? extends ActiveRecord>, RecordBase<?>> bases;
 	private Map<Class<? extends ActiveRecord>, ProxyHandler[]> handlers;
 	private final Map<Class<? extends ActiveRecord>, Set<RecordListener>> recordListeners;
 
-	private RecordCore( RecordStore store )
+	private RecordCore( final RecordStore store )
 	{
 		this.store = store;
 		this.bases = new HashMap<Class<? extends ActiveRecord>, RecordBase<?>>(10);
@@ -72,61 +75,61 @@ public final class RecordCore implements AutoCloseable
 	 * @param dbConnection
 	 * @param cached whether the used {@link RecordStore} should be cached
 	 * @return the existing or newly created RecordCore
-	 * @throws SQLException 
+	 * @throws SQLException
 	 */
-	public static RecordCore fromDatabase(Connection dbConnection, boolean cached) throws SQLException
+	public static RecordCore fromDatabase(final Connection dbConnection, final boolean cached) throws SQLException
 	{
-		String cat = dbConnection.getCatalog();
-		RecordCore core = cores.get( cat );
+		final String cat = dbConnection.getCatalog();
+		RecordCore core = RecordCore.cores.get( cat );
 		if(core==null)
 		{
 			core = new RecordCore(cached ? new CachedJDBCRecordStore(dbConnection ): new SimpleJDBCRecordStore(dbConnection ));
-			cores.put( cat, core );
+			RecordCore.cores.put( cat, core );
 			Logging.getLogger().info( "RecordCore", "registered new"+(cached? " cached ":" ")+"record-core for DB-connection: "+cat);
 		}
 		return core;
 	}
-	
+
 	/**
 	 * @param name
 	 * @return the existing or newly created RecordCore
 	 */
-	public static RecordCore newMemoryStore(String name)
+	public static RecordCore newMemoryStore(final String name)
 	{
-		RecordCore core = cores.get( name );
+		RecordCore core = RecordCore.cores.get( name );
 		if(core==null)
 		{
 			core = new RecordCore(new MapRecordStore());
-			cores.put( name, core );
+			RecordCore.cores.put( name, core );
 			Logging.getLogger().info( "RecordCore", "registered new record-core for memory-store: "+name);
 		}
 		return core;
 	}
-	
+
 	/**
 	 * @param name
 	 * @param store
 	 * @return a new or existing RecordCore on top of the given RecordStore
 	 */
-	public static RecordCore fromStore(String name, RecordStore store)
+	public static RecordCore fromStore(final String name, final RecordStore store)
 	{
-		RecordCore core = cores.get( name );
+		RecordCore core = RecordCore.cores.get( name );
 		if(core==null)
 		{
 			core = new RecordCore(store );
-			cores.put( name, core );
+			RecordCore.cores.put( name, core );
 			Logging.getLogger().info( "RecordCore", "registered new record-core for record-store: "+name);
 		}
 		return core;
 	}
-	
+
 	/**
 	 * @param name
 	 * @return the existing RecordCore or <code>null</code>
 	 */
-	public static RecordCore getCore(String name)
+	public static RecordCore getCore(final String name)
 	{
-		return cores.get( name );
+		return RecordCore.cores.get( name );
 	}
 
 	@Override
@@ -135,16 +138,16 @@ public final class RecordCore implements AutoCloseable
 		store.close();
 		Logging.getLogger().info( "RecordCore", "RecordCore closed");
 		//remove Core from mappings
-		for(Map.Entry<String, RecordCore> entry:cores.entrySet())
+		for(final Map.Entry<String, RecordCore> entry:RecordCore.cores.entrySet())
 		{
 			if(entry.getValue().equals( this ))
 			{
-				cores.remove( entry.getKey());
+				RecordCore.cores.remove( entry.getKey());
 				return;
 			}
 		}
 	}
-	
+
 	/**
 	 * @return whether the underlying store maintains a cache
 	 */
@@ -152,7 +155,7 @@ public final class RecordCore implements AutoCloseable
 	{
 		return store.isCached();
 	}
-	
+
 	/**
 	 * @return the underlying record-store
 	 */
@@ -160,22 +163,22 @@ public final class RecordCore implements AutoCloseable
 	{
 		return store;
 	}
-	
+
 	/**
 	 * Creates a new base for this type if none already exists.
 	 * @param <T>
 	 * @param type
-	 * @param handlers
+	 * @param additionalHandlers
 	 * @return the base for this type
 	 */
-	public <T extends ActiveRecord> RecordBase<T> buildBase(Class<T> type, ProxyHandler... handlers)
+	public <T extends ActiveRecord> RecordBase<T> buildBase(final Class<T> type, final ProxyHandler... additionalHandlers)
 	{
 		RecordBase<T> base = ( RecordBase<T> ) bases.get( type );
 		if(base==null)
 		{
 			if(type.isInterface())
 			{
-				base = new ProxyBase<T>(Proxy.getProxyClass( type.getClassLoader(), type).asSubclass( type ), type, mergeHandlers( type, handlers ), store, this);
+				base = new ProxyBase<T>(Proxy.getProxyClass( type.getClassLoader(), type).asSubclass( type ), type, mergeHandlers( type, additionalHandlers ), store, this);
 			}
 			else if(type.isAnnotationPresent( SingleTableInheritance.class))
 			{
@@ -190,14 +193,14 @@ public final class RecordCore implements AutoCloseable
 		}
 		return base;
 	}
-	
+
 	/**
 	 * If the {@link #getHandlers() handlers} are set, this method will create a new base if none for this type exists.
 	 * @param <T>
 	 * @param type
 	 * @return the base for this type or <code>null</code> if none was yet created
 	 */
-	public <T extends ActiveRecord> RecordBase<T> getBase(Class<T> type)
+	public <T extends ActiveRecord> RecordBase<T> getBase(final Class<T> type)
 	{
 		RecordBase<T> base = ( RecordBase<T> ) bases.get( type );
 		if(base==null)
@@ -225,8 +228,8 @@ public final class RecordCore implements AutoCloseable
 		}
 		return base;
 	}
-	
-	private ProxyHandler[] mergeHandlers(Class<? extends ActiveRecord> type, ProxyHandler[] custom)
+
+	private ProxyHandler[] mergeHandlers(final Class<? extends ActiveRecord> type, final ProxyHandler[] custom)
 	{
 		//TODO add handlers by default, e.g. ValidatedHandler if recordType is ValidatedRecord and annotated with Validate
 		if(this.handlers==null)
@@ -237,11 +240,11 @@ public final class RecordCore implements AutoCloseable
 		{
 			return this.handlers.get( type );
 		}
-		List<ProxyHandler> proxies = new ArrayList<>(custom.length);
+		final List<ProxyHandler> proxies = new ArrayList<>(custom.length);
 		proxies.addAll( Arrays.asList( custom));
 		if(handlers.containsKey( type ))
 		{
-			for(ProxyHandler h: handlers.get( type ))
+			for(final ProxyHandler h: handlers.get( type ))
 			{
 				if(!proxies.contains( h ))
 				{
@@ -263,7 +266,7 @@ public final class RecordCore implements AutoCloseable
 	/**
 	 * @param handlers the handlers to set
 	 */
-	public void setHandlers(Map<Class<? extends ActiveRecord>, ProxyHandler[]> handlers )
+	public void setHandlers(final Map<Class<? extends ActiveRecord>, ProxyHandler[]> handlers )
 	{
 		this.handlers = handlers;
 	}
@@ -271,9 +274,9 @@ public final class RecordCore implements AutoCloseable
 	/**
 	 * Adds a new RecordListener for this record-type
 	 * @param recordType
-	 * @param l 
+	 * @param l
 	 */
-	public void addRecordListener(Class<? extends ActiveRecord> recordType, RecordListener l)
+	public void addRecordListener(final Class<? extends ActiveRecord> recordType, final RecordListener l)
 	{
 		if(!this.recordListeners.containsKey( recordType))
 		{
@@ -281,43 +284,44 @@ public final class RecordCore implements AutoCloseable
 		}
 		this.recordListeners.get( recordType).add( l );
 	}
-	
+
 	/**
 	 * Removes a record-listener for this record-type
 	 * @param recordType
-	 * @param l 
+	 * @param l
 	 */
-	public void removeRecordListener(Class<? extends ActiveRecord> recordType, RecordListener l)
+	public void removeRecordListener(final Class<? extends ActiveRecord> recordType, final RecordListener l)
 	{
 		if(this.recordListeners.containsKey( recordType))
 		{
 			this.recordListeners.get( recordType).remove( l );
 		}
 	}
-	
+
 	/**
 	 * Fires a RecordEvent to all RecordListeners registered to the base's {@link RecordBase#getRecordType() record-type}
 	 * @param eventType
 	 * @param base
-	 * @param record 
+	 * @param record
 	 */
-	public void fireRecordEvent(RecordListener.RecordEvent eventType, RecordBase<?> base, ActiveRecord record)
+	public void fireRecordEvent(@Nonnull final RecordListener.RecordEvent eventType, @Nonnull final RecordBase<?> base,
+		@Nonnull final ActiveRecord record)
 	{
 		if(recordListeners.containsKey( base.getRecordType()))
 		{
-			for(RecordListener l: recordListeners.get( base.getRecordType()))
+			for(final RecordListener l: recordListeners.get( base.getRecordType()))
 			{
 				l.notifyRecordEvent( eventType, base, record );
 			}
 		}
 	}
-	
+
 	/**
 	 * Saves all records for all RecordBases in this core
 	 */
 	public void saveAllRecords()
 	{
-		for(RecordBase<?> b : bases.values())
+		for(final RecordBase<?> b : bases.values())
 		{
 			b.saveAll();
 		}

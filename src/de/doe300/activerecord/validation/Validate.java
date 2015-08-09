@@ -35,7 +35,7 @@ import java.lang.annotation.Target;
 import java.util.function.Predicate;
 
 /**
- * Specifies validations for {@link ValidatedRecord}, from which the <code>validate</code> and <code>isValid</code> methods are gnerated
+ * Specifies validations for {@link ValidatedRecord}, from which the <code>validate</code> and <code>isValid</code> methods are generated
  * @author doe300
  * @see ValidatedRecord#validate() 
  * @see ValidatedRecord#isValid() 

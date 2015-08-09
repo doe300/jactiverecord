@@ -111,7 +111,7 @@ public class MapRecordStore implements RecordStore
 	}
 
 	@Override
-	public boolean containsRecord( RecordBase<?> base, Integer primaryKey )
+	public boolean containsRecord( RecordBase<?> base, int primaryKey )
 	{
 		return data.containsKey( base.getTableName() ) && data.get( base.getTableName() ).containsKey( primaryKey);
 	}

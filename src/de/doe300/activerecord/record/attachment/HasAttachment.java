@@ -28,6 +28,7 @@ import de.doe300.activerecord.record.ActiveRecord;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
+import javax.annotation.Nonnull;
 
 /**
  * ActiveRecord which provides has some kind of attached resource
@@ -38,6 +39,7 @@ public interface HasAttachment extends ActiveRecord
 	/**
 	 * @return the associated attachment-handler
 	 */
+	@Nonnull
 	public default AttachmentHandler getAttachmentHandler()
 	{
 		return Attachments.getHander( getClass());
@@ -62,6 +64,7 @@ public interface HasAttachment extends ActiveRecord
 	 * @throws IOException if no such attachment exists or an IO error occurs
 	 * @see AttachmentHandler#readAttachment(de.doe300.activerecord.record.attachment.HasAttachment) 
 	 */
+	@Nonnull
 	public default InputStream readAttachment() throws IOException
 	{
 		return getAttachmentHandler().readAttachment( this );
@@ -72,6 +75,7 @@ public interface HasAttachment extends ActiveRecord
 	 * @throws IOException if no such attachment exists and is not created or any other IO error occurs
 	 * @see AttachmentHandler#writeAttachment(de.doe300.activerecord.record.attachment.HasAttachment) 
 	 */
+	@Nonnull
 	public default OutputStream writeAttachment() throws IOException
 	{
 		return getAttachmentHandler().writeAttachment( this );

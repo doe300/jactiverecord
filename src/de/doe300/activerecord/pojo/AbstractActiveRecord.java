@@ -24,6 +24,8 @@
  */
 package de.doe300.activerecord.pojo;
 
+import javax.annotation.Nonnull;
+
 import de.doe300.activerecord.RecordBase;
 import de.doe300.activerecord.record.ActiveRecord;
 
@@ -34,14 +36,19 @@ import de.doe300.activerecord.record.ActiveRecord;
 public abstract class AbstractActiveRecord implements ActiveRecord
 {
 	protected final int primaryKey;
+	@Nonnull
 	protected final POJOBase<?> base;
 
-	public AbstractActiveRecord( int primaryKey, POJOBase<?> base )
+	/**
+	 * @param primaryKey
+	 * @param base
+	 */
+	public AbstractActiveRecord(final int primaryKey, @Nonnull final POJOBase<?> base)
 	{
 		this.primaryKey = primaryKey;
 		this.base = base;
 	}
-	
+
 	@Override
 	public int getPrimaryKey()
 	{

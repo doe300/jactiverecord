@@ -24,16 +24,16 @@
  */
 package de.doe300.activerecord.store.impl;
 
-import de.doe300.activerecord.RecordBase;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Timestamp;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Objects;
 
+import de.doe300.activerecord.RecordBase;
 import de.doe300.activerecord.record.TimestampedRecord;
-import java.util.Collections;
 
 /**
  * Caches one single row of one DB TABLE
@@ -55,7 +55,7 @@ class RowCache implements Comparable<RowCache>
 		this.isTimestamped = isTimestamped;
 		if(isTimestamped)
 		{
-			Timestamp stamp = new Timestamp(System.currentTimeMillis());
+			final Timestamp stamp = new Timestamp(System.currentTimeMillis());
 			columnData.put( TimestampedRecord.COLUMN_CREATED_AT, stamp);
 		}
 	}
@@ -84,7 +84,6 @@ class RowCache implements Comparable<RowCache>
 	/**
 	 * @param names
 	 * @param values
-	 * @param updateTimestamp
 	 */
 	public synchronized void setData(final String[] names, final Object[] values)
 	{
@@ -151,7 +150,6 @@ class RowCache implements Comparable<RowCache>
 	/**
 	 * Updates the cache-entry with data from the DB
 	 * @param set
-	 * @param updateTimestamp
 	 * @throws SQLException
 	 */
 	public synchronized void update(final ResultSet set) throws SQLException
@@ -175,7 +173,7 @@ class RowCache implements Comparable<RowCache>
 		}
 	}
 	
-	public synchronized boolean writeBack(CachedJDBCRecordStore store, RecordBase<?> base)
+	public synchronized boolean writeBack(final CachedJDBCRecordStore store, final RecordBase<?> base)
 	{
 		if(modifiedData.isEmpty())
 		{

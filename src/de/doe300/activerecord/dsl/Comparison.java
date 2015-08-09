@@ -30,6 +30,8 @@ import java.util.Objects;
 import java.util.function.BiPredicate;
 import java.util.regex.Pattern;
 
+import javax.annotation.Nullable;
+
 /**
  *
  * @author doe300
@@ -42,11 +44,11 @@ public enum Comparison implements BiPredicate<Object, Object>
 	IS {
 
 		@Override
-		public boolean test( Object value, Object compareValue )
+		public boolean test( final Object value, final Object compareValue )
 		{
 			return Objects.equals( value, compareValue);
 		}
-	}, 
+	},
 	/**
 	 * Non-match of the values
 	 * @see #IS
@@ -54,11 +56,11 @@ public enum Comparison implements BiPredicate<Object, Object>
 	IS_NOT {
 
 		@Override
-		public boolean test( Object value, Object compareValue )
+		public boolean test( final Object value, final Object compareValue )
 		{
 			return !Objects.equals( value, compareValue);
 		}
-	}, 
+	},
 	/**
 	 * Regex-match (SQL LIKE-Statement).
 	 * This comparison uses <code>%</code> as wildcard.
@@ -66,26 +68,30 @@ public enum Comparison implements BiPredicate<Object, Object>
 	LIKE {
 
 		@Override
-		public boolean test( Object value, Object compareValue )
+		public boolean test( final Object value, final Object compareValue )
 		{
+			if (value == null || compareValue == null)
+			{
+				return false;
+			}
 			if(value instanceof String)
 			{
-				return Pattern.matches(((String)compareValue).replaceAll( "%", ".*"),((String)value) );
+				return Pattern.matches(((String)compareValue).replaceAll( "%", ".*"),(String)value );
 			}
 			return false;
 		}
-	}, 
+	},
 	/**
 	 * Whether the first argument is <code>null</code>.
 	 */
 	IS_NULL {
 
 		@Override
-		public boolean test( Object value, Object compareValue )
+		public boolean test( final Object value, final Object compareValue )
 		{
 			return value == null;
 		}
-	}, 
+	},
 	/**
 	 * Whether the first value is not <code>null</code>
 	 * @see #IS_NULL
@@ -93,7 +99,7 @@ public enum Comparison implements BiPredicate<Object, Object>
 	IS_NOT_NULL {
 
 		@Override
-		public boolean test( Object value, Object compareValue )
+		public boolean test( final Object value, final Object compareValue )
 		{
 			return value != null;
 		}
@@ -105,7 +111,7 @@ public enum Comparison implements BiPredicate<Object, Object>
 	LARGER {
 
 		@Override
-		public boolean test( Object value, Object compareValue )
+		public boolean test( final Object value, final Object compareValue )
 		{
 			return ((Comparable)value).compareTo( compareValue) > 0;
 		}
@@ -117,7 +123,7 @@ public enum Comparison implements BiPredicate<Object, Object>
 	LARGER_EQUALS {
 
 		@Override
-		public boolean test( Object value, Object compareValue )
+		public boolean test( final Object value, final Object compareValue )
 		{
 			return ((Comparable)value).compareTo( compareValue) >= 0;
 		}
@@ -129,7 +135,7 @@ public enum Comparison implements BiPredicate<Object, Object>
 	SMALLER {
 
 		@Override
-		public boolean test( Object value, Object compareValue )
+		public boolean test( final Object value, final Object compareValue )
 		{
 			return ((Comparable)value).compareTo( compareValue) < 0;
 		}
@@ -141,7 +147,7 @@ public enum Comparison implements BiPredicate<Object, Object>
 	SMALLER_EQUALS {
 
 		@Override
-		public boolean test( Object value, Object compareValue )
+		public boolean test( final Object value, final Object compareValue )
 		{
 			return ((Comparable)value).compareTo( compareValue) <= 0;
 		}
@@ -152,7 +158,7 @@ public enum Comparison implements BiPredicate<Object, Object>
 	TRUE {
 
 		@Override
-		public boolean test( Object value, Object compareValue )
+		public boolean test( final Object value, final Object compareValue )
 		{
 			return true;
 		}
@@ -164,7 +170,7 @@ public enum Comparison implements BiPredicate<Object, Object>
 	IN {
 
 		@Override
-		public boolean test( Object value, Object compareValue )
+		public boolean test( final Object value, final Object compareValue )
 		{
 			if(Objects.equals( value, compareValue))
 			{
@@ -196,5 +202,5 @@ public enum Comparison implements BiPredicate<Object, Object>
 	};
 
 	@Override
-	public abstract boolean test( Object value, Object compareValue );
+	public abstract boolean test(@Nullable final Object value,@Nullable final Object compareValue );
 }

@@ -34,6 +34,9 @@ import java.util.Map;
 import java.util.Set;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
+import javax.annotation.CheckReturnValue;
+import javax.annotation.Nonnull;
+import javax.annotation.Nullable;
 
 /**
  * Base interface for all kinds of record storing data-base.
@@ -45,13 +48,14 @@ public interface RecordStore extends AutoCloseable
 	/**
 	 * @return the underlying Connection or <code>null</code>
 	 */
+	@Nullable
 	public Connection getConnection();
 	
 	/**
 	 * @param tableName 
 	 * @return whether the data-store exists
 	 */
-	public boolean exists(String tableName);
+	public boolean exists(@Nonnull final String tableName);
 	
 	/**
 	 * NOTE: to unify database-access, this method returns the keys in lower-case independent from the DBMS used.
@@ -59,7 +63,8 @@ public interface RecordStore extends AutoCloseable
 	 * @return all available column-names
 	 * @throws java.lang.UnsupportedOperationException if the store can't retrieve the column-names
 	 */
-	public Set<String> getAllColumnNames(String tableName) throws UnsupportedOperationException;
+	@Nonnull
+	public Set<String> getAllColumnNames(@Nonnull final String tableName) throws UnsupportedOperationException;
 	
 	/**
 	 * @param base
@@ -68,7 +73,7 @@ public interface RecordStore extends AutoCloseable
 	 * @param value
 	 * @throws IllegalArgumentException 
 	 */
-	public void setValue(RecordBase<?> base, int primaryKey, String name, Object value) throws IllegalArgumentException;
+	public void setValue(@Nonnull final RecordBase<?> base, int primaryKey, @Nonnull final String name, @Nullable final Object value) throws IllegalArgumentException;
 	
 	/**
 	 * @param base
@@ -77,7 +82,7 @@ public interface RecordStore extends AutoCloseable
 	 * @param values
 	 * @throws IllegalArgumentException 
 	 */
-	public void setValues(RecordBase<?> base, int primaryKey, String[] names, Object[] values) throws IllegalArgumentException;
+	public void setValues(@Nonnull final RecordBase<?> base, int primaryKey, @Nonnull final String[] names, @Nonnull final Object[] values) throws IllegalArgumentException;
 	
 	/**
 	 * @param base
@@ -85,7 +90,7 @@ public interface RecordStore extends AutoCloseable
 	 * @param values
 	 * @throws IllegalArgumentException 
 	 */
-	public void setValues(RecordBase<?> base, int primaryKey, Map<String,Object> values) throws IllegalArgumentException;
+	public void setValues(@Nonnull final RecordBase<?> base, int primaryKey, @Nonnull final Map<String,Object> values) throws IllegalArgumentException;
 	
 	/**
 	 * @param base
@@ -94,7 +99,8 @@ public interface RecordStore extends AutoCloseable
 	 * @return the value or <code>null</code>
 	 * @throws IllegalArgumentException 
 	 */
-	public Object getValue(RecordBase<?> base, int primaryKey, String name) throws IllegalArgumentException;
+	@Nullable
+	public Object getValue(@Nonnull final RecordBase<?> base, int primaryKey, @Nonnull final String name) throws IllegalArgumentException;
 	
 	/**
 	 * @param base
@@ -103,7 +109,8 @@ public interface RecordStore extends AutoCloseable
 	 * @return the values or an empty map, if the <code>primaryKey</code> was not found
 	 * @throws IllegalArgumentException 
 	 */
-	public Map<String,Object> getValues(RecordBase<?> base, int primaryKey, String[] columns) throws IllegalArgumentException;
+	@Nonnull
+	public Map<String,Object> getValues(@Nonnull final RecordBase<?> base, int primaryKey, @Nonnull final String[] columns) throws IllegalArgumentException;
 	
 	/**
 	 * This method is for usage only if the table has no mapped model, i.e. for association-tables.
@@ -118,7 +125,8 @@ public interface RecordStore extends AutoCloseable
 	 * @return the values for the given <code>column</code> or <code>null</code>
 	 * @throws IllegalArgumentException if the <code>tableName</code> does not exist or the <code>condValue</code> does not match the type for <code>condColumn</code>
 	 */
-	public Stream<Object> getValues(String tableName, String column, String condColumn, Object condValue) throws IllegalArgumentException;
+	@Nonnull
+	public Stream<Object> getValues(@Nonnull final String tableName, @Nonnull final String column, @Nonnull final String condColumn, Object condValue) throws IllegalArgumentException;
 	
 	/**
 	 * This method is for usage only if the table has no mapped model, i.e. for association-tables.
@@ -130,7 +138,8 @@ public interface RecordStore extends AutoCloseable
 	 * @return whether the row was added
 	 * @throws IllegalArgumentException if the <code>tableName</code> does not exist or the <code>condValue</code> does not match the type for <code>condColumn</code>
 	 */
-	public boolean addRow(String tableName, String[] columns, Object[] values) throws IllegalArgumentException;
+	@CheckReturnValue
+	public boolean addRow(@Nonnull final String tableName, @Nonnull final String[] columns, @Nonnull final Object[] values) throws IllegalArgumentException;
 	
 	/**
 	 * This method is for usage only if the table has no mapped model, i.e. for association-tables.
@@ -140,7 +149,8 @@ public interface RecordStore extends AutoCloseable
 	 * @return whether the row was removed
 	 * @throws IllegalArgumentException if the <code>tableName</code> does not exist or the <code>condValue</code> does not match the type for <code>condColumn</code>
 	 */
-	public boolean removeRow(String tableName, Condition cond) throws IllegalArgumentException;
+	@CheckReturnValue
+	public boolean removeRow(@Nonnull final String tableName, @Nullable final Condition cond) throws IllegalArgumentException;
 	
 	/**
 	 * This method is only necessary for caching RecordStores
@@ -148,14 +158,16 @@ public interface RecordStore extends AutoCloseable
 	 * @param primaryKey  
 	 * @return whether data was updated
 	 */
-	public boolean save(RecordBase<?> base, int primaryKey);
+	@CheckReturnValue
+	public boolean save(@Nonnull final RecordBase<?> base, int primaryKey);
 	
 	/**
 	 * This method is only necessary for caching RecordStores
 	 * @param base
 	 * @return whether any data was updated
 	 */
-	public boolean saveAll(RecordBase<?> base);
+	@CheckReturnValue
+	public boolean saveAll(@Nonnull final RecordBase<?> base);
 	
 	/**
 	 * Clears all cached records for the given RecordBase.
@@ -163,7 +175,7 @@ public interface RecordStore extends AutoCloseable
 	 * @param base
 	 * @param primaryKey 
 	 */
-	public void clearCache(RecordBase<?> base, int primaryKey);
+	public void clearCache(@Nonnull final RecordBase<?> base, int primaryKey);
 	
 	/**
 	 * @return whether this store maintains some kind of cache
@@ -176,7 +188,7 @@ public interface RecordStore extends AutoCloseable
 	 * @param primaryKey 
 	 * @see TimestampedRecord
 	 */
-	public default void touch(RecordBase<?> base, int primaryKey)
+	public default void touch(@Nonnull final RecordBase<?> base, int primaryKey)
 	{
 		setValue( base, primaryKey, TimestampedRecord.COLUMN_UPDATED_AT, new Timestamp(System.currentTimeMillis()));
 	}
@@ -189,7 +201,7 @@ public interface RecordStore extends AutoCloseable
 	 * @return the ID of the new record
 	 * @see RecordBase#isAutoCreate() 
 	 */
-	public int insertNewRecord(RecordBase<?> base, Map<String,Object> columnData);
+	public int insertNewRecord(@Nonnull final RecordBase<?> base, @Nullable final Map<String,Object> columnData);
 	
 	/**
 	 * A record may be non-synchronized if the record-store uses caches or the record was not yet saved to the underlying resource
@@ -197,21 +209,21 @@ public interface RecordStore extends AutoCloseable
 	 * @param primaryKey 
 	 * @return whether the record is synchronized
 	 */
-	public boolean isSynchronized(RecordBase<?> base, int primaryKey);
+	public boolean isSynchronized(@Nonnull final RecordBase<?> base, int primaryKey);
 	
 	/**
 	 * @param base
 	 * @param primaryKey the primary key
 	 * @return whether the Store contains a record with this <code>primaryKey</code>
 	 */
-	public boolean containsRecord(RecordBase<?> base, Integer primaryKey);	
+	public boolean containsRecord(@Nonnull final RecordBase<?> base, int primaryKey);	
 	
 	/**
 	 * Destroys the storage and cache of this record
 	 * @param base
 	 * @param primaryKey 
 	 */
-	public void destroy(RecordBase<?> base, int primaryKey);
+	public void destroy(@Nonnull final RecordBase<?> base, int primaryKey);
 	
 	////
 	// find-Methods
@@ -222,14 +234,11 @@ public interface RecordStore extends AutoCloseable
 	 * @param scope
 	 * @return the primaryKey of the first match or <code>null</code>
 	 */
-	public default Integer findFirst(RecordBase<?> base, Scope scope)
+	@Nullable
+	public default Integer findFirst(@Nonnull final RecordBase<?> base, @Nonnull final Scope scope)
 	{
 		Map<String, Object> data = findFirstWithData(base, new String[]{base.getPrimaryColumn()}, scope);
-		if(data!=null)
-		{
-			return ( Integer ) data.get( base.getPrimaryColumn());
-		}
-		return null;
+		return ( Integer ) data.get( base.getPrimaryColumn());
 	}
 	
 	/**
@@ -237,7 +246,8 @@ public interface RecordStore extends AutoCloseable
 	 * @param scope
 	 * @return the primary keys of all matches or an empty Set
 	 */
-	public default Set<Integer> findAll(RecordBase<?> base, Scope scope)
+	@Nonnull
+	public default Set<Integer> findAll(@Nonnull final RecordBase<?> base, @Nonnull final Scope scope)
 	{
 		return streamAll(base, scope).collect( Collectors.toSet());
 	}
@@ -247,7 +257,8 @@ public interface RecordStore extends AutoCloseable
 	 * @param scope
 	 * @return all matching primary keys or an empty Stream
 	 */
-	public default Stream<Integer> streamAll(RecordBase<?> base, Scope scope)
+	@Nonnull
+	public default Stream<Integer> streamAll(@Nonnull final RecordBase<?> base, @Nonnull final Scope scope)
 	{
 		return streamAllWithData( base, new String[]{base.getPrimaryColumn()}, scope).map( (Map<String,Object> map)->
 		{
@@ -261,7 +272,8 @@ public interface RecordStore extends AutoCloseable
 	 * @param scope
 	 * @return the data for the first match or an empty map
 	 */
-	public Map<String, Object> findFirstWithData(RecordBase<?> base, String[] columns, Scope scope);
+	@Nonnull
+	public Map<String, Object> findFirstWithData(@Nonnull final RecordBase<?> base, @Nonnull final String[] columns, @Nonnull final Scope scope);
 	
 	/**
 	 * @param base
@@ -269,7 +281,8 @@ public interface RecordStore extends AutoCloseable
 	 * @param scope
 	 * @return the data for all matches or an empty map
 	 */
-	public default Map<Integer, Map<String, Object>> findAllWithData(RecordBase<?> base, String[] columns, Scope scope)
+	@Nonnull
+	public default Map<Integer, Map<String, Object>> findAllWithData(@Nonnull final RecordBase<?> base, @Nonnull final String[] columns, @Nonnull final Scope scope)
 	{
 		return streamAllWithData( base, columns, scope ).collect( Collectors.toMap( (Map<String,Object> map) -> 
 		{
@@ -283,7 +296,8 @@ public interface RecordStore extends AutoCloseable
 	 * @param scope
 	 * @return the requested data for all matches or an empty Stream
 	 */
-	public Stream<Map<String, Object>> streamAllWithData(RecordBase<?> base, String[] columns, Scope scope);
+	@Nonnull
+	public Stream<Map<String, Object>> streamAllWithData(@Nonnull final RecordBase<?> base, @Nonnull final String[] columns, @Nonnull final Scope scope);
 	
 	////
 	// COUNT
@@ -294,7 +308,7 @@ public interface RecordStore extends AutoCloseable
 	 * @param condition
 	 * @return the number of records matching the given <code>condition</code>
 	 */
-	public default int count(RecordBase<?> base, Condition condition)
+	public default int count(@Nonnull final RecordBase<?> base, @Nullable final Condition condition)
 	{
 		return ( int ) streamAll( base, new Scope(condition, null, Scope.NO_LIMIT) ).count();
 	}

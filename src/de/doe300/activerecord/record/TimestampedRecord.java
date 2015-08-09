@@ -24,8 +24,11 @@
  */
 package de.doe300.activerecord.record;
 
-import de.doe300.activerecord.migration.AutomaticMigration;
 import java.sql.Timestamp;
+
+import javax.annotation.Nonnull;
+
+import de.doe300.activerecord.migration.AutomaticMigration;
 
 /**
  * Timestamped ActiveRecords automatically maintain {@link TimestampedRecord#COLUMN_CREATED_AT created_at} and  {@link TimestampedRecord#COLUMN_UPDATED_AT updated_at}
@@ -38,22 +41,24 @@ public interface TimestampedRecord extends ActiveRecord
 	/**
 	 * The creation timestamp
 	 */
+	@Nonnull
 	public static final String COLUMN_CREATED_AT="created_at";
 	/**
 	 * The timestamp of the last update
 	 */
+	@Nonnull
 	public static final String COLUMN_UPDATED_AT="updated_at";
 
 	/**
 	 * @return the creation date of this entry
 	 */
 	public Timestamp getCreatedAt();
-	
+
 	/**
 	 * @return the timestamp of the last update
 	 */
 	public Timestamp getUpdatedAt();
-	
+
 	/**
 	 * Sets the {@link #getUpdatedAt()} timestamp to this instant
 	 */

@@ -24,13 +24,20 @@
  */
 package de.doe300.activerecord;
 
+import java.util.stream.Stream;
+
+import javax.annotation.Nonnull;
+import javax.annotation.Nullable;
+
 import de.doe300.activerecord.dsl.Condition;
 import de.doe300.activerecord.dsl.Order;
 import de.doe300.activerecord.dsl.QueryResult;
 import de.doe300.activerecord.record.ActiveRecord;
+import de.doe300.activerecord.record.RecordType;
+import de.doe300.activerecord.record.Searchable;
 import de.doe300.activerecord.record.association.RecordSet;
 import de.doe300.activerecord.scope.Scope;
-import java.util.stream.Stream;
+import de.doe300.activerecord.validation.ValidatedRecord;
 
 /**
  * A RecordBase which can be read only
@@ -42,34 +49,38 @@ public interface ReadOnlyRecordBase<T extends ActiveRecord> extends FinderMethod
 	/**
 	 * @return the data-type of the records
 	 */
+	@Nonnull
 	public Class<T> getRecordType();
-	
+
 	/**
 	 * The table name is retrieved from {@link RecordType#typeName() }.
 	 * If this name is not set, the {@link Class#getSimpleName() simple-name} of the record-class is used.
 	 * @return the tableName
 	 * @see RecordType#typeName()
 	 */
+	@Nonnull
 	public String getTableName();
-	
+
 	/**
 	 * Uses the {@link RecordType#primaryKey() }. If this key is not set, {@link ActiveRecord#DEFAULT_PRIMARY_COLUMN id} is used.
 	 * @return the name of the primary Column
 	 * @see RecordType#primaryKey()
 	 * @see ActiveRecord#DEFAULT_PRIMARY_COLUMN
 	 */
+	@Nonnull
 	public String getPrimaryColumn();
-	
+
 	/**
 	 * The default order is looked up in {@link RecordType#defaultOrder() }. If
 	 * this value is not set, the records are ordered by
 	 * {@link #getPrimaryColumn() primary-key}
 	 * {@link de.doe300.activerecord.dsl.Order.OrderType#ASCENDING ascending}.
-	 * 
+	 *
 	 * @return the default ordering of records
 	 * @see RecordType#defaultOrder()
 	 * @see de.doe300.activerecord.dsl.Order.OrderType
 	 */
+	@Nonnull
 	public Order getDefaultOrder();
 
 	/**
@@ -77,8 +88,9 @@ public interface ReadOnlyRecordBase<T extends ActiveRecord> extends FinderMethod
 	 * @return the record, if it exists or <code>null</code>
 	 * @throws RecordException
 	 */
+	@Nullable
 	public T getRecord(final int primaryKey) throws RecordException;
-	
+
 	/**
 	 * @param primaryKey
 	 * @return whether the record is stored in the underlying record-store
@@ -89,77 +101,83 @@ public interface ReadOnlyRecordBase<T extends ActiveRecord> extends FinderMethod
 	 * @param record
 	 * @return whether the attributes of the record are in sync with the underlying store
 	 */
-	public boolean isSynchronized(final ActiveRecord record);
-	
+	public boolean isSynchronized(@Nonnull final ActiveRecord record);
+
 	/**
 	 * @param condition
 	 * @return the number of records matching these conditions
 	 */
 	public int count(final Condition condition);
-	
+
 	/**
 	 * @param condition
 	 * @return the result for this query
 	 */
-	public QueryResult<T> where( final Condition condition );
-	
+	@Nonnull
+	public QueryResult<T> where(@Nullable final Condition condition );
+
 	/**
-	 * 
+	 *
 	 * @param scope
 	 * @return the result of this query
 	 */
-	public QueryResult<T> withScope(Scope scope);
-	
+	@Nonnull
+	public QueryResult<T> withScope(@Nonnull final Scope scope);
+
 	/**
 	 * @return whether this record is searchable
 	 * @see Searchable
 	 */
 	public boolean isSearchable();
-	
+
 	/**
 	 * @param term
 	 * @return the matching records
 	 * @throws UnsupportedOperationException if the record-type is not annotated with {@link Searchable}
 	 * @see Searchable
 	 */
-	public Stream<T> search(final String term);
-	
+	@Nonnull
+	public Stream<T> search(@Nonnull final String term);
+
 	/**
 	 * @param term
 	 * @return the first matching record
 	 * @throws UnsupportedOperationException if the record-type is not annotated with {@link Searchable}
 	 * @see Searchable
 	 */
-	public T searchFirst(final String term);
-	
+	@Nullable
+	public T searchFirst(@Nonnull final String term);
+
 	/**
 	 * @return whether the record supports creation and update timestamps
 	 */
 	public boolean isTimestamped();
-	
+
 	/**
 	 * @return whether the record-type is {@link ValidatedRecord validated}
 	 */
 	public boolean isValidated();
-	
+
 	/**
 	 * A non-validated record type always returns true for {@link #isValid(de.doe300.activerecord.record.ActiveRecord) }
 	 * @param record
 	 * @return whether the record is valid
 	 * @see ValidatedRecord#isValid()
 	 */
-	public boolean isValid(final ActiveRecord record);
-	
+	public boolean isValid(@Nonnull final ActiveRecord record);
+
 	/**
 	 * NOTE: this result-set will be immutable
 	 * @return a ResultSet containing all records in this base
 	 */
+	@Nonnull
 	public RecordSet<T> getAll();
-	
+
 	/**
 	 * NOTE: this result-set will be immutable
 	 * @param cond
 	 * @return a ResultSet for the given condition
 	 */
-	public RecordSet<T> getForCondition(Condition cond);
+	@Nonnull
+	public RecordSet<T> getForCondition(@Nullable final Condition cond);
 }

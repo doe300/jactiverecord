@@ -24,13 +24,17 @@
  */
 package de.doe300.activerecord.validation;
 
-import de.doe300.activerecord.record.ActiveRecord;
 import java.lang.reflect.Array;
 import java.lang.reflect.Method;
 import java.util.Collection;
 import java.util.Map;
 import java.util.function.BiPredicate;
 import java.util.function.Predicate;
+
+import javax.annotation.Nonnull;
+import javax.annotation.Nullable;
+
+import de.doe300.activerecord.record.ActiveRecord;
 
 /**
  *
@@ -45,7 +49,7 @@ public final class Validations
 	 * @return whether the object is not empty
 	 * @throws IllegalArgumentException
 	 */
-	public static boolean notEmpty(Object obj)
+	public static boolean notEmpty(@Nullable final Object obj)
 	{
 		if(obj == null)
 		{
@@ -73,28 +77,28 @@ public final class Validations
 		}
 		if(obj instanceof Number)
 		{
-			double d = ((Number)obj).doubleValue();
+			final double d = ((Number)obj).doubleValue();
 			return d == 0.0;
 		}
 		throw new IllegalArgumentException("Invalid data-type, can't check empty for: "+ obj.getClass());
 	}
-	
+
 	/**
 	 * @param obj
 	 * @return whether the object is empty
-	 * @see #notEmpty(java.lang.Object) 
+	 * @see #notEmpty(java.lang.Object)
 	 */
-	public static boolean isEmpty(Object obj)
+	public static boolean isEmpty(@Nullable final Object obj)
 	{
-		return !notEmpty( obj );
+		return !Validations.notEmpty( obj );
 	}
-	
+
 	/**
 	 * @param obj
 	 * @return whether this object is a positive number
 	 * @throws IllegalArgumentException if the parameter is not a number
 	 */
-	public static boolean positiveNumber(Object obj)
+	public static boolean positiveNumber(@Nullable final Object obj)
 	{
 		if(obj == null)
 		{
@@ -106,14 +110,14 @@ public final class Validations
 		}
 		throw new IllegalArgumentException("Can only determine positive for numbers");
 	}
-	
+
 	/**
-	 * 
+	 *
 	 * @param obj
 	 * @return whether the parameter is a negative number
 	 * @throws IllegalArgumentException if the object is no number
 	 */
-	public static boolean negativeNumber(Object obj)
+	public static boolean negativeNumber(@Nullable final Object obj)
 	{
 		if(obj == null)
 		{
@@ -125,7 +129,7 @@ public final class Validations
 		}
 		throw new IllegalArgumentException("Can only determine negative for numbers");
 	}
-	
+
 	/**
 	 * @param column
 	 * @param value
@@ -133,7 +137,8 @@ public final class Validations
 	 * @param message
 	 * @throws ValidationFailed if the validation failed
 	 */
-	public static void validate(String column, Object value, Predicate<Object> pred, String message) throws ValidationFailed
+	public static void validate(@Nonnull final String column, @Nullable final Object value,
+		@Nonnull final Predicate<Object> pred, final String message) throws ValidationFailed
 	{
 		if(pred.test( value ))
 		{
@@ -141,50 +146,50 @@ public final class Validations
 		}
 		throw new ValidationFailed(column, value, message);
 	}
-	
+
 	/**
 	 * @param validate
 	 * @return the BiPredicate for validation
 	 */
-	public static BiPredicate<ActiveRecord,Object> getValidationMethod(Validate validate)
+	public static BiPredicate<ActiveRecord, Object> getValidationMethod(@Nonnull final Validate validate)
 	{
 		switch(validate.type())
 		{
 			case IS_NULL:
-				return (ActiveRecord rec, Object obj) -> obj == null;
+				return (final ActiveRecord rec, final Object obj) -> obj == null;
 			case IS_EMPTY:
-				return (ActiveRecord rec, Object obj) -> isEmpty( obj);
+				return (final ActiveRecord rec, final Object obj) -> Validations.isEmpty( obj);
 			case NOT_NULL:
-				return (ActiveRecord rec, Object obj) -> obj != null;
+				return (final ActiveRecord rec, final Object obj) -> obj != null;
 			case NOT_EMPTY:
-				return (ActiveRecord rec, Object obj) -> notEmpty( obj);
+				return (final ActiveRecord rec, final Object obj) -> Validations.notEmpty( obj);
 			case POSITIVE:
-				return (ActiveRecord rec, Object obj) -> positiveNumber( obj);
+				return (final ActiveRecord rec, final Object obj) -> Validations.positiveNumber( obj);
 			case NEGATIVE:
-				return (ActiveRecord rec, Object obj) -> negativeNumber( obj);
+				return (final ActiveRecord rec, final Object obj) -> Validations.negativeNumber( obj);
 			case CUSTOM:
 			default:
 				try{
-					Method m = validate.customClass().getMethod( validate.customMethod(), Object.class);
-					return (ActiveRecord record, Object obj) -> {
+					final Method m = validate.customClass().getMethod( validate.customMethod(), Object.class);
+					return (final ActiveRecord record, final Object obj) -> {
 						try
 						{
 							return (boolean) m.invoke( record, obj);
 						}
-						catch ( ReflectiveOperationException ex )
+						catch ( final ReflectiveOperationException ex )
 						{
 							throw new RuntimeException("Error while running custom validation-method", ex);
 						}
 					};
 				}
-				catch(ReflectiveOperationException roe)
+				catch(final ReflectiveOperationException roe)
 				{
 					throw new IllegalArgumentException("Could not determine custom validation-method", roe);
 				}
-					
+
 		}
 	}
-	
+
 	private Validations()
 	{
 	}

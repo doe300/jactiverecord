@@ -38,7 +38,6 @@ import org.junit.AfterClass;
 import org.junit.Assert;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.assertSame;
 import static org.junit.Assert.assertTrue;
 import org.junit.BeforeClass;
 import org.junit.Test;
@@ -92,7 +91,7 @@ public class SimpleJDBCRecordStoreTest extends Assert
 	public void testSetValues_3args()
 	{
 		store.setValues( base, primaryKey, Collections.singletonMap( "age", 13));
-		assertSame( 13, store.getValue( base, primaryKey, "age"));
+		assertEquals( 13, store.getValue( base, primaryKey, "age"));
 		//set empty values
 		store.setValues( base, primaryKey, Collections.emptyMap());
 		//negative test - throws exception
@@ -222,7 +221,6 @@ public class SimpleJDBCRecordStoreTest extends Assert
 		assertEquals( 0, store.getValues( base.getTableName(), "name", base.getPrimaryColumn(), primaryKey+1000 ).count());
 		//negative test - throws exception
 		store.getValues( base.getTableName(), "no_column", base.getPrimaryColumn(), primaryKey);
-		
 	}
 
 

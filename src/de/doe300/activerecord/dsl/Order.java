@@ -24,11 +24,15 @@
  */
 package de.doe300.activerecord.dsl;
 
-import de.doe300.activerecord.jdbc.VendorSpecific;
-import de.doe300.activerecord.record.ActiveRecord;
 import java.util.Arrays;
 import java.util.Comparator;
 import java.util.Map;
+
+import javax.annotation.Nonnull;
+import javax.annotation.Nullable;
+
+import de.doe300.activerecord.jdbc.VendorSpecific;
+import de.doe300.activerecord.record.ActiveRecord;
 
 /**
  * An object representing the SQL ORDER BY-Clause
@@ -36,7 +40,9 @@ import java.util.Map;
  */
 public class Order implements Comparator<Map<String,Object>>, SQLCommand
 {
+	@Nonnull
 	private final String[] columns;
+	@Nonnull
 	private final OrderType types[];
 
 	/**
@@ -44,39 +50,40 @@ public class Order implements Comparator<Map<String,Object>>, SQLCommand
 	 * If the <code>types</code>-array is smaller than the <code>columns</code>, the rest will be filled with {@link OrderType#ASCENDING}
 	 * allowing for  only the <code>columns</code> to be specified.
 	 * @param columns
-	 * @param types the order-types, may be <code>null</code> 
+	 * @param types the order-types, may be <code>null</code>
 	 */
-	public Order( String[] columns, OrderType[] types )
+	public Order(@Nonnull final String[] columns, @Nullable final OrderType[] types)
 	{
 		this.columns = columns;
-		this.types = levelTypes( columns.length, types );
+		this.types = Order.levelTypes( columns.length, types );
 	}
 
 	/**
 	 * Order by a single column
 	 * @param column
-	 * @param type 
+	 * @param type
 	 */
-	public Order(String column, OrderType type)
+	public Order(@Nonnull final String column, @Nonnull final OrderType type)
 	{
 		this.columns = new String[]{column};
 		this.types = new OrderType[]{type};
 	}
-	
+
 	/**
 	 * @param sqlOrderBy
 	 * @return a new order from the SQL ORDER BY-Statement
 	 */
-	public static Order fromSQLString(String sqlOrderBy)
+	@Nullable
+	public static Order fromSQLString(@Nullable final String sqlOrderBy)
 	{
 		if(sqlOrderBy==null|| sqlOrderBy.isEmpty())
 		{
 			return null;
 		}
-		String stmt = sqlOrderBy.contains( "ORDER BY") ? sqlOrderBy.substring( sqlOrderBy.indexOf( "ORDER BY")+"ORDER BY".length()) : sqlOrderBy;
-		String[] parts = stmt.trim().split( "\\,");
-		String[] columns = new String[parts.length];
-		OrderType[] types = new OrderType[parts.length];
+		final String stmt = sqlOrderBy.contains( "ORDER BY") ? sqlOrderBy.substring( sqlOrderBy.indexOf( "ORDER BY")+"ORDER BY".length()) : sqlOrderBy;
+		final String[] parts = stmt.trim().split( "\\,");
+		final String[] columns = new String[parts.length];
+		final OrderType[] types = new OrderType[parts.length];
 		String[] tmp;
 		for(int i=0;i<parts.length;i++)
 		{
@@ -94,14 +101,15 @@ public class Order implements Comparator<Map<String,Object>>, SQLCommand
 		}
 		return new Order(columns, types );
 	}
-	
-	private static OrderType[] levelTypes(int num, OrderType[] types)
+
+	@Nonnull
+	private static OrderType[] levelTypes(final int num, @Nullable final OrderType[] types)
 	{
 		if(types!=null && num==types.length)
 		{
 			return types;
 		}
-		OrderType[] newTypes = new OrderType[ num ];
+		final OrderType[] newTypes = new OrderType[ num ];
 		Arrays.fill( newTypes, OrderType.ASCENDING);
 		if(types!=null)
 		{
@@ -109,9 +117,9 @@ public class Order implements Comparator<Map<String,Object>>, SQLCommand
 		}
 		return newTypes;
 	}
-	
+
 	@Override
-	public int compare( Map<String, Object> o1, Map<String, Object> o2 )
+	public int compare( final Map<String, Object> o1, final Map<String, Object> o2 )
 	{
 		int index = 0;
 		int compare = 0;
@@ -133,9 +141,9 @@ public class Order implements Comparator<Map<String,Object>>, SQLCommand
 	}
 
 	@Override
-	public String toSQL(VendorSpecific vendorSpecifics)
+	public String toSQL(final VendorSpecific vendorSpecifics)
 	{
-		StringBuilder sb = new StringBuilder(100);
+		final StringBuilder sb = new StringBuilder(100);
 		for(int i=0;i<columns.length;i++)
 		{
 			sb.append( ", ").append( columns[i]).append( " ").append( types[i].toSQL(vendorSpecifics));
@@ -159,10 +167,10 @@ public class Order implements Comparator<Map<String,Object>>, SQLCommand
 		return new Comparator<ActiveRecord>()
 		{
 			@Override
-			public int compare( ActiveRecord o1, ActiveRecord o2 )
+			public int compare( final ActiveRecord o1, final ActiveRecord o2 )
 			{
-				Map<String,Object> map1 = o1.getBase().getStore().getValues( o1.getBase(), o1.getPrimaryKey(), columns);
-				Map<String,Object> map2 = o2.getBase().getStore().getValues( o2.getBase(), o2.getPrimaryKey(), columns);
+				final Map<String,Object> map1 = o1.getBase().getStore().getValues( o1.getBase(), o1.getPrimaryKey(), columns);
+				final Map<String,Object> map2 = o2.getBase().getStore().getValues( o2.getBase(), o2.getPrimaryKey(), columns);
 				return Order.this.compare( map1, map2 );
 			}
 		};
@@ -179,7 +187,7 @@ public class Order implements Comparator<Map<String,Object>>, SQLCommand
 		ASCENDING {
 
 			@Override
-			public String toSQL(VendorSpecific vendorSpecifics)
+			public String toSQL(final VendorSpecific vendorSpecifics)
 			{
 				return "ASC";
 			}
@@ -190,12 +198,12 @@ public class Order implements Comparator<Map<String,Object>>, SQLCommand
 		DESCENDING {
 
 			@Override
-			public String toSQL(VendorSpecific vendorSpecifics)
+			public String toSQL(final VendorSpecific vendorSpecifics)
 			{
 				return "DESC";
 			}
 		};
-		
+
 		@Override
 		public abstract String toSQL(VendorSpecific vendorSpecifics);
 	}

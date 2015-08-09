@@ -24,15 +24,18 @@
  */
 package de.doe300.activerecord.pojo;
 
+import java.lang.reflect.InvocationTargetException;
+import java.lang.reflect.Method;
+import java.util.Map;
+import java.util.Objects;
+
+import javax.annotation.Nonnull;
+
 import de.doe300.activerecord.RecordCore;
 import de.doe300.activerecord.RecordException;
 import de.doe300.activerecord.record.ActiveRecord;
 import de.doe300.activerecord.record.SingleTableInheritance;
 import de.doe300.activerecord.store.RecordStore;
-import java.lang.reflect.InvocationTargetException;
-import java.lang.reflect.Method;
-import java.util.Map;
-import java.util.Objects;
 
 /**
  * The record-base for records using the single-table inheritance
@@ -42,17 +45,27 @@ import java.util.Objects;
  */
 public class SingleInheritanceBase<T extends ActiveRecord> extends POJOBase<T>
 {
+	@Nonnull
 	private final SingleTableInheritance inheritance;
+	@Nonnull
 	private final Method recordFactoryMethod;
 
-	public SingleInheritanceBase( Class<T> recordType, RecordCore core, RecordStore store ) throws RecordException
+	/**
+	 * @param recordType
+	 * @param core
+	 * @param store
+	 * @throws RecordException
+	 */
+	public SingleInheritanceBase(@Nonnull final Class<T> recordType, @Nonnull final RecordCore core,
+		@Nonnull final RecordStore store) throws RecordException
 	{
 		super( recordType, core, store );
-		this.inheritance = Objects.requireNonNull( recordType.getAnnotation( SingleTableInheritance.class));		
-		this.recordFactoryMethod = getRecordFactoryMethod( inheritance );
+		this.inheritance = Objects.requireNonNull( recordType.getAnnotation( SingleTableInheritance.class));
+		this.recordFactoryMethod = SingleInheritanceBase.getRecordFactoryMethod( inheritance );
 	}
-	
-	private static Method getRecordFactoryMethod(SingleTableInheritance inheritance)
+
+	@Nonnull
+	private static Method getRecordFactoryMethod(@Nonnull final SingleTableInheritance inheritance)
 	{
 		try
 		{
@@ -65,7 +78,7 @@ public class SingleInheritanceBase<T extends ActiveRecord> extends POJOBase<T>
 	}
 
 	@Override
-	protected T createProxy( int primaryKey, boolean newRecord, Map<String, Object> recordData ) throws RecordException
+	protected T createProxy( final int primaryKey, final boolean newRecord, final Map<String, Object> recordData ) throws RecordException
 	{
 		if(newRecord && recordData == null)
 		{

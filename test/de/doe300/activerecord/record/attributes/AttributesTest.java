@@ -27,7 +27,6 @@ package de.doe300.activerecord.record.attributes;
 import de.doe300.activerecord.TestInterface;
 import de.doe300.activerecord.record.TimestampedRecord;
 import de.doe300.activerecord.validation.ValidatedRecord;
-import java.beans.IntrospectionException;
 import java.lang.reflect.Method;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
@@ -76,7 +75,7 @@ public class AttributesTest
 	}
 
 	@Test
-	public void testIsSetter() throws NoSuchMethodException, IntrospectionException
+	public void testIsSetter() throws NoSuchMethodException
 	{
 		Method m1 = TestInterface.class.getMethod( "getName"), m2 = TestInterface.class.getMethod( "setAge", Integer.TYPE);
 		assertTrue(Attributes.isSetter( m2, Integer.TYPE, false));

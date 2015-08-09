@@ -24,6 +24,8 @@
  */
 package de.doe300.activerecord.logging;
 
+import javax.annotation.Nonnull;
+
 /**
  * Adapter to write to various logger-APIs
  * @author doe300
@@ -35,26 +37,26 @@ public interface LoggerAdapter
 	 * @param source
 	 * @param message 
 	 */
-	public void info(String source, String message);
+	public void info(@Nonnull final String source, @Nonnull final String message);
 	
 	/**
 	 * Debug message
 	 * @param source
 	 * @param message 
 	 */
-	public void debug(String source, String message);
+	public void debug(@Nonnull final String source, @Nonnull final String message);
 	
 	/**
 	 * Error message
 	 * @param source
 	 * @param message 
 	 */
-	public void error(String source, String message);
+	public void error(@Nonnull final String source, @Nonnull final String message);
 	
 	/**
 	 * Throws Error
 	 * @param source
 	 * @param exception 
 	 */
-	public void error(String source, Throwable exception);
+	public void error(@Nonnull final String source, @Nonnull final Throwable exception);
 }

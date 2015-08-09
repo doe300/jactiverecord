@@ -24,9 +24,15 @@
  */
 package de.doe300.activerecord;
 
+import java.util.Arrays;
 import java.util.Map;
 import java.util.TreeMap;
+import java.util.function.Consumer;
 import java.util.stream.Stream;
+
+import javax.annotation.CheckReturnValue;
+import javax.annotation.Nonnull;
+import javax.annotation.Nullable;
 
 import de.doe300.activerecord.dsl.Comparison;
 import de.doe300.activerecord.dsl.Condition;
@@ -47,8 +53,6 @@ import de.doe300.activerecord.scope.Scope;
 import de.doe300.activerecord.store.RecordStore;
 import de.doe300.activerecord.validation.ValidatedRecord;
 import de.doe300.activerecord.validation.ValidationFailed;
-import java.util.Arrays;
-import java.util.function.Consumer;
 
 /**
  * Common base for mapped objects
@@ -57,9 +61,13 @@ import java.util.function.Consumer;
  */
 public abstract class RecordBase<T extends ActiveRecord> implements ReadOnlyRecordBase<T>
 {
+	@Nonnull
 	protected final Class<T> recordType;
+	@Nonnull
 	protected final RecordCore core;
+	@Nonnull
 	protected final RecordStore store;
+	@Nonnull
 	protected final TreeMap<Integer, T> records;
 
 	//caching variables
@@ -73,7 +81,8 @@ public abstract class RecordBase<T extends ActiveRecord> implements ReadOnlyReco
 	 * @param core
 	 * @param store
 	 */
-	public RecordBase( final Class<T> recordType, final RecordCore core, final RecordStore store )
+	public RecordBase(@Nonnull final Class<T> recordType, @Nonnull final RecordCore core,
+		@Nonnull final RecordStore store)
 	{
 		this.recordType = recordType;
 		this.core = core;
@@ -84,6 +93,7 @@ public abstract class RecordBase<T extends ActiveRecord> implements ReadOnlyReco
 	/**
 	 * @return the store
 	 */
+	@Nonnull
 	public RecordStore getStore()
 	{
 		return store;
@@ -145,6 +155,7 @@ public abstract class RecordBase<T extends ActiveRecord> implements ReadOnlyReco
 	 * @return the defaultColumns
 	 * @see RecordType#defaultColumns()
 	 */
+	@Nonnull
 	public String[] getDefaultColumns()
 	{
 		if(defaultColumns==null)
@@ -163,6 +174,7 @@ public abstract class RecordBase<T extends ActiveRecord> implements ReadOnlyReco
 	}
 
 	@Override
+	@Nonnull
 	public Order getDefaultOrder()
 	{
 		if(defaultOrder == null)
@@ -228,13 +240,14 @@ public abstract class RecordBase<T extends ActiveRecord> implements ReadOnlyReco
 	/**
 	 * Returns a new record which is not yet stored to the underlying
 	 * record-store
-	 * 
+	 *
 	 * @param primaryKey
 	 * @return the newly created record or <code>null</code>
 	 * @throws RecordException
 	 * @throws IllegalArgumentException
 	 *             if the record with this ID already exists
 	 */
+	@Nullable
 	public T newRecord(final int primaryKey) throws RecordException
 	{
 		if(records.containsKey( primaryKey) || store.containsRecord(this, primaryKey))
@@ -255,10 +268,11 @@ public abstract class RecordBase<T extends ActiveRecord> implements ReadOnlyReco
 	/**
 	 * Unlike {@link #newRecord(int)}, this method creates a new entry in the
 	 * underlying record-store
-	 * 
+	 *
 	 * @return the newly created record
 	 * @throws RecordException
 	 */
+	@Nonnull
 	public T createRecord() throws RecordException
 	{
 		return createRecord(null, null );
@@ -266,13 +280,14 @@ public abstract class RecordBase<T extends ActiveRecord> implements ReadOnlyReco
 
 	/**
 	 * This method creates a new record in the underlying Database
-	 * 
+	 *
 	 * @param data
 	 * @return the newly created record
 	 * @throws RecordException
 	 * @see #createRecord()
 	 */
-	public T createRecord(final Map<String,Object> data) throws RecordException
+	@Nonnull
+	public T createRecord(@Nullable final Map<String,Object> data) throws RecordException
 	{
 		return createRecord( data, null );
 	}
@@ -288,10 +303,11 @@ public abstract class RecordBase<T extends ActiveRecord> implements ReadOnlyReco
 	 * @param data the row-data to set
 	 * @param onCreation the callback, may be <code>null</code>
 	 * @return the newly created record
-	 * @throws RecordException 
-	 * @see #createRecord() 
+	 * @throws RecordException
+	 * @see #createRecord()
 	 */
-	public T createRecord(final Map<String,Object> data, Consumer<T> onCreation) throws RecordException
+	@Nonnull
+	public T createRecord(@Nullable final Map<String,Object> data, @Nullable final Consumer<T> onCreation) throws RecordException
 	{
 		if(data != null)
 		{
@@ -312,7 +328,7 @@ public abstract class RecordBase<T extends ActiveRecord> implements ReadOnlyReco
 		core.fireRecordEvent( RecordListener.RecordEvent.RECORD_CREATED, this, record );
 		return record;
 	}
-	
+
 	/**
 	 * Note: it is not the job of the {@link #createProxy(int, boolean, java.util.Map) }-method to store the recordData.
 	 * @param primaryKey
@@ -320,7 +336,8 @@ public abstract class RecordBase<T extends ActiveRecord> implements ReadOnlyReco
 	 * @param recordData the data to create the record with, may be <code>null</code>
 	 * @return the proxy object mapped to the underlying record-store
 	 */
-	protected abstract T createProxy(int primaryKey, boolean newRecord, Map<String, Object> recordData) throws RecordException;
+	@Nonnull
+	protected abstract T createProxy(int primaryKey, boolean newRecord, @Nullable Map<String, Object> recordData) throws RecordException;
 
 	@Override
 	public boolean hasRecord(final int primaryKey)
@@ -333,6 +350,7 @@ public abstract class RecordBase<T extends ActiveRecord> implements ReadOnlyReco
 	 * @return whether data was changed
 	 * @throws ValidationFailed if the record-type is {@link ValidatedRecord} and any of the validations failed
 	 */
+	@CheckReturnValue
 	public boolean saveAll() throws ValidationFailed
 	{
 		Logging.getLogger().debug( recordType.getSimpleName(), "Saving all records...");
@@ -364,7 +382,8 @@ public abstract class RecordBase<T extends ActiveRecord> implements ReadOnlyReco
 	 * @return whether data was changed
 	 * @throws ValidationFailed if the record is {@link ValidatedRecord} and the validation failed
 	 */
-	public boolean save(final ActiveRecord record) throws ValidationFailed
+	@CheckReturnValue
+	public boolean save(@Nonnull final ActiveRecord record) throws ValidationFailed
 	{
 		if(hasCallbacks())
 		{
@@ -378,7 +397,7 @@ public abstract class RecordBase<T extends ActiveRecord> implements ReadOnlyReco
 	}
 
 	@Override
-	public boolean isSynchronized(final ActiveRecord record)
+	public boolean isSynchronized(@Nonnull final ActiveRecord record)
 	{
 		return store.isSynchronized(this, record.getPrimaryKey());
 	}
@@ -387,7 +406,7 @@ public abstract class RecordBase<T extends ActiveRecord> implements ReadOnlyReco
 	 * Discards all changes made to this record and reloads it from the database
 	 * @param record
 	 */
-	public void reload(final ActiveRecord record)
+	public void reload(@Nonnull final ActiveRecord record)
 	{
 		store.clearCache(this,record.getPrimaryKey());
 	}
@@ -399,11 +418,14 @@ public abstract class RecordBase<T extends ActiveRecord> implements ReadOnlyReco
 	public void destroy(final int primaryKey)
 	{
 		final T record = records.remove( primaryKey);
-		if(record != null && hasCallbacks())
+		if (record != null)
 		{
-			((RecordCallbacks)record).onDestroy();
+			if (hasCallbacks())
+			{
+				((RecordCallbacks) record).onDestroy();
+			}
+			core.fireRecordEvent(RecordListener.RecordEvent.RECORD_DESTROYED, this, record);
 		}
-		core.fireRecordEvent( RecordListener.RecordEvent.RECORD_DESTROYED, this, record);
 		getStore().destroy(this, primaryKey );
 	}
 
@@ -412,7 +434,8 @@ public abstract class RecordBase<T extends ActiveRecord> implements ReadOnlyReco
 	 * @param record
 	 * @return the duplicate record
 	 */
-	public T duplicate(final T record)
+	@Nonnull
+	public T duplicate(@Nonnull final T record)
 	{
 		return createRecord( store.getValues( this, record.getPrimaryKey(), store.getAllColumnNames( getTableName()).toArray( new String[0])) );
 	}
@@ -422,7 +445,8 @@ public abstract class RecordBase<T extends ActiveRecord> implements ReadOnlyReco
 	////
 
 	@Override
-	public Stream<T> findWithScope(final Scope scope)
+	@Nonnull
+	public Stream<T> findWithScope(@Nonnull final Scope scope)
 	{
 		return getStore().streamAll(this, scope ).map( (final Integer i) ->
 		{
@@ -438,7 +462,8 @@ public abstract class RecordBase<T extends ActiveRecord> implements ReadOnlyReco
 	}
 
 	@Override
-	public T findFirstWithScope(final Scope scope)
+	@Nullable
+	public T findFirstWithScope(@Nonnull final Scope scope)
 	{
 		final Integer key = getStore().findFirst(this, scope );
 		if(key!=null)
@@ -456,7 +481,7 @@ public abstract class RecordBase<T extends ActiveRecord> implements ReadOnlyReco
 	}
 
 	@Override
-	public int count(final Condition condition)
+	public int count(@Nullable final Condition condition)
 	{
 		return store.count( this, condition);
 	}
@@ -466,13 +491,15 @@ public abstract class RecordBase<T extends ActiveRecord> implements ReadOnlyReco
 	////
 
 	@Override
-	public QueryResult<T> where( final Condition condition )
+	@Nonnull
+	public QueryResult<T> where(@Nullable final Condition condition )
 	{
 		return new QueryResult<T>(find( condition), count( condition ) ,getDefaultOrder());
 	}
 
 	@Override
-	public QueryResult<T> withScope(Scope scope)
+	@Nonnull
+	public QueryResult<T> withScope(@Nonnull final Scope scope)
 	{
 		return new QueryResult<T>(findWithScope( scope), Math.min(scope.getLimit(), count( scope.getCondition())), scope.getOrder()!= null ? scope.getOrder() : getDefaultOrder());
 	}
@@ -488,7 +515,8 @@ public abstract class RecordBase<T extends ActiveRecord> implements ReadOnlyReco
 	}
 
 	@Override
-	public Stream<T> search(final String term)
+	@Nonnull
+	public Stream<T> search(@Nonnull final String term)
 	{
 		if(!isSearchable())
 		{
@@ -500,7 +528,8 @@ public abstract class RecordBase<T extends ActiveRecord> implements ReadOnlyReco
 	}
 
 	@Override
-	public T searchFirst(final String term)
+	@Nullable
+	public T searchFirst(@Nonnull final String term)
 	{
 		if(!isSearchable())
 		{
@@ -511,7 +540,7 @@ public abstract class RecordBase<T extends ActiveRecord> implements ReadOnlyReco
 		return findFirst( RecordBase.toSearchClause( term, columns ) );
 	}
 
-	private static Condition toSearchClause(final String term, final String[] columns)
+	private static Condition toSearchClause(@Nonnull final String term, @Nonnull final String[] columns)
 	{
 		final Condition[] conds = new Condition[columns.length];
 		for(int i=0;i<columns.length;i++)
@@ -542,7 +571,7 @@ public abstract class RecordBase<T extends ActiveRecord> implements ReadOnlyReco
 	}
 
 	@Override
-	public boolean isValid(final ActiveRecord record)
+	public boolean isValid(@Nonnull final ActiveRecord record)
 	{
 		if(isValidated())
 		{
@@ -556,7 +585,7 @@ public abstract class RecordBase<T extends ActiveRecord> implements ReadOnlyReco
 	 * @throws ValidationFailed if the validation failed
 	 * @see ValidatedRecord#validate()
 	 */
-	public void validate(final ActiveRecord record)
+	public void validate(@Nonnull final ActiveRecord record)
 	{
 		if(isValidated())
 		{
@@ -576,19 +605,21 @@ public abstract class RecordBase<T extends ActiveRecord> implements ReadOnlyReco
 	{
 		return RecordCallbacks.class.isAssignableFrom( recordType);
 	}
-	
+
 	////
 	// Record-Sets
 	////
-	
+
 	@Override
+	@Nonnull
 	public RecordSet<T> getAll()
 	{
 		return new TableSet<T>(this );
 	}
-	
+
 	@Override
-	public RecordSet<T> getForCondition(Condition cond)
+	@Nonnull
+	public RecordSet<T> getForCondition(@Nullable final Condition cond)
 	{
 		return new ConditionSet<T>(this, cond, null, null );
 	}

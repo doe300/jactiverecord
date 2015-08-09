@@ -24,6 +24,8 @@
  */
 package de.doe300.activerecord;
 
+import javax.annotation.Nonnull;
+
 import de.doe300.activerecord.record.ActiveRecord;
 
 /**
@@ -38,8 +40,13 @@ public interface RecordListener
 	 * @param base the record-base which threw the event
 	 * @param record the record created/destroyed
 	 */
-	public void notifyRecordEvent(RecordEvent eventType, RecordBase<?> base, ActiveRecord record);
-	
+	public void notifyRecordEvent(@Nonnull RecordEvent eventType, @Nonnull RecordBase<?> base, @Nonnull ActiveRecord record);
+
+	/**
+	 * The Event-type
+	 * 
+	 * @author daniel
+	 */
 	public static enum RecordEvent
 	{
 		/**

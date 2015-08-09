@@ -158,7 +158,7 @@ public class ProfilingRecordStore implements RecordStore
 	}
 
 	@Override
-	public boolean containsRecord(RecordBase<?> base, Integer primaryKey )
+	public boolean containsRecord(RecordBase<?> base, int primaryKey )
 	{
 		return profiler.profile( "containsRecord", () -> store.containsRecord( base, primaryKey));
 	}

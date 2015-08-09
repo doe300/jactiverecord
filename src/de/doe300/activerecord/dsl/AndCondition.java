@@ -24,13 +24,17 @@
  */
 package de.doe300.activerecord.dsl;
 
-import de.doe300.activerecord.jdbc.VendorSpecific;
-import de.doe300.activerecord.record.ActiveRecord;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
+
+import javax.annotation.Nonnull;
+import javax.annotation.Nullable;
+
+import de.doe300.activerecord.jdbc.VendorSpecific;
+import de.doe300.activerecord.record.ActiveRecord;
 
 /**
  * Class for SQL cond1 AND cond2 AND cond3 ... conditions
@@ -40,7 +44,7 @@ public class AndCondition implements Condition
 {
 	private final Condition[] conditions;
 
-	private AndCondition( Condition[] conditions )
+	private AndCondition(final Condition[] conditions )
 	{
 		this.conditions = conditions;
 	}
@@ -57,14 +61,15 @@ public class AndCondition implements Condition
 	 * @param conds
 	 * @return the combined Condition
 	 */
-	public static Condition andConditions(Condition... conds)
+	@Nonnull
+	public static Condition andConditions(@Nullable final Condition... conds)
 	{
 		if(conds == null || conds.length == 0)
 		{
 			throw new IllegalArgumentException();
 		}
-		ArrayList<Condition> list = new ArrayList<>(conds.length);
-		for(Condition cond: conds)
+		final ArrayList<Condition> list = new ArrayList<>(conds.length);
+		for(final Condition cond: conds)
 		{
 			//remove nulls
 			if(cond == null)
@@ -89,7 +94,7 @@ public class AndCondition implements Condition
 			}
 			list.add( cond );
 		}
-		if(list.size() == 0)
+		if(list.isEmpty())
 		{
 			//TODO what to return??
 		}
@@ -103,7 +108,7 @@ public class AndCondition implements Condition
 	@Override
 	public boolean hasWildcards()
 	{
-		for(Condition con : conditions)
+		for(final Condition con : conditions)
 		{
 			if(con.hasWildcards())
 			{
@@ -116,8 +121,8 @@ public class AndCondition implements Condition
 	@Override
 	public Object[] getValues()
 	{
-		List<Object> values = new ArrayList<>(conditions.length);
-		for(Condition cond:conditions)
+		final List<Object> values = new ArrayList<>(conditions.length);
+		for(final Condition cond:conditions)
 		{
 			values.addAll( Arrays.asList( cond.getValues()));
 		}
@@ -125,9 +130,9 @@ public class AndCondition implements Condition
 	}
 
 	@Override
-	public boolean test( ActiveRecord record )
+	public boolean test(final ActiveRecord record )
 	{
-		for(Condition cond:conditions)
+		for(final Condition cond:conditions)
 		{
 			if(!cond.test( record ))
 			{
@@ -138,9 +143,9 @@ public class AndCondition implements Condition
 	}
 
 	@Override
-	public boolean test( Map<String, Object> t )
+	public boolean test( final Map<String, Object> t )
 	{
-		for(Condition cond:conditions)
+		for(final Condition cond:conditions)
 		{
 			if(!cond.test( t ))
 			{
@@ -151,12 +156,13 @@ public class AndCondition implements Condition
 	}
 
 	@Override
-	public String toSQL(VendorSpecific vendorSpecifics)
+	public String toSQL(@Nullable final VendorSpecific vendorSpecifics)
 	{
-		return "("+ Arrays.stream( conditions ).map( (Condition c) -> c.toSQL(vendorSpecifics) ).collect( Collectors.joining( ") AND ("))+")";
+		return "("+ Arrays.stream( conditions ).map( (final Condition c) -> c.toSQL(vendorSpecifics) ).collect( Collectors.joining( ") AND ("))+")";
 	}
 
 	@Override
+	@Nonnull
 	public Condition negate()
 	{
 		return InvertedCondition.invertCondition(this );

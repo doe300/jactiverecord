@@ -24,36 +24,40 @@
  */
 package de.doe300.activerecord.record.association;
 
-import de.doe300.activerecord.ReadOnlyRecordBase;
-import de.doe300.activerecord.RecordBase;
-import de.doe300.activerecord.dsl.Condition;
-import de.doe300.activerecord.record.ActiveRecord;
-import de.doe300.activerecord.scope.Scope;
 import java.util.AbstractSet;
 import java.util.Collection;
 import java.util.Iterator;
 import java.util.stream.Stream;
 
+import javax.annotation.Nonnull;
+
+import de.doe300.activerecord.ReadOnlyRecordBase;
+import de.doe300.activerecord.RecordBase;
+import de.doe300.activerecord.dsl.Condition;
+import de.doe300.activerecord.record.ActiveRecord;
+import de.doe300.activerecord.scope.Scope;
+
 /**
  * A RecordSet containing all records in a table
- * 
+ *
  * NOTE: this set is unmodifiable
  * @author doe300
  * @param <T>
  */
 public class TableSet<T extends ActiveRecord> extends AbstractSet<T> implements RecordSet<T>
 {
+	@Nonnull
 	private final RecordBase<T> base;
 
 	/**
 	 * Standard constructor for creating a set containing all records in the {@link RecordBase}
-	 * @param base 
+	 * @param base
 	 */
-	public TableSet( RecordBase<T> base )
+	public TableSet(@Nonnull final RecordBase<T> base)
 	{
 		this.base = base;
 	}
-	
+
 	@Override
 	public ReadOnlyRecordBase<T> getRecordBase()
 	{
@@ -73,7 +77,7 @@ public class TableSet<T extends ActiveRecord> extends AbstractSet<T> implements 
 	}
 
 	@Override
-	public boolean contains( Object o )
+	public boolean contains( final Object o )
 	{
 		return base.getRecordType().isInstance( o ) && base.hasRecord( ((ActiveRecord)o).getPrimaryKey() );
 	}
@@ -85,37 +89,37 @@ public class TableSet<T extends ActiveRecord> extends AbstractSet<T> implements 
 	}
 
 	@Override
-	public boolean add( T e )
+	public boolean add( final T e )
 	{
 		throw new UnsupportedOperationException("TableSets are unmodifiable");
 	}
 
 	@Override
-	public boolean remove( Object o )
+	public boolean remove( final Object o )
 	{
 		throw new UnsupportedOperationException("TableSets are unmodifiable");
 	}
 
 	@Override
-	public boolean addAll(Collection<? extends T> c )
+	public boolean addAll(final Collection<? extends T> c )
 	{
 		throw new UnsupportedOperationException("TableSets are unmodifiable");
 	}
 
 	@Override
-	public boolean retainAll(Collection<?> c )
+	public boolean retainAll(final Collection<?> c )
 	{
 		throw new UnsupportedOperationException("TableSets are unmodifiable");
 	}
 
 	@Override
-	public boolean removeAll(Collection<?> c )
+	public boolean removeAll(final Collection<?> c )
 	{
 		throw new UnsupportedOperationException("TableSets are unmodifiable");
 	}
 
 	@Override
-	public boolean containsAll(Collection<?> c )
+	public boolean containsAll(final Collection<?> c )
 	{
 		return c.stream().allMatch( this::contains);
 	}
@@ -127,19 +131,19 @@ public class TableSet<T extends ActiveRecord> extends AbstractSet<T> implements 
 	}
 
 	@Override
-	public Stream<T> findWithScope( Scope scope )
+	public Stream<T> findWithScope( final Scope scope )
 	{
 		return base.findWithScope( new Scope(scope.getCondition(), scope.getOrder(), scope.getLimit()) );
 	}
 
 	@Override
-	public T findFirstWithScope( Scope scope )
+	public T findFirstWithScope( final Scope scope )
 	{
 		return base.findFirstWithScope( new Scope(scope.getCondition(), scope.getOrder(), scope.getLimit()) );
 	}
 
 	@Override
-	public RecordSet<T> getForCondition( Condition cond )
+	public RecordSet<T> getForCondition( final Condition cond )
 	{
 		return new ConditionSet<T>(base, cond );
 	}

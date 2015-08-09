@@ -24,13 +24,17 @@
  */
 package de.doe300.activerecord.pojo;
 
+import java.util.Map;
+
+import javax.annotation.Nonnull;
+import javax.annotation.Nullable;
+
 import de.doe300.activerecord.RecordBase;
 import de.doe300.activerecord.RecordCore;
 import de.doe300.activerecord.RecordException;
 import de.doe300.activerecord.jdbc.TypeMappings;
 import de.doe300.activerecord.record.ActiveRecord;
 import de.doe300.activerecord.store.RecordStore;
-import java.util.Map;
 
 /**
  * Any POJO-based ActiveRecord is required to have a constructor accepting the primaryKey (int) and this POJOBase as parameters
@@ -50,7 +54,7 @@ public class POJOBase<T extends ActiveRecord> extends RecordBase<T>
 	}
 
 	@Override
-	protected T createProxy( final int primaryKey, boolean newRecord, Map<String, Object> recordData ) throws RecordException
+	protected T createProxy( final int primaryKey, final boolean newRecord, final Map<String, Object> recordData ) throws RecordException
 	{
 		try
 		{
@@ -68,7 +72,7 @@ public class POJOBase<T extends ActiveRecord> extends RecordBase<T>
 	 * @param name
 	 * @param value
 	 */
-	public void setProperty(final int primaryKey, final String name, final Object value)
+	public void setProperty(final int primaryKey, @Nonnull final String name, @Nullable final Object value)
 	{
 		store.setValue( this, primaryKey, name, value );
 	}
@@ -80,22 +84,28 @@ public class POJOBase<T extends ActiveRecord> extends RecordBase<T>
 	 * @deprecated use {@link #getProperty(int, java.lang.String, java.lang.Class) } instead
 	 */
 	@Deprecated
-	public Object getProperty(final int primaryKey, final String name)
+	public Object getProperty(final int primaryKey, @Nonnull final String name)
 	{
 		return store.getValue( this, primaryKey, name );
 	}
-	
+
 	/**
-	 * 
-	 * @param <T> 
+	 * @param <U>
+	 *            the type of the return-value
 	 * @param primaryKey
 	 * @param name
-	 * @param type the expected type
+	 * @param type
+	 *            the expected type
 	 * @return the value of the given type
+	 * @throws ClassCastException
+	 *             if the return-value could not be casted
+	 * @see TypeMappings#coerceToType(Object, Class)
 	 */
-	public <T> T getProperty(final int primaryKey, final String name, final Class<T> type) throws ClassCastException
+	@Nullable
+	public <U> U getProperty(final int primaryKey, @Nonnull final String name, @Nonnull final Class<U> type)
+		throws ClassCastException
 	{
-		Object obj = store.getValue( this, primaryKey, name );
+		final Object obj = store.getValue( this, primaryKey, name );
 		return TypeMappings.coerceToType( obj, type );
 	}
 }

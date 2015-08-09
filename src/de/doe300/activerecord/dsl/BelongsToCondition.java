@@ -24,12 +24,15 @@
  */
 package de.doe300.activerecord.dsl;
 
+import java.util.Map;
+
+import javax.annotation.Nullable;
+
 import de.doe300.activerecord.ReadOnlyRecordBase;
 import de.doe300.activerecord.RecordBase;
 import de.doe300.activerecord.jdbc.VendorSpecific;
 import de.doe300.activerecord.record.ActiveRecord;
 import de.doe300.activerecord.record.association.AssociationHelper;
-import java.util.Map;
 
 /**
  * A Condition on another table referenced by a belongs-to association
@@ -42,14 +45,14 @@ public class BelongsToCondition implements Condition
 	private final ReadOnlyRecordBase<?> associatedTableBase;
 
 	/**
-	 * 
+	 *
 	 * @param foreignKeyColumn the name of the local column containing the foreign key
 	 * @param associatedTableBase the base of the associated table
 	 * @param associatedTableKey the column of the associated table referenced by the foreign key
 	 * @param associatedTableCond the condition to test in the associated table
 	 */
-	public BelongsToCondition( String foreignKeyColumn, ReadOnlyRecordBase<?> associatedTableBase, String associatedTableKey,
-			Condition associatedTableCond )
+	public BelongsToCondition(final String foreignKeyColumn, final ReadOnlyRecordBase<?> associatedTableBase,
+			final String associatedTableKey, @Nullable final Condition associatedTableCond )
 	{
 		this.foreignKeyColumn = foreignKeyColumn;
 		this.associatedTableBase = associatedTableBase;
@@ -62,15 +65,16 @@ public class BelongsToCondition implements Condition
 	 * @param foreignKeyColumn the name of the local column containing the foreign key
 	 * @param associatedTableBase the base of the associated table
 	 * @param associatedTableCond the condition to test in the associated table
-	 * @see RecordBase#getPrimaryColumn() 
+	 * @see RecordBase#getPrimaryColumn()
 	 */
-	public BelongsToCondition(String foreignKeyColumn, RecordBase<?> associatedTableBase, Condition associatedTableCond )
+	public BelongsToCondition(final String foreignKeyColumn, final RecordBase<?> associatedTableBase,
+			final Condition associatedTableCond )
 	{
 		this(foreignKeyColumn, associatedTableBase, associatedTableBase.getPrimaryColumn(), associatedTableCond);
 	}
-	
-	
-	
+
+
+
 	@Override
 	public boolean hasWildcards()
 	{
@@ -78,13 +82,14 @@ public class BelongsToCondition implements Condition
 	}
 
 	@Override
+	@Nullable
 	public Object[] getValues()
 	{
 		return associatedTableCond.getValues();
 	}
 
 	@Override
-	public String toSQL(VendorSpecific vendorSpecifics)
+	public String toSQL(@Nullable final VendorSpecific vendorSpecifics)
 	{
 		//XXX which version is more performant??
 		//EXISTS(SELECT associatedKey FROM associatedTable WHERE thisTable.foreignKey = associatedKey AND cond)
@@ -92,16 +97,20 @@ public class BelongsToCondition implements Condition
 		//for now choosing the seconds, because the subquery is independant and could be cached easier, I think
 		return foreignKeyColumn+" IN (SELECT "+associatedTableKey+" FROM "+associatedTableBase.getTableName()+" WHERE "+associatedTableCond.toSQL(vendorSpecifics)+")";
 	}
-	
-	@Override
-	public boolean test( ActiveRecord record )
-	{
-		ActiveRecord associatedRecord = AssociationHelper.getBelongsTo( record, associatedTableBase.getRecordType(), foreignKeyColumn);
-			return associatedTableCond.test( associatedRecord);
-		}
 
 	@Override
-	public boolean test( Map<String, Object> map )
+	public boolean test(final ActiveRecord record )
+	{
+		final ActiveRecord associatedRecord = AssociationHelper.getBelongsTo( record, associatedTableBase.getRecordType(), foreignKeyColumn);
+		if (associatedRecord == null)
+		{
+			return false;
+		}
+		return associatedTableCond.test(associatedRecord);
+	}
+
+	@Override
+	public boolean test(final Map<String, Object> map )
 	{
 		throw new UnsupportedOperationException( "Can't resolve an AssociationCondition from column-values!" );
 	}

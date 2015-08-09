@@ -43,6 +43,10 @@ import java.util.stream.Collectors;
 import java.util.stream.Stream;
 import java.util.stream.StreamSupport;
 
+import javax.annotation.Nonnull;
+import javax.annotation.Nullable;
+import javax.annotation.WillNotClose;
+
 import de.doe300.activerecord.RecordBase;
 import de.doe300.activerecord.dsl.Condition;
 import de.doe300.activerecord.dsl.Order;
@@ -62,24 +66,29 @@ import de.doe300.activerecord.store.RecordStore;
  */
 public class SimpleJDBCRecordStore implements RecordStore
 {
+	@Nonnull
 	protected final Connection con;
 	protected final VendorSpecific vendorSpecifics;
 
 	/**
 	 * @param con
 	 */
-	public SimpleJDBCRecordStore(final Connection con)
+	public SimpleJDBCRecordStore(@Nonnull final Connection con)
 	{
 		this.con=con;
 		this.vendorSpecifics = VendorSpecific.guessDatabaseVendor( con );
 	}
-	
-	public SimpleJDBCRecordStore( Connection con, VendorSpecific vendorSpecifics )
+
+	/**
+	 * @param con
+	 * @param vendorSpecifics
+	 */
+	public SimpleJDBCRecordStore(@Nonnull final Connection con, @Nullable final VendorSpecific vendorSpecifics)
 	{
 		this.con = con;
 		this.vendorSpecifics = vendorSpecifics;
 	}
-	
+
 	protected String toWhereClause(final Condition condition)
 	{
 		if(condition==null)
@@ -113,11 +122,16 @@ public class SimpleJDBCRecordStore implements RecordStore
 		return primaryColumn+", "+Arrays.stream( columns ).collect( Collectors.joining(", "));
 	}
 
-	protected void fillStatement(final PreparedStatement stm, final Condition condition) throws SQLException
+	protected void fillStatement(@Nonnull final PreparedStatement stm, @Nonnull final Condition condition)
+		throws SQLException
 	{
 		if(condition.hasWildcards())
 		{
 			final Object[] values = condition.getValues();
+			if (values == null)
+			{
+				throw new IllegalArgumentException("Wildcard-Condition without any Arguments");
+			}
 			for(int i=0;i<values.length;i++)
 			{
 				stm.setObject( i+1, values[i]);
@@ -134,16 +148,16 @@ public class SimpleJDBCRecordStore implements RecordStore
 	{
 		return VendorSpecific.convertIdentifier( input, con );
 	}
-	
+
 	/**
 	 * Checks whether the table for this RecordBase exists.
-	 * 
+	 *
 	 * If the base is {@link RecordBase#isAutoCreate() auto-create}, the table is created, if necessary
-	 * 
+	 *
 	 * @param base
-	 * @throws IllegalStateException 
+	 * @throws IllegalStateException
 	 */
-	protected void checkTableExists(RecordBase<?> base) throws IllegalStateException
+	protected void checkTableExists(final RecordBase<?> base) throws IllegalStateException
 	{
 		if(!exists( base.getTableName()))
 		{
@@ -158,7 +172,7 @@ public class SimpleJDBCRecordStore implements RecordStore
 				}
 				else
 				{
-					mig = new AutomaticMigration(base.getRecordType(), false);
+					mig = new AutomaticMigration(base.getRecordType(), false, vendorSpecifics);
 				}
 				try
 				{
@@ -317,7 +331,7 @@ public class SimpleJDBCRecordStore implements RecordStore
 	}
 
 	@Override
-	public boolean containsRecord( final RecordBase<?> base, final Integer primaryKey )
+	public boolean containsRecord( final RecordBase<?> base, final int primaryKey )
 	{
 		checkTableExists( base );
 		final String sql = "SELECT "+base.getPrimaryColumn()+" FROM "+base.getTableName()+" WHERE "+base.getPrimaryColumn()+" = "+primaryKey;
@@ -424,6 +438,7 @@ public class SimpleJDBCRecordStore implements RecordStore
 	}
 
 	@Override
+	@WillNotClose
 	public Stream<Map<String, Object>> streamAllWithData( final RecordBase<?> base, final String[] columns, final Scope scope )
 	{
 		String sql = "SELECT "+toColumnsList( columns, base.getPrimaryColumn() )+" FROM "+base.getTableName()+" "+toWhereClause( scope.getCondition() )+" ORDER BY "+toOrder( base, scope ).toSQL(vendorSpecifics);
@@ -435,7 +450,7 @@ public class SimpleJDBCRecordStore implements RecordStore
 		try
 		{
 			//this statement can't be try-with-resource because it would close the result-set
-			PreparedStatement stm = con.prepareStatement(sql);
+			final PreparedStatement stm = con.prepareStatement(sql);
 			if(scope.getCondition()!=null)
 			{
 				fillStatement( stm, scope.getCondition() );
@@ -453,7 +468,8 @@ public class SimpleJDBCRecordStore implements RecordStore
 		}
 	}
 
-	private Stream<Map<String, Object>> allWithDataStream(final String[] columns, final ResultSet res)
+	@Nonnull
+	private Stream<Map<String, Object>> allWithDataStream(@Nonnull final String[] columns, @Nonnull final ResultSet res)
 	{
 		return StreamSupport.stream( new Spliterator<Map<String,Object>>()
 		{
@@ -500,7 +516,17 @@ public class SimpleJDBCRecordStore implements RecordStore
 			{
 				return Spliterator.DISTINCT|Spliterator.IMMUTABLE|Spliterator.NONNULL|Spliterator.ORDERED;
 			}
-		},false);
+		},false).onClose( () ->
+		{
+			try
+			{
+				res.close();
+			}
+			catch ( final SQLException ex )
+			{
+				throw new RuntimeException(ex);
+			}
+		});
 	}
 
 	@Override
@@ -568,8 +594,8 @@ public class SimpleJDBCRecordStore implements RecordStore
 			}
 
 			final String sql = "INSERT INTO "+base.getTableName()+
-					" ("+rowData.entrySet().stream().map((final Map.Entry<String,Object> e) -> e.getKey()).map( this::convertIdentifier).collect( Collectors.joining( ", "))+
-					") VALUES ("+rowData.entrySet().stream().map((final Map.Entry<String,Object> e) -> "?").collect( Collectors.joining( ", "))+")";
+				" ("+rowData.entrySet().stream().map((final Map.Entry<String,Object> e) -> e.getKey()).map( this::convertIdentifier).collect( Collectors.joining( ", "))+
+				") VALUES ("+rowData.entrySet().stream().map((final Map.Entry<String,Object> e) -> "?").collect( Collectors.joining( ", "))+")";
 			Logging.getLogger().debug( "JDBCStore", sql);
 			try (PreparedStatement stmt = con.prepareStatement(sql, Statement.RETURN_GENERATED_KEYS))
 			{
@@ -609,15 +635,17 @@ public class SimpleJDBCRecordStore implements RecordStore
 	}
 
 	@Override
+	@WillNotClose
 	public Stream<Object> getValues( final String tableName, final String column, final String condColumn, final Object condValue ) throws
-			IllegalArgumentException
+	IllegalArgumentException
 	{
+		//FIXME ResultSet is never closed if Stream is not read to the end!! (in all methods returning a Stream)
 		final String sql = "SELECT "+column+" FROM " +tableName+ " WHERE "+condColumn+" = ?";
 		Logging.getLogger().debug( "JDBCStore", sql);
 		try
 		{
 			//can't use try-with-resource here, because result-set is required to stay open
-			PreparedStatement stmt = con.prepareStatement( sql);
+			final PreparedStatement stmt = con.prepareStatement( sql);
 			stmt.setObject( 1, condValue);
 			final ResultSet res = stmt.executeQuery();
 			return valuesStream(res);
@@ -631,7 +659,8 @@ public class SimpleJDBCRecordStore implements RecordStore
 		}
 	}
 
-	private Stream<Object> valuesStream(final ResultSet res)
+	@Nonnull
+	private Stream<Object> valuesStream(@Nonnull final ResultSet res)
 	{
 		return StreamSupport.stream( new Spliterator<Object>()
 		{
@@ -672,7 +701,16 @@ public class SimpleJDBCRecordStore implements RecordStore
 			{
 				return Spliterator.DISTINCT|Spliterator.IMMUTABLE|Spliterator.NONNULL|Spliterator.ORDERED;
 			}
-		}, false);
+		}, false).onClose( () -> {
+			try
+			{
+				res.close();
+			}
+			catch ( final SQLException ex )
+			{
+				throw new RuntimeException(ex);
+			}
+		});
 	}
 
 	@Override
@@ -707,7 +745,7 @@ public class SimpleJDBCRecordStore implements RecordStore
 			throw new IllegalArgumentException("Table doesn't exists: "+tableName);
 		}
 		final String sql = "INSERT INTO "+tableName+" ("+Arrays.stream( rows).collect( Collectors.joining(", "))+") VALUES ("+
-				Arrays.stream( values ).map( (final Object obj) -> "?").collect( Collectors.joining(", "))+")";
+			Arrays.stream( values ).map( (final Object obj) -> "?").collect( Collectors.joining(", "))+")";
 		Logging.getLogger().debug( "JDBCStore", sql);
 		try(PreparedStatement stm = con.prepareStatement( sql ))
 		{

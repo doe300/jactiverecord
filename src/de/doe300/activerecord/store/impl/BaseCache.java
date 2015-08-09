@@ -24,12 +24,15 @@
  */
 package de.doe300.activerecord.store.impl;
 
-import de.doe300.activerecord.RecordBase;
 import java.util.Collections;
 import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
 import java.util.TreeMap;
+
+import javax.annotation.Nonnull;
+
+import de.doe300.activerecord.RecordBase;
 
 /**
  * Caches all rows of one DB TABLE
@@ -39,10 +42,10 @@ class BaseCache
 {
 	private final Map<Integer, RowCache> cachedRows;
 	private final RecordBase<?> base;
-	
+
 	private final Set<RowCache> modifiedRows;
 
-	BaseCache(RecordBase<?> base)
+	BaseCache(final RecordBase<?> base)
 	{
 		this.cachedRows = Collections.synchronizedSortedMap( new TreeMap<>());
 		this.base = base;
@@ -53,25 +56,25 @@ class BaseCache
 	 * @param primaryKey
 	 * @return the row or <code>null</code>
 	 */
-	public RowCache getRow(int primaryKey)
+	public RowCache getRow(final int primaryKey)
 	{
 		return cachedRows.get( primaryKey );
 	}
-	
-	private RowCache createRow(int primaryKey)
+
+	private RowCache createRow(final int primaryKey)
 	{
-		RowCache cache = new RowCache(this, base.getPrimaryColumn(), base.isTimestamped() );
+		final RowCache cache = new RowCache(this, base.getPrimaryColumn(), base.isTimestamped() );
 		cache.setData( base.getPrimaryColumn(), primaryKey, false);
 		cachedRows.put( primaryKey, cache );
 		return cache;
 	}
-	
+
 	/**
-	 * 
+	 *
 	 * @param primaryKey
 	 * @return the existing or newly created row
 	 */
-	public RowCache getOrCreateRow(int primaryKey)
+	public RowCache getOrCreateRow(final int primaryKey)
 	{
 		if(cachedRows.containsKey( primaryKey))
 		{
@@ -79,39 +82,41 @@ class BaseCache
 		}
 		return createRow( primaryKey );
 	}
-	
+
 	/**
-	 * 
+	 *
 	 * @param primaryKey
 	 * @return whether the row is cached
 	 */
-	public boolean containsRow(int primaryKey)
+	public boolean containsRow(final int primaryKey)
 	{
 		return cachedRows.containsKey( primaryKey );
 	}
-	
+
 	/**
-	 * @param primaryKey 
+	 * @param primaryKey
 	 */
-	public void removeRow(int primaryKey)
+	public void removeRow(final int primaryKey)
 	{
 		cachedRows.remove( primaryKey );
 	}
-	
+
 	/**
 	 * Called by RowCache to invalidate the BaseCache
+	 * 
+	 * @param row
 	 */
-	public void setModified(RowCache row)
+	public void setModified(@Nonnull final RowCache row)
 	{
 		modifiedRows.add( row );
 	}
-	
+
 	/**
 	 * Writes all changes from this table
 	 * @param store
 	 * @return whether some data was written
 	 */
-	public boolean writeAllBack(CachedJDBCRecordStore store)
+	public boolean writeAllBack(final CachedJDBCRecordStore store)
 	{
 		if(modifiedRows.isEmpty())
 		{
@@ -120,7 +125,7 @@ class BaseCache
 		boolean changed = false;
 		synchronized(modifiedRows)
 		{
-			for(RowCache cache : modifiedRows)
+			for(final RowCache cache : modifiedRows)
 			{
 				if(cache.writeBack( store, base ))
 				{

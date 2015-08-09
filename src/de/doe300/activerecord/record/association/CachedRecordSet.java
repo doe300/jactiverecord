@@ -24,10 +24,6 @@
  */
 package de.doe300.activerecord.record.association;
 
-import de.doe300.activerecord.ReadOnlyRecordBase;
-import de.doe300.activerecord.dsl.Condition;
-import de.doe300.activerecord.record.ActiveRecord;
-import de.doe300.activerecord.scope.Scope;
 import java.util.AbstractSet;
 import java.util.Collection;
 import java.util.Iterator;
@@ -35,20 +31,32 @@ import java.util.SortedSet;
 import java.util.TreeSet;
 import java.util.stream.Stream;
 
+import javax.annotation.Nonnull;
+
+import de.doe300.activerecord.ReadOnlyRecordBase;
+import de.doe300.activerecord.dsl.Condition;
+import de.doe300.activerecord.record.ActiveRecord;
+import de.doe300.activerecord.scope.Scope;
+
 /**
  * A CachedRecordSet caches the records for successive calls, but will NOT be notified about changes in the underling DB.
- * 
+ *
  * NOTE: CachedRecordSet is unmodifiable
- * 
+ *
  * @author doe300
  * @param <T>
  */
 public class CachedRecordSet<T extends ActiveRecord> extends AbstractSet<T> implements RecordSet<T>
 {
+	@Nonnull
 	private final RecordSet<T> source;
+	@Nonnull
 	private final SortedSet<T> cache;
 
-	public CachedRecordSet(RecordSet<T> source)
+	/**
+	 * @param source
+	 */
+	public CachedRecordSet(@Nonnull final RecordSet<T> source)
 	{
 		this.source = source;
 		this.cache = new TreeSet<T>();
@@ -71,7 +79,7 @@ public class CachedRecordSet<T extends ActiveRecord> extends AbstractSet<T> impl
 	}
 
 	@Override
-	public RecordSet<T> getForCondition( Condition cond )
+	public RecordSet<T> getForCondition( final Condition cond )
 	{
 		return new CachedRecordSet<T>(source.getForCondition( cond) );
 	}
@@ -117,7 +125,7 @@ public class CachedRecordSet<T extends ActiveRecord> extends AbstractSet<T> impl
 	}
 
 	@Override
-	public boolean contains( Object o )
+	public boolean contains( final Object o )
 	{
 		if(!cache.isEmpty())
 		{
@@ -133,37 +141,37 @@ public class CachedRecordSet<T extends ActiveRecord> extends AbstractSet<T> impl
 	}
 
 	@Override
-	public boolean add( T e )
+	public boolean add( final T e )
 	{
 		throw new UnsupportedOperationException("CachedRecordSets are unmodifiable");
 	}
 
 	@Override
-	public boolean remove( Object o )
+	public boolean remove( final Object o )
 	{
 		throw new UnsupportedOperationException("CachedRecordSets are unmodifiable");
 	}
 
 	@Override
-	public boolean containsAll(Collection<?> c )
+	public boolean containsAll(final Collection<?> c )
 	{
 		throw new UnsupportedOperationException("CachedRecordSets are unmodifiable");
 	}
 
 	@Override
-	public boolean addAll(Collection<? extends T> c )
+	public boolean addAll(final Collection<? extends T> c )
 	{
 		throw new UnsupportedOperationException("CachedRecordSets are unmodifiable");
 	}
 
 	@Override
-	public boolean retainAll(Collection<?> c )
+	public boolean retainAll(final Collection<?> c )
 	{
 		throw new UnsupportedOperationException("CachedRecordSets are unmodifiable");
 	}
 
 	@Override
-	public boolean removeAll(Collection<?> c )
+	public boolean removeAll(final Collection<?> c )
 	{
 		throw new UnsupportedOperationException("CachedRecordSets are unmodifiable");
 	}
@@ -175,13 +183,13 @@ public class CachedRecordSet<T extends ActiveRecord> extends AbstractSet<T> impl
 	}
 
 	@Override
-	public Stream<T> findWithScope( Scope scope )
+	public Stream<T> findWithScope( final Scope scope )
 	{
 		return source.findWithScope( scope );
 	}
 
 	@Override
-	public T findFirstWithScope( Scope scope )
+	public T findFirstWithScope( final Scope scope )
 	{
 		return source.findFirstWithScope( scope );
 	}

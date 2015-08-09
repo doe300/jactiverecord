@@ -39,6 +39,8 @@ import java.lang.reflect.Constructor;
 import java.lang.reflect.InvocationHandler;
 import java.lang.reflect.Method;
 
+import javax.annotation.Nonnull;
+
 /**
  * The handler-class for proxy-based ActiveRecord. Mainly handles standard ActiveRecord-methods and delegates to any given {@link ProxyHandler}
  * @author doe300
@@ -46,8 +48,9 @@ import java.lang.reflect.Method;
  */
 public final class RecordHandler<T extends ActiveRecord> implements InvocationHandler
 {
-	
+	@Nonnull
 	private final RecordStore store;
+	@Nonnull
 	private final RecordBase<T> base;
 	private final ProxyHandler[] proxyHandlers;
 	private final int primaryKey;
@@ -89,7 +92,7 @@ public final class RecordHandler<T extends ActiveRecord> implements InvocationHa
 	 * @param base
 	 * @param handlers 
 	 */
-	public RecordHandler(int primaryKey, RecordBase<T> base, ProxyHandler... handlers)
+	public RecordHandler(int primaryKey,@Nonnull final RecordBase<T> base, ProxyHandler... handlers)
 	{
 		this.primaryKey = primaryKey;
 		this.base = base;

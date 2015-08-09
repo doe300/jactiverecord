@@ -24,6 +24,15 @@
  */
 package de.doe300.activerecord.record.association;
 
+import java.util.AbstractSet;
+import java.util.Collection;
+import java.util.Iterator;
+import java.util.Set;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
+
+import javax.annotation.Nonnull;
+
 import de.doe300.activerecord.ReadOnlyRecordBase;
 import de.doe300.activerecord.RecordBase;
 import de.doe300.activerecord.dsl.AndCondition;
@@ -32,12 +41,6 @@ import de.doe300.activerecord.dsl.Condition;
 import de.doe300.activerecord.dsl.SimpleCondition;
 import de.doe300.activerecord.record.ActiveRecord;
 import de.doe300.activerecord.scope.Scope;
-import java.util.AbstractSet;
-import java.util.Collection;
-import java.util.Iterator;
-import java.util.Set;
-import java.util.stream.Collectors;
-import java.util.stream.Stream;
 
 /**
  * has-many-through association represented as modifiable Set writing all changes into the backing record-store
@@ -46,20 +49,23 @@ import java.util.stream.Stream;
  */
 public class HasManyThroughAssociationSet<T extends ActiveRecord> extends AbstractSet<T> implements RecordSet<T>
 {
-	private final RecordBase<T> destBase;
+	@Nonnull
+	final RecordBase<T> destBase;
+	@Nonnull
 	private final String mappingTableName, thisMappingKey, foreignMappingKey;
 	private final int thisPrimaryKey;
 
 	/**
-	 * 
+	 *
 	 * @param destBase the RecordBase for the associated record
 	 * @param thisPrimaryKey the primary-key to list the associations for
 	 * @param mappingTableName the name of the mapping-table
 	 * @param thisMappingKey the column of the mapping-table the primary key for the source object is stored
 	 * @param foreignMappingKey the column of the mapping-table the primary key for the associated objects are stored
 	 */
-	public HasManyThroughAssociationSet( RecordBase<T> destBase, int thisPrimaryKey, String mappingTableName, String thisMappingKey,
-			String foreignMappingKey )
+	public HasManyThroughAssociationSet(@Nonnull final RecordBase<T> destBase, final int thisPrimaryKey,
+		@Nonnull final String mappingTableName, @Nonnull final String thisMappingKey,
+		@Nonnull final String foreignMappingKey)
 	{
 		this.destBase = destBase;
 		this.thisPrimaryKey = thisPrimaryKey;
@@ -67,10 +73,10 @@ public class HasManyThroughAssociationSet<T extends ActiveRecord> extends Abstra
 		this.thisMappingKey = thisMappingKey;
 		this.foreignMappingKey = foreignMappingKey;
 	}
-	
+
 	protected Stream<Integer> getAssocationKeys()
 	{
-		return destBase.getStore().getValues( mappingTableName, foreignMappingKey, thisMappingKey, thisPrimaryKey ).map( (Object o) -> (Integer)o);
+		return destBase.getStore().getValues( mappingTableName, foreignMappingKey, thisMappingKey, thisPrimaryKey ).map( (final Object o) -> (Integer)o);
 	}
 
 	@Override
@@ -80,24 +86,24 @@ public class HasManyThroughAssociationSet<T extends ActiveRecord> extends Abstra
 	}
 
 	@Override
-	public boolean contains( Object o )
+	public boolean contains( final Object o )
 	{
 		if(o == null || !destBase.getRecordType().isInstance( o))
 		{
 			return false;
 		}
-		T otherRecord = destBase.getRecordType().cast( o );
-		return getAssocationKeys().anyMatch( (Integer i) -> i == otherRecord.getPrimaryKey() );
+		final T otherRecord = destBase.getRecordType().cast( o );
+		return getAssocationKeys().anyMatch( (final Integer i) -> i == otherRecord.getPrimaryKey() );
 	}
 
 	@Override
 	public Iterator<T> iterator()
 	{
-		return getAssocationKeys().map( (Integer key ) -> destBase.getRecord( key)).iterator();
+		return getAssocationKeys().map( (final Integer key ) -> destBase.getRecord( key)).iterator();
 	}
 
 	@Override
-	public boolean add( T e )
+	public boolean add( final T e )
 	{
 		if(contains( e ))
 		{
@@ -105,18 +111,18 @@ public class HasManyThroughAssociationSet<T extends ActiveRecord> extends Abstra
 		}
 		return destBase.getStore().addRow( mappingTableName, new String[]{thisMappingKey,foreignMappingKey}, new Object[]{thisPrimaryKey,e.getPrimaryKey()} );
 	}
-	
-	private boolean remove0(Integer key)
+
+	boolean remove0(final Integer key)
 	{
-		Condition cond = AndCondition.andConditions(
-				new SimpleCondition(thisMappingKey, thisPrimaryKey, Comparison.IS),
-				new SimpleCondition(foreignMappingKey, key, Comparison.IS)
-		);
+		final Condition cond = AndCondition.andConditions(
+			new SimpleCondition(thisMappingKey, thisPrimaryKey, Comparison.IS),
+			new SimpleCondition(foreignMappingKey, key, Comparison.IS)
+			);
 		return destBase.getStore().removeRow( mappingTableName, cond );
 	}
 
 	@Override
-	public boolean remove( Object o )
+	public boolean remove( final Object o )
 	{
 		if(!destBase.getRecordType().isInstance( o ) || !contains(o ))
 		{
@@ -126,18 +132,18 @@ public class HasManyThroughAssociationSet<T extends ActiveRecord> extends Abstra
 	}
 
 	@Override
-	public boolean retainAll(Collection<?> c )
+	public boolean retainAll(final Collection<?> c )
 	{
-		return stream().filter( (T t ) -> !c.contains( t)).peek( (T t)->
+		return stream().filter( (final T t ) -> !c.contains( t)).peek( (final T t)->
 		{
 			remove0( t.getPrimaryKey() );
 		} ).count() > 0;
 	}
 
 	@Override
-	public boolean removeAll(Collection<?> c )
+	public boolean removeAll(final Collection<?> c )
 	{
-		return stream().filter( c::contains).peek( (T t)->
+		return stream().filter( c::contains).peek( (final T t)->
 		{
 			remove0( t.getPrimaryKey() );
 		} ).count() > 0;
@@ -146,7 +152,7 @@ public class HasManyThroughAssociationSet<T extends ActiveRecord> extends Abstra
 	@Override
 	public void clear()
 	{
-		getAssocationKeys().forEach( (Integer i) -> {remove0( i );} );
+		getAssocationKeys().forEach( (final Integer i) -> {remove0( i );} );
 	}
 
 	@Override
@@ -158,16 +164,16 @@ public class HasManyThroughAssociationSet<T extends ActiveRecord> extends Abstra
 	@Override
 	public Stream<T> findWithScope( final Scope scope)
 	{
-		Set<Integer> keys = getAssocationKeys().collect( Collectors.toSet());
-		Scope newScope = new Scope(AndCondition.andConditions(new SimpleCondition(destBase.getPrimaryColumn(), keys, Comparison.IN), scope.getCondition()), scope.getOrder(), scope.getLimit());
+		final Set<Integer> keys = getAssocationKeys().collect( Collectors.toSet());
+		final Scope newScope = new Scope(AndCondition.andConditions(new SimpleCondition(destBase.getPrimaryColumn(), keys, Comparison.IN), scope.getCondition()), scope.getOrder(), scope.getLimit());
 		return destBase.findWithScope( newScope );
 	}
 
 	@Override
-	public T findFirstWithScope( Scope scope)
+	public T findFirstWithScope( final Scope scope)
 	{
-		Set<Integer> keys = getAssocationKeys().collect( Collectors.toSet());
-		Scope newScope = new Scope(AndCondition.andConditions(new SimpleCondition(destBase.getPrimaryColumn(), keys, Comparison.IN), scope.getCondition()), scope.getOrder(), scope.getLimit());
+		final Set<Integer> keys = getAssocationKeys().collect( Collectors.toSet());
+		final Scope newScope = new Scope(AndCondition.andConditions(new SimpleCondition(destBase.getPrimaryColumn(), keys, Comparison.IN), scope.getCondition()), scope.getOrder(), scope.getLimit());
 		return destBase.findFirstWithScope( newScope);
 	}
 
@@ -178,7 +184,7 @@ public class HasManyThroughAssociationSet<T extends ActiveRecord> extends Abstra
 	}
 
 	@Override
-	public RecordSet<T> getForCondition( Condition cond )
+	public RecordSet<T> getForCondition( final Condition cond )
 	{
 		return new HasManyThroughSubSet(cond);
 	}
@@ -186,8 +192,8 @@ public class HasManyThroughAssociationSet<T extends ActiveRecord> extends Abstra
 	private class HasManyThroughSubSet extends AbstractSet<T> implements RecordSet<T>
 	{
 		private final Condition subCondition;
-		
-		HasManyThroughSubSet(Condition subCondition)
+
+		HasManyThroughSubSet(final Condition subCondition)
 		{
 			this.subCondition = subCondition;
 		}
@@ -197,7 +203,7 @@ public class HasManyThroughAssociationSet<T extends ActiveRecord> extends Abstra
 		{
 			return getAssocationKeys().map( destBase::getRecord).filter( subCondition);
 		}
-		
+
 		@Override
 		public int size()
 		{
@@ -205,9 +211,9 @@ public class HasManyThroughAssociationSet<T extends ActiveRecord> extends Abstra
 		}
 
 		@Override
-		public boolean contains( Object o )
+		public boolean contains( final Object o )
 		{
-			return HasManyThroughAssociationSet.this.contains( o ) && subCondition.test((ActiveRecord)o);
+			return o != null && HasManyThroughAssociationSet.this.contains(o) && subCondition.test((ActiveRecord) o);
 		}
 
 		@Override
@@ -217,9 +223,9 @@ public class HasManyThroughAssociationSet<T extends ActiveRecord> extends Abstra
 		}
 
 		@Override
-		public boolean add( T e )
+		public boolean add( final T e )
 		{
-			if(!subCondition.test( e ))
+			if (e == null || !subCondition.test(e))
 			{
 				return false;
 			}
@@ -227,24 +233,24 @@ public class HasManyThroughAssociationSet<T extends ActiveRecord> extends Abstra
 		}
 
 		@Override
-		public boolean remove( Object o )
+		public boolean remove( final Object o )
 		{
 			return contains( o ) && HasManyThroughAssociationSet.this.remove( o );
 		}
 
 		@Override
-		public boolean retainAll(Collection<?> c )
+		public boolean retainAll(final Collection<?> c )
 		{
-			return stream().filter( (T t ) -> !c.contains( t)).peek( (T t)->
+			return stream().filter( (final T t ) -> !c.contains( t)).peek( (final T t)->
 			{
 				remove0( t.getPrimaryKey() );
 			} ).count() > 0;
 		}
 
 		@Override
-		public boolean removeAll(Collection<?> c )
+		public boolean removeAll(final Collection<?> c )
 		{
-			return stream().filter( c::contains).peek( (T t)->
+			return stream().filter( c::contains).peek( (final T t)->
 			{
 				remove0( t.getPrimaryKey() );
 			} ).count() > 0;
@@ -253,7 +259,7 @@ public class HasManyThroughAssociationSet<T extends ActiveRecord> extends Abstra
 		@Override
 		public void clear()
 		{
-			stream().forEach( (T t) -> remove0( t.getPrimaryKey()));
+			stream().forEach( (final T t) -> remove0( t.getPrimaryKey()));
 		}
 
 		@Override
@@ -265,23 +271,23 @@ public class HasManyThroughAssociationSet<T extends ActiveRecord> extends Abstra
 		@Override
 		public Stream<T> findWithScope( final Scope scope)
 		{
-			Scope newScope = new Scope(
-					AndCondition.andConditions(subCondition, scope.getCondition()),
-					scope.getOrder(), scope.getLimit());
+			final Scope newScope = new Scope(
+				AndCondition.andConditions(subCondition, scope.getCondition()),
+				scope.getOrder(), scope.getLimit());
 			return destBase.findWithScope( newScope );
 		}
 
 		@Override
-		public T findFirstWithScope( Scope scope)
+		public T findFirstWithScope( final Scope scope)
 		{
-			Scope newScope = new Scope(
-					AndCondition.andConditions(subCondition,scope.getCondition()),
-					scope.getOrder(), scope.getLimit());
+			final Scope newScope = new Scope(
+				AndCondition.andConditions(subCondition,scope.getCondition()),
+				scope.getOrder(), scope.getLimit());
 			return destBase.findFirstWithScope( newScope);
 		}
 
 		@Override
-		public RecordSet<T> getForCondition( Condition cond )
+		public RecordSet<T> getForCondition( final Condition cond )
 		{
 			return new HasManyThroughSubSet(AndCondition.andConditions(subCondition,cond));
 		}

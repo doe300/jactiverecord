@@ -24,12 +24,15 @@
  */
 package de.doe300.activerecord.record;
 
-import de.doe300.activerecord.RecordBase;
-import de.doe300.activerecord.pojo.POJOBase;
 import java.lang.annotation.ElementType;
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
+
+import javax.annotation.Nonnull;
+
+import de.doe300.activerecord.RecordBase;
+import de.doe300.activerecord.pojo.POJOBase;
 
 /**
  * Allows for storing inherited object types via single-table inheritance.
@@ -40,7 +43,7 @@ import java.lang.annotation.Target;
  * Otherwise the instantiation of the correct subclass can not be guaranteed.
  * <br>
  * This annotation can only be used in combination with {@link RecordType}. It also only works on POJO-records.
- * 
+ *
  * @author doe300
  * @see RecordType
  */
@@ -51,13 +54,15 @@ public @interface SingleTableInheritance
 	/**
 	 * @return the name of the column determining the type
 	 */
+	@Nonnull
 	public String typeColumnName();
-	
+
 	/**
 	 * @return class containing the factory-method
 	 */
+	@Nonnull
 	public Class<?> factoryClass();
-	
+
 	/**
 	 * The factory-method must be static, public and accepts three parameters:
 	 * <ul>
@@ -71,8 +76,9 @@ public @interface SingleTableInheritance
 	 * {@code public static T methodName(POJOBase<T> base, int primaryKey, Object typeKey);}<br>
 	 * Where T a subtype of the annotated type, extending ActiveRecord
 	 * </p>
-	 * 
+	 *
 	 * @return the name of the factory-method.
 	 */
+	@Nonnull
 	public String factoryMethod();
 }

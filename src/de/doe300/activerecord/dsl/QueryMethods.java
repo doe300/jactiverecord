@@ -28,6 +28,8 @@ import de.doe300.activerecord.FinderMethods;
 import de.doe300.activerecord.record.ActiveRecord;
 import de.doe300.activerecord.scope.Scope;
 import java.util.stream.Stream;
+import javax.annotation.Nonnull;
+import javax.annotation.Nullable;
 
 /**
  * An implementation of QueryMethods will behave like {@link Stream}, more precise, the stored records are not guaranteed to be accessible more than one time
@@ -44,13 +46,15 @@ public interface QueryMethods<T extends ActiveRecord> extends FinderMethods<T>
 	/**
 	 * @return the stream of records
 	 */
+	@Nonnull
 	public Stream<T> stream();
 	
 	/**
 	 * @param condition
 	 * @return a new QueryResult matching the given condition
 	 */
-	public default QueryResult<T> where(Condition condition)
+	@Nonnull
+	public default QueryResult<T> where(@Nullable final Condition condition)
 	{
 		return withScope( new Scope(condition, null, size()));
 	}
@@ -59,6 +63,7 @@ public interface QueryMethods<T extends ActiveRecord> extends FinderMethods<T>
 	 * @param number
 	 * @return a new QueryResult with the limit of records applied
 	 */
+	@Nonnull
 	public default QueryResult<T> limit(int number)
 	{
 		return withScope( new Scope(null, null, number));
@@ -68,7 +73,8 @@ public interface QueryMethods<T extends ActiveRecord> extends FinderMethods<T>
 	 * @param order
 	 * @return a new QueryResult with ordered records
 	 */
-	public default QueryResult<T> order(Order order)
+	@Nonnull
+	public default QueryResult<T> order(@Nullable final Order order)
 	{
 		return withScope( new Scope(null, order, size()));
 	}
@@ -87,16 +93,19 @@ public interface QueryMethods<T extends ActiveRecord> extends FinderMethods<T>
 	 * @param scope
 	 * @return  a new QueryResult matching the given scope
 	 */
-	public QueryResult<T> withScope(Scope scope);
+	@Nonnull
+	public QueryResult<T> withScope(@Nonnull final Scope scope);
 	
 	@Override
-	public default Stream<T> findWithScope( final Scope scope )
+	@Nonnull
+	public default Stream<T> findWithScope(@Nonnull final Scope scope )
 	{
 		return withScope( scope ).stream();
 	}
 
 	@Override
-	public default T findFirstWithScope( final Scope scope)
+	@Nullable
+	public default T findFirstWithScope(@Nonnull final Scope scope)
 	{
 		return withScope( scope ).stream().findFirst().get();
 	}

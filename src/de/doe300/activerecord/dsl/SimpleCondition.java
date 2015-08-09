@@ -24,12 +24,16 @@
  */
 package de.doe300.activerecord.dsl;
 
-import de.doe300.activerecord.jdbc.VendorSpecific;
-import de.doe300.activerecord.record.ActiveRecord;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.Map;
 import java.util.stream.Collectors;
+
+import javax.annotation.Nonnull;
+import javax.annotation.Nullable;
+
+import de.doe300.activerecord.jdbc.VendorSpecific;
+import de.doe300.activerecord.record.ActiveRecord;
 
 /**
  *
@@ -37,23 +41,26 @@ import java.util.stream.Collectors;
  */
 public class SimpleCondition implements Condition, SQLCommand
 {
+	@Nonnull
 	private final String key;
+	@Nullable
 	private final Object compValue;
+	@Nonnull
 	private final Comparison comp;
 
 	/**
 	 * @param key
 	 * @param compValue
-	 * @param comp 
+	 * @param comp
 	 */
-	public SimpleCondition( String key, Object compValue, Comparison comp )
+	public SimpleCondition(@Nonnull final String key, @Nullable final Object compValue, @Nonnull final Comparison comp)
 	{
 		this.key = key;
-		this.compValue = checkValue( compValue, comp );
-		this.comp = checkComparison( this.compValue, comp);
+		this.compValue = SimpleCondition.checkValue( compValue, comp );
+		this.comp = SimpleCondition.checkComparison( this.compValue, comp);
 	}
-	
-	private static Object checkValue(Object val, Comparison comp)
+
+	private static Object checkValue(final Object val, final Comparison comp)
 	{
 		//check for IN
 		if(comp == Comparison.IN)
@@ -68,11 +75,12 @@ public class SimpleCondition implements Condition, SQLCommand
 			}
 			throw new IllegalArgumentException("Invalid list-type: "+val.getClass());
 		}
-		
+
 		return val;
 	}
-	
-	private static Comparison checkComparison(Object val, Comparison comp)
+
+	@Nonnull
+	private static Comparison checkComparison(@Nullable final Object val, @Nonnull final Comparison comp)
 	{
 		//check for null
 		if(val == null)
@@ -88,7 +96,7 @@ public class SimpleCondition implements Condition, SQLCommand
 		}
 		return comp;
 	}
-	
+
 	/**
 	 * @return the key (attribute or column) this condition checks for
 	 */
@@ -96,7 +104,7 @@ public class SimpleCondition implements Condition, SQLCommand
 	{
 		return key;
 	}
-	
+
 	@Override
 	public Object[] getValues()
 	{
@@ -106,7 +114,7 @@ public class SimpleCondition implements Condition, SQLCommand
 		}
 		return new Object[]{compValue};
 	}
-	
+
 	/**
 	 * @return the comparison-method
 	 */
@@ -116,7 +124,7 @@ public class SimpleCondition implements Condition, SQLCommand
 	}
 
 	@Override
-	public String toSQL(VendorSpecific vendorSpecifics)
+	public String toSQL(final VendorSpecific vendorSpecifics)
 	{
 		switch(comp)
 		{
@@ -140,13 +148,13 @@ public class SimpleCondition implements Condition, SQLCommand
 				return key+" <= ?";
 			case IN:
 				//see: https://stackoverflow.com/questions/178479/preparedstatement-in-clause-alternatives
-				return key+" IN ("+Arrays.stream( (Object[])compValue).map( (Object o) -> "?").collect( Collectors.joining( ", "))+")";
+				return key+" IN ("+Arrays.stream( (Object[])compValue).map( (final Object o) -> "?").collect( Collectors.joining( ", "))+")";
 			case TRUE:
 			default:
 				return vendorSpecifics.convertBooleanToDB( true );
 		}
 	}
-	
+
 	@Override
 	public boolean hasWildcards()
 	{
@@ -168,15 +176,15 @@ public class SimpleCondition implements Condition, SQLCommand
 				return false;
 		}
 	}
-	
+
 	@Override
-	public boolean test( Map<String, Object> t )
+	public boolean test( final Map<String, Object> t )
 	{
 		return comp.test( t.get( key), compValue);
 	}
-	
+
 	@Override
-	public boolean test( ActiveRecord t )
+	public boolean test( final ActiveRecord t )
 	{
 		return comp.test(t.getBase().getStore().getValue( t.getBase(), t.getPrimaryKey(), key), compValue);
 	}
