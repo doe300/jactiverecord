@@ -38,33 +38,36 @@ public class Profiler
 	private final Map<String, Integer> numberOfRuns;
 	private final Map<String, Long> runtimes;
 
-	public Profiler(int numberOfMethods)
+	/**
+	 * @param numberOfMethods
+	 */
+	public Profiler(final int numberOfMethods)
 	{
 		this.numberOfRuns = new HashMap<>(numberOfMethods);
 		this.runtimes = new HashMap<>(numberOfMethods);
 	}
-	
+
 	/**
-	 * 
+	 *
 	 * @param ignoreTrivial whether to ignore times under 0.1 ms per run
 	 */
-	public void printStatistics(boolean ignoreTrivial)
+	public void printStatistics(final boolean ignoreTrivial)
 	{
 		System.err.flush();
 		System.out.flush();
 		System.out.printf( "%30s|%10s|%16s|%16s%n", "Method", "# of Runs", "Time (in ms)", "Time per run" );
 		double totalTime = 0;
-		Set<Map.Entry<String, Integer>> runs = new TreeSet<>((Map.Entry<String, Integer> e1, Map.Entry<String, Integer> e2) -> {
-			int comp = -Integer.compare( e1.getValue(), e2.getValue());
+		final Set<Map.Entry<String, Integer>> runs = new TreeSet<>((final Map.Entry<String, Integer> e1, final Map.Entry<String, Integer> e2) -> {
+			final int comp = -Integer.compare( e1.getValue(), e2.getValue());
 			return comp != 0 ? comp : e1.getKey().compareTo( e2.getKey());
 		});
 		//sort by number of usages
 		runs.addAll( numberOfRuns.entrySet());
-		for(Map.Entry<String, Integer> entry : runs)
+		for(final Map.Entry<String, Integer> entry : runs)
 		{
-			double time = runtimes.get( entry.getKey())/1000_000.0;
+			final double time = runtimes.get( entry.getKey())/1000_000.0;
 			totalTime+= time;
-			double timePerRun = time/entry.getValue();
+			final double timePerRun = time/entry.getValue();
 			if(!ignoreTrivial || timePerRun >= 0.1)
 			{
 				System.out.printf( "%30s|%10d|%16.3f|%16.3f%n", entry.getKey(), entry.getValue(), time, timePerRun );
@@ -72,59 +75,69 @@ public class Profiler
 		}
 		System.out.printf( "Total Time (in ms): %10.3f%n",totalTime );
 	}
-	
-	private void increaseRuns(String name)
+
+	private void increaseRuns(final String name)
 	{
 		numberOfRuns.putIfAbsent( name, 0);
 		numberOfRuns.put( name, numberOfRuns.get( name)+1);
 	}
-	
-	private void increaseRuntime(String name, Long time)
+
+	private void increaseRuntime(final String name, final Long time)
 	{
 		runtimes.putIfAbsent( name, 0L);
 		runtimes.put( name, runtimes.get( name)+time);
 	}
-	
-//	public <T> T profile(final String name, final Supplier<T> sup)
-//	{
-//		increaseRuns( name );
-//		long time = System.nanoTime();
-//		T res = sup.get();
-//		increaseRuntime( name, System.nanoTime()- time);
-//		return res;
-//	}
-//	
-//	public void profile(final String name, Runnable run)
-//	{
-//		increaseRuns( name );
-//		long time = System.nanoTime();
-//		run.run();
-//		increaseRuntime( name, System.nanoTime()- time);
-//	}
-	
+
+	//	public <T> T profile(final String name, final Supplier<T> sup)
+	//	{
+	//		increaseRuns( name );
+	//		long time = System.nanoTime();
+	//		T res = sup.get();
+	//		increaseRuntime( name, System.nanoTime()- time);
+	//		return res;
+	//	}
+	//
+	//	public void profile(final String name, Runnable run)
+	//	{
+	//		increaseRuns( name );
+	//		long time = System.nanoTime();
+	//		run.run();
+	//		increaseRuntime( name, System.nanoTime()- time);
+	//	}
+	public <E extends Throwable> int profileInt(final String name, final ThrowingSupplier<Integer, E> sup) throws E
+	{
+		return profile(name, sup);
+	}
+
+	public <E extends Throwable> boolean profileBoolean(final String name, final ThrowingSupplier<Boolean, E> sup)
+		throws E
+	{
+		return profile(name, sup);
+	}
+
 	public <T, E extends Throwable> T profile(final String name, final ThrowingSupplier<T, E> sup) throws E
 	{
 		increaseRuns( name );
-		long time = System.nanoTime();
-		T res = sup.get();
+		final long time = System.nanoTime();
+		final T res = sup.get();
 		increaseRuntime( name, System.nanoTime()- time);
 		return res;
 	}
-	
-	public <E extends Throwable> void profile(final String name, ThrowingRunnable<E> run) throws E
+
+	public <E extends Throwable> void profile(final String name, final ThrowingRunnable<E> run) throws E
 	{
 		increaseRuns( name );
-		long time = System.nanoTime();
+		final long time = System.nanoTime();
 		run.run();
 		increaseRuntime( name, System.nanoTime()- time);
 	}
-	
+
 	@FunctionalInterface
 	public static interface ThrowingSupplier<T, E extends Throwable>
 	{
 		public T get() throws E;
 	}
-	
+
 	@FunctionalInterface
 	public static interface ThrowingRunnable<E extends Throwable>
 	{

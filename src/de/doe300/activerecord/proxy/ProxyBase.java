@@ -24,14 +24,17 @@
  */
 package de.doe300.activerecord.proxy;
 
+import java.lang.reflect.InvocationHandler;
+import java.util.Map;
+
+import javax.annotation.Nonnull;
+
 import de.doe300.activerecord.RecordBase;
 import de.doe300.activerecord.RecordCore;
 import de.doe300.activerecord.RecordException;
 import de.doe300.activerecord.proxy.handlers.ProxyHandler;
 import de.doe300.activerecord.record.ActiveRecord;
 import de.doe300.activerecord.store.RecordStore;
-import java.lang.reflect.InvocationHandler;
-import java.util.Map;
 
 /**
  * Base for one table and all its records
@@ -42,24 +45,25 @@ public final class ProxyBase<T extends ActiveRecord> extends RecordBase<T>
 {
 	private final Class<? extends T> proxyType;
 	private final ProxyHandler[] proxyHandlers;
-	
+
 	/**
 	 * Do not call this constructor!
 	 * @param proxyType
 	 * @param recordType
 	 * @param proxyHandlers
 	 * @param store
-	 * @param core 
+	 * @param core
 	 */
-	public ProxyBase(Class<? extends T> proxyType, Class<T> recordType, ProxyHandler[] proxyHandlers, RecordStore store, RecordCore core)
+	public ProxyBase(@Nonnull final Class<? extends T> proxyType, @Nonnull final Class<T> recordType,
+		final ProxyHandler[] proxyHandlers, @Nonnull final RecordStore store, @Nonnull final RecordCore core)
 	{
 		super(recordType, core, store);
 		this.proxyType = proxyType;
 		this.proxyHandlers = proxyHandlers;
 	}
-	
+
 	@Override
-	protected T createProxy(int primaryKey, boolean newRecord, Map<String, Object> recordData) throws RecordException
+	protected T createProxy(final int primaryKey, final boolean newRecord, final Map<String, Object> recordData) throws RecordException
 	{
 		try
 		{

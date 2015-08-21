@@ -163,10 +163,10 @@ public enum VendorSpecific
 	/**
 	 * @param con
 	 * @param term
-	 * @return whether the therm is a reserved keyword, either in SQL92 or vendor-specific
+	 * @return whether the term is a reserved keyword, either in SQL92 or vendor-specific
 	 * @throws SQLException
 	 */
-	public boolean isReservedKeyword(final Connection con, final String term) throws SQLException
+	public boolean isReservedKeyword(@Nonnull final Connection con, @Nonnull final String term) throws SQLException
 	{
 		if(Arrays.stream( VendorSpecific.sql92Keywords ).anyMatch( (final String s) -> s.equalsIgnoreCase( term)))
 		{

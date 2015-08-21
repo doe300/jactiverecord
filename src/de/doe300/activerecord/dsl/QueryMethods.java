@@ -24,12 +24,14 @@
  */
 package de.doe300.activerecord.dsl;
 
+import java.util.stream.Stream;
+
+import javax.annotation.Nonnull;
+import javax.annotation.Nullable;
+
 import de.doe300.activerecord.FinderMethods;
 import de.doe300.activerecord.record.ActiveRecord;
 import de.doe300.activerecord.scope.Scope;
-import java.util.stream.Stream;
-import javax.annotation.Nonnull;
-import javax.annotation.Nullable;
 
 /**
  * An implementation of QueryMethods will behave like {@link Stream}, more precise, the stored records are not guaranteed to be accessible more than one time
@@ -64,7 +66,7 @@ public interface QueryMethods<T extends ActiveRecord> extends FinderMethods<T>
 	 * @return a new QueryResult with the limit of records applied
 	 */
 	@Nonnull
-	public default QueryResult<T> limit(int number)
+	public default QueryResult<T> limit(final int number)
 	{
 		return withScope( new Scope(null, null, number));
 	}

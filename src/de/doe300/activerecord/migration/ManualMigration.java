@@ -24,8 +24,12 @@
  */
 package de.doe300.activerecord.migration;
 
-import de.doe300.activerecord.logging.Logging;
 import java.sql.Connection;
+
+import javax.annotation.Nonnull;
+import javax.annotation.Nullable;
+
+import de.doe300.activerecord.logging.Logging;
 
 /**
  * This migration is more general than the automatic migration.
@@ -34,15 +38,19 @@ import java.sql.Connection;
  */
 public class ManualMigration implements Migration
 {
-	private final String command, revertedCommand, updateCommand;
+	@Nonnull
+	private final String command;
+	@Nullable
+	private final String revertedCommand, updateCommand;
 
 	/**
-	 * 
+	 *
 	 * @param command the command for {@link #apply(java.sql.Connection) }
 	 * @param updateCommand the command for {@link #update(java.sql.Connection) }
 	 * @param revertCommand the command for {@link #revert(java.sql.Connection) }
 	 */
-	public ManualMigration(String command, String updateCommand, String revertCommand)
+	public ManualMigration(@Nonnull final String command, @Nullable final String updateCommand,
+		@Nullable final String revertCommand)
 	{
 		this.command = command;
 		this.updateCommand = updateCommand;
@@ -50,7 +58,7 @@ public class ManualMigration implements Migration
 	}
 
 	@Override
-	public boolean apply( Connection con ) throws Exception
+	public boolean apply( final Connection con ) throws Exception
 	{
 		Logging.getLogger().info("ManualMigration", "Executing manual migration...");
 		Logging.getLogger().info("ManualMigration", command);
@@ -58,7 +66,7 @@ public class ManualMigration implements Migration
 	}
 
 	@Override
-	public boolean revert( Connection con ) throws Exception
+	public boolean revert( final Connection con ) throws Exception
 	{
 		if(revertedCommand == null)
 		{
@@ -70,7 +78,7 @@ public class ManualMigration implements Migration
 	}
 
 	@Override
-	public boolean update( Connection con ) throws Exception
+	public boolean update( final Connection con ) throws Exception
 	{
 		if(updateCommand == null)
 		{

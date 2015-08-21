@@ -26,6 +26,7 @@ package de.doe300.activerecord.dsl;
 
 import java.util.Map;
 
+import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 
 import de.doe300.activerecord.ReadOnlyRecordBase;
@@ -40,8 +41,11 @@ import de.doe300.activerecord.record.association.AssociationHelper;
  */
 public class BelongsToCondition implements Condition
 {
+	@Nonnull
 	private final String foreignKeyColumn, associatedTableKey;
+	@Nonnull
 	private final Condition associatedTableCond;
+	@Nonnull
 	private final ReadOnlyRecordBase<?> associatedTableBase;
 
 	/**
@@ -51,8 +55,9 @@ public class BelongsToCondition implements Condition
 	 * @param associatedTableKey the column of the associated table referenced by the foreign key
 	 * @param associatedTableCond the condition to test in the associated table
 	 */
-	public BelongsToCondition(final String foreignKeyColumn, final ReadOnlyRecordBase<?> associatedTableBase,
-			final String associatedTableKey, @Nullable final Condition associatedTableCond )
+	public BelongsToCondition(@Nonnull final String foreignKeyColumn,
+		@Nonnull final ReadOnlyRecordBase<?> associatedTableBase, @Nonnull final String associatedTableKey,
+		@Nonnull final Condition associatedTableCond)
 	{
 		this.foreignKeyColumn = foreignKeyColumn;
 		this.associatedTableBase = associatedTableBase;
@@ -67,8 +72,8 @@ public class BelongsToCondition implements Condition
 	 * @param associatedTableCond the condition to test in the associated table
 	 * @see RecordBase#getPrimaryColumn()
 	 */
-	public BelongsToCondition(final String foreignKeyColumn, final RecordBase<?> associatedTableBase,
-			final Condition associatedTableCond )
+	public BelongsToCondition(@Nonnull final String foreignKeyColumn, @Nonnull final RecordBase<?> associatedTableBase,
+		@Nonnull final Condition associatedTableCond)
 	{
 		this(foreignKeyColumn, associatedTableBase, associatedTableBase.getPrimaryColumn(), associatedTableCond);
 	}
@@ -101,6 +106,10 @@ public class BelongsToCondition implements Condition
 	@Override
 	public boolean test(final ActiveRecord record )
 	{
+		if (record == null)
+		{
+			return false;
+		}
 		final ActiveRecord associatedRecord = AssociationHelper.getBelongsTo( record, associatedTableBase.getRecordType(), foreignKeyColumn);
 		if (associatedRecord == null)
 		{

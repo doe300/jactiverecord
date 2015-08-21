@@ -27,6 +27,9 @@ package de.doe300.activerecord.record.attachment;
 import java.util.HashMap;
 import java.util.Map;
 
+import javax.annotation.Nonnull;
+import javax.annotation.Nullable;
+
 /**
  *
  * @author doe300
@@ -34,15 +37,26 @@ import java.util.Map;
 public final class Attachments
 {
 	private static final Map<Class<? extends HasAttachment>, AttachmentHandler> handlers = new HashMap<>(5);
-	
-	public static AttachmentHandler getHander(Class<? extends HasAttachment> recordType)
+
+	/**
+	 * @param recordType
+	 * @return the {@link AttachmentHandler} for the given type or
+	 *         <code>null</code>
+	 */
+	@Nullable
+	public static AttachmentHandler getHander(@Nonnull final Class<? extends HasAttachment> recordType)
 	{
-		return handlers.get( recordType );
+		return Attachments.handlers.get( recordType );
 	}
-	
-	public static void registerHandler(Class<? extends HasAttachment> recordType, AttachmentHandler handler)
+
+	/**
+	 * Registers a new {@link AttachmentHandler} for the given type
+	 * @param recordType
+	 * @param handler
+	 */
+	public static void registerHandler(@Nonnull final Class<? extends HasAttachment> recordType, @Nonnull final AttachmentHandler handler)
 	{
-		handlers.putIfAbsent( recordType, handler );
+		Attachments.handlers.putIfAbsent( recordType, handler );
 	}
 
 	private Attachments()

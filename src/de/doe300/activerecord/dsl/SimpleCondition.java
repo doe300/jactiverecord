@@ -151,6 +151,11 @@ public class SimpleCondition implements Condition, SQLCommand
 				return key+" IN ("+Arrays.stream( (Object[])compValue).map( (final Object o) -> "?").collect( Collectors.joining( ", "))+")";
 			case TRUE:
 			default:
+				if(vendorSpecifics == null)
+				{
+					//if we can't determine the vendor, we simply hope, it supports the TRUE SQL-keyword
+					return "TRUE";
+				}
 				return vendorSpecifics.convertBooleanToDB( true );
 		}
 	}

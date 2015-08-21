@@ -37,13 +37,16 @@ public class URLAttachmentHandler implements AttachmentHandler
 {
 	private final URLConverter pathFunc;
 
-	public URLAttachmentHandler( URLConverter pathFunc )
+	/**
+	 * @param pathFunc
+	 */
+	public URLAttachmentHandler( final URLConverter pathFunc )
 	{
 		this.pathFunc = pathFunc;
 	}
 
 	@Override
-	public boolean attachmentExists( HasAttachment record )
+	public boolean attachmentExists( final HasAttachment record )
 	{
 		try
 		{
@@ -51,20 +54,20 @@ public class URLAttachmentHandler implements AttachmentHandler
 			//could connect and read content-type
 			return true;
 		}
-		catch ( IOException ex )
+		catch ( final IOException ex )
 		{
 			return false;
 		}
 	}
 
 	@Override
-	public InputStream readAttachment( HasAttachment record ) throws IOException
+	public InputStream readAttachment( final HasAttachment record ) throws IOException
 	{
 		return pathFunc.getAttachmentPath(record ).openConnection().getInputStream();
 	}
 
 	@Override
-	public OutputStream writeAttachment( HasAttachment record ) throws IOException
+	public OutputStream writeAttachment( final HasAttachment record ) throws IOException
 	{
 		return pathFunc.getAttachmentPath( record ).openConnection().getOutputStream();
 	}

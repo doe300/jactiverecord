@@ -27,6 +27,7 @@ package de.doe300.activerecord.dsl;
 import java.util.stream.Stream;
 
 import javax.annotation.Nonnull;
+import javax.annotation.Nullable;
 
 import de.doe300.activerecord.record.ActiveRecord;
 import de.doe300.activerecord.scope.Scope;
@@ -52,7 +53,8 @@ public class GroupResult<R, T extends ActiveRecord> implements QueryMethods<T>
 	 * @param size the size of the group
 	 * @param order the ordering of the elements
 	 */
-	public GroupResult(@Nonnull final R key, @Nonnull final Stream<T> baseStream, final int size, final Order order)
+	public GroupResult(@Nonnull final R key, @Nonnull final Stream<T> baseStream, final int size,
+		@Nullable final Order order)
 	{
 		this.key = key;
 		this.baseStream = order!=null? baseStream.sorted( order.toRecordComparator()) : baseStream;

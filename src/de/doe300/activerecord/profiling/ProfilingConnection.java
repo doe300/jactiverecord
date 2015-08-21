@@ -52,17 +52,23 @@ public class ProfilingConnection implements Connection
 	private final Connection con;
 	private final Profiler profiler;
 
-	public ProfilingConnection( Connection con)
+	/**
+	 * @param con
+	 */
+	public ProfilingConnection( final Connection con)
 	{
 		this.con = con;
 		this.profiler = new Profiler(60);
 	}
 
+	/**
+	 * @return the associated profiler
+	 */
 	public Profiler getProfiler()
 	{
 		return profiler;
 	}
-	
+
 	@Override
 	public Statement createStatement() throws SQLException
 	{
@@ -70,25 +76,25 @@ public class ProfilingConnection implements Connection
 	}
 
 	@Override
-	public PreparedStatement prepareStatement( String sql ) throws SQLException
+	public PreparedStatement prepareStatement( final String sql ) throws SQLException
 	{
 		return profiler.profile( "prepareStatement", () -> con.prepareStatement( sql));
 	}
 
 	@Override
-	public CallableStatement prepareCall( String sql ) throws SQLException
+	public CallableStatement prepareCall( final String sql ) throws SQLException
 	{
 		return profiler.profile( "prepareCall", () -> con.prepareCall( sql));
 	}
 
 	@Override
-	public String nativeSQL( String sql ) throws SQLException
+	public String nativeSQL( final String sql ) throws SQLException
 	{
 		return profiler.profile( "nativeSQL", () -> con.nativeSQL( sql));
 	}
 
 	@Override
-	public void setAutoCommit( boolean autoCommit ) throws SQLException
+	public void setAutoCommit( final boolean autoCommit ) throws SQLException
 	{
 		profiler.profile( "setAutoCommit", ()->con.setAutoCommit( autoCommit));
 	}
@@ -96,7 +102,7 @@ public class ProfilingConnection implements Connection
 	@Override
 	public boolean getAutoCommit() throws SQLException
 	{
-		return profiler.profile( "getAutoCommit", () -> con.getAutoCommit());
+		return profiler.profileBoolean("getAutoCommit", () -> con.getAutoCommit());
 	}
 
 	@Override
@@ -120,7 +126,7 @@ public class ProfilingConnection implements Connection
 	@Override
 	public boolean isClosed() throws SQLException
 	{
-		return profiler.profile( "isClosed", () -> con.isClosed());
+		return profiler.profileBoolean("isClosed", () -> con.isClosed());
 	}
 
 	@Override
@@ -130,7 +136,7 @@ public class ProfilingConnection implements Connection
 	}
 
 	@Override
-	public void setReadOnly( boolean readOnly ) throws SQLException
+	public void setReadOnly( final boolean readOnly ) throws SQLException
 	{
 		profiler.profile( "setReadOnly", () -> con.setReadOnly( readOnly));
 	}
@@ -138,11 +144,11 @@ public class ProfilingConnection implements Connection
 	@Override
 	public boolean isReadOnly() throws SQLException
 	{
-		return profiler.profile( "isReadOnly", () -> con.isReadOnly());
+		return profiler.profileBoolean("isReadOnly", () -> con.isReadOnly());
 	}
 
 	@Override
-	public void setCatalog( String catalog ) throws SQLException
+	public void setCatalog( final String catalog ) throws SQLException
 	{
 		profiler.profile( "setCatalog", () -> con.setCatalog( catalog));
 	}
@@ -154,7 +160,7 @@ public class ProfilingConnection implements Connection
 	}
 
 	@Override
-	public void setTransactionIsolation( int level ) throws SQLException
+	public void setTransactionIsolation( final int level ) throws SQLException
 	{
 		profiler.profile( "setTransactionIsolation", () -> con.setTransactionIsolation( level));
 	}
@@ -162,7 +168,7 @@ public class ProfilingConnection implements Connection
 	@Override
 	public int getTransactionIsolation() throws SQLException
 	{
-		return profiler.profile( "getTransactionIsolation", () -> con.getTransactionIsolation());
+		return profiler.profileInt("getTransactionIsolation", () -> con.getTransactionIsolation());
 	}
 
 	@Override
@@ -178,20 +184,20 @@ public class ProfilingConnection implements Connection
 	}
 
 	@Override
-	public Statement createStatement( int resultSetType, int resultSetConcurrency ) throws SQLException
+	public Statement createStatement( final int resultSetType, final int resultSetConcurrency ) throws SQLException
 	{
 		return profiler.profile("createStatment ResultSet", () -> con.createStatement( resultSetType, resultSetConcurrency ));
 	}
 
 	@Override
-	public PreparedStatement prepareStatement( String sql, int resultSetType, int resultSetConcurrency ) throws SQLException
+	public PreparedStatement prepareStatement( final String sql, final int resultSetType, final int resultSetConcurrency ) throws SQLException
 	{
 		return profiler.profile( "prepareStatement ResultSet", () -> con.prepareStatement( sql, resultSetType,
-				resultSetConcurrency));
+			resultSetConcurrency));
 	}
 
 	@Override
-	public CallableStatement prepareCall( String sql, int resultSetType, int resultSetConcurrency ) throws SQLException
+	public CallableStatement prepareCall( final String sql, final int resultSetType, final int resultSetConcurrency ) throws SQLException
 	{
 		return profiler.profile( "prepareCall ResultSet", () -> con.prepareCall( sql, resultSetType, resultSetConcurrency));
 	}
@@ -203,13 +209,13 @@ public class ProfilingConnection implements Connection
 	}
 
 	@Override
-	public void setTypeMap(Map<String, Class<?>> map ) throws SQLException
+	public void setTypeMap(final Map<String, Class<?>> map ) throws SQLException
 	{
 		profiler.profile( "setTypeMap", () -> con.setTypeMap( map));
 	}
 
 	@Override
-	public void setHoldability( int holdability ) throws SQLException
+	public void setHoldability( final int holdability ) throws SQLException
 	{
 		profiler.profile( "setHoldability", () -> con.setHoldability( holdability));
 	}
@@ -217,7 +223,7 @@ public class ProfilingConnection implements Connection
 	@Override
 	public int getHoldability() throws SQLException
 	{
-		return profiler.profile( "getHoldability", () -> con.getHoldability());
+		return profiler.profileInt("getHoldability", () -> con.getHoldability());
 	}
 
 	@Override
@@ -227,60 +233,60 @@ public class ProfilingConnection implements Connection
 	}
 
 	@Override
-	public Savepoint setSavepoint( String name ) throws SQLException
+	public Savepoint setSavepoint( final String name ) throws SQLException
 	{
 		return profiler.profile( "setSavePoint name", () -> con.setSavepoint( name));
 	}
 
 	@Override
-	public void rollback( Savepoint savepoint ) throws SQLException
+	public void rollback( final Savepoint savepoint ) throws SQLException
 	{
 		profiler.profile( "rollback Savepoint", () -> con.rollback( savepoint));
 	}
 
 	@Override
-	public void releaseSavepoint( Savepoint savepoint ) throws SQLException
+	public void releaseSavepoint( final Savepoint savepoint ) throws SQLException
 	{
 		profiler.profile( "releaseSavepoint", () -> con.releaseSavepoint( savepoint ));
 	}
 
 	@Override
-	public Statement createStatement( int resultSetType, int resultSetConcurrency, int resultSetHoldability ) throws SQLException
+	public Statement createStatement( final int resultSetType, final int resultSetConcurrency, final int resultSetHoldability ) throws SQLException
 	{
 		return profiler.profile( "createStatement holdability", () -> con.createStatement( resultSetType,
-				resultSetConcurrency, resultSetHoldability));
+			resultSetConcurrency, resultSetHoldability));
 	}
 
 	@Override
-	public PreparedStatement prepareStatement( String sql, int resultSetType, int resultSetConcurrency,
-			int resultSetHoldability ) throws SQLException
+	public PreparedStatement prepareStatement( final String sql, final int resultSetType, final int resultSetConcurrency,
+		final int resultSetHoldability ) throws SQLException
 	{
 		return profiler.profile( "prepareStatement holdability", () -> con.prepareStatement(sql, resultSetType, resultSetConcurrency,
-				resultSetHoldability ));
+			resultSetHoldability ));
 	}
 
 	@Override
-	public CallableStatement prepareCall( String sql, int resultSetType, int resultSetConcurrency,
-			int resultSetHoldability ) throws SQLException
+	public CallableStatement prepareCall( final String sql, final int resultSetType, final int resultSetConcurrency,
+		final int resultSetHoldability ) throws SQLException
 	{
 		return profiler.profile( "prepareCall", () -> con.prepareCall( sql, resultSetType, resultSetConcurrency,
-				resultSetHoldability));
+			resultSetHoldability));
 	}
 
 	@Override
-	public PreparedStatement prepareStatement( String sql, int autoGeneratedKeys ) throws SQLException
+	public PreparedStatement prepareStatement( final String sql, final int autoGeneratedKeys ) throws SQLException
 	{
 		return profiler.profile( "prepareStatement generateKeys", () -> con.prepareStatement( sql, autoGeneratedKeys));
 	}
 
 	@Override
-	public PreparedStatement prepareStatement( String sql, int[] columnIndexes ) throws SQLException
+	public PreparedStatement prepareStatement( final String sql, final int[] columnIndexes ) throws SQLException
 	{
 		return profiler.profile( "prepareStatement columnIndices", () -> con.prepareStatement( sql, columnIndexes));
 	}
 
 	@Override
-	public PreparedStatement prepareStatement( String sql, String[] columnNames ) throws SQLException
+	public PreparedStatement prepareStatement( final String sql, final String[] columnNames ) throws SQLException
 	{
 		return profiler.profile( "prepareStatment columnNames", () -> con.prepareStatement( sql, columnNames));
 	}
@@ -310,25 +316,25 @@ public class ProfilingConnection implements Connection
 	}
 
 	@Override
-	public boolean isValid( int timeout ) throws SQLException
+	public boolean isValid( final int timeout ) throws SQLException
 	{
-		return profiler.profile( "isValid", () -> con.isValid( timeout));
+		return profiler.profileBoolean("isValid", () -> con.isValid(timeout));
 	}
 
 	@Override
-	public void setClientInfo( String name, String value ) throws SQLClientInfoException
+	public void setClientInfo( final String name, final String value ) throws SQLClientInfoException
 	{
 		profiler.profile( "setClientInfo", () -> con.setClientInfo( name, value));
 	}
 
 	@Override
-	public void setClientInfo( Properties properties ) throws SQLClientInfoException
+	public void setClientInfo( final Properties properties ) throws SQLClientInfoException
 	{
 		profiler.profile( "setClientInfo Properties", () -> con.setClientInfo( properties));
 	}
 
 	@Override
-	public String getClientInfo( String name ) throws SQLException
+	public String getClientInfo( final String name ) throws SQLException
 	{
 		return profiler.profile( "getClientInfo", () -> con.getClientInfo( name));
 	}
@@ -340,19 +346,19 @@ public class ProfilingConnection implements Connection
 	}
 
 	@Override
-	public Array createArrayOf( String typeName, Object[] elements ) throws SQLException
+	public Array createArrayOf( final String typeName, final Object[] elements ) throws SQLException
 	{
 		return profiler.profile( "createArrayOf", () -> con.createArrayOf( typeName, elements));
 	}
 
 	@Override
-	public Struct createStruct( String typeName, Object[] attributes ) throws SQLException
+	public Struct createStruct( final String typeName, final Object[] attributes ) throws SQLException
 	{
 		return profiler.profile( "createStruct", () -> con.createStruct( typeName, attributes));
 	}
 
 	@Override
-	public void setSchema( String schema ) throws SQLException
+	public void setSchema( final String schema ) throws SQLException
 	{
 		profiler.profile( "setSchema", () -> con.setSchema( schema));
 	}
@@ -364,13 +370,13 @@ public class ProfilingConnection implements Connection
 	}
 
 	@Override
-	public void abort( Executor executor ) throws SQLException
+	public void abort( final Executor executor ) throws SQLException
 	{
 		profiler.profile( "abort", () -> con.abort( executor ));
 	}
 
 	@Override
-	public void setNetworkTimeout( Executor executor, int milliseconds ) throws SQLException
+	public void setNetworkTimeout( final Executor executor, final int milliseconds ) throws SQLException
 	{
 		profiler.profile( "setNetworkTimeout", () -> con.setNetworkTimeout( executor, milliseconds));
 	}
@@ -378,19 +384,19 @@ public class ProfilingConnection implements Connection
 	@Override
 	public int getNetworkTimeout() throws SQLException
 	{
-		return profiler.profile( "getNetworkTimeout", () -> con.getNetworkTimeout());
+		return profiler.profileInt("getNetworkTimeout", () -> con.getNetworkTimeout());
 	}
 
 	@Override
-	public <T> T unwrap( Class<T> iface ) throws SQLException
+	public <T> T unwrap( final Class<T> iface ) throws SQLException
 	{
 		return profiler.profile( "unwrap", () -> con.unwrap( iface));
 	}
 
 	@Override
 	public boolean isWrapperFor(
-			Class<?> iface ) throws SQLException
+		final Class<?> iface ) throws SQLException
 	{
-		return profiler.profile( "isWrapperFor", () -> con.isWrapperFor( iface));
+		return profiler.profileBoolean("isWrapperFor", () -> con.isWrapperFor(iface));
 	}
 }

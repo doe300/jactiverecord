@@ -305,7 +305,7 @@ public class AutomaticMigration implements Migration
 		for(final Method method:methods)
 		{
 			//1. get attributes
-			//this is priorized before skipping of default methods, so columns for assoziations are created correctly
+			//this is priorized before skipping of default methods, so columns for associations are created correctly
 			if(method.isAnnotationPresent( Attribute.class))
 			{
 				final Attribute att = method.getAnnotation( Attribute.class);

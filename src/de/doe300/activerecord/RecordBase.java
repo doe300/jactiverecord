@@ -25,6 +25,7 @@
 package de.doe300.activerecord;
 
 import java.util.Arrays;
+import java.util.Collection;
 import java.util.Map;
 import java.util.TreeMap;
 import java.util.function.Consumer;
@@ -437,7 +438,9 @@ public abstract class RecordBase<T extends ActiveRecord> implements ReadOnlyReco
 	@Nonnull
 	public T duplicate(@Nonnull final T record)
 	{
-		return createRecord( store.getValues( this, record.getPrimaryKey(), store.getAllColumnNames( getTableName()).toArray( new String[0])) );
+		final Collection<String> columnNames = store.getAllColumnNames( getTableName());
+		final Map<String, Object> copyValues = store.getValues( this, record.getPrimaryKey(), columnNames.toArray( new String[columnNames.size()]));
+		return createRecord( copyValues );
 	}
 
 	////
@@ -545,7 +548,7 @@ public abstract class RecordBase<T extends ActiveRecord> implements ReadOnlyReco
 		final Condition[] conds = new Condition[columns.length];
 		for(int i=0;i<columns.length;i++)
 		{
-			conds[i] = new SimpleCondition(columns[i], "%"+term+"%", Comparison.LIKE);
+			conds[i] = new SimpleCondition(columns[i], "%" + term + "%", Comparison.LIKE);
 		}
 		return OrCondition.orConditions(conds );
 	}

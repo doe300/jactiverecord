@@ -32,6 +32,8 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.Objects;
 
+import javax.annotation.Nonnull;
+
 import de.doe300.activerecord.RecordBase;
 import de.doe300.activerecord.record.TimestampedRecord;
 
@@ -41,12 +43,14 @@ import de.doe300.activerecord.record.TimestampedRecord;
  */
 class RowCache implements Comparable<RowCache>
 {
+	@Nonnull
 	private final Map<String,Object> columnData, modifiedData;
 	private final String primaryKey;
 	private final boolean isTimestamped;
+	@Nonnull
 	private final BaseCache parent;
 
-	RowCache(final BaseCache parent, final String primaryKey, final boolean isTimestamped)
+	RowCache(@Nonnull final BaseCache parent, final String primaryKey, final boolean isTimestamped)
 	{
 		this.parent = parent;
 		this.primaryKey = primaryKey.toLowerCase();
@@ -74,7 +78,7 @@ class RowCache implements Comparable<RowCache>
 		}
 		if(updateValues)
 		{
-			modifiedData.put( columnName.toLowerCase(), value);	
+			modifiedData.put( columnName.toLowerCase(), value);
 			parent.setModified( this );
 			updateModifiedTimestamp();
 		}
@@ -172,8 +176,8 @@ class RowCache implements Comparable<RowCache>
 			setData( e.getKey().toLowerCase(), e.getValue(), updateValues);
 		}
 	}
-	
-	public synchronized boolean writeBack(final CachedJDBCRecordStore store, final RecordBase<?> base)
+
+	public synchronized boolean writeBack(@Nonnull final CachedJDBCRecordStore store, @Nonnull final RecordBase<?> base)
 	{
 		if(modifiedData.isEmpty())
 		{
@@ -183,7 +187,7 @@ class RowCache implements Comparable<RowCache>
 		modifiedData.clear();
 		return true;
 	}
-	
+
 	@Override
 	public String toString()
 	{
@@ -207,7 +211,7 @@ class RowCache implements Comparable<RowCache>
 	{
 		return Integer.compare( getPrimaryKey(), o.getPrimaryKey());
 	}
-	
+
 	private void updateModifiedTimestamp()
 	{
 		//if no other data was changed, don't update modified

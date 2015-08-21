@@ -660,6 +660,7 @@ public class SimpleJDBCRecordStore implements RecordStore
 	}
 
 	@Nonnull
+	@WillNotClose
 	private Stream<Object> valuesStream(@Nonnull final ResultSet res)
 	{
 		return StreamSupport.stream( new Spliterator<Object>()
@@ -699,7 +700,7 @@ public class SimpleJDBCRecordStore implements RecordStore
 			@Override
 			public int characteristics()
 			{
-				return Spliterator.DISTINCT|Spliterator.IMMUTABLE|Spliterator.NONNULL|Spliterator.ORDERED;
+				return Spliterator.IMMUTABLE|Spliterator.ORDERED;
 			}
 		}, false).onClose( () -> {
 			try
@@ -765,13 +766,17 @@ public class SimpleJDBCRecordStore implements RecordStore
 	}
 
 	@Override
-	public boolean removeRow( final String tableName, final Condition cond ) throws IllegalArgumentException
+	public boolean removeRow(@Nonnull final String tableName, @Nullable final Condition cond)
+		throws IllegalArgumentException
 	{
 		final String sql = "DELETE FROM "+tableName+toWhereClause( cond );
 		Logging.getLogger().debug( "JDBCStore", sql);
 		try(PreparedStatement stm = con.prepareStatement( sql ))
 		{
-			fillStatement( stm, cond );
+			if (cond != null)
+			{
+				fillStatement(stm, cond);
+			}
 			return stm.executeUpdate() >= 1;
 		}
 		catch ( final SQLException ex )

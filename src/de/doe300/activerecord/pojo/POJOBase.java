@@ -48,7 +48,8 @@ public class POJOBase<T extends ActiveRecord> extends RecordBase<T>
 	 * @param core
 	 * @param store
 	 */
-	public POJOBase( final Class<T> recordType, final RecordCore core, final RecordStore store )
+	public POJOBase(@Nonnull final Class<T> recordType, @Nonnull final RecordCore core,
+		@Nonnull final RecordStore store)
 	{
 		super( recordType, core, store );
 	}

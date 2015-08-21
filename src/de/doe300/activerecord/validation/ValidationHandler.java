@@ -72,7 +72,7 @@ public class ValidationHandler implements ProxyHandler
 		}
 	}
 	
-	private Predicate<ActiveRecord> getOrCreateValidationCheck(Class<? extends ActiveRecord> recordType)
+	private static Predicate<ActiveRecord> getOrCreateValidationCheck(Class<? extends ActiveRecord> recordType)
 	{
 		if(!validationChecks.containsKey( recordType))
 		{
@@ -97,7 +97,7 @@ public class ValidationHandler implements ProxyHandler
 		return validationChecks.get( recordType);
 	}
 	
-	private Consumer<ActiveRecord> getOrCreateValidationEnforcer(Class<? extends ActiveRecord> recordType)
+	private static Consumer<ActiveRecord> getOrCreateValidationEnforcer(Class<? extends ActiveRecord> recordType)
 	{
 		if(!validationEnforcements.containsKey( recordType))
 		{

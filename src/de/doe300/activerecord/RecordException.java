@@ -24,6 +24,8 @@
  */
 package de.doe300.activerecord;
 
+import javax.annotation.Nullable;
+
 import de.doe300.activerecord.record.ActiveRecord;
 
 /**
@@ -35,34 +37,57 @@ public class RecordException extends RuntimeException
 	private static final long serialVersionUID = -1658070637692098056L;
 	private final ActiveRecord record;
 
+	/**
+	 * @param message
+	 */
 	public RecordException( final String message )
 	{
 		super( message );
 		this.record = null;
 	}
 
+	/**
+	 * @param cause
+	 */
 	public RecordException( final Throwable cause )
 	{
 		this( (ActiveRecord)null, cause );
 	}
 
+	/**
+	 * @param message
+	 * @param cause
+	 */
 	public RecordException( final String message, final Throwable cause )
 	{
 		this( null, message, cause );
 	}
 
+	/**
+	 * @param record
+	 * @param message
+	 */
 	public RecordException( final ActiveRecord record, final String message )
 	{
 		super( message );
 		this.record = record;
 	}
 
+	/**
+	 * @param record
+	 * @param cause
+	 */
 	public RecordException( final ActiveRecord record, final Throwable cause )
 	{
 		super( cause );
 		this.record = record;
 	}
 
+	/**
+	 * @param record
+	 * @param message
+	 * @param cause
+	 */
 	public RecordException( final ActiveRecord record, final String message, final Throwable cause )
 	{
 		super( message, cause );
@@ -72,6 +97,7 @@ public class RecordException extends RuntimeException
 	/**
 	 * @return the causative record, may be <code>null</code>
 	 */
+	@Nullable
 	public ActiveRecord getRecord()
 	{
 		return record;

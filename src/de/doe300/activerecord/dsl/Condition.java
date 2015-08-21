@@ -55,7 +55,7 @@ public interface Condition extends Predicate<ActiveRecord>, SQLCommand
 	 * @return whether the <code>record</code> matches this condition
 	 */
 	@Override
-	public boolean test(@Nonnull final ActiveRecord record);
+	public boolean test(final ActiveRecord record);
 
 	/**
 	 * NOTE: This method is not required to be supported

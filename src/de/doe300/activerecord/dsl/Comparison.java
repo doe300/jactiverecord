@@ -180,10 +180,10 @@ public enum Comparison implements BiPredicate<Object, Object>
 			{
 				return false;
 			}
-			Collection<? extends Object> col;
+			Collection col;
 			if(compareValue instanceof Collection)
 			{
-				col=( Collection<? extends Object> ) compareValue;
+				col = Collection.class.cast(compareValue);
 				return col.contains( value );
 			}
 			if(compareValue.getClass().isArray())

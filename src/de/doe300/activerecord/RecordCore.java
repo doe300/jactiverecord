@@ -37,6 +37,7 @@ import java.util.Map;
 import java.util.Set;
 
 import javax.annotation.Nonnull;
+import javax.annotation.Nullable;
 
 import de.doe300.activerecord.logging.Logging;
 import de.doe300.activerecord.pojo.POJOBase;
@@ -58,12 +59,13 @@ public final class RecordCore implements AutoCloseable
 {
 	private final static Map<String, RecordCore> cores = Collections.synchronizedMap( new HashMap<String, RecordCore>(5));
 
+	@Nonnull
 	private final RecordStore store;
 	private final Map<Class<? extends ActiveRecord>, RecordBase<?>> bases;
 	private Map<Class<? extends ActiveRecord>, ProxyHandler[]> handlers;
 	private final Map<Class<? extends ActiveRecord>, Set<RecordListener>> recordListeners;
 
-	private RecordCore( final RecordStore store )
+	private RecordCore(@Nonnull final RecordStore store)
 	{
 		this.store = store;
 		this.bases = new HashMap<Class<? extends ActiveRecord>, RecordBase<?>>(10);
@@ -77,6 +79,7 @@ public final class RecordCore implements AutoCloseable
 	 * @return the existing or newly created RecordCore
 	 * @throws SQLException
 	 */
+	@Nonnull
 	public static RecordCore fromDatabase(final Connection dbConnection, final boolean cached) throws SQLException
 	{
 		final String cat = dbConnection.getCatalog();
@@ -93,7 +96,10 @@ public final class RecordCore implements AutoCloseable
 	/**
 	 * @param name
 	 * @return the existing or newly created RecordCore
+	 * @deprecated Implementation incomplete
 	 */
+	@Nonnull
+	@Deprecated
 	public static RecordCore newMemoryStore(final String name)
 	{
 		RecordCore core = RecordCore.cores.get( name );
@@ -111,7 +117,8 @@ public final class RecordCore implements AutoCloseable
 	 * @param store
 	 * @return a new or existing RecordCore on top of the given RecordStore
 	 */
-	public static RecordCore fromStore(final String name, final RecordStore store)
+	@Nonnull
+	public static RecordCore fromStore(@Nonnull final String name, @Nonnull final RecordStore store)
 	{
 		RecordCore core = RecordCore.cores.get( name );
 		if(core==null)
@@ -127,7 +134,8 @@ public final class RecordCore implements AutoCloseable
 	 * @param name
 	 * @return the existing RecordCore or <code>null</code>
 	 */
-	public static RecordCore getCore(final String name)
+	@Nullable
+	public static RecordCore getCore(@Nonnull final String name)
 	{
 		return RecordCore.cores.get( name );
 	}
@@ -159,6 +167,7 @@ public final class RecordCore implements AutoCloseable
 	/**
 	 * @return the underlying record-store
 	 */
+	@Nonnull
 	public RecordStore getStore()
 	{
 		return store;
@@ -171,7 +180,9 @@ public final class RecordCore implements AutoCloseable
 	 * @param additionalHandlers
 	 * @return the base for this type
 	 */
-	public <T extends ActiveRecord> RecordBase<T> buildBase(final Class<T> type, final ProxyHandler... additionalHandlers)
+	@Nonnull
+	public <T extends ActiveRecord> RecordBase<T> buildBase(@Nonnull final Class<T> type,
+		final ProxyHandler... additionalHandlers)
 	{
 		RecordBase<T> base = ( RecordBase<T> ) bases.get( type );
 		if(base==null)
@@ -200,7 +211,8 @@ public final class RecordCore implements AutoCloseable
 	 * @param type
 	 * @return the base for this type or <code>null</code> if none was yet created
 	 */
-	public <T extends ActiveRecord> RecordBase<T> getBase(final Class<T> type)
+	@Nullable
+	public <T extends ActiveRecord> RecordBase<T> getBase(@Nonnull final Class<T> type)
 	{
 		RecordBase<T> base = ( RecordBase<T> ) bases.get( type );
 		if(base==null)

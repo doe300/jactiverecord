@@ -175,7 +175,7 @@ public class CachedJDBCRecordStore extends SimpleJDBCRecordStore
 	}
 
 	/* Loads the whole row into cache at once */
-	private Object getDBValue(final RecordBase<?> base, final int primaryKey, final RowCache cache, final String name) throws IllegalArgumentException
+	private Object getDBValue(final RecordBase<?> base, final int primaryKey, final RowCache cacheRow, final String name) throws IllegalArgumentException
 	{
 		final String sql =
 			"SELECT * FROM " + base.getTableName() + " WHERE " + base.getPrimaryColumn() + " = " + primaryKey;
@@ -185,8 +185,8 @@ public class CachedJDBCRecordStore extends SimpleJDBCRecordStore
 		{
 			if(res.next())
 			{
-				cache.update( res);
-				return cache.getData( name );
+				cacheRow.update( res);
+				return cacheRow.getData( name );
 			}
 			return null;
 		}

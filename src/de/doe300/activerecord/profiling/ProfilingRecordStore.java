@@ -24,14 +24,15 @@
  */
 package de.doe300.activerecord.profiling;
 
-import de.doe300.activerecord.RecordBase;
-import de.doe300.activerecord.dsl.Condition;
-import de.doe300.activerecord.scope.Scope;
-import de.doe300.activerecord.store.RecordStore;
 import java.sql.Connection;
 import java.util.Map;
 import java.util.Set;
 import java.util.stream.Stream;
+
+import de.doe300.activerecord.RecordBase;
+import de.doe300.activerecord.dsl.Condition;
+import de.doe300.activerecord.scope.Scope;
+import de.doe300.activerecord.store.RecordStore;
 
 /**
  * Wrapper around another record-store profiling all method-calls
@@ -43,7 +44,7 @@ public class ProfilingRecordStore implements RecordStore
 	private final Profiler profiler;
 
 
-	public ProfilingRecordStore( RecordStore store )
+	public ProfilingRecordStore( final RecordStore store )
 	{
 		this.store = store;
 		this.profiler = new Profiler(30);
@@ -53,7 +54,7 @@ public class ProfilingRecordStore implements RecordStore
 	{
 		return profiler;
 	}
-	
+
 	@Override
 	public Connection getConnection()
 	{
@@ -61,80 +62,80 @@ public class ProfilingRecordStore implements RecordStore
 	}
 
 	@Override
-	public boolean exists( String tableName )
+	public boolean exists( final String tableName )
 	{
-		return profiler.profile( "exists", () -> store.exists( tableName ));
+		return profiler.profileBoolean("exists", () -> store.exists(tableName));
 	}
 
 	@Override
-	public Set<String> getAllColumnNames( String tableName ) throws UnsupportedOperationException
+	public Set<String> getAllColumnNames( final String tableName ) throws UnsupportedOperationException
 	{
 		return profiler.profile( "getAllColumnNames", () -> store.getAllColumnNames( tableName));
 	}
 
 	@Override
-	public void setValue(RecordBase<?> base, int primaryKey, String name, Object value ) throws IllegalArgumentException
+	public void setValue(final RecordBase<?> base, final int primaryKey, final String name, final Object value ) throws IllegalArgumentException
 	{
 		profiler.profile( "setValue", () -> store.setValue( base, primaryKey, name, value));
 	}
 
 	@Override
-	public void setValues(RecordBase<?> base, int primaryKey, String[] names, Object[] values ) throws IllegalArgumentException
+	public void setValues(final RecordBase<?> base, final int primaryKey, final String[] names, final Object[] values ) throws IllegalArgumentException
 	{
 		profiler.profile( "setValuesArray", () -> store.setValues( base, primaryKey, names, values));
 	}
 
 	@Override
-	public void setValues(RecordBase<?> base, int primaryKey, Map<String, Object> values ) throws IllegalArgumentException
+	public void setValues(final RecordBase<?> base, final int primaryKey, final Map<String, Object> values ) throws IllegalArgumentException
 	{
 		profiler.profile( "setValuesMap", () -> store.setValues( base, primaryKey, values ));
 	}
 
 	@Override
-	public Object getValue(RecordBase<?> base, int primaryKey, String name ) throws IllegalArgumentException
+	public Object getValue(final RecordBase<?> base, final int primaryKey, final String name ) throws IllegalArgumentException
 	{
 		return profiler.profile( "getValue", () -> store.getValue( base, primaryKey, name));
 	}
 
 	@Override
-	public Map<String, Object> getValues(RecordBase<?> base, int primaryKey, String[] columns ) throws IllegalArgumentException
+	public Map<String, Object> getValues(final RecordBase<?> base, final int primaryKey, final String[] columns ) throws IllegalArgumentException
 	{
 		return profiler.profile( "getValuesMap", () -> store.getValues( base, primaryKey, columns));
 	}
 
 	@Override
-	public Stream<Object> getValues( String tableName, String column, String condColumn, Object condValue ) throws
-			IllegalArgumentException
+	public Stream<Object> getValues( final String tableName, final String column, final String condColumn, final Object condValue ) throws
+	IllegalArgumentException
 	{
 		return profiler.profile( "getValuesStream", () -> store.getValues( tableName, column, condColumn, condValue ));
 	}
 
 	@Override
-	public boolean addRow( String tableName, String[] rows, Object[] values ) throws IllegalArgumentException
+	public boolean addRow( final String tableName, final String[] rows, final Object[] values ) throws IllegalArgumentException
 	{
-		return profiler.profile( "addRow", () -> store.addRow( tableName, rows, values));
+		return profiler.profileBoolean("addRow", () -> store.addRow(tableName, rows, values));
 	}
 
 	@Override
-	public boolean removeRow( String tableName, Condition cond ) throws IllegalArgumentException
+	public boolean removeRow( final String tableName, final Condition cond ) throws IllegalArgumentException
 	{
-		return profiler.profile( "removeRow", () -> store.removeRow( tableName, cond));
+		return profiler.profileBoolean("removeRow", () -> store.removeRow(tableName, cond));
 	}
 
 	@Override
-	public boolean save(RecordBase<?> base, int primaryKey )
+	public boolean save(final RecordBase<?> base, final int primaryKey )
 	{
-		return profiler.profile( "save", () -> store.save( base, primaryKey));
+		return profiler.profileBoolean("save", () -> store.save(base, primaryKey));
 	}
 
 	@Override
-	public boolean saveAll(RecordBase<?> base )
+	public boolean saveAll(final RecordBase<?> base )
 	{
-		return profiler.profile( "saveAll", () -> store.saveAll( base));
+		return profiler.profileBoolean("saveAll", () -> store.saveAll(base));
 	}
 
 	@Override
-	public void clearCache(RecordBase<?> base, int primaryKey )
+	public void clearCache(final RecordBase<?> base, final int primaryKey )
 	{
 		profiler.profile( "clearCache", () -> store.clearCache( base, primaryKey));
 	}
@@ -142,41 +143,41 @@ public class ProfilingRecordStore implements RecordStore
 	@Override
 	public boolean isCached()
 	{
-		return profiler.profile( "isCached", () -> store.isCached());
+		return profiler.profileBoolean("isCached", () -> store.isCached());
 	}
 
 	@Override
-	public int insertNewRecord(RecordBase<?> base, Map<String, Object> columnData )
+	public int insertNewRecord(final RecordBase<?> base, final Map<String, Object> columnData )
 	{
-		return profiler.profile( "insertNewRecord", () -> store.insertNewRecord( base, columnData));
+		return profiler.profileInt("insertNewRecord", () -> store.insertNewRecord(base, columnData));
 	}
 
 	@Override
-	public boolean isSynchronized(RecordBase<?> base, int primaryKey )
+	public boolean isSynchronized(final RecordBase<?> base, final int primaryKey )
 	{
-		return profiler.profile( "isSynchronized", () -> store.isSynchronized( base, primaryKey));
+		return profiler.profileBoolean("isSynchronized", () -> store.isSynchronized(base, primaryKey));
 	}
 
 	@Override
-	public boolean containsRecord(RecordBase<?> base, int primaryKey )
+	public boolean containsRecord(final RecordBase<?> base, final int primaryKey )
 	{
-		return profiler.profile( "containsRecord", () -> store.containsRecord( base, primaryKey));
+		return profiler.profileBoolean("containsRecord", () -> store.containsRecord(base, primaryKey));
 	}
 
 	@Override
-	public void destroy(RecordBase<?> base, int primaryKey )
+	public void destroy(final RecordBase<?> base, final int primaryKey )
 	{
 		profiler.profile( "destroy", () -> store.destroy( base, primaryKey));
 	}
 
 	@Override
-	public Map<String, Object> findFirstWithData(RecordBase<?> base, String[] columns, Scope scope )
+	public Map<String, Object> findFirstWithData(final RecordBase<?> base, final String[] columns, final Scope scope )
 	{
 		return profiler.profile( "findFirstWithData", () -> store.findFirstWithData( base, columns, scope));
 	}
 
 	@Override
-	public Stream<Map<String, Object>> streamAllWithData(RecordBase<?> base, String[] columns, Scope scope )
+	public Stream<Map<String, Object>> streamAllWithData(final RecordBase<?> base, final String[] columns, final Scope scope )
 	{
 		return profiler.profile( "streamAllWithData", () -> store.streamAllWithData( base, columns, scope));
 	}
@@ -188,40 +189,40 @@ public class ProfilingRecordStore implements RecordStore
 	}
 
 	//override even default methods
-	
+
 	@Override
-	public void touch(RecordBase<?> base, int primaryKey)
+	public void touch(final RecordBase<?> base, final int primaryKey)
 	{
 		profiler.profile( "touch", () -> store.touch( base, primaryKey));
 	}
-	
+
 	@Override
-	public Integer findFirst(RecordBase<?> base, Scope scope)
+	public Integer findFirst(final RecordBase<?> base, final Scope scope)
 	{
 		return profiler.profile( "findFirst", () -> store.findFirst( base, scope));
 	}
-	
+
 	@Override
-	public Set<Integer> findAll(RecordBase<?> base, Scope scope)
+	public Set<Integer> findAll(final RecordBase<?> base, final Scope scope)
 	{
 		return profiler.profile( "findAll", () -> store.findAll( base, scope));
 	}
-	
+
 	@Override
-	public Stream<Integer> streamAll(RecordBase<?> base, Scope scope)
+	public Stream<Integer> streamAll(final RecordBase<?> base, final Scope scope)
 	{
 		return profiler.profile( "streamAll", () -> store.streamAll( base, scope));
 	}
-	
+
 	@Override
-	public Map<Integer, Map<String, Object>> findAllWithData(RecordBase<?> base, String[] columns, Scope scope)
+	public Map<Integer, Map<String, Object>> findAllWithData(final RecordBase<?> base, final String[] columns, final Scope scope)
 	{
 		return profiler.profile( "findAllWithData", () -> store.findAllWithData( base, columns, scope));
 	}
-	
+
 	@Override
-	public int count(RecordBase<?> base, Condition condition)
+	public int count(final RecordBase<?> base, final Condition condition)
 	{
-		return profiler.profile( "count", () -> store.count( base, condition));
+		return profiler.profileInt("count", () -> store.count(base, condition));
 	}
 }

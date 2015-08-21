@@ -87,7 +87,7 @@ public class TestServer extends Assert
 	{
 		if(con == null || con.isClosed())
 		{
-//			con = DriverManager.getConnection( "jdbc:hsqldb:mem:test", "sa", "");
+			con = DriverManager.getConnection( "jdbc:hsqldb:mem:test", "sa", "");
 			//FIXME SQLite errors:
 			/**
 			 * - Can't find column '*' -> does not interpret as all-columns

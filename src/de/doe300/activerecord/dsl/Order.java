@@ -164,15 +164,10 @@ public class Order implements Comparator<Map<String,Object>>, SQLCommand
 	 */
 	public Comparator<ActiveRecord> toRecordComparator()
 	{
-		return new Comparator<ActiveRecord>()
-		{
-			@Override
-			public int compare( final ActiveRecord o1, final ActiveRecord o2 )
-			{
-				final Map<String,Object> map1 = o1.getBase().getStore().getValues( o1.getBase(), o1.getPrimaryKey(), columns);
-				final Map<String,Object> map2 = o2.getBase().getStore().getValues( o2.getBase(), o2.getPrimaryKey(), columns);
-				return Order.this.compare( map1, map2 );
-			}
+		return (o1, o2) -> {
+			final Map<String,Object> map1 = o1.getBase().getStore().getValues( o1.getBase(), o1.getPrimaryKey(), columns);
+			final Map<String,Object> map2 = o2.getBase().getStore().getValues( o2.getBase(), o2.getPrimaryKey(), columns);
+			return Order.this.compare( map1, map2 );
 		};
 	}
 

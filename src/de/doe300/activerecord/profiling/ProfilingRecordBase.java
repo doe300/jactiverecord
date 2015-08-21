@@ -24,6 +24,9 @@
  */
 package de.doe300.activerecord.profiling;
 
+import java.util.Map;
+import java.util.stream.Stream;
+
 import de.doe300.activerecord.RecordBase;
 import de.doe300.activerecord.RecordCore;
 import de.doe300.activerecord.RecordException;
@@ -34,8 +37,6 @@ import de.doe300.activerecord.record.ActiveRecord;
 import de.doe300.activerecord.scope.Scope;
 import de.doe300.activerecord.store.RecordStore;
 import de.doe300.activerecord.validation.ValidationFailed;
-import java.util.Map;
-import java.util.stream.Stream;
 
 /**
  * A wrapper around another RecordBase profiling all method-calls
@@ -47,7 +48,7 @@ public class ProfilingRecordBase<T extends ActiveRecord> extends RecordBase<T>
 	private final RecordBase<T> otherBase;
 	private final Profiler profiler;
 
-	public ProfilingRecordBase( RecordBase<T> otherBase )
+	public ProfilingRecordBase( final RecordBase<T> otherBase )
 	{
 		super( null, null, null );
 		this.otherBase = otherBase;
@@ -60,16 +61,16 @@ public class ProfilingRecordBase<T extends ActiveRecord> extends RecordBase<T>
 	}
 
 	@Override
-	protected T createProxy( int primaryKey, boolean newRecord, Map<String, Object> recordData ) throws RecordException
+	protected T createProxy( final int primaryKey, final boolean newRecord, final Map<String, Object> recordData ) throws RecordException
 	{
 		//not used
 		throw new UnsupportedOperationException();
 	}
-	
+
 	@Override
-	public int count( Condition condition )
+	public int count( final Condition condition )
 	{
-		return profiler.profile( "count", () -> otherBase.count( condition));
+		return profiler.profileInt("count", () -> otherBase.count(condition));
 	}
 
 	@Override
@@ -79,25 +80,25 @@ public class ProfilingRecordBase<T extends ActiveRecord> extends RecordBase<T>
 	}
 
 	@Override
-	public T createRecord( Map<String, Object> data ) throws RecordException
+	public T createRecord( final Map<String, Object> data ) throws RecordException
 	{
 		return profiler.profile("createRecord Map", () -> otherBase.createRecord( data ));
 	}
 
 	@Override
-	public void destroy( int primaryKey )
+	public void destroy( final int primaryKey )
 	{
 		profiler.profile("destroy", () -> otherBase.destroy( primaryKey ));
 	}
 
 	@Override
-	public T duplicate( T record )
+	public T duplicate( final T record )
 	{
 		return profiler.profile("duplicate", () -> otherBase.duplicate( record ));
 	}
 
 	@Override
-	public Stream<T> find( Condition condition )
+	public Stream<T> find( final Condition condition )
 	{
 		return profiler.profile("find", () -> otherBase.find( condition ));
 	}
@@ -109,43 +110,43 @@ public class ProfilingRecordBase<T extends ActiveRecord> extends RecordBase<T>
 	}
 
 	@Override
-	public T findFirst( Condition condition )
+	public T findFirst( final Condition condition )
 	{
 		return profiler.profile("findFirst", () -> otherBase.findFirst( condition ));
 	}
 
 	@Override
-	public T findFirstFor( Map<String, Object> data )
+	public T findFirstFor( final Map<String, Object> data )
 	{
 		return profiler.profile("findFirstFor Map", () -> otherBase.findFirstFor( data ));
 	}
 
 	@Override
-	public T findFirstFor( String column, Object value )
+	public T findFirstFor( final String column, final Object value )
 	{
 		return profiler.profile("findFirstFor", () -> otherBase.findFirstFor( column, value ));
 	}
 
 	@Override
-	public T findFirstWithScope( Scope scope )
+	public T findFirstWithScope( final Scope scope )
 	{
 		return profiler.profile("findFirstWithScope", () -> otherBase.findFirstWithScope( scope ));
 	}
 
 	@Override
-	public Stream<T> findFor( Map<String, Object> data )
+	public Stream<T> findFor( final Map<String, Object> data )
 	{
 		return profiler.profile("findFor Map", () -> otherBase.findFor( data ));
 	}
 
 	@Override
-	public Stream<T> findFor( String column, Object value )
+	public Stream<T> findFor( final String column, final Object value )
 	{
 		return profiler.profile("findFor", () -> otherBase.findFor( column, value ));
 	}
 
 	@Override
-	public Stream<T> findWithScope( Scope scope )
+	public Stream<T> findWithScope( final Scope scope )
 	{
 		return profiler.profile("findWithScope", () -> otherBase.findWithScope( scope ));
 	}
@@ -175,7 +176,7 @@ public class ProfilingRecordBase<T extends ActiveRecord> extends RecordBase<T>
 	}
 
 	@Override
-	public T getRecord( int primaryKey ) throws RecordException
+	public T getRecord( final int primaryKey ) throws RecordException
 	{
 		return profiler.profile("getRecord", () -> otherBase.getRecord( primaryKey ));
 	}
@@ -201,53 +202,53 @@ public class ProfilingRecordBase<T extends ActiveRecord> extends RecordBase<T>
 	@Override
 	public boolean hasCallbacks()
 	{
-		return profiler.profile("hasCallbacks", () -> otherBase.hasCallbacks());
+		return profiler.profileBoolean("hasCallbacks", () -> otherBase.hasCallbacks());
 	}
 
 	@Override
-	public boolean hasRecord( int primaryKey )
+	public boolean hasRecord( final int primaryKey )
 	{
-		return profiler.profile("hasRecord", () -> otherBase.hasRecord( primaryKey ));
+		return profiler.profileBoolean("hasRecord", () -> otherBase.hasRecord(primaryKey));
 	}
 
 	@Override
 	public boolean isAutoCreate()
 	{
-		return profiler.profile("isAutoCreate", () -> otherBase.isAutoCreate());
+		return profiler.profileBoolean("isAutoCreate", () -> otherBase.isAutoCreate());
 	}
 
 	@Override
 	public boolean isSearchable()
 	{
-		return profiler.profile("isSearchable", () -> otherBase.isSearchable());
+		return profiler.profileBoolean("isSearchable", () -> otherBase.isSearchable());
 	}
 
 	@Override
-	public boolean isSynchronized( ActiveRecord record )
+	public boolean isSynchronized( final ActiveRecord record )
 	{
-		return profiler.profile("isSynchronized", () -> otherBase.isSynchronized( record ));
+		return profiler.profileBoolean("isSynchronized", () -> otherBase.isSynchronized(record));
 	}
 
 	@Override
 	public boolean isTimestamped()
 	{
-		return profiler.profile("isTimestamped", () -> otherBase.isTimestamped());
+		return profiler.profileBoolean("isTimestamped", () -> otherBase.isTimestamped());
 	}
 
 	@Override
-	public boolean isValid( ActiveRecord record )
+	public boolean isValid( final ActiveRecord record )
 	{
-		return profiler.profile("isValid", ()-> otherBase.isValid( record ));
+		return profiler.profileBoolean("isValid", () -> otherBase.isValid(record));
 	}
 
 	@Override
 	public boolean isValidated()
 	{
-		return profiler.profile("isValidated", () -> otherBase.isValidated());
+		return profiler.profileBoolean("isValidated", () -> otherBase.isValidated());
 	}
 
 	@Override
-	public T newRecord( int primaryKey ) throws RecordException
+	public T newRecord( final int primaryKey ) throws RecordException
 	{
 		return profiler.profile("newRecord", ()-> otherBase.newRecord( primaryKey ));
 	}
@@ -255,47 +256,47 @@ public class ProfilingRecordBase<T extends ActiveRecord> extends RecordBase<T>
 	@Override
 	public boolean recordStoreExists()
 	{
-		return profiler.profile("recordStoreExists", () -> otherBase.recordStoreExists());
+		return profiler.profileBoolean("recordStoreExists", () -> otherBase.recordStoreExists());
 	}
 
 	@Override
-	public void reload( ActiveRecord record )
+	public void reload( final ActiveRecord record )
 	{
 		profiler.profile("reload", () -> otherBase.reload( record ));
 	}
 
 	@Override
-	public boolean save( ActiveRecord record ) throws ValidationFailed
+	public boolean save( final ActiveRecord record ) throws ValidationFailed
 	{
-		return profiler.profile("save", () -> otherBase.save( record ));
+		return profiler.profileBoolean("save", () -> otherBase.save(record));
 	}
 
 	@Override
-	public Stream<T> search( String term )
+	public Stream<T> search( final String term )
 	{
 		return profiler.profile("search", () -> otherBase.search( term ));
 	}
 
 	@Override
-	public T searchFirst( String term )
+	public T searchFirst( final String term )
 	{
 		return profiler.profile("searchFirst", () -> otherBase.searchFirst( term ));
 	}
 
 	@Override
-	public void validate( ActiveRecord record )
+	public void validate( final ActiveRecord record )
 	{
 		profiler.profile("validate", () -> otherBase.validate( record ));
 	}
 
 	@Override
-	public QueryResult<T> where( Condition condition )
+	public QueryResult<T> where( final Condition condition )
 	{
 		return profiler.profile("where", () -> otherBase.where( condition ));
 	}
 
 	@Override
-	public QueryResult<T> withScope( Scope scope )
+	public QueryResult<T> withScope( final Scope scope )
 	{
 		return profiler.profile("withScope", () -> otherBase.withScope( scope ));
 	}

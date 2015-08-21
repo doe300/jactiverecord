@@ -90,10 +90,10 @@ public class MapHandler implements ProxyHandler
 		@Override
 		public Set<Entry<String, Object>> entrySet()
 		{
-			return columnNames.stream().map( (final String s)->
+			return columnNames.stream().map((final String s) ->
 			{
 				return new Entry<String, Object>()
-					{
+				{
 					@Override
 					public String getKey()
 					{
@@ -103,18 +103,18 @@ public class MapHandler implements ProxyHandler
 					@Override
 					public Object getValue()
 					{
-						return store.getValue(base, primaryKey, s );
+						return store.getValue(base, primaryKey, s);
 					}
 
 					@Override
-					public Object setValue( final Object value )
+					public Object setValue(final Object value)
 					{
 						final Object old = getValue();
 						store.setValue(base, primaryKey, s, value);
 						return old;
 					}
-					};
-			}).collect( Collectors.toSet());
+				};
+			}).collect(Collectors.toSet());
 		}
 
 		@Override

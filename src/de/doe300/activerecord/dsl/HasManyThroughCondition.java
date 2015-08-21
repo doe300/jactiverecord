@@ -24,21 +24,24 @@
  */
 package de.doe300.activerecord.dsl;
 
+import java.util.Map;
+
+import javax.annotation.Nonnull;
+
 import de.doe300.activerecord.ReadOnlyRecordBase;
 import de.doe300.activerecord.jdbc.VendorSpecific;
 import de.doe300.activerecord.record.ActiveRecord;
 import de.doe300.activerecord.record.association.AssociationHelper;
-import java.util.Map;
 
 /**
  * A Condition on a table referenced by a has-many-through association.
- * 
+ *
  * <p>
- * This condition matches any record in table <code>thisTable</code> which has at least one record 
+ * This condition matches any record in table <code>thisTable</code> which has at least one record
  * of table <code>associatedTable</code> - associated via a third table <code>associationTable</code>
  * - that matches the <code>associatedBaseCondition</code>.
  * </p>
- * 
+ *
  * <pre>
  * Example:
  * |    A    |				|           C          |				|            B           |
@@ -50,15 +53,19 @@ import java.util.Map;
  * <code>thisBaseAssociationKey</code> is the column <code>id</code> of table A.
  * If the <code>associatedBaseCondition</code> matches only the first entry in B, this condition will only match the first entry in A.
  * </pre>
- * 
+ *
  * @author doe300
  */
 public class HasManyThroughCondition implements Condition
 {
 	//FIXME doesn't work if source- and association-table are the same
+	@Nonnull
 	private final String associationTable, associationTableThisForeignKey, associationTableOtherForeignKey;
+	@Nonnull
 	private final String thisBaseAssociationKey;
+	@Nonnull
 	private final ReadOnlyRecordBase<?> associatedBase, thisBase;
+	@Nonnull
 	private final Condition associatedBaseCondition;
 
 	/**
@@ -70,9 +77,10 @@ public class HasManyThroughCondition implements Condition
 	 * @param associatedBase the RecordBase for the associated record
 	 * @param associatedBaseCondition the Condition to match in the associated table
 	 */
-	public HasManyThroughCondition(ReadOnlyRecordBase<?> thisBase, String associationTable, String associationTableThisForeignKey,
-			String associationTableOtherForeignKey, String thisBaseAssociationKey,
-			ReadOnlyRecordBase<?> associatedBase, Condition associatedBaseCondition )
+	public HasManyThroughCondition(@Nonnull final ReadOnlyRecordBase<?> thisBase,
+		@Nonnull final String associationTable, @Nonnull final String associationTableThisForeignKey,
+		@Nonnull final String associationTableOtherForeignKey, @Nonnull final String thisBaseAssociationKey,
+		@Nonnull final ReadOnlyRecordBase<?> associatedBase, @Nonnull final Condition associatedBaseCondition)
 	{
 		this.thisBase = thisBase;
 		this.associationTable = associationTable;
@@ -83,7 +91,7 @@ public class HasManyThroughCondition implements Condition
 		this.associatedBaseCondition = associatedBaseCondition;
 	}
 
-	
+
 	@Override
 	public boolean hasWildcards()
 	{
@@ -97,14 +105,18 @@ public class HasManyThroughCondition implements Condition
 	}
 
 	@Override
-	public boolean test( ActiveRecord record )
+	public boolean test( final ActiveRecord record )
 	{
+		if (record == null)
+		{
+			return false;
+		}
 		return AssociationHelper.getHasManyThrough( record, associatedBase.getRecordType(), associationTable, associationTableThisForeignKey, associationTableOtherForeignKey).
-				anyMatch(associatedBaseCondition);
+			anyMatch(associatedBaseCondition);
 	}
 
 	@Override
-	public boolean test( Map<String, Object> map )
+	public boolean test( final Map<String, Object> map )
 	{
 		throw new UnsupportedOperationException( "Can't resolve an AssociationCondition from column-values!" );
 	}
@@ -116,15 +128,15 @@ public class HasManyThroughCondition implements Condition
 	}
 
 	@Override
-	public String toSQL( VendorSpecific vendorSpecifics )
+	public String toSQL( final VendorSpecific vendorSpecifics )
 	{
-		//EXISTS(SELECT primaryKey FROM associatedTable WHERE associatedTable.primaryKey IN 
-			// (SELECT associationTableOtherForeignKey FROM associationTable WHERE associationTable.associatioNTableThisForeignKey = thisTable.primaryKey)
+		//EXISTS(SELECT primaryKey FROM associatedTable WHERE associatedTable.primaryKey IN
+		// (SELECT associationTableOtherForeignKey FROM associationTable WHERE associationTable.associatioNTableThisForeignKey = thisTable.primaryKey)
 		// AND cond)
 		return "EXISTS("
-				+ "SELECT " + associatedBase.getPrimaryColumn() + " FROM " + associatedBase.getTableName()+" WHERE " + associatedBase.getPrimaryColumn()+" IN ("
-					+ "SELECT " + associationTableOtherForeignKey + " FROM " + associationTable + " WHERE " + associationTable + "." + associationTableThisForeignKey + " = "+ thisBase.getTableName()+ "." + thisBaseAssociationKey
-				+ ") AND " + associatedBaseCondition.toSQL( vendorSpecifics ) + ")";
+		+ "SELECT " + associatedBase.getPrimaryColumn() + " FROM " + associatedBase.getTableName()+" WHERE " + associatedBase.getPrimaryColumn()+" IN ("
+		+ "SELECT " + associationTableOtherForeignKey + " FROM " + associationTable + " WHERE " + associationTable + "." + associationTableThisForeignKey + " = "+ thisBase.getTableName()+ "." + thisBaseAssociationKey
+		+ ") AND " + associatedBaseCondition.toSQL( vendorSpecifics ) + ")";
 	}
 
 }

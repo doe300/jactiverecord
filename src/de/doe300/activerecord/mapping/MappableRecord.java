@@ -24,14 +24,18 @@
  */
 package de.doe300.activerecord.mapping;
 
-import de.doe300.activerecord.record.ActiveRecord;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Set;
 
+import javax.annotation.Nonnull;
+import javax.annotation.Nullable;
+
+import de.doe300.activerecord.record.ActiveRecord;
+
 /**
  * An ActiveRecord which can be mapped to and from a {@link Map}
- * 
+ *
  * @author doe300
  */
 public interface MappableRecord extends ActiveRecord
@@ -42,42 +46,42 @@ public interface MappableRecord extends ActiveRecord
 	 */
 	public default Map<String,Object> getAttributes()
 	{
-		Set<String> columns = getBase().getStore().getAllColumnNames( getBase().getTableName());
-		Map<String,Object> attributes = new HashMap<>(columns.size());
-		for(String col:columns)
+		final Set<String> columns = getBase().getStore().getAllColumnNames( getBase().getTableName());
+		final Map<String,Object> attributes = new HashMap<>(columns.size());
+		for(final String col:columns)
 		{
 			attributes.put( col, getBase().getStore().getValue( getBase(), getPrimaryKey(), col));
 		}
 		return attributes;
 	}
-	
+
 	/**
-	 * 
+	 *
 	 * @param column
 	 * @return the value for the given <code>column</code>
 	 */
-	public default Object getAttribute(String column)
+	public default Object getAttribute(@Nonnull final String column)
 	{
 		return getBase().getStore().getValue( getBase(), getPrimaryKey(), column);
 	}
-	
+
 	/**
 	 * Sets all attributes for this record from the key-value pairs in the given <code>map</code>
-	 * @param map 
+	 * @param map
 	 */
-	public default void setAttributes(Map<String,Object> map)
+	public default void setAttributes(@Nonnull final Map<String, Object> map)
 	{
 		save();//TODO save is wrong, but how to make sure, changes are not omitted??
 		getBase().getStore().setValues( getBase(), getPrimaryKey(), map);
 		reload();
 	}
-	
+
 	/**
 	 * Sets the given attribute for this record
 	 * @param column
-	 * @param value 
+	 * @param value
 	 */
-	public default void setAttribute(String column, Object value)
+	public default void setAttribute(@Nonnull final String column, @Nullable final Object value)
 	{
 		save();
 		getBase().getStore().setValue( getBase(), getPrimaryKey(), column, value);
