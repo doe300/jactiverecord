@@ -101,7 +101,7 @@ public class TestSingleInheritancePOJO implements ActiveRecord, TestInterface
 	{
 		try
 		{
-			return base.getCore().buildBase( TestInterface.class).getRecord(base.getProperty( primaryKey, "fk_test_id", Integer.class));
+			return base.getCore().getBase( TestInterface.class).getRecord(base.getProperty( primaryKey, "fk_test_id", Integer.class));
 		}
 		catch ( final ClassCastException | RecordException ex )
 		{

@@ -143,12 +143,14 @@ class RowCache implements Comparable<RowCache>
 	}
 
 	/**
-	 * clears all entries from the cache
+	 * clears all entries from the cache (except primary key)
 	 */
 	public synchronized void clear()
 	{
+		int key = getPrimaryKey();
 		columnData.clear();
 		modifiedData.clear();
+		columnData.put( primaryKey, key );
 	}
 
 	/**

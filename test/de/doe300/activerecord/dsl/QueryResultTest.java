@@ -49,7 +49,7 @@ public class QueryResultTest extends Assert
 	public static void createTables() throws Exception
 	{
 		TestServer.buildTestTables();
-		base = RecordCore.fromDatabase( TestServer.getTestConnection(), false).buildBase( TestInterface.class);
+		base = RecordCore.fromDatabase( TestServer.getTestConnection(), false).getBase( TestInterface.class);
 		TestInterface i = base.createRecord();
 		i.setName( "Alfons");
 		i.setAge( 20);

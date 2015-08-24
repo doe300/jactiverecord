@@ -86,6 +86,7 @@ public final class TypeMappings
 	 * @throws ClassCastException
 	 */
 	@Nullable
+	@SuppressWarnings( "unchecked" )
 	public static <T> T coerceToType(@Nullable final Object obj, @Nonnull final Class<T> type) throws ClassCastException
 	{
 		if(obj == null)

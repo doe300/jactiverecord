@@ -50,7 +50,7 @@ public class MappableRecordTest extends Assert
 	{
 		migration = new AutomaticMigration(TestMappableRecord.class, false);
 		migration.apply( TestServer.getTestConnection() );
-		base = RecordCore.fromDatabase( TestServer.getTestConnection(), false).buildBase( TestMappableRecord.class);
+		base = RecordCore.fromDatabase( TestServer.getTestConnection(), false).getBase( TestMappableRecord.class);
 		record = base.createRecord();
 	}
 	

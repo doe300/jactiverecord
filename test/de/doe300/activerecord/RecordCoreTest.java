@@ -84,8 +84,8 @@ public class RecordCoreTest extends Assert
 	@Test
 	public void testBuildBase()
 	{
-		assertNotNull( core.buildBase( TestInterface.class, new MapHandler()) );
-		assertEquals(core.buildBase( TestInterface.class), core.getBase( TestInterface.class));
+		assertNotNull( core.getBase( TestInterface.class, new MapHandler()) );
+		assertEquals(core.getBase( TestInterface.class), core.getBase( TestInterface.class));
 	}
 
 	@Test

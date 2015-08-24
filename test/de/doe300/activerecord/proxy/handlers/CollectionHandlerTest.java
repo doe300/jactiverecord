@@ -52,7 +52,7 @@ public class CollectionHandlerTest extends Assert
 	{
 		TestServer.buildTestTables();
 		handler = new CollectionHandler();
-		base = RecordCore.fromDatabase( TestServer.getTestConnection(), false).buildBase(CollectionHandlerTest.TestCollectionInterface.class, handler);
+		base = RecordCore.fromDatabase( TestServer.getTestConnection(), false).getBase(CollectionHandlerTest.TestCollectionInterface.class, handler);
 		record = base.createRecord();
 	}
 	

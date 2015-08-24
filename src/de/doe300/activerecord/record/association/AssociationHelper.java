@@ -60,7 +60,7 @@ public final class AssociationHelper
 		{
 			return null;
 		}
-		return record.getBase().getCore().buildBase( type).getRecord(foreignKey);
+		return record.getBase().getCore().getBase( type).getRecord(foreignKey);
 	}
 
 	/**
@@ -87,7 +87,7 @@ public final class AssociationHelper
 	public static <T extends ActiveRecord> T getHasOne(@Nonnull final ActiveRecord record, @Nonnull final Class<T> type,
 		@Nonnull final String foreignKeyColumn)
 	{
-		final RecordBase<T> base = record.getBase().getCore().buildBase( type);
+		final RecordBase<T> base = record.getBase().getCore().getBase( type);
 		return base.findFirst( new SimpleCondition(foreignKeyColumn, record.getPrimaryKey(), Comparison.IS));
 	}
 
@@ -115,7 +115,7 @@ public final class AssociationHelper
 	public static <T extends ActiveRecord> T getHasOne(@Nonnull final ActiveRecord record, @Nonnull final Class<T> type,
 		@Nullable final Condition cond)
 	{
-		return record.getBase().getCore().buildBase( type ).findFirst( cond );
+		return record.getBase().getCore().getBase( type ).findFirst( cond );
 	}
 
 	/**
@@ -130,7 +130,7 @@ public final class AssociationHelper
 	public static <T extends ActiveRecord> Stream<T> getHasMany(@Nonnull final ActiveRecord record,
 		@Nonnull final Class<T> type, @Nonnull final String foreignKeyColumn)
 	{
-		final RecordBase<T> base = record.getBase().getCore().buildBase( type);
+		final RecordBase<T> base = record.getBase().getCore().getBase( type);
 		return base.find( new SimpleCondition(foreignKeyColumn, record.getPrimaryKey(), Comparison.IS));
 	}
 
@@ -146,7 +146,7 @@ public final class AssociationHelper
 	public static <T extends ActiveRecord> RecordSet<T> getHasManySet(@Nonnull final ActiveRecord record,
 		@Nonnull final Class<T> type, @Nonnull final String foreignKeyColumn)
 	{
-		final RecordBase<T> base = record.getBase().getCore().buildBase( type);
+		final RecordBase<T> base = record.getBase().getCore().getBase( type);
 		final Condition cond = new SimpleCondition(foreignKeyColumn, record.getPrimaryKey(), Comparison.IS);
 		final Consumer<T> setAssoc = (final T t) -> base.getStore().setValue( base, t.getPrimaryKey(), foreignKeyColumn, record.getPrimaryKey() );
 		final Consumer<T> unsetAssoc = (final T t) -> base.getStore().setValue( base, t.getPrimaryKey(), foreignKeyColumn, null );

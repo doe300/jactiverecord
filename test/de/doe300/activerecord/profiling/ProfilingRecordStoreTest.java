@@ -55,7 +55,7 @@ public class ProfilingRecordStoreTest extends Assert
 	{
 		this.name = name;
 		this.recordStore = new ProfilingRecordStore(store );
-		base = new ProfilingRecordBase<>(RecordCore.fromStore( name, recordStore ).buildBase( TestInterface.class));
+		base = new ProfilingRecordBase<>(RecordCore.fromStore( name, recordStore ).getBase( TestInterface.class));
 	}
 	
 	@Parameterized.Parameters

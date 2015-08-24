@@ -62,7 +62,7 @@ public class CachedJDBCRecordStoreTest extends Assert
 	{
 		TestServer.buildTestTables();
 		store = new CachedJDBCRecordStore(TestServer.getTestConnection());
-		base = RecordCore.fromStore( "Test1", store).buildBase(TestInterface.class);
+		base = RecordCore.fromStore( "Test1", store).getBase(TestInterface.class);
 		assertNotNull( base );
 		primaryKey = base.createRecord().getPrimaryKey();
 	}

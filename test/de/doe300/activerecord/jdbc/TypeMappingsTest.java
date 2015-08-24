@@ -56,7 +56,7 @@ public class TypeMappingsTest extends Assert
 	{
 		Connection con = TestServer.getTestConnection();
 		new AutomaticMigration(TestTypesInterface.class, false).apply( con);
-		base = RecordCore.fromDatabase( con, false).buildBase( TestTypesInterface.class);
+		base = RecordCore.fromDatabase( con, false).getBase( TestTypesInterface.class);
 	}
 	
 	@AfterClass

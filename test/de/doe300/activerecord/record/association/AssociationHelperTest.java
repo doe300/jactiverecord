@@ -46,7 +46,7 @@ public class AssociationHelperTest extends Assert
 	
 	public AssociationHelperTest() throws SQLException
 	{
-		base = RecordCore.fromDatabase( TestServer.getTestConnection(), false).buildBase( TestInterface.class);
+		base = RecordCore.fromDatabase( TestServer.getTestConnection(), false).getBase( TestInterface.class);
 	}
 	
 	@BeforeClass

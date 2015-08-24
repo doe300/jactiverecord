@@ -63,7 +63,7 @@ public class ConditionSetTest extends Assert
 	public static void createTables() throws Exception
 	{
 		TestServer.buildTestTables();
-		base = RecordCore.fromDatabase( TestServer.getTestConnection(), true).buildBase( TestInterface.class );
+		base = RecordCore.fromDatabase( TestServer.getTestConnection(), true).getBase( TestInterface.class );
 		set = AssociationHelper.getConditionSet( base, "age", 23, 12);
 		
 		//fill set

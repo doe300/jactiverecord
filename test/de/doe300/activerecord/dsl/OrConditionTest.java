@@ -53,7 +53,7 @@ public class OrConditionTest extends Assert
 	{
 		TestServer.buildTestTables();
 		
-		base = RecordCore.fromDatabase( TestServer.getTestConnection(), false).buildBase( TestInterface.class);
+		base = RecordCore.fromDatabase( TestServer.getTestConnection(), false).getBase( TestInterface.class);
 		t1 = base.createRecord();
 		t1.setName( "123Name1");
 		t1.setAge( -912);

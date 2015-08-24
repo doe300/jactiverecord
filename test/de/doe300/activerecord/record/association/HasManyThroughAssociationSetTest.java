@@ -61,7 +61,7 @@ public class HasManyThroughAssociationSetTest extends Assert
 	public static void setUpClass() throws Exception
 	{
 		TestServer.buildTestTables();
-		base = RecordCore.fromDatabase( TestServer.getTestConnection(), true).buildBase( TestInterface.class );
+		base = RecordCore.fromDatabase( TestServer.getTestConnection(), true).getBase( TestInterface.class );
 		assocI = base.createRecord();
 		set = AssociationHelper.getHasManyThroughSet(assocI, TestInterface.class, "mappingTable", "fk_test1", "fk_test2" );
 		

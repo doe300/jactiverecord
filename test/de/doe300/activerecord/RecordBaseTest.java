@@ -63,9 +63,9 @@ public class RecordBaseTest<T extends TestInterface> extends Assert
 	public static Collection<Object[]> getParameters() throws SQLException
 	{
 		return Arrays.asList(
-			new Object[]{TestInterface.class, RecordCore.fromDatabase( TestServer.getTestConnection(), true).buildBase( TestInterface.class )},
-			new Object[]{TestPOJO.class, RecordCore.fromDatabase( TestServer.getTestConnection(), true).buildBase( TestPOJO.class )},
-			new Object[]{TestSingleInheritancePOJO.class, RecordCore.fromDatabase( TestServer.getTestConnection(), true).buildBase( TestSingleInheritancePOJO.class )}
+			new Object[]{TestInterface.class, RecordCore.fromDatabase( TestServer.getTestConnection(), true).getBase( TestInterface.class )},
+			new Object[]{TestPOJO.class, RecordCore.fromDatabase( TestServer.getTestConnection(), true).getBase( TestPOJO.class )},
+			new Object[]{TestSingleInheritancePOJO.class, RecordCore.fromDatabase( TestServer.getTestConnection(), true).getBase( TestSingleInheritancePOJO.class )}
 		);
 	}
 	

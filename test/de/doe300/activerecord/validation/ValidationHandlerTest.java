@@ -52,7 +52,7 @@ public class ValidationHandlerTest extends Assert
 	public static void createTables() throws Exception
 	{
 		TestServer.buildTestTables();
-		base = RecordCore.fromDatabase( TestServer.getTestConnection(), true).buildBase(TestInterface.class, new ValidationHandler());
+		base = RecordCore.fromDatabase( TestServer.getTestConnection(), true).getBase(TestInterface.class);
 	}
 	
 	@AfterClass

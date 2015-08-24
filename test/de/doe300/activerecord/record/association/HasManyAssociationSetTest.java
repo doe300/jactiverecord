@@ -59,7 +59,7 @@ public class HasManyAssociationSetTest extends Assert
 	public static void createTables() throws Exception
 	{
 		TestServer.buildTestTables();
-		base = RecordCore.fromDatabase( TestServer.getTestConnection(), true).buildBase( TestInterface.class );
+		base = RecordCore.fromDatabase( TestServer.getTestConnection(), true).getBase( TestInterface.class );
 		assocI = base.createRecord();
 		set = AssociationHelper.getHasManySet( assocI, TestInterface.class, "fk_test_id" );
 		

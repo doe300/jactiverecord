@@ -55,7 +55,7 @@ public class MapHandlerTest extends Assert
 	{
 		TestServer.buildTestTables();
 		handler = new MapHandler();
-		base = RecordCore.fromDatabase( TestServer.getTestConnection(), false).buildBase( TestMapInterface.class, handler);
+		base = RecordCore.fromDatabase( TestServer.getTestConnection(), false).getBase( TestMapInterface.class, handler);
 		record = base.createRecord();
 	}
 	

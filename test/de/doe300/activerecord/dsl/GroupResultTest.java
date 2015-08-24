@@ -49,7 +49,7 @@ public class GroupResultTest extends Assert
 	public static void createTables() throws Exception
 	{
 		TestServer.buildTestTables();
-		base = RecordCore.fromDatabase( TestServer.getTestConnection(), true).buildBase(TestInterface.class);
+		base = RecordCore.fromDatabase( TestServer.getTestConnection(), true).getBase(TestInterface.class);
 		TestInterface t = base.createRecord();
 		t.setName( "Adam5");
 		t.setAge( 145);

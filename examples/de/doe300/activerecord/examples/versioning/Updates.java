@@ -56,7 +56,7 @@ public class Updates
 		
 		
 		//This code executed at startup of the program will ensure the database to be up to date
-		RecordBase<Version> versions = core.buildBase( Version.class);
+		RecordBase<Version> versions = core.getBase( Version.class);
 		for(int i = 0; i < update_log.length;i++)
 		{
 			//we assume, no entries are ever deleted from the 

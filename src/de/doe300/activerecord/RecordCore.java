@@ -43,6 +43,8 @@ import de.doe300.activerecord.logging.Logging;
 import de.doe300.activerecord.pojo.POJOBase;
 import de.doe300.activerecord.pojo.SingleInheritanceBase;
 import de.doe300.activerecord.proxy.ProxyBase;
+import de.doe300.activerecord.proxy.handlers.CollectionHandler;
+import de.doe300.activerecord.proxy.handlers.MapHandler;
 import de.doe300.activerecord.proxy.handlers.ProxyHandler;
 import de.doe300.activerecord.record.ActiveRecord;
 import de.doe300.activerecord.record.SingleTableInheritance;
@@ -50,6 +52,11 @@ import de.doe300.activerecord.store.RecordStore;
 import de.doe300.activerecord.store.impl.CachedJDBCRecordStore;
 import de.doe300.activerecord.store.impl.MapRecordStore;
 import de.doe300.activerecord.store.impl.SimpleJDBCRecordStore;
+import de.doe300.activerecord.validation.Validate;
+import de.doe300.activerecord.validation.ValidatedRecord;
+import de.doe300.activerecord.validation.Validates;
+import de.doe300.activerecord.validation.ValidationHandler;
+import java.util.Collection;
 
 /**
  * Core class for the active record API
@@ -62,7 +69,6 @@ public final class RecordCore implements AutoCloseable
 	@Nonnull
 	private final RecordStore store;
 	private final Map<Class<? extends ActiveRecord>, RecordBase<?>> bases;
-	private Map<Class<? extends ActiveRecord>, ProxyHandler[]> handlers;
 	private final Map<Class<? extends ActiveRecord>, Set<RecordListener>> recordListeners;
 
 	private RecordCore(@Nonnull final RecordStore store)
@@ -80,7 +86,7 @@ public final class RecordCore implements AutoCloseable
 	 * @throws SQLException
 	 */
 	@Nonnull
-	public static RecordCore fromDatabase(final Connection dbConnection, final boolean cached) throws SQLException
+	public static RecordCore fromDatabase(@Nonnull final Connection dbConnection, final boolean cached) throws SQLException
 	{
 		final String cat = dbConnection.getCatalog();
 		RecordCore core = RecordCore.cores.get( cat );
@@ -181,8 +187,8 @@ public final class RecordCore implements AutoCloseable
 	 * @return the base for this type
 	 */
 	@Nonnull
-	public <T extends ActiveRecord> RecordBase<T> buildBase(@Nonnull final Class<T> type,
-		final ProxyHandler... additionalHandlers)
+	public <T extends ActiveRecord> RecordBase<T> getBase(@Nonnull final Class<T> type, 
+			@Nullable final ProxyHandler... additionalHandlers)
 	{
 		RecordBase<T> base = ( RecordBase<T> ) bases.get( type );
 		if(base==null)
@@ -200,89 +206,41 @@ public final class RecordCore implements AutoCloseable
 				base = new POJOBase<T>(type, this, store );
 			}
 			bases.put( type, base );
-			Logging.getLogger().debug( "RecordCore", "Built new record-base for "+type.getCanonicalName());
+			Logging.getLogger().debug( "RecordCore", "Created new record-base for "+type.getCanonicalName());
 		}
 		return base;
 	}
 
-	/**
-	 * If the {@link #getHandlers() handlers} are set, this method will create a new base if none for this type exists.
-	 * @param <T>
-	 * @param type
-	 * @return the base for this type or <code>null</code> if none was yet created
-	 */
-	@Nullable
-	public <T extends ActiveRecord> RecordBase<T> getBase(@Nonnull final Class<T> type)
+	private ProxyHandler[] mergeHandlers(@Nonnull final Class<? extends ActiveRecord> type, @Nullable final ProxyHandler[] custom)
 	{
-		RecordBase<T> base = ( RecordBase<T> ) bases.get( type );
-		if(base==null)
-		{
-			if(type.isInterface() && handlers!=null)
-			{
-				base = new ProxyBase<T>(Proxy.getProxyClass( type.getClassLoader(), type).asSubclass( type ), type, mergeHandlers( type, null ), store, this);
-			}
-			else if(!type.isInterface())
-			{
-				if(type.isAnnotationPresent( SingleTableInheritance.class))
-				{
-					base =new SingleInheritanceBase<T>(type, this, store );
-				}
-				else
-				{
-					base = new POJOBase<T>(type, this, store );
-				}
-			}
-			if(base != null)
-			{
-				Logging.getLogger().debug( "RecordCore", "Created new record-base for "+type.getCanonicalName());
-				bases.put( type, base );
-			}
-		}
-		return base;
-	}
-
-	private ProxyHandler[] mergeHandlers(final Class<? extends ActiveRecord> type, final ProxyHandler[] custom)
-	{
-		//TODO add handlers by default, e.g. ValidatedHandler if recordType is ValidatedRecord and annotated with Validate
-		if(this.handlers==null)
-		{
-			return custom;
-		}
-		if(custom == null)
-		{
-			return this.handlers.get( type );
-		}
-		final List<ProxyHandler> proxies = new ArrayList<>(custom.length);
+		
+		final List<ProxyHandler> proxies = new ArrayList<>(custom != null ? custom.length : 5);
 		proxies.addAll( Arrays.asList( custom));
-		if(handlers.containsKey( type ))
+		//add handlers by default, e.g. ValidatedHandler if recordType is ValidatedRecord and annotated with Validate
+		if(ValidatedRecord.class.isAssignableFrom( type ) && (type.isAnnotationPresent( Validate.class) || type.isAnnotationPresent( Validates.class)))
 		{
-			for(final ProxyHandler h: handlers.get( type ))
+			if(!proxies.stream().anyMatch( (ProxyHandler h) -> ValidationHandler.class.isAssignableFrom( h.getClass()) ))
 			{
-				if(!proxies.contains( h ))
-				{
-					proxies.add( h );
-				}
+				proxies.add( new ValidationHandler());
+			}
+		}
+		if(Collection.class.isAssignableFrom( type ))
+		{
+			if(!proxies.stream().anyMatch( (ProxyHandler h) -> CollectionHandler.class.isAssignableFrom( h.getClass()) ))
+			{
+				proxies.add( new CollectionHandler());
+			}
+		}
+		if(Map.class.isAssignableFrom( type ))
+		{
+			if(!proxies.stream().anyMatch( (ProxyHandler h) -> MapHandler.class.isAssignableFrom( h.getClass()) ))
+			{
+				proxies.add( new MapHandler());
 			}
 		}
 		return proxies.toArray( new ProxyHandler[proxies.size()]);
 	}
-
-	/**
-	 * @return the handlers
-	 */
-	public Map<Class<? extends ActiveRecord>, ProxyHandler[]> getHandlers()
-	{
-		return handlers;
-	}
-
-	/**
-	 * @param handlers the handlers to set
-	 */
-	public void setHandlers(final Map<Class<? extends ActiveRecord>, ProxyHandler[]> handlers )
-	{
-		this.handlers = handlers;
-	}
-
+	
 	/**
 	 * Adds a new RecordListener for this record-type
 	 * @param recordType
@@ -335,7 +293,10 @@ public final class RecordCore implements AutoCloseable
 	{
 		for(final RecordBase<?> b : bases.values())
 		{
-			b.saveAll();
+			if(b.saveAll())
+			{
+				Logging.getLogger().debug( "RecordCore", "Records saved for: "+b.getRecordType().getSimpleName());
+			}
 		}
 	}
 }

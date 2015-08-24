@@ -63,7 +63,7 @@ public class TableSetTest extends Assert
 	public static void createTables() throws Exception
 	{
 		TestServer.buildTestTables();
-		base = RecordCore.fromDatabase( TestServer.getTestConnection(), true).buildBase( TestInterface.class );
+		base = RecordCore.fromDatabase( TestServer.getTestConnection(), true).getBase( TestInterface.class );
 		set = new TableSet<TestInterface>(base );
 		
 		//fill set

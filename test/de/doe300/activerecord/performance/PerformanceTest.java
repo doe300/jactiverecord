@@ -49,7 +49,7 @@ public class PerformanceTest<T extends ProxyPerformance> extends Assert
 
 	public PerformanceTest(Class<T> type, boolean cached) throws SQLException
 	{
-		this.base = RecordCore.fromDatabase( TestServer.getTestConnection(), cached).buildBase( type);
+		this.base = RecordCore.fromDatabase( TestServer.getTestConnection(), cached).getBase( type);
 	}
 	
 	@Parameterized.Parameters

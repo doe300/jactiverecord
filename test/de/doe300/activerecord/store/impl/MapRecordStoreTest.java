@@ -50,7 +50,7 @@ public class MapRecordStoreTest extends Assert
 	public static void init() throws Exception
 	{
 		store = new MapRecordStore();
-		base = RecordCore.fromStore( "map", store).buildBase( TestInterface.class);
+		base = RecordCore.fromStore( "map", store).getBase( TestInterface.class);
 		primaryKey = base.createRecord().getPrimaryKey();
 	}
 
