@@ -47,23 +47,10 @@ public class TestServer extends Assert
 	
 	static 
 	{
-		try
+		Enumeration<Driver> drivers = DriverManager.getDrivers();
+		while(drivers.hasMoreElements())
 		{
-			if(Class.forName("org.hsqldb.jdbc.JDBCDriver")==null)
-			{
-				throw new RuntimeException("HSQLDB Driver not found");
-			}
-			Class.forName("org.sqlite.JDBC");
-			Enumeration<Driver> drivers = DriverManager.getDrivers();
-			while(drivers.hasMoreElements())
-			{
-				System.out.println( drivers.nextElement().getClass() );
-			}
-		}
-		catch ( ClassNotFoundException ex )
-		{
-			System.err.println( ex.getMessage() );
-			ex.printStackTrace( System.err);
+			System.out.println( drivers.nextElement().getClass() );
 		}
 	}
 	
@@ -128,13 +115,13 @@ public class TestServer extends Assert
 		ManualMigrationTest.init();
 		new ManualMigrationTest().testApply();
 		//print existing tables
-		try(ResultSet set = getTestConnection().getMetaData().getTables( null, null, null, null))
-		{
-			while(set.next())
-			{
-				System.out.println( set.getString( "TABLE_CAT" ) + " " + set.getString( "TABLE_SCHEM") + " " + set.getString( "TABLE_NAME" ));
-			}
-		}
+//		try(ResultSet set = getTestConnection().getMetaData().getTables( null, null, null, null))
+//		{
+//			while(set.next())
+//			{
+//				System.out.println( set.getString( "TABLE_CAT" ) + " " + set.getString( "TABLE_SCHEM") + " " + set.getString( "TABLE_NAME" ));
+//			}
+//		}
 		
 	}
 	
