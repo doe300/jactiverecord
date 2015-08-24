@@ -14,3 +14,4 @@ before_script:
   - dpkg -L libhsqldb-java
   - cp /usr/share/java/hsqldb* ./
 
+script: mvn test
