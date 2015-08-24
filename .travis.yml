@@ -11,8 +11,6 @@ install:
   - mvn dependency:copy-dependencies
   
 before_script:
-  - echo $CLASSPATH
   - dpkg -L libhsqldb-java
-  - CLASSPATH=/usr/share/java/*:$CLASSPATH
-  - export CLASSPATH
+  - cp /usr/share/java/hsqldb* ./
 
