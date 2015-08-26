@@ -31,6 +31,8 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
+import javax.annotation.Nonnull;
+import javax.annotation.Nullable;
 
 /**
  * Grouped Condition, returning <code>true</code> if any of the children conditions returns <code>true</code>
@@ -57,7 +59,8 @@ public class OrCondition implements Condition
 	 * @param conds
 	 * @return the combined Condition
 	 */
-	public static Condition orConditions(Condition... conds)
+	@Nonnull
+	public static Condition orConditions(@Nullable Condition... conds)
 	{
 		if(conds == null || conds.length == 0)
 		{
@@ -90,9 +93,9 @@ public class OrCondition implements Condition
 			}
 			list.add( cond );
 		}
-		if(list.size() == 0)
+		if(list.isEmpty())
 		{
-			//TODO what to return??
+			throw new IllegalArgumentException("Can't OR null conditions");
 		}
 		if(list.size() == 1)
 		{

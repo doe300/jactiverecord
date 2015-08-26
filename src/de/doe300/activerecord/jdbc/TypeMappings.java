@@ -93,7 +93,6 @@ public final class TypeMappings
 		{
 			return null;
 		}
-		//TODO still far from perfect solution -> find some better way for implicit casting
 		if(type.isInstance( obj ))
 		{
 			return type.cast( obj );

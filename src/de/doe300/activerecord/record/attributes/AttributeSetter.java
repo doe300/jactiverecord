@@ -61,7 +61,7 @@ public @interface AttributeSetter
 	 * If the validation is set and fails, the setter has no effect on the underlying record-base and the validation-method throws a {@link ValidationFailed}.
 	 *
 	 * If both {@link #validatorMethod() } and {@link #converterMethod() } are set, the validation is performed on the unconverted parameter.
-	 * Meaning, the validation is called before the convertion and therefore must accept the original argument type.
+	 * Meaning, the validation is called before the conversion and therefore must accept the original argument type.
 	 * @return the name of the validator-method, if specified
 	 */
 	public String validatorMethod() default "";

@@ -96,7 +96,7 @@ public class AndCondition implements Condition
 		}
 		if(list.isEmpty())
 		{
-			//TODO what to return??
+			throw new IllegalArgumentException("Cant AND null conditions");
 		}
 		if(list.size() == 1)
 		{

@@ -31,6 +31,7 @@ import java.util.Collections;
 import java.util.Map;
 import java.util.Set;
 import java.util.TreeMap;
+import java.util.function.Function;
 import java.util.stream.Collectors;
 
 import de.doe300.activerecord.RecordBase;
@@ -90,7 +91,7 @@ public class MapHandler implements ProxyHandler
 		@Override
 		public Set<Entry<String, Object>> entrySet()
 		{
-			return columnNames.stream().map((final String s) ->
+			final Function<String, Entry<String, Object>> mapper = (final String s) ->
 			{
 				return new Entry<String, Object>()
 				{
@@ -114,7 +115,8 @@ public class MapHandler implements ProxyHandler
 						return old;
 					}
 				};
-			}).collect(Collectors.toSet());
+			};
+			return columnNames.stream().map(mapper).collect(Collectors.toSet());
 		}
 
 		@Override

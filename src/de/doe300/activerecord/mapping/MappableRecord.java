@@ -71,7 +71,6 @@ public interface MappableRecord extends ActiveRecord
 	 */
 	public default void setAttributes(@Nonnull final Map<String, Object> map)
 	{
-		save();//TODO save is wrong, but how to make sure, changes are not omitted??
 		getBase().getStore().setValues( getBase(), getPrimaryKey(), map);
 		reload();
 	}

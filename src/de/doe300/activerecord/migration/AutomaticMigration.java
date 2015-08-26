@@ -386,10 +386,10 @@ public class AutomaticMigration implements Migration
 				columnName = Attributes.getPropertyName( method ).toLowerCase();
 				attType = method.getParameterTypes()[0];
 			}
-			//convert type (for 2. and 3.)
-			if(columnName!=null && attType!=null)
+			//convert type (for 2. and 3.) only if not yet registered
+			if(columnName!=null && attType!=null && !columns.containsKey( columnName))
 			{
-				columns.putIfAbsent(columnName, getSQLType( attType));
+				columns.put(columnName, getSQLType( attType));
 			}
 		}
 		//4. add timestamps, other features
