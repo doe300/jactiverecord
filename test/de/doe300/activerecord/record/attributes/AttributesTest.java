@@ -89,10 +89,10 @@ public class AttributesTest
 	{
 		Method m1 = TestInterface.class.getMethod( "getName"), m2 = TestInterface.class.getMethod( "setAge", Integer.TYPE),
 				m3 = TimestampedRecord.class.getMethod( "getUpdatedAt"), m4 = ValidatedRecord.class.getMethod( "isValid");
-		assertEquals("name", Attributes.getPropertyName( m1));
-		assertEquals("age", Attributes.getPropertyName( m2));
-		assertEquals("updated_at", Attributes.getPropertyName( m3));
-		assertEquals("valid", Attributes.getPropertyName( m4));
+		assertEquals("name", Attributes.getPropertyName( m1.getName()));
+		assertEquals("age", Attributes.getPropertyName( m2.getName()));
+		assertEquals("updated_at", Attributes.getPropertyName( m3.getName()));
+		assertEquals("valid", Attributes.getPropertyName( m4.getName()));
 	}
 
 	@Test

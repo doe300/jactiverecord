@@ -47,26 +47,26 @@ public final class Attributes
 
 	/**
 	 * Returns the name of the property, following the bean standard
-	 * @param getterOrSetter
+	 * @param methodName
 	 * @return the name of the property, or <code>null</code>
 	 */
-	public static String getPropertyName(@Nonnull final Method getterOrSetter)
+	public static String getPropertyName(@Nonnull final String methodName)
 	{
 		String result;
-		if ( getterOrSetter.getName().startsWith( "is" ) )
+		if ( methodName.startsWith( "is" ) )
 		{
-			result = getterOrSetter.getName().substring( 2 );
+			result = methodName.substring( 2 );
 		}
-		else if ( getterOrSetter.getName().startsWith( "get" ) || getterOrSetter.getName().startsWith( "set" ) )
+		else if ( methodName.startsWith( "get" ) || methodName.startsWith( "set" ) )
 		{
-			result = getterOrSetter.getName().substring( 3 );
+			result = methodName.substring( 3 );
 		}
 		else
 		{
 			//Not a valid getter or setter
 			return null;
 		}
-		if ( getterOrSetter.getName().equals( "get" ) || getterOrSetter.getName().equals( "set" ) )
+		if ( methodName.equals( "get" ) || methodName.equals( "set" ) )
 		{
 			//valid getter/setter but not handled by this handler
 			return null;

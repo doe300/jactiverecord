@@ -378,12 +378,12 @@ public class AutomaticMigration implements Migration
 			//3. get bean accessors
 			else if(Attributes.isGetter( method, false))
 			{
-				columnName = Attributes.getPropertyName( method ).toLowerCase();
+				columnName = Attributes.getPropertyName( method.getName() );
 				attType = method.getReturnType();
 			}
 			else if(Attributes.isSetter( method, null, false))
 			{
-				columnName = Attributes.getPropertyName( method ).toLowerCase();
+				columnName = Attributes.getPropertyName( method.getName() );
 				attType = method.getParameterTypes()[0];
 			}
 			//convert type (for 2. and 3.) only if not yet registered

@@ -201,7 +201,7 @@ public final class RecordHandler<T extends ActiveRecord> implements InvocationHa
 			return null;
 		}
 		//3.2 check for bean-style accessor
-		String property = Attributes.getPropertyName( method );
+		String property = Attributes.getPropertyName( method.getName() );
 		if(property!=null)
 		{
 			if(args!=null&&args.length==1&&Attributes.isSetter( method, args[0] == null ? null : args[0].getClass(), false))
