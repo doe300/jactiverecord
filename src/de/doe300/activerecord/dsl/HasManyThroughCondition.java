@@ -128,15 +128,19 @@ public class HasManyThroughCondition implements Condition
 	}
 
 	@Override
-	public String toSQL( final VendorSpecific vendorSpecifics )
+	public String toSQL( final VendorSpecific vendorSpecifics, final String tableName )
 	{
+		String associatedTableName = SQLCommand.getNextTableIdentifier( tableName );
+		String associationTableName = SQLCommand.getNextTableIdentifier( associatedTableName);
 		//EXISTS(SELECT primaryKey FROM associatedTable WHERE associatedTable.primaryKey IN
 		// (SELECT associationTableOtherForeignKey FROM associationTable WHERE associationTable.associatioNTableThisForeignKey = thisTable.primaryKey)
 		// AND cond)
 		return "EXISTS("
-		+ "SELECT " + associatedBase.getPrimaryColumn() + " FROM " + associatedBase.getTableName()+" WHERE " + associatedBase.getPrimaryColumn()+" IN ("
-		+ "SELECT " + associationTableOtherForeignKey + " FROM " + associationTable + " WHERE " + associationTable + "." + associationTableThisForeignKey + " = "+ thisBase.getTableName()+ "." + thisBaseAssociationKey
-		+ ") AND " + associatedBaseCondition.toSQL( vendorSpecifics ) + ")";
+		+ "SELECT " + associatedTableName + "."+ associatedBase.getPrimaryColumn() + " FROM " + associatedBase.getTableName()+ " AS "+ associatedTableName
+				+ " WHERE " + associatedTableName + "." + associatedBase.getPrimaryColumn()+" IN ("
+		+ "SELECT " + associationTableName + "." + associationTableOtherForeignKey + " FROM " + associationTable + " AS " + associationTableName
+				+ " WHERE " + associationTableName + "." + associationTableThisForeignKey + " = "+ tableName + "." + thisBaseAssociationKey
+		+ ") AND " + associatedBaseCondition.toSQL( vendorSpecifics, associatedTableName ) + ")";
 	}
 
 }

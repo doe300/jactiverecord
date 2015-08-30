@@ -85,7 +85,7 @@ public class OrConditionTest extends Assert
 	{
 		Condition c1 = OrCondition.orConditions(cond);
 		//test OR-unrolling
-		assertEquals( cond.toSQL( VendorSpecific.HSQLDB), c1.toSQL( VendorSpecific.HSQLDB ));
+		assertEquals( cond.toSQL( VendorSpecific.HSQLDB, null), c1.toSQL( VendorSpecific.HSQLDB, null ));
 		//test skip duplicates
 		Condition s1 = new SimpleCondition("test", "dummy", Comparison.IS);
 		Condition c2 = OrCondition.orConditions(s1, s1);

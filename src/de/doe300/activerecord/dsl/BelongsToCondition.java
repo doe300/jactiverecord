@@ -94,12 +94,15 @@ public class BelongsToCondition implements Condition
 	}
 
 	@Override
-	public String toSQL(@Nullable final VendorSpecific vendorSpecifics)
+	public String toSQL(@Nullable final VendorSpecific vendorSpecifics, final String tableName)
 	{
+		String associatedTableName = SQLCommand.getNextTableIdentifier( tableName );
 		//foreignKey IN(SELECT associatedKey FROM associatedTable WHERE cond)
 		//could also be written as:
 		//EXISTS(SELECT associatedKey FROM associatedTable WHERE thisTable.foreignKey = associatedKey AND cond)
-		return foreignKeyColumn+" IN (SELECT "+associatedTableKey+" FROM "+associatedTableBase.getTableName()+" WHERE "+associatedTableCond.toSQL(vendorSpecifics)+")";
+		return tableName + "." + foreignKeyColumn+" IN (SELECT " + associatedTableName + "." + associatedTableKey 
+				+ " FROM " + associatedTableBase.getTableName() + " AS " + associatedTableName 
+				+ " WHERE " + associatedTableCond.toSQL(vendorSpecifics, associatedTableName) + ")";
 	}
 
 	@Override

@@ -156,9 +156,9 @@ public class AndCondition implements Condition
 	}
 
 	@Override
-	public String toSQL(@Nullable final VendorSpecific vendorSpecifics)
+	public String toSQL(@Nullable final VendorSpecific vendorSpecifics, final String tableName)
 	{
-		return "("+ Arrays.stream( conditions ).map( (final Condition c) -> c.toSQL(vendorSpecifics) ).collect( Collectors.joining( ") AND ("))+")";
+		return "("+ Arrays.stream( conditions ).map( (final Condition c) -> c.toSQL(vendorSpecifics, tableName) ).collect( Collectors.joining( ") AND ("))+")";
 	}
 
 	@Override

@@ -216,14 +216,14 @@ public class HasManyThroughAssociationSetTest extends Assert
 	public void testSubSet()
 	{
 		SortedSet<TestInterface> subSet = set.subSet(a1, a3);
-		assertSame( 1, subSet.size());
-		assertSame( a2, subSet.first());
+		assertSame( 2, subSet.size());
+		assertSame( a1, subSet.first());
 		assertSame( a2, subSet.last());
 		//test backing
 		set.remove( a2);
-		assertSame( 0, subSet.size());
-		set.add( a2);
 		assertSame( 1, subSet.size());
+		set.add( a2);
+		assertSame( 2, subSet.size());
 	}
 	
 	@Test

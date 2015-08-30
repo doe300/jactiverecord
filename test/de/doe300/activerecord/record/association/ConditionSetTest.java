@@ -39,6 +39,7 @@ import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertSame;
 import static org.junit.Assert.assertTrue;
+import org.junit.Before;
 import org.junit.BeforeClass;
 import org.junit.Test;
 
@@ -85,6 +86,16 @@ public class ConditionSetTest extends Assert
 	public static void destroyTables() throws Exception
 	{
 		TestServer.destroyTestTables();
+	}
+	
+	@Before
+	public void resetObjects()
+	{
+		a1.setAge( 23);
+		a2.setAge( 23);
+		a3.setAge( 23);
+		n1.setAge( 10);
+		n2.setAge( 24);
 	}
 	
 	@Test(expected = UnsupportedOperationException.class)
@@ -226,18 +237,18 @@ public class ConditionSetTest extends Assert
 	public void testSubSet()
 	{
 		SortedSet<TestInterface> subSet = set.subSet(a1, a3);
-		assertSame( 1, subSet.size());
-		assertSame( a2, subSet.first());
+		assertSame( 2, subSet.size());
+		assertSame( a1, subSet.first());
 		assertSame( a2, subSet.last());
 		//test backing
 		set.remove( a2);
-		assertSame( 0, subSet.size());
-		set.add( a2);
 		assertSame( 1, subSet.size());
+		set.add( a2);
+		assertSame( 2, subSet.size());
 		subSet.clear();
-		assertSame( 2, set.size());
+		assertSame( 1, set.size());
 		subSet.add( a2);
-		assertSame( 3, set.size());
+		assertSame( 2, set.size());
 	}
 	
 	@Test

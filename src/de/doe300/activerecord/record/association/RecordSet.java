@@ -102,7 +102,7 @@ public interface RecordSet<T extends ActiveRecord> extends SortedSet<T>, FinderM
 	public default RecordSet<T> subSet(final T fromElement, final T toElement)
 	{
 		return getForCondition( AndCondition.andConditions(
-			new SimpleCondition(getRecordBase().getPrimaryColumn(), fromElement.getPrimaryKey(), Comparison.LARGER),
+			new SimpleCondition(getRecordBase().getPrimaryColumn(), fromElement.getPrimaryKey(), Comparison.LARGER_EQUALS),
 			new SimpleCondition(getRecordBase().getPrimaryColumn(), toElement.getPrimaryKey(), Comparison.SMALLER)
 			));
 	}
@@ -111,7 +111,7 @@ public interface RecordSet<T extends ActiveRecord> extends SortedSet<T>, FinderM
 	@Nullable
 	public default T first()
 	{
-		return stream().findFirst().get();
+		return stream().sorted( getRecordBase().getDefaultOrder().toRecordComparator()).findFirst().get();
 	}
 
 	@Override

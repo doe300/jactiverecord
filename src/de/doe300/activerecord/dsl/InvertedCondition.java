@@ -95,9 +95,9 @@ public class InvertedCondition implements Condition
 	}
 
 	@Override
-	public String toSQL( final VendorSpecific vendorSpecifics )
+	public String toSQL( final VendorSpecific vendorSpecifics, final String tableName )
 	{
-		return "NOT("+invertedCondition.toSQL( vendorSpecifics )+")";
+		return "NOT("+invertedCondition.toSQL( vendorSpecifics, tableName )+")";
 	}
 
 	@Override

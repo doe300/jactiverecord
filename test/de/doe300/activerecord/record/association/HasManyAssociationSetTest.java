@@ -36,6 +36,7 @@ import org.junit.AfterClass;
 import org.junit.Assert;
 import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertSame;
+import org.junit.Before;
 import org.junit.BeforeClass;
 import org.junit.Test;
 
@@ -80,6 +81,16 @@ public class HasManyAssociationSetTest extends Assert
 	public static void destroyTables() throws Exception
 	{
 		TestServer.destroyTestTables();
+	}
+	
+	@Before
+	public void initObjects()
+	{
+		set.add( a1);
+		set.add( a2);
+		set.add( a3);
+		set.remove( n1);
+		set.remove( n2);
 	}
 
 	@Test
@@ -213,18 +224,18 @@ public class HasManyAssociationSetTest extends Assert
 	public void testSubSet()
 	{
 		SortedSet<TestInterface> subSet = set.subSet(a1, a3);
-		assertSame( 1, subSet.size());
-		assertSame( a2, subSet.first());
+		assertSame( 2, subSet.size());
+		assertSame( a1, subSet.first());
 		assertSame( a2, subSet.last());
 		//test backing
 		set.remove( a2);
-		assertSame( 0, subSet.size());
-		set.add( a2);
 		assertSame( 1, subSet.size());
+		set.add( a2);
+		assertSame( 2, subSet.size());
 		subSet.clear();
-		assertSame( 2, set.size());
+		assertSame( 1, set.size());
 		subSet.add( a2);
-		assertSame( 3, set.size());
+		assertSame( 2, set.size());
 	}
 	
 	@Test

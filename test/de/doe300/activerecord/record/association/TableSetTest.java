@@ -205,13 +205,14 @@ public class TableSetTest extends Assert
 		assertSame( a5, tailSet.last());
 	}
 	
-	@Test
+	@Test(expected = UnsupportedOperationException.class)
 	public void testSubSet()
 	{
 		SortedSet<TestInterface> subSet = set.subSet(a2, a4);
-		assertSame( 1, subSet.size());
-		assertSame( a3, subSet.first());
+		assertSame( 2, subSet.size());
+		assertSame( a2, subSet.first());
 		assertSame( a3, subSet.last());
+		subSet.clear();
 	}
 	
 	@Test

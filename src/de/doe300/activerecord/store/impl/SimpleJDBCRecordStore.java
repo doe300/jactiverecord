@@ -50,6 +50,7 @@ import javax.annotation.WillNotClose;
 import de.doe300.activerecord.RecordBase;
 import de.doe300.activerecord.dsl.Condition;
 import de.doe300.activerecord.dsl.Order;
+import de.doe300.activerecord.dsl.SQLCommand;
 import de.doe300.activerecord.jdbc.VendorSpecific;
 import de.doe300.activerecord.logging.Logging;
 import de.doe300.activerecord.migration.AutomaticMigration;
@@ -89,14 +90,14 @@ public class SimpleJDBCRecordStore implements RecordStore
 		this.vendorSpecifics = vendorSpecifics;
 	}
 
-	protected String toWhereClause(final Condition condition)
+	protected String toWhereClause(final Condition condition, String tableName)
 	{
 		if(condition==null)
 		{
 			return "";
 		}
 		String clause =" WHERE ";
-		clause += condition.toSQL(vendorSpecifics);
+		clause += condition.toSQL(vendorSpecifics, tableName);
 		return clause;
 	}
 
@@ -109,17 +110,18 @@ public class SimpleJDBCRecordStore implements RecordStore
 		return base.getDefaultOrder();
 	}
 
-	protected String toColumnsList(final String[] columns, final String primaryColumn)
+	protected String toColumnsList(final String[] columns, final String primaryColumn, String tableName)
 	{
+		String tableID = tableName != null ? tableName + "." : "";
 		if(columns==null||columns.length==0)
 		{
-			return primaryColumn;
+			return tableID+primaryColumn;
 		}
 		if(Arrays.stream( columns ).anyMatch( (final String col)-> col.equalsIgnoreCase(primaryColumn)))
 		{
-			return Arrays.stream( columns ).collect( Collectors.joining(", "));
+			return Arrays.stream( columns ).map((String col) -> tableID+col).collect( Collectors.joining(", "));
 		}
-		return primaryColumn+", "+Arrays.stream( columns ).collect( Collectors.joining(", "));
+		return tableID+primaryColumn+", "+Arrays.stream( columns ).map((String col) -> tableID+col).collect( Collectors.joining(", "));
 	}
 
 	protected void fillStatement(@Nonnull final PreparedStatement stm, @Nonnull final Condition condition)
@@ -298,7 +300,7 @@ public class SimpleJDBCRecordStore implements RecordStore
 	public Map<String, Object> getValues( final RecordBase<?> base, final int primaryKey, final String[] columns ) throws IllegalArgumentException
 	{
 		final String sql =
-			"SELECT " + toColumnsList(columns, base.getPrimaryColumn()) + " FROM " + base.getTableName() + " WHERE "
+			"SELECT " + toColumnsList(columns, base.getPrimaryColumn(), null) + " FROM " + base.getTableName() + " WHERE "
 				+ base.getPrimaryColumn() + " = " + primaryKey;
 		Logging.getLogger().debug("JDBCStore", sql);
 		try (Statement stm = con.createStatement(); final ResultSet res = stm.executeQuery(sql))
@@ -372,7 +374,11 @@ public class SimpleJDBCRecordStore implements RecordStore
 	public Map<String, Object> findFirstWithData( final RecordBase<?> base, final String[] columns, final Scope scope )
 	{
 		checkTableExists( base );
-		final String sql = "SELECT "+toColumnsList( columns, base.getPrimaryColumn() )+" FROM "+base.getTableName()+" "+toWhereClause( scope.getCondition() )+" ORDER BY "+toOrder( base, scope ).toSQL(vendorSpecifics)+" LIMIT 1";
+		String tableID = SQLCommand.getNextTableIdentifier( null );
+		final String sql = "SELECT "+toColumnsList( columns, base.getPrimaryColumn(), tableID )
+				+" FROM "+base.getTableName()+" AS " + tableID
+				+toWhereClause( scope.getCondition(), tableID )
+				+" ORDER BY "+toOrder( base, scope ).toSQL(vendorSpecifics, tableID)+" LIMIT 1";
 		Logging.getLogger().debug( "JDBCStore", sql);
 		try(PreparedStatement stm = con.prepareStatement(sql))
 		{
@@ -408,7 +414,8 @@ public class SimpleJDBCRecordStore implements RecordStore
 	public int count( final RecordBase<?> base, final Condition condition )
 	{
 		checkTableExists( base );
-		final String sql = "SELECT COUNT(1) as size FROM "+base.getTableName()+" "+toWhereClause( condition );
+		String tableID = SQLCommand.getNextTableIdentifier( null );
+		final String sql = "SELECT COUNT(1) as size FROM "+base.getTableName()+" AS "+tableID+toWhereClause( condition, tableID );
 		Logging.getLogger().debug( "JDBCStore", sql);
 		//column name can't be count, because its a keyword
 		try(PreparedStatement stm = con.prepareStatement(sql))
@@ -441,7 +448,11 @@ public class SimpleJDBCRecordStore implements RecordStore
 	@WillNotClose
 	public Stream<Map<String, Object>> streamAllWithData( final RecordBase<?> base, final String[] columns, final Scope scope )
 	{
-		String sql = "SELECT "+toColumnsList( columns, base.getPrimaryColumn() )+" FROM "+base.getTableName()+" "+toWhereClause( scope.getCondition() )+" ORDER BY "+toOrder( base, scope ).toSQL(vendorSpecifics);
+		String tableID = SQLCommand.getNextTableIdentifier( null );
+		String sql = "SELECT "+toColumnsList( columns, base.getPrimaryColumn(), tableID )
+				+" FROM "+base.getTableName()+" AS "+tableID
+				+toWhereClause( scope.getCondition(), tableID )
+				+" ORDER BY "+toOrder( base, scope ).toSQL(vendorSpecifics, tableID);
 		if(scope.getLimit()!=Scope.NO_LIMIT)
 		{
 			sql += " LIMIT "+scope.getLimit();
@@ -769,7 +780,8 @@ public class SimpleJDBCRecordStore implements RecordStore
 	public boolean removeRow(@Nonnull final String tableName, @Nullable final Condition cond)
 		throws IllegalArgumentException
 	{
-		final String sql = "DELETE FROM "+tableName+toWhereClause( cond );
+		String tableID = SQLCommand.getNextTableIdentifier( null);
+		final String sql = "DELETE FROM "+tableName+ " AS "+tableID+toWhereClause( cond, tableID );
 		Logging.getLogger().debug( "JDBCStore", sql);
 		try(PreparedStatement stm = con.prepareStatement( sql ))
 		{

@@ -74,7 +74,7 @@ public class AndConditionTest extends Assert
 		Condition c1 = AndCondition.andConditions(simpleCond );
 		Condition c2 = AndCondition.andConditions(c1);
 		//unrolls inner ANDs
-		assertEquals( c1.toSQL( VendorSpecific.MYSQL), c2.toSQL( VendorSpecific.MYSQL));
+		assertEquals( c1.toSQL( VendorSpecific.MYSQL, null), c2.toSQL( VendorSpecific.MYSQL, null));
 		//removes non-false conditions
 		Condition simpleCond2 = new SimpleCondition("id", null, Comparison.TRUE);
 		Condition c3 = AndCondition.andConditions( simpleCond, simpleCond2);

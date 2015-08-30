@@ -36,8 +36,49 @@ public interface SQLCommand
 {
 	/**
 	 * @param vendorSpecifics the vendor-specifics, may be <code>null</code>
+	 * @param tableName the name to use to uniquely identify the table
 	 * @return the sQL representation of this statement
 	 */
 	@Nonnull
-	public String toSQL(@Nullable final VendorSpecific vendorSpecifics);
+	public String toSQL(@Nullable final VendorSpecific vendorSpecifics, @Nullable final String tableName);
+	
+	/**
+	 * This method is used to make sure, every table in a condition is uniquely identified
+	 * @param currentIdentifier
+	 * @return the identifier for an associated table
+	 */
+	@Nonnull
+	public static String getNextTableIdentifier(@Nullable final String currentIdentifier)
+	{
+		if(currentIdentifier == null)
+		{
+			return "thisTable";
+		}
+		if("thisTable".equals( currentIdentifier))
+		{
+			return "associatedTable";
+		}
+		if(currentIdentifier.startsWith( "associatedTable"))
+		{
+			String numString = currentIdentifier.substring( "associatedTable".length() );
+			if(numString.isEmpty())
+			{
+				return "associatedTable1";
+			}
+			try
+			{
+				Integer num = Integer.parseInt( numString);
+				return "associatedTable"+num;
+			}
+			catch(NumberFormatException nfe)
+			{
+				return "otherAssociatedTable";
+			}
+		}
+		if("otherTable".equals( currentIdentifier))
+		{
+			return "associatedTable";
+		}
+		return "otherTable";
+	}
 }

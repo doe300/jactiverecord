@@ -155,9 +155,9 @@ public class OrCondition implements Condition
 	}
 
 	@Override
-	public String toSQL(VendorSpecific vendorSpecifics)
+	public String toSQL(VendorSpecific vendorSpecifics, final String tableName)
 	{
-		return "("+ Arrays.stream( conditions ).map( (Condition c) -> c.toSQL(vendorSpecifics) ).collect( Collectors.joining( ") OR ("))+")";
+		return "("+ Arrays.stream( conditions ).map( (Condition c) -> c.toSQL(vendorSpecifics, tableName) ).collect( Collectors.joining( ") OR ("))+")";
 	}
 
 	@Override

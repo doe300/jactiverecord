@@ -141,12 +141,12 @@ public class Order implements Comparator<Map<String,Object>>, SQLCommand
 	}
 
 	@Override
-	public String toSQL(final VendorSpecific vendorSpecifics)
+	public String toSQL(final VendorSpecific vendorSpecifics, final String tableName)
 	{
 		final StringBuilder sb = new StringBuilder(100);
 		for(int i=0;i<columns.length;i++)
 		{
-			sb.append( ", ").append( columns[i]).append( " ").append( types[i].toSQL(vendorSpecifics));
+			sb.append( ", ").append( columns[i]).append( " ").append( types[i].toSQL());
 		}
 		//deletes first ', '
 		sb.delete( 0, 2 );
@@ -156,7 +156,7 @@ public class Order implements Comparator<Map<String,Object>>, SQLCommand
 	@Override
 	public String toString()
 	{
-		return toSQL(null);
+		return toSQL(null, SQLCommand.getNextTableIdentifier( null ));
 	}
 
 	/**
@@ -174,7 +174,7 @@ public class Order implements Comparator<Map<String,Object>>, SQLCommand
 	/**
 	 * The type of ordering
 	 */
-	public static enum OrderType implements SQLCommand
+	public static enum OrderType
 	{
 		/**
 		 * Order by value ascending
@@ -182,7 +182,7 @@ public class Order implements Comparator<Map<String,Object>>, SQLCommand
 		ASCENDING {
 
 			@Override
-			public String toSQL(final VendorSpecific vendorSpecifics)
+			public String toSQL()
 			{
 				return "ASC";
 			}
@@ -193,13 +193,12 @@ public class Order implements Comparator<Map<String,Object>>, SQLCommand
 		DESCENDING {
 
 			@Override
-			public String toSQL(final VendorSpecific vendorSpecifics)
+			public String toSQL()
 			{
 				return "DESC";
 			}
 		};
 
-		@Override
-		public abstract String toSQL(VendorSpecific vendorSpecifics);
+		public abstract String toSQL();
 	}
 }

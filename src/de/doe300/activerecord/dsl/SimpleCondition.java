@@ -124,31 +124,32 @@ public class SimpleCondition implements Condition, SQLCommand
 	}
 
 	@Override
-	public String toSQL(final VendorSpecific vendorSpecifics)
+	public String toSQL(final VendorSpecific vendorSpecifics, final String tableName)
 	{
+		String columnID = tableName != null ? tableName + "." + key : key;
 		switch(comp)
 		{
 			case IS:
-				return key+" = ?";
+				return columnID+" = ?";
 			case IS_NOT:
-				return key+" != ?";
+				return columnID+" != ?";
 			case LIKE:
-				return key+" LIKE ?";
+				return columnID+" LIKE ?";
 			case IS_NULL:
-				return key+" IS NULL";
+				return columnID+" IS NULL";
 			case IS_NOT_NULL:
-				return key+" IS NOT NULL";
+				return columnID+" IS NOT NULL";
 			case LARGER:
-				return key+" > ?";
+				return columnID+" > ?";
 			case LARGER_EQUALS:
-				return key+" >= ?";
+				return columnID+" >= ?";
 			case SMALLER:
-				return key+" < ?";
+				return columnID+" < ?";
 			case SMALLER_EQUALS:
-				return key+" <= ?";
+				return columnID+" <= ?";
 			case IN:
 				//see: https://stackoverflow.com/questions/178479/preparedstatement-in-clause-alternatives
-				return key+" IN ("+Arrays.stream( (Object[])compValue).map( (final Object o) -> "?").collect( Collectors.joining( ", "))+")";
+				return columnID+" IN ("+Arrays.stream( (Object[])compValue).map( (final Object o) -> "?").collect( Collectors.joining( ", "))+")";
 			case TRUE:
 			default:
 				if(vendorSpecifics == null)
