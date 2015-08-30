@@ -93,4 +93,16 @@ public class RecordCoreTest extends Assert
 	{
 		assertNotNull( core.getBase( TestPOJO.class));
 	}
+
+	@Test
+	public void testIsCached()
+	{
+		assertTrue( core.isCached());
+	}
+
+	@Test
+	public void testGetStore()
+	{
+		assertNotNull( core.getStore());
+	}
 }

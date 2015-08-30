@@ -30,7 +30,9 @@ import de.doe300.activerecord.TestInterface;
 import de.doe300.activerecord.TestServer;
 import de.doe300.activerecord.dsl.Comparison;
 import de.doe300.activerecord.dsl.SimpleCondition;
+import de.doe300.activerecord.scope.Scope;
 import java.util.Arrays;
+import java.util.Objects;
 import java.util.SortedSet;
 import org.junit.AfterClass;
 import org.junit.Assert;
@@ -279,5 +281,20 @@ public class ConditionSetTest extends Assert
 		assertSame( 1, set.size());
 		subSet.add( a2);
 		assertSame( 2, set.size());
+	}
+
+	@Test
+	public void testFindWithScope()
+	{
+		TestInterface i = base.createRecord();
+		i.setName( "Hans");
+		i.setAge( 23);
+		assertTrue( set.findWithScope( new Scope(null, null, Scope.NO_LIMIT)).anyMatch( (TestInterface t) -> Objects.equals( t.getName(), "Hans")));
+	}
+
+	@Test
+	public void testFindFirstWithScope()
+	{
+		assertNotNull( set.findFirstWithScope( new Scope(null, null, Scope.NO_LIMIT)));
 	}
 }

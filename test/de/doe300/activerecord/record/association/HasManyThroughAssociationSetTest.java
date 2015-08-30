@@ -29,7 +29,9 @@ import de.doe300.activerecord.RecordCore;
 import de.doe300.activerecord.TestInterface;
 import de.doe300.activerecord.TestServer;
 import de.doe300.activerecord.dsl.Comparison;
+import de.doe300.activerecord.dsl.Order;
 import de.doe300.activerecord.dsl.SimpleCondition;
+import de.doe300.activerecord.scope.Scope;
 import java.util.Arrays;
 import java.util.SortedSet;
 import org.junit.AfterClass;
@@ -250,5 +252,17 @@ public class HasManyThroughAssociationSetTest extends Assert
 		assertSame( 1, subSet.size());
 		set.add( a2);
 		assertSame( 2, subSet.size());
+	}
+
+	@Test
+	public void testFindWithScope()
+	{
+		assertSame( a3, set.findWithScope( new Scope(null, new Order(base.getPrimaryColumn(), Order.OrderType.DESCENDING), 5)).findFirst().get());
+	}
+
+	@Test
+	public void testFindFirstWithScope()
+	{
+		assertSame( a3, set.findFirstWithScope( new Scope(null, new Order(base.getPrimaryColumn(), Order.OrderType.DESCENDING), 5)));
 	}
 }

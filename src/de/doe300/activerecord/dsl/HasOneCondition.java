@@ -39,7 +39,6 @@ import de.doe300.activerecord.record.association.AssociationHelper;
  */
 public class HasOneCondition implements Condition
 {
-	//FIXME doesn't work if source- and association-table are the same
 	@Nonnull
 	private final String associationKeyColumn;
 	@Nonnull

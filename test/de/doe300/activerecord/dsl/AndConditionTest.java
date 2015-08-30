@@ -68,7 +68,7 @@ public class AndConditionTest extends Assert
 	}
 	
 	@Test
-	public void testAndOptimization()
+	public void testAndConditions()
 	{
 		Condition simpleCond = new SimpleCondition(base.getPrimaryColumn(), 3, Comparison.SMALLER_EQUALS);
 		Condition c1 = AndCondition.andConditions(simpleCond );
@@ -138,5 +138,5 @@ public class AndConditionTest extends Assert
 		assertTrue( condition.test( t1));
 		assertFalse( condition.test( t2));
 	}
-	
+
 }

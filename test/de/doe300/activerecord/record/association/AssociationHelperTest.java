@@ -174,4 +174,18 @@ public class AssociationHelperTest extends Assert
 		assertTrue( AssociationHelper.addHasManyThrough( i, i, "mappingTable", "fk_test1", "fk_test2"));
 		assertEquals( 2, AssociationHelper.getHasManyThroughSet( i, TestInterface.class, "mappingTable", "fk_test1", "fk_test2").size());
 	}
+
+	@Test
+	public void testGetConditionSet()
+	{
+		RecordSet<TestInterface> set = AssociationHelper.getConditionSet( base, "name", "Adam", "Eve");
+		base.createRecord().setName( "Adam");
+		assertFalse( set.isEmpty());
+		int size = set.size();
+		set.remove( set.first());
+		assertSame( size-1, set.size());
+		
+		set.clear();
+		assertTrue(set.isEmpty());
+	}
 }

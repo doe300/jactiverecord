@@ -81,7 +81,7 @@ public class OrConditionTest extends Assert
 	}
 	
 	@Test
-	public void testOrOptimization()
+	public void testOrConditions()
 	{
 		Condition c1 = OrCondition.orConditions(cond);
 		//test OR-unrolling

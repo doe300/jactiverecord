@@ -28,6 +28,7 @@ package de.doe300.activerecord.scope;
 
 import de.doe300.activerecord.dsl.Condition;
 import de.doe300.activerecord.dsl.Order;
+import javax.annotation.Nullable;
 
 /**
  * A scope is a set of predefined conditions to narrow the results
@@ -40,7 +41,9 @@ public final class Scope
 	 */
 	public static final int NO_LIMIT = -1;
 
+	@Nullable
 	private final Condition condition;
+	@Nullable
 	private final Order order;
 	private final int limit;
 
@@ -50,7 +53,7 @@ public final class Scope
 	 * @param order a order to apply to the results, may be <code>null</code>
 	 * @param limit a maximum number of results to retrieve, <code>NO_LIMIT</code> to disable
 	 */
-	public Scope(final Condition condition, final Order order, final int limit )
+	public Scope(@Nullable final Condition condition, @Nullable final Order order, final int limit )
 	{
 		this.condition = condition;
 		this.order = order;
@@ -60,6 +63,7 @@ public final class Scope
 	/**
 	 * @return the condition, may be <code>null</code>
 	 */
+	@Nullable
 	public Condition getCondition()
 	{
 		return condition;
@@ -68,6 +72,7 @@ public final class Scope
 	/**
 	 * @return the order, may be <code>null</code>
 	 */
+	@Nullable
 	public Order getOrder()
 	{
 		return order;

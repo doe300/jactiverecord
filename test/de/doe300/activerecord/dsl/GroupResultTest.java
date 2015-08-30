@@ -104,4 +104,18 @@ public class GroupResultTest extends Assert
 	{
 		return base.where( new SimpleCondition("name", null, Comparison.IS_NOT_NULL) ).groupBy( "name").filter( (GroupResult<Object,TestInterface> r) -> r.getKey().equals( "Adam5")).findAny().get();
 	}
+
+	@Test
+	public void testGetKey()
+	{
+		GroupResult<String,TestInterface> res = new GroupResult<String,TestInterface>("Adam5", base.find( new SimpleCondition("name", "Adam5", Comparison.IS)), GroupResult.SIZE_UNKNOWN, base.getDefaultOrder());
+		assertEquals( "Adam5", res.getKey());
+	}
+
+	@Test
+	public void testSize()
+	{
+		GroupResult<String,TestInterface> res = new GroupResult<String,TestInterface>("Adam5", base.find( new SimpleCondition("name", "Adam5", Comparison.IS)), GroupResult.SIZE_UNKNOWN, base.getDefaultOrder());
+		assertTrue( res.size() == GroupResult.SIZE_UNKNOWN);
+	}
 }

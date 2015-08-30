@@ -30,6 +30,7 @@ import de.doe300.activerecord.TestInterface;
 import de.doe300.activerecord.TestServer;
 import de.doe300.activerecord.dsl.Comparison;
 import de.doe300.activerecord.dsl.SimpleCondition;
+import de.doe300.activerecord.scope.Scope;
 import java.util.Arrays;
 import java.util.SortedSet;
 import org.junit.AfterClass;
@@ -266,5 +267,17 @@ public class HasManyAssociationSetTest extends Assert
 		assertSame( 1, set.size());
 		subSet.add( a2);
 		assertSame( 2, set.size());
+	}
+
+	@Test
+	public void testFindWithScope()
+	{
+		assertTrue( set.findWithScope( new Scope(null, null, Scope.NO_LIMIT)).count() == 3);
+	}
+
+	@Test
+	public void testFindFirstWithScope()
+	{
+		assertEquals(a2, set.findFirstWithScope( new Scope(new SimpleCondition(base.getPrimaryColumn(), a2.getPrimaryKey(), Comparison.IS), null, Scope.NO_LIMIT)));
 	}
 }

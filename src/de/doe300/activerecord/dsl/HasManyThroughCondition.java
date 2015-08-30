@@ -58,7 +58,6 @@ import de.doe300.activerecord.record.association.AssociationHelper;
  */
 public class HasManyThroughCondition implements Condition
 {
-	//FIXME doesn't work if source- and association-table are the same
 	@Nonnull
 	private final String associationTable, associationTableThisForeignKey, associationTableOtherForeignKey;
 	@Nonnull

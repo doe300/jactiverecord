@@ -27,7 +27,12 @@ package de.doe300.activerecord.store.impl;
 import de.doe300.activerecord.RecordBase;
 import de.doe300.activerecord.RecordCore;
 import de.doe300.activerecord.TestInterface;
+import de.doe300.activerecord.dsl.Comparison;
+import de.doe300.activerecord.dsl.SimpleCondition;
+import de.doe300.activerecord.scope.Scope;
 import java.util.Collections;
+import java.util.Map;
+import java.util.Set;
 import org.junit.Assert;
 import org.junit.BeforeClass;
 import org.junit.Test;
@@ -52,6 +57,9 @@ public class MapRecordStoreTest extends Assert
 		store = new MapRecordStore();
 		base = RecordCore.fromStore( "map", store).getBase( TestInterface.class);
 		primaryKey = base.createRecord().getPrimaryKey();
+		base.createRecord().setAge( 123);
+		base.createRecord().setName( "Adam");
+		base.createRecord().setOther( base.getRecord( primaryKey));
 	}
 
 	@Test
@@ -71,6 +79,7 @@ public class MapRecordStoreTest extends Assert
 	@Test
 	public void testGetValues_3args()
 	{
+		assertTrue( store.getValues( base, primaryKey, new String[]{"name", "other"}).size() >= 2);
 	}
 
 	@Test
@@ -98,16 +107,25 @@ public class MapRecordStoreTest extends Assert
 	@Test
 	public void testCount()
 	{
+		assertSame( 2, store.count( base, new SimpleCondition("name", "Adam", Comparison.IS)) );
+		assertSame( 3, store.count( base, null));
 	}
 
 	@Test
 	public void testFindFirstWithData()
 	{
+		Map<String,Object> result = store.findFirstWithData( base, new String[]{"name", "other"}, new Scope(null, null, Scope.NO_LIMIT));
+		assertNotNull( result );
+		assertTrue( result.size() >= 2);
+		assertEquals( "Adam", result.get("name"));
+		assertNull( result.get( "other"));
 	}
 
 	@Test
 	public void testStreamAllWithData()
 	{
+		assertTrue( store.streamAllWithData( base, new String[]{base.getPrimaryColumn(), "name", "other"}, new Scope(null, null, Scope.NO_LIMIT))
+				.anyMatch( (Map<String, Object> row) -> row.get( base.getPrimaryColumn()).equals( primaryKey)));
 	}
 
 	@Test
@@ -119,6 +137,10 @@ public class MapRecordStoreTest extends Assert
 	@Test
 	public void testGetAllColumnNames()
 	{
+		Set<String> columnNames = store.getAllColumnNames( base.getTableName());
+		assertTrue( columnNames.contains( "name"));
+		assertTrue( columnNames.contains( base.getPrimaryColumn()));
+		assertTrue( columnNames.contains( "other"));
 	}
 
 	@Test
@@ -131,6 +153,7 @@ public class MapRecordStoreTest extends Assert
 	@Test
 	public void testGetValues_4args()
 	{
+		assertTrue( store.getValues( base.getTableName(), base.getPrimaryColumn(), "name", "Adam" ).anyMatch( (Object o) -> o.equals( primaryKey)));
 	}
 
 	@Test
@@ -164,6 +187,31 @@ public class MapRecordStoreTest extends Assert
 	public void testSaveAll()
 	{
 		assertFalse( store.saveAll( base));
+	}
+
+	@Test
+	public void testGetConnection()
+	{
+	}
+
+	@Test
+	public void testClose() throws Exception
+	{
+	}
+
+	@Test
+	public void testClearCache()
+	{
+	}
+
+	@Test
+	public void testAddRow()
+	{
+	}
+
+	@Test
+	public void testRemoveRow()
+	{
 	}
 
 }

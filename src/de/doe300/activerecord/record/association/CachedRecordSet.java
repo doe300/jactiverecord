@@ -155,7 +155,7 @@ public class CachedRecordSet<T extends ActiveRecord> extends AbstractSet<T> impl
 	@Override
 	public boolean containsAll(final Collection<?> c )
 	{
-		throw new UnsupportedOperationException("CachedRecordSets are unmodifiable");
+		return c.stream().allMatch( this::contains);
 	}
 
 	@Override

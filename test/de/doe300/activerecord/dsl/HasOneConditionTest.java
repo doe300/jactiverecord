@@ -137,5 +137,5 @@ public class HasOneConditionTest
 		assertTrue( invCond.test( t2));
 		assertFalse( invCond.test( t3));
 	}
-	
+
 }

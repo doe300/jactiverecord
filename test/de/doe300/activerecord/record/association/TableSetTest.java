@@ -30,6 +30,7 @@ import de.doe300.activerecord.TestInterface;
 import de.doe300.activerecord.TestServer;
 import de.doe300.activerecord.dsl.Comparison;
 import de.doe300.activerecord.dsl.SimpleCondition;
+import de.doe300.activerecord.scope.Scope;
 import java.util.Arrays;
 import java.util.SortedSet;
 import org.junit.AfterClass;
@@ -234,5 +235,17 @@ public class TableSetTest extends Assert
 		assertSame( 2, subSet.size());
 		assertSame( a2, subSet.first());
 		assertSame( a3, subSet.last());
+	}
+
+	@Test
+	public void testFindWithScope()
+	{
+		assertTrue( set.findWithScope( new Scope(null, null, 2)).count() <= 2);
+	}
+
+	@Test
+	public void testFindFirstWithScope()
+	{
+		assertEquals( base.findFirstWithScope( new Scope(null, null, Scope.NO_LIMIT)), set.findFirstWithScope( new Scope(null, null, Scope.NO_LIMIT)));
 	}
 }

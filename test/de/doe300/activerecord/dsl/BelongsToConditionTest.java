@@ -122,5 +122,5 @@ public class BelongsToConditionTest extends Assert
 		assertFalse( invCond.test( t2));
 		assertFalse( invCond.test( t3));
 	}
-	
+
 }

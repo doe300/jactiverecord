@@ -133,7 +133,9 @@ public class MapRecordStore implements RecordStore
 	{
 		if(data.containsKey( base.getTableName()))
 		{
-			return (int) data.get(base.getTableName()).values().stream().filter( (final Map<String,Object>m )-> condition.test( m ) ).count();
+			return (int) data.get(base.getTableName()).values().stream().filter( 
+					(final Map<String,Object>m )-> condition == null ? true : condition.test( m ) 
+			).count();
 		}
 		return 0;
 	}
@@ -145,7 +147,7 @@ public class MapRecordStore implements RecordStore
 		{
 			return data.get(base.getTableName()).entrySet().stream().filter((final Map.Entry<Integer,Map<String,Object>> e)->
 			{
-				return scope.getCondition().test( e.getValue());
+				return scope.getCondition() == null ? true : scope.getCondition().test( e.getValue());
 			}).map( (final Map.Entry<Integer,Map<String,Object>> e)->e.getValue()).sorted( base.getDefaultOrder()).findFirst().orElse( null );
 		}
 		return Collections.emptyMap();
@@ -158,7 +160,7 @@ public class MapRecordStore implements RecordStore
 		{
 			return data.get(base.getTableName()).entrySet().stream().filter((final Map.Entry<Integer,Map<String,Object>> e)->
 			{
-				return scope.getCondition().test( e.getValue());
+				return scope.getCondition() == null ? true : scope.getCondition().test( e.getValue());
 			}).map( (final Map.Entry<Integer,Map<String,Object>> e)->e.getValue()).sorted( base.getDefaultOrder());
 		}
 		return Stream.empty();
@@ -183,12 +185,14 @@ public class MapRecordStore implements RecordStore
 		{
 			data.put( base.getTableName(), new TreeMap<>());
 		}
+		//FIXME this is totally not safe!
 		final int key = data.get( base.getTableName() ).size();
 		data.get( base.getTableName() ).put( key, new HashMap<>(columns != null ? columns.size() : 10));
 		if(columns != null)
 		{
 			data.get( base.getTableName() ).get( key ).putAll( columns );
 		}
+		data.get( base.getTableName() ).get( key ).put(base.getPrimaryColumn(), key);
 		return key;
 	}
 

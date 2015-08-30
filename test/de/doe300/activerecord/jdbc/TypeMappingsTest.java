@@ -35,6 +35,8 @@ import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.sql.Connection;
 import java.sql.SQLException;
+import java.util.Date;
+import java.util.TreeSet;
 import java.util.UUID;
 import org.junit.Test;
 import org.junit.AfterClass;
@@ -120,5 +122,21 @@ public class TypeMappingsTest extends Assert
 		record.setDBMappable( impl );
 		assertEquals( impl.testString, record.getDBMappable().testString);
 		assertEquals( impl.testInteger, record.getDBMappable().testInteger);
+	}
+
+	@Test
+	public void testCoerceToType()
+	{
+		assertTrue(TypeMappings.coerceToType( true, Boolean.class));
+		assertTrue(TypeMappings.coerceToType( 1, Boolean.TYPE));
+		assertEquals( Long.valueOf( 123), TypeMappings.coerceToType( new Date(123), Long.class));
+		try{
+			TypeMappings.coerceToType( new TreeSet<Object>(), String.class);
+			fail( "Failed to throw exception");
+		}
+		catch(ClassCastException e)
+		{
+			
+		}
 	}
 }
