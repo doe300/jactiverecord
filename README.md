@@ -1,7 +1,7 @@
 JActiveRecord
 =============
 [![GitHub license](https://img.shields.io/github/license/doe300/jactiverecord.svg)](https://github.com/doe300/jactiverecord/blob/master/LICENSE)
-[![Release](https://img.shields.io/github/tag/doe300/jactiverecord.svg)](https://github.com/doe300/jactiverecod/releases/latest)
+[![Release](https://img.shields.io/github/tag/doe300/jactiverecord.svg)](https://github.com/doe300/jactiverecord/releases/latest)
 
 A java-based object-database-binding on top of JDBC inspired by Rails ActiveRecord.
 
