@@ -1,1 +1,2 @@
-de.doe300.activerecord.record.RecordAnnotationProcessor
+de.doe300.activerecord.annotations.RecordTypeProcessor
+de.doe300.activerecord.annotations.AttributeProcessor
