@@ -26,6 +26,7 @@ package de.doe300.activerecord.record;
 
 import de.doe300.activerecord.dsl.Order;
 import de.doe300.activerecord.migration.AutomaticMigration;
+import java.lang.annotation.Documented;
 import java.lang.annotation.ElementType;
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
@@ -35,6 +36,7 @@ import java.lang.annotation.Target;
  * The data-set or table-name
  * @author doe300
  */
+@Documented
 @Target(ElementType.TYPE)
 @Retention(RetentionPolicy.RUNTIME)
 public @interface RecordType

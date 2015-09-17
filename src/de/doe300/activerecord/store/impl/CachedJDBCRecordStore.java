@@ -165,9 +165,12 @@ public class CachedJDBCRecordStore extends SimpleJDBCRecordStore
 			//this else clause is only called the first time a column is not in the cache
 			else
 			{
-				//TODO better handling for non existing row
-				//currently getDBValue is called for every column
 				final Object val = getDBValue( base, primaryKey, c, col );
+				if(!c.hasData( col ))
+				{
+					//no data was written into cache -> row was not read from DB -> every successive call will fail to read data too
+					break;
+				}
 				result.put( col, val );
 			}
 		}

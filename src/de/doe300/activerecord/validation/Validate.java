@@ -25,7 +25,6 @@
 
 package de.doe300.activerecord.validation;
 
-import java.lang.annotation.Documented;
 import java.lang.annotation.ElementType;
 import java.lang.annotation.Inherited;
 import java.lang.annotation.Repeatable;
@@ -40,7 +39,6 @@ import java.util.function.Predicate;
  * @see ValidatedRecord#validate() 
  * @see ValidatedRecord#isValid() 
  */
-@Documented
 @Retention(RetentionPolicy.RUNTIME)
 @Target(ElementType.TYPE)
 @Repeatable(Validates.class)

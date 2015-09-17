@@ -48,7 +48,6 @@ import de.doe300.activerecord.store.RecordStore;
 @Deprecated
 public class MapRecordStore implements RecordStore
 {
-	//TODO needs testing
 	private final Map<String, Map<Integer, Map<String,Object>>> data;
 
 	public MapRecordStore()

@@ -25,7 +25,6 @@
 package de.doe300.activerecord.migration.constraints;
 
 import de.doe300.activerecord.migration.AutomaticMigration;
-import java.lang.annotation.Documented;
 import java.lang.annotation.ElementType;
 import java.lang.annotation.Repeatable;
 import java.lang.annotation.Retention;
@@ -37,7 +36,6 @@ import java.lang.annotation.Target;
  * @author doe300
  * @see AutomaticMigration
  */
-@Documented
 @Retention(RetentionPolicy.RUNTIME)
 @Target(ElementType.TYPE)
 @Repeatable(Indices.class)
