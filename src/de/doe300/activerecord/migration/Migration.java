@@ -64,7 +64,7 @@ public interface Migration
 	 * @param name
 	 * @return whether the structure already exists
 	 */
-	public default boolean structureExists(final Connection con, final String name)
+	public default boolean structureExists(@Nonnull final Connection con, @Nonnull final String name)
 	{
 		try (ResultSet set = con.getMetaData().getTables(con.getCatalog(), con.getSchema(), null, null))
 		{

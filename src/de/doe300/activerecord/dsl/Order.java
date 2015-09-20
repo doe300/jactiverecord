@@ -30,14 +30,17 @@ import java.util.Map;
 
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
+import javax.annotation.concurrent.Immutable;
 
 import de.doe300.activerecord.jdbc.VendorSpecific;
 import de.doe300.activerecord.record.ActiveRecord;
+import javax.annotation.Syntax;
 
 /**
  * An object representing the SQL ORDER BY-Clause
  * @author doe300
  */
+@Immutable
 public class Order implements Comparator<Map<String,Object>>, SQLCommand
 {
 	@Nonnull
@@ -162,6 +165,7 @@ public class Order implements Comparator<Map<String,Object>>, SQLCommand
 	/**
 	 * @return a Comparator to sort records
 	 */
+	@Nonnull
 	public Comparator<ActiveRecord> toRecordComparator()
 	{
 		return (o1, o2) -> {
@@ -199,6 +203,7 @@ public class Order implements Comparator<Map<String,Object>>, SQLCommand
 			}
 		};
 
+		@Syntax(value = "SQL")
 		public abstract String toSQL();
 	}
 }

@@ -28,6 +28,9 @@ import de.doe300.activerecord.RecordBase;
 import de.doe300.activerecord.RecordCore;
 import de.doe300.activerecord.TestServer;
 import de.doe300.activerecord.migration.AutomaticMigration;
+import java.io.ByteArrayOutputStream;
+import java.io.IOException;
+import java.io.InputStream;
 import java.math.RoundingMode;
 import java.net.URI;
 import java.net.URL;
@@ -35,6 +38,8 @@ import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.sql.Connection;
 import java.sql.SQLException;
+import java.sql.SQLSyntaxErrorException;
+import java.sql.Timestamp;
 import java.util.Date;
 import java.util.TreeSet;
 import java.util.UUID;
@@ -103,13 +108,19 @@ public class TypeMappingsTest extends Assert
 		assertEquals( path, record.getPath());
 	}
 
-	@Test
+	@Test(expected = IllegalArgumentException.class)
 	public void testEnumValue()
 	{
 		TestTypesInterface record = base.createRecord();
 		RoundingMode mode = RoundingMode.HALF_UP;
 		record.setEnum( mode );
 		assertEquals( mode, record.getEnum());
+		//test ordinal for enum
+		record.setEnumOrdinal( mode);
+		assertEquals( mode, record.getEnumOrdinal());
+		//error-test
+		base.getStore().setValue( base, record.getPrimaryKey(), "enum", "no such entry");
+		record.getEnum();
 	}
 	
 	@Test
@@ -123,13 +134,35 @@ public class TypeMappingsTest extends Assert
 		assertEquals( impl.testString, record.getDBMappable().testString);
 		assertEquals( impl.testInteger, record.getDBMappable().testInteger);
 	}
-
+	
+	@Test(expected = SQLSyntaxErrorException.class)
+	public void testXML() throws SQLException, IOException
+	{
+		//TODO hsqldb does not support XML??
+		String xmlString = "<tag><subtag/>some text</tag>";
+		TestTypesInterface record = base.createRecord();
+		record.writeXML( xmlString);
+		String resultXML;
+		try(ByteArrayOutputStream bos = new ByteArrayOutputStream(xmlString.getBytes().length); InputStream is = record.readXML())
+		{
+			int b;
+			while((b = is.read()) != -1)
+			{
+				bos.write( b);
+			}
+			resultXML = bos.toString();
+		}
+		assertEquals( xmlString, resultXML);
+	}
+	
 	@Test
 	public void testCoerceToType()
 	{
 		assertTrue(TypeMappings.coerceToType( true, Boolean.class));
 		assertTrue(TypeMappings.coerceToType( 1, Boolean.TYPE));
 		assertEquals( Long.valueOf( 123), TypeMappings.coerceToType( new Date(123), Long.class));
+		Timestamp ts = new Timestamp(System.currentTimeMillis());
+		assertEquals( ts, TypeMappings.coerceToType( ts.getTime(), Timestamp.class));
 		try{
 			TypeMappings.coerceToType( new TreeSet<Object>(), String.class);
 			fail( "Failed to throw exception");

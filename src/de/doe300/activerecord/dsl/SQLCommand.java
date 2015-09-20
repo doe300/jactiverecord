@@ -27,6 +27,7 @@ package de.doe300.activerecord.dsl;
 import de.doe300.activerecord.jdbc.VendorSpecific;
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
+import javax.annotation.Syntax;
 
 /**
  *
@@ -40,6 +41,7 @@ public interface SQLCommand
 	 * @return the sQL representation of this statement
 	 */
 	@Nonnull
+	@Syntax(value = "SQL")
 	public String toSQL(@Nullable final VendorSpecific vendorSpecifics, @Nullable final String tableName);
 	
 	/**

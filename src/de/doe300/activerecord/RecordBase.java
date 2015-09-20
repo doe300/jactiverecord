@@ -54,6 +54,7 @@ import de.doe300.activerecord.scope.Scope;
 import de.doe300.activerecord.store.RecordStore;
 import de.doe300.activerecord.validation.ValidatedRecord;
 import de.doe300.activerecord.validation.ValidationFailed;
+import javax.annotation.Nonnegative;
 
 /**
  * Common base for mapped objects
@@ -103,6 +104,7 @@ public abstract class RecordBase<T extends ActiveRecord> implements ReadOnlyReco
 	/**
 	 * @return the core
 	 */
+	@Nonnull
 	public RecordCore getCore()
 	{
 		return core;
@@ -338,7 +340,7 @@ public abstract class RecordBase<T extends ActiveRecord> implements ReadOnlyReco
 	 * @return the proxy object mapped to the underlying record-store
 	 */
 	@Nonnull
-	protected abstract T createProxy(int primaryKey, boolean newRecord, @Nullable Map<String, Object> recordData) throws RecordException;
+	protected abstract T createProxy(@Nonnegative int primaryKey, boolean newRecord, @Nullable Map<String, Object> recordData) throws RecordException;
 
 	@Override
 	public boolean hasRecord(final int primaryKey)
@@ -416,7 +418,7 @@ public abstract class RecordBase<T extends ActiveRecord> implements ReadOnlyReco
 	 * Removes the record with this primaryKey from the record-store and all cache
 	 * @param primaryKey
 	 */
-	public void destroy(final int primaryKey)
+	public void destroy(@Nonnegative final int primaryKey)
 	{
 		final T record = records.remove( primaryKey);
 		if (record != null)

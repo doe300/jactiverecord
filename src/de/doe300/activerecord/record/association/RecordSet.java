@@ -108,14 +108,14 @@ public interface RecordSet<T extends ActiveRecord> extends SortedSet<T>, FinderM
 	}
 
 	@Override
-	@Nullable
+	@Nonnull
 	public default T first()
 	{
 		return stream().sorted( getRecordBase().getDefaultOrder().toRecordComparator()).findFirst().get();
 	}
 
 	@Override
-	@Nullable
+	@Nonnull
 	public default T last()
 	{
 		return stream().sorted( getRecordBase().getDefaultOrder().toRecordComparator().reversed()).findFirst().get();

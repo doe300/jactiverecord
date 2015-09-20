@@ -26,6 +26,7 @@ package de.doe300.activerecord.record;
 
 import de.doe300.activerecord.RecordBase;
 import de.doe300.activerecord.store.RecordStore;
+import javax.annotation.Nonnegative;
 import javax.annotation.Nonnull;
 
 /**
@@ -52,6 +53,7 @@ public interface ActiveRecord extends Comparable<ActiveRecord>
 	/**
 	 * @return the unique primary key for this record
 	 */
+	@Nonnegative
 	public int getPrimaryKey();
 	
 	/**
@@ -108,6 +110,7 @@ public interface ActiveRecord extends Comparable<ActiveRecord>
 	 * @return a string representing this Object
 	 * @see Object#toString() 
 	 */
+	@Nonnull
 	public default String toStringOverride()
 	{
 		return "ActiveRecord{"+getPrimaryKey()+"@"+getBase().getRecordType().getCanonicalName()+"}";

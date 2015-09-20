@@ -33,6 +33,7 @@ import java.util.function.Function;
 import javax.annotation.Nonnull;
 
 import de.doe300.activerecord.logging.Logging;
+import javax.annotation.Nullable;
 
 /**
  *
@@ -134,7 +135,8 @@ public enum VendorSpecific
 	 * @param con
 	 * @return the database vendor specific settings
 	 */
-	public static VendorSpecific guessDatabaseVendor(final Connection con)
+	@Nullable
+	public static VendorSpecific guessDatabaseVendor(@Nonnull final Connection con)
 	{
 		try
 		{
@@ -208,7 +210,7 @@ public enum VendorSpecific
 	 * @param value
 	 * @return the boolean-value from the DB
 	 */
-	public boolean convertDBToBoolean(final Object value)
+	public boolean convertDBToBoolean(@Nonnull final Object value)
 	{
 		return ( boolean ) value;
 	}
@@ -221,7 +223,8 @@ public enum VendorSpecific
 	 * @param con
 	 * @return the input in the correct case
 	 */
-	public static String convertIdentifier(final String input, final Connection con)
+	@Nonnull
+	public static String convertIdentifier(@Nonnull final String input, @Nonnull final Connection con)
 	{
 		try
 		{
@@ -266,7 +269,8 @@ public enum VendorSpecific
 	 * @param con
 	 * @return the input in the correct case
 	 */
-	public static String convertIdentifierWithoutQuote(final String input, final Connection con)
+	@Nonnull
+	public static String convertIdentifierWithoutQuote(@Nonnull final String input, @Nonnull final Connection con)
 	{
 		try
 		{

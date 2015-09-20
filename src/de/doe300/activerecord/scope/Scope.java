@@ -26,9 +26,10 @@
 
 package de.doe300.activerecord.scope;
 
+import javax.annotation.Nullable;
+
 import de.doe300.activerecord.dsl.Condition;
 import de.doe300.activerecord.dsl.Order;
-import javax.annotation.Nullable;
 
 /**
  * A scope is a set of predefined conditions to narrow the results

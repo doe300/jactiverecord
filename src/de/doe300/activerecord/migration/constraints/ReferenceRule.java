@@ -26,6 +26,7 @@ package de.doe300.activerecord.migration.constraints;
 
 import de.doe300.activerecord.migration.Attribute;
 import de.doe300.activerecord.migration.AutomaticMigration;
+import javax.annotation.Syntax;
 
 /**
  * Rule for FOREIGN KEYS for ON DELETE or ON UPDATE clauses
@@ -98,5 +99,6 @@ public enum ReferenceRule
 	 * @param onAction
 	 * @return the SQL clause
 	 */
+	@Syntax(value = "SQL")
 	public abstract String toSQL(String onAction);
 }

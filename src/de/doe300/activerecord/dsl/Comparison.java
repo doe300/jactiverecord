@@ -202,5 +202,5 @@ public enum Comparison implements BiPredicate<Object, Object>
 	};
 
 	@Override
-	public abstract boolean test(@Nullable final Object value,@Nullable final Object compareValue );
+	public abstract boolean test(@Nullable final Object value, @Nullable final Object compareValue );
 }

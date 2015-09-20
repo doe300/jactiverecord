@@ -211,7 +211,7 @@ public final class RecordCore implements AutoCloseable
 		return base;
 	}
 
-	private ProxyHandler[] mergeHandlers(@Nonnull final Class<? extends ActiveRecord> type, @Nullable final ProxyHandler[] custom)
+	private static ProxyHandler[] mergeHandlers(@Nonnull final Class<? extends ActiveRecord> type, @Nullable final ProxyHandler[] custom)
 	{
 		
 		final List<ProxyHandler> proxies = new ArrayList<>(custom != null ? custom.length : 5);

@@ -26,11 +26,13 @@ package de.doe300.activerecord.jdbc;
 
 import de.doe300.activerecord.migration.Attribute;
 import de.doe300.activerecord.record.ActiveRecord;
+import java.io.InputStream;
 import java.math.RoundingMode;
 import java.net.MalformedURLException;
 import java.net.URI;
 import java.net.URL;
 import java.nio.file.Path;
+import java.sql.SQLException;
 import java.sql.Types;
 import java.util.UUID;
 
@@ -95,6 +97,17 @@ public interface TestTypesInterface extends ActiveRecord
 		TypeMappings.writeEnumValue( mode, this, "enum");
 	}
 	
+	@Attribute(type = Types.INTEGER, name = "enum_ordinal")
+	public  default RoundingMode getEnumOrdinal()
+	{
+		return TypeMappings.readEnumValue( RoundingMode.class, this, "enum_ordinal");
+	}
+	
+	public default void setEnumOrdinal(RoundingMode mode)
+	{
+		getBase().getStore().setValue( getBase(), getPrimaryKey(), "enum_ordinal", mode.ordinal());
+	}
+	
 	@Attribute(type = Types.VARCHAR, typeName = "VARCHAR(100)", name = "db_mappable")
 	public default TestDBMappableImpl getDBMappable()
 	{
@@ -104,6 +117,17 @@ public interface TestTypesInterface extends ActiveRecord
 	public default void setDBMappable(TestDBMappableImpl obj)
 	{
 		TypeMappings.writeDBMappable( obj, this, "db_mappable");
+	}
+	
+	@Attribute(name = "xml", type = Types.VARCHAR, typeName = "VARCHAR(1)")
+	public default InputStream readXML() throws SQLException
+	{
+		return TypeMappings.readXML( this, "xml");
+	}
+	
+	public default void writeXML(String xml) throws SQLException
+	{
+		TypeMappings.writeXML( xml, this, "xml");
 	}
 			
 	static class TestDBMappableImpl implements DBMappable

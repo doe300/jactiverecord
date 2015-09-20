@@ -89,30 +89,40 @@ public class CachedRecordSetTest extends Assert
 	public void testFirst()
 	{
 		assertEquals( a1, set.first());
+		//loads from cache
+		assertNotSame(a2, set.first());
 	}
 
 	@Test
 	public void testLast()
 	{
 		assertEquals( a5, set.last());
+		//loads from cache
+		assertNotSame( a2, set.last());
 	}
 
 	@Test
 	public void testSize()
 	{
 		assertEquals( 5, set.size());
+		//loads from cache
+		assertNotSame( 6, set.size());
 	}
 
 	@Test
 	public void testIsEmpty()
 	{
 		assertFalse( set.isEmpty());
+		//loads from cache
+		assertFalse(set.isEmpty());
 	}
 
 	@Test
 	public void testContains()
 	{
 		assertTrue( set.contains( a4));
+		//loads from cache
+		assertTrue( set.contains( a1));
 	}
 
 	@Test(expected = UnsupportedOperationException.class)

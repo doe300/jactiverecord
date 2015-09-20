@@ -50,6 +50,7 @@ public final class Attributes
 	 * @param methodName
 	 * @return the name of the property, or <code>null</code>
 	 */
+	@Nullable
 	public static String getPropertyName(@Nonnull final String methodName)
 	{
 		String result;
@@ -90,6 +91,7 @@ public final class Attributes
 	 * @throws NoSuchMethodException
 	 * @see AttributeSetter
 	 */
+	@Nullable
 	public static Method getValidatorMethod(@Nonnull final Method base) throws NoSuchMethodException
 	{
 		if(base.isAnnotationPresent( AttributeSetter.class))
@@ -177,6 +179,7 @@ public final class Attributes
 	 * @see AttributeGetter
 	 * @see AttributeSetter
 	 */
+	@Nullable
 	public static Method getConverterMethod(@Nonnull final Method base) throws NoSuchMethodException
 	{
 		if ( base.isAnnotationPresent( AttributeGetter.class))
@@ -207,7 +210,7 @@ public final class Attributes
 	 * @return whether the attribute-value is not <code>null</code>
 	 */
 	public static boolean checkNotNull(@Nonnull final ActiveRecord record, @Nonnull final String attribute,
-		final Function<Object, Object> converterFunc)
+		@Nullable final Function<Object, Object> converterFunc)
 	{
 		return Attributes.checkAttribute( record, attribute, (final Object o) -> o!= null, converterFunc);
 	}
@@ -220,7 +223,7 @@ public final class Attributes
 	 * @return whether the attribute-value matches the <code>checkFunc</code>
 	 */
 	public static boolean checkAttribute(@Nonnull final ActiveRecord record, @Nonnull final String attribute,
-		@Nonnull final Predicate<Object> checkFunc, final Function<Object, Object> converterFunc)
+		@Nonnull final Predicate<Object> checkFunc, @Nullable final Function<Object, Object> converterFunc)
 	{
 		Object val = record.getBase().getStore().getValue( record.getBase(), record.getPrimaryKey(), attribute);
 		if(converterFunc!=null)
@@ -240,7 +243,7 @@ public final class Attributes
 	 * @return the length of the attribute-value or <code>-1</code>
 	 */
 	public static int getLength(@Nonnull final ActiveRecord record, @Nonnull final String attribute,
-		final ToIntFunction<Object> lengthFunc, final Function<Object, Object> converterFunc)
+		@Nullable final ToIntFunction<Object> lengthFunc, @Nullable final Function<Object, Object> converterFunc)
 	{
 		Object val = record.getBase().getStore().getValue( record.getBase(), record.getPrimaryKey(), attribute);
 		if(converterFunc!=null)

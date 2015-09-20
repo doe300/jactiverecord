@@ -24,8 +24,11 @@
  */
 package de.doe300.activerecord.migration.constraints;
 
-import de.doe300.activerecord.jdbc.VendorSpecific;
 import javax.annotation.Nullable;
+
+import de.doe300.activerecord.jdbc.VendorSpecific;
+import javax.annotation.Nonnull;
+import javax.annotation.Syntax;
 
 /**
  * All supported types of indices.
@@ -39,19 +42,21 @@ public enum IndexType
 	 */
 	NON_UNIQUE()
 	{
-		public String toSQL(VendorSpecific vendorSpecifics)
+		@Override
+		public String toSQL(final VendorSpecific vendorSpecifics)
 		{
 			return "";
 		}
 	},
-	
+
 	/**
 	 * IndexType with unique keys.
 	 * Every combination in the index-columns is unique
 	 */
 	UNIQUE()
 	{
-		public String toSQL(VendorSpecific vendorSpecifics)
+		@Override
+		public String toSQL(final VendorSpecific vendorSpecifics)
 		{
 			return "UNIQUE";
 		}
@@ -62,13 +67,19 @@ public enum IndexType
 	 */
 	CLUSTERED()
 	{
-		public String toSQL(VendorSpecific vendorSpecifics)
+		@Override
+		public String toSQL(final VendorSpecific vendorSpecifics)
 		{
 			return "CLUSTERED";
 		}
 	}
 	;
-	
+
+	/**
+	 * @param vendorSpecifics
+	 * @return the SQL keyword for the given index-type
+	 */
+	@Syntax(value = "SQL")
 	public abstract String toSQL(@Nullable final VendorSpecific vendorSpecifics);
 
 	/**
@@ -77,9 +88,10 @@ public enum IndexType
 	 * @param columnNames the names of the columns to add the index to
 	 * @return the SQL command to create this index
 	 */
-	public String toSQL(String tableName, String name, String... columnNames)
+	@Syntax(value = "SQL")
+	public String toSQL(@Nonnull final String tableName, @Nullable final String name, @Nullable final String... columnNames)
 	{
 		return "CREATE "+toSQL(null)+" INDEX "+(name!=null? name : "")+" ON "+tableName+" ("+String.join( ", ",columnNames)+")";
 	}
-	
+
 }

@@ -25,6 +25,7 @@
 package de.doe300.activerecord;
 
 import de.doe300.activerecord.proxy.handlers.MapHandler;
+import de.doe300.activerecord.record.ActiveRecord;
 import de.doe300.activerecord.store.impl.MapRecordStore;
 import org.junit.AfterClass;
 import org.junit.Assert;
@@ -104,5 +105,23 @@ public class RecordCoreTest extends Assert
 	public void testGetStore()
 	{
 		assertNotNull( core.getStore());
+	}
+	
+	@Test
+	public void testRecordListener()
+	{
+		RecordListener l = (RecordListener.RecordEvent eventType, RecordBase<?> base, ActiveRecord record) ->
+		{
+			assertEquals( RecordListener.RecordEvent.RECORD_CREATED, eventType);
+		};
+		RecordListener failL = (RecordListener.RecordEvent eventType, RecordBase<?> base, ActiveRecord record) ->
+		{
+			fail( "Should not be called");
+		};
+		
+		core.addRecordListener( TestInterface.class, l);
+		core.addRecordListener( TestSingleInheritancePOJO.class, failL);
+		core.fireRecordEvent( RecordListener.RecordEvent.RECORD_CREATED, core.getBase( TestInterface.class ), core.getBase( TestInterface.class).createRecord());
+		core.removeRecordListener( TestInterface.class, l);
 	}
 }

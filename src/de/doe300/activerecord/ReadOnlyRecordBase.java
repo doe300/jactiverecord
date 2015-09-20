@@ -38,6 +38,7 @@ import de.doe300.activerecord.record.Searchable;
 import de.doe300.activerecord.record.association.RecordSet;
 import de.doe300.activerecord.scope.Scope;
 import de.doe300.activerecord.validation.ValidatedRecord;
+import javax.annotation.Nonnegative;
 
 /**
  * A RecordBase which can be read only
@@ -89,13 +90,13 @@ public interface ReadOnlyRecordBase<T extends ActiveRecord> extends FinderMethod
 	 * @throws RecordException
 	 */
 	@Nullable
-	public T getRecord(final int primaryKey) throws RecordException;
+	public T getRecord(@Nonnegative final int primaryKey) throws RecordException;
 
 	/**
 	 * @param primaryKey
 	 * @return whether the record is stored in the underlying record-store
 	 */
-	public boolean hasRecord(final int primaryKey);
+	public boolean hasRecord(@Nonnegative final int primaryKey);
 
 	/**
 	 * @param record
@@ -107,7 +108,8 @@ public interface ReadOnlyRecordBase<T extends ActiveRecord> extends FinderMethod
 	 * @param condition
 	 * @return the number of records matching these conditions
 	 */
-	public int count(final Condition condition);
+	@Nonnegative
+	public int count(@Nullable final Condition condition);
 
 	/**
 	 * @param condition

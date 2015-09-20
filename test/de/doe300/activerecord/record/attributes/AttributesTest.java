@@ -24,15 +24,20 @@
  */
 package de.doe300.activerecord.record.attributes;
 
+import de.doe300.activerecord.RecordBase;
+import de.doe300.activerecord.RecordCore;
 import de.doe300.activerecord.TestInterface;
+import de.doe300.activerecord.TestServer;
 import de.doe300.activerecord.record.TimestampedRecord;
 import de.doe300.activerecord.validation.ValidatedRecord;
 import java.lang.reflect.Method;
+import org.junit.AfterClass;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotSame;
 import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertTrue;
+import org.junit.BeforeClass;
 import org.junit.Test;
 
 /**
@@ -41,9 +46,23 @@ import org.junit.Test;
  */
 public class AttributesTest
 {
+	private static RecordBase<TestInterface> base;
 	
 	public AttributesTest()
 	{
+	}
+	
+	@BeforeClass
+	public static void createTables() throws Exception
+	{
+		TestServer.buildTestTables();
+		base = RecordCore.fromDatabase( TestServer.getTestConnection(), true).getBase( TestInterface.class);
+	}
+	
+	@AfterClass
+	public static void destroyTables() throws Exception
+	{
+		TestServer.destroyTestTables();
 	}
 
 	@Test
@@ -98,17 +117,37 @@ public class AttributesTest
 	@Test
 	public void testCheckNotNull()
 	{
-		
+		TestInterface i = base.createRecord();
+		i.setName( "Adam");
+		assertTrue( Attributes.checkNotNull( i, "name", null));
+		i.setAge( 123);
+		assertTrue( Attributes.checkNotNull(i, "age", null));
 	}
 
 	@Test
 	public void testCheckAttribute()
 	{
+		TestInterface i = base.createRecord();
+		i.setAge( 123);
+		i.setName( "Eve");
+		assertTrue( Attributes.checkAttribute( i, "name", (Object obj) -> "Eve".equals( obj), null));
+		assertTrue( Attributes.checkAttribute(i, "age", (Object obj) -> "123".equals( obj ) , (Object t) -> Integer.toString( (int)t)));
+		assertFalse( Attributes.checkAttribute( i, "age", (Object obj) -> "Eve".equals( obj), null));
 	}
 
 	@Test
 	public void testGetLength()
 	{
+		TestInterface i = base.createRecord();
+		String name = "Steve";
+		i.setName( name);
+		i.setDirectionOne(i);
+		i.save();
+		
+		assertEquals(name.length(), Attributes.getLength( i, "name", null, null));
+		assertEquals( -1, Attributes.getLength( i, "age", null, null));
+		
+		assertEquals( 42, Attributes.getLength( i, "fk_test_id", (Object obj) -> (obj instanceof Number) ? 42 : -1, null));
 	}
 	
 }
