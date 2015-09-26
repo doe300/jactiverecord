@@ -43,7 +43,7 @@ public class TestActiveRecordSyntax
 	public static void main(final String[] args) throws SQLException, Exception
 	{
 		//0, create new core
-		final RecordCore core = RecordCore.fromDatabase(TestServer.getTestConnection(), true);
+		final RecordCore core = TestServer.getTestCore();
 		//1. create new recordbase
 		final RecordBase<TestInterface> base = core.getBase( TestInterface.class);
 		//2. get record

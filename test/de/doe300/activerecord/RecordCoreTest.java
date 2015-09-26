@@ -26,6 +26,7 @@ package de.doe300.activerecord;
 
 import de.doe300.activerecord.proxy.handlers.MapHandler;
 import de.doe300.activerecord.record.ActiveRecord;
+import de.doe300.activerecord.store.impl.CachedJDBCRecordStore;
 import de.doe300.activerecord.store.impl.MapRecordStore;
 import org.junit.AfterClass;
 import org.junit.Assert;
@@ -48,7 +49,7 @@ public class RecordCoreTest extends Assert
 	public static void createTables() throws Exception
 	{
 		TestServer.buildTestTables();
-		core = RecordCore.fromDatabase( TestServer.getTestConnection(), true);
+		core = TestServer.getTestCore();
 	}
 	
 	@AfterClass
@@ -98,7 +99,14 @@ public class RecordCoreTest extends Assert
 	@Test
 	public void testIsCached()
 	{
-		assertTrue( core.isCached());
+		if(core.getStore() instanceof CachedJDBCRecordStore)
+		{
+			assertTrue( core.isCached());
+		}
+		else
+		{
+			assertFalse( core.isCached());
+		}
 	}
 
 	@Test

@@ -30,6 +30,7 @@ import javax.annotation.Nullable;
 /**
  *
  * @author doe300
+ * @since 0.3
  */
 public interface EncryptionAlgorithm
 {

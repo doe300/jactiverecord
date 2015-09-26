@@ -35,6 +35,7 @@ import javax.annotation.Nonnull;
 /**
  * RecordHandler for {@link EncryptedRecord}
  * @author doe300
+ * @since 0.3
  */
 public class EncryptionHandler implements ProxyHandler
 {

@@ -26,7 +26,6 @@
 package de.doe300.activerecord.validation;
 
 import de.doe300.activerecord.RecordBase;
-import de.doe300.activerecord.RecordCore;
 import de.doe300.activerecord.TestInterface;
 import de.doe300.activerecord.TestServer;
 import org.junit.AfterClass;
@@ -52,7 +51,7 @@ public class ValidationHandlerTest extends Assert
 	public static void createTables() throws Exception
 	{
 		TestServer.buildTestTables();
-		base = RecordCore.fromDatabase( TestServer.getTestConnection(), true).getBase(TestInterface.class);
+		base = TestServer.getTestCore().getBase(TestInterface.class);
 	}
 	
 	@AfterClass

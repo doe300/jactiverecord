@@ -108,7 +108,7 @@ public class MapRecordStoreTest extends Assert
 	public void testCount()
 	{
 		assertSame( 2, store.count( base, new SimpleCondition("name", "Adam", Comparison.IS)) );
-		assertSame( 3, store.count( base, null));
+		assertSame( 4, store.count( base, null));
 	}
 
 	@Test
@@ -134,7 +134,7 @@ public class MapRecordStoreTest extends Assert
 		assertTrue( store.exists( base.getTableName()));
 	}
 
-	@Test
+	@Test(expected = UnsupportedOperationException.class)
 	public void testGetAllColumnNames()
 	{
 		Set<String> columnNames = store.getAllColumnNames( base.getTableName());

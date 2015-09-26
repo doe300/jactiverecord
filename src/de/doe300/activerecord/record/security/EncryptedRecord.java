@@ -32,6 +32,7 @@ import javax.annotation.Nullable;
 /**
  * An ActiveRecord which encrypt several of its fields
  * @author doe300
+ * @since 0.3
  */
 public interface EncryptedRecord extends ActiveRecord
 {

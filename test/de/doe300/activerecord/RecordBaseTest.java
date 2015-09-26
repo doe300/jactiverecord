@@ -53,6 +53,8 @@ public class RecordBaseTest<T extends TestInterface> extends Assert
 	private final RecordBase<T> base;
 	private final Class<T> type;
 	
+	//FIXME validations fail for simple jdbc record-store
+	
 	public RecordBaseTest(Class<T> type, RecordBase<T> base) throws SQLException
 	{
 		this.type = type;
@@ -63,9 +65,9 @@ public class RecordBaseTest<T extends TestInterface> extends Assert
 	public static Collection<Object[]> getParameters() throws SQLException
 	{
 		return Arrays.asList(
-			new Object[]{TestInterface.class, RecordCore.fromDatabase( TestServer.getTestConnection(), true).getBase( TestInterface.class )},
-			new Object[]{TestPOJO.class, RecordCore.fromDatabase( TestServer.getTestConnection(), true).getBase( TestPOJO.class )},
-			new Object[]{TestSingleInheritancePOJO.class, RecordCore.fromDatabase( TestServer.getTestConnection(), true).getBase( TestSingleInheritancePOJO.class )}
+			new Object[]{TestInterface.class, TestServer.getTestCore().getBase( TestInterface.class )},
+			new Object[]{TestPOJO.class, TestServer.getTestCore().getBase( TestPOJO.class )},
+			new Object[]{TestSingleInheritancePOJO.class, TestServer.getTestCore().getBase( TestSingleInheritancePOJO.class )}
 		);
 	}
 	

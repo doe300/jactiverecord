@@ -25,7 +25,6 @@
 package de.doe300.activerecord.dsl;
 
 import de.doe300.activerecord.RecordBase;
-import de.doe300.activerecord.RecordCore;
 import de.doe300.activerecord.TestInterface;
 import de.doe300.activerecord.TestServer;
 import java.util.HashMap;
@@ -54,7 +53,7 @@ public class HasManyThroughConditionTest extends Assert
 	{
 		TestServer.buildTestTables();
 		
-		base = RecordCore.fromDatabase( TestServer.getTestConnection(), false).getBase( TestInterface.class);
+		base = TestServer.getTestCore().getBase( TestInterface.class);
 		t1 = base.createRecord();
 		t1.setName( "123Name1");
 		t1.setAge( -912);

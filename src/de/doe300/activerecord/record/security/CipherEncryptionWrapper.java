@@ -35,6 +35,7 @@ import javax.crypto.IllegalBlockSizeException;
 /**
  *
  * @author doe300
+ * @since 0.3
  */
 public class CipherEncryptionWrapper implements EncryptionAlgorithm
 {

@@ -25,10 +25,14 @@
 package de.doe300.activerecord.performance;
 
 import de.doe300.activerecord.RecordBase;
-import de.doe300.activerecord.RecordCore;
 import de.doe300.activerecord.TestServer;
 import de.doe300.activerecord.migration.AutomaticMigration;
+import de.doe300.activerecord.migration.Migration;
+import de.doe300.activerecord.store.RecordStore;
 import de.doe300.activerecord.store.impl.CachedJDBCRecordStore;
+import de.doe300.activerecord.store.impl.SimpleJDBCRecordStore;
+import de.doe300.activerecord.store.impl.memory.MemoryMigration;
+import de.doe300.activerecord.store.impl.memory.MemoryRecordStore;
 import java.sql.SQLException;
 import java.util.Arrays;
 import java.util.Collection;
@@ -47,9 +51,9 @@ public class PerformanceTest<T extends ProxyPerformance> extends Assert
 {
 	private final RecordBase<T> base;
 
-	public PerformanceTest(Class<T> type, boolean cached) throws SQLException
+	public PerformanceTest(Class<T> type, Class<? extends RecordStore> storeType) throws SQLException
 	{
-		this.base = RecordCore.fromDatabase( TestServer.getTestConnection(), cached).getBase( type);
+		this.base = TestServer.getTestCore( storeType ).getBase( type);
 	}
 	
 	@Parameterized.Parameters
@@ -58,12 +62,15 @@ public class PerformanceTest<T extends ProxyPerformance> extends Assert
 		return Arrays.asList(
 				new Object[][]
 				{
-					{ProxyPerformance.class, false},
-					{POJOPerformance.class, false},
-					{CachingPOJOPerformance.class,false},
-					{ProxyPerformance.class,true},
-					{POJOPerformance.class,true},
-					{CachingPOJOPerformance.class,true}
+					{ProxyPerformance.class, SimpleJDBCRecordStore.class},
+					{POJOPerformance.class, SimpleJDBCRecordStore.class},
+					{CachingPOJOPerformance.class,SimpleJDBCRecordStore.class},
+					{ProxyPerformance.class, CachedJDBCRecordStore.class},
+					{POJOPerformance.class,CachedJDBCRecordStore.class},
+					{CachingPOJOPerformance.class,CachedJDBCRecordStore.class},
+					{ProxyPerformance.class, MemoryRecordStore.class},
+					{POJOPerformance.class,MemoryRecordStore.class},
+					{CachingPOJOPerformance.class,MemoryRecordStore.class}
 				}
 		);
 	}
@@ -71,7 +78,15 @@ public class PerformanceTest<T extends ProxyPerformance> extends Assert
 	@Test
 	public void testPerformance() throws SQLException, Exception
 	{
-		AutomaticMigration mig = new AutomaticMigration(base.getRecordType(), false);
+		Migration mig;
+		if(base.getStore().getConnection() != null)
+		{
+			mig = new AutomaticMigration(base.getRecordType(), false);
+		}
+		else
+		{
+			mig = new MemoryMigration(( MemoryRecordStore ) base.getStore(), base.getRecordType(), false);
+		}
 		mig.apply( base.getStore().getConnection());
 		long[] times = new long[10];
 		
@@ -132,7 +147,8 @@ public class PerformanceTest<T extends ProxyPerformance> extends Assert
 			times[5] += t10 - t9;	//Find
 		}
 		System.out.printf( "%33s: %12s|%12s|%12s|%12s|%12s|%12s\n", "Name", "Create", "Get 'name'", "Get 'other'", "Find prev", "Set atts", "Find" );
-		System.out.printf( "%33s: %12d|%12d|%12d|%12d|%12d|%12d\n", base.getRecordType().getSimpleName() + (base.getStore() instanceof CachedJDBCRecordStore ? " (cached)" : " (plain)"),
+		System.out.printf( "%33s: %12d|%12d|%12d|%12d|%12d|%12d\n", base.getRecordType().getSimpleName() + 
+				(base.getStore() instanceof CachedJDBCRecordStore ? " (cached)" : base.getStore() instanceof MemoryRecordStore ? " (memory)" : " (plain)"),
 				times[0], times[1], times[2], times[3], times[4], times[5] );
 		
 		//clean up

@@ -371,6 +371,7 @@ public final class TypeMappings
 		{
 			throw new RecordException(record, "no JDBC-Connection for this database");
 		}
+		//TODO fall back to string, if type of columnName is VARCHAR
 		final SQLXML xml = con.createSQLXML();
 		xml.setString( xmlString );
 

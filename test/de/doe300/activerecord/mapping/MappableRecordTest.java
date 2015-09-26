@@ -25,9 +25,11 @@
 package de.doe300.activerecord.mapping;
 
 import de.doe300.activerecord.RecordBase;
-import de.doe300.activerecord.RecordCore;
 import de.doe300.activerecord.TestServer;
 import de.doe300.activerecord.migration.AutomaticMigration;
+import de.doe300.activerecord.migration.Migration;
+import de.doe300.activerecord.store.impl.memory.MemoryMigration;
+import de.doe300.activerecord.store.impl.memory.MemoryRecordStore;
 import java.util.HashMap;
 import java.util.Map;
 import org.junit.AfterClass;
@@ -41,23 +43,30 @@ import org.junit.Test;
  */
 public class MappableRecordTest extends Assert
 {
-	private static AutomaticMigration migration;
+	private static Migration migration;
 	private static RecordBase<TestMappableRecord> base;
 	private static TestMappableRecord record;
 	
 	@BeforeClass
 	public static void createTables() throws Exception
 	{
-		migration = new AutomaticMigration(TestMappableRecord.class, false);
-		migration.apply( TestServer.getTestConnection() );
-		base = RecordCore.fromDatabase( TestServer.getTestConnection(), false).getBase( TestMappableRecord.class);
+		base = TestServer.getTestCore().getBase( TestMappableRecord.class);
+		if(base.getStore() instanceof MemoryRecordStore)
+		{
+			migration = new MemoryMigration(( MemoryRecordStore ) base.getStore(), TestMappableRecord.class, false);
+		}
+		else
+		{
+			migration = new AutomaticMigration(TestMappableRecord.class, false);
+		}
+		migration.apply( base.getStore().getConnection() );
 		record = base.createRecord();
 	}
 	
 	@AfterClass
 	public static void destroyTables() throws Exception
 	{
-		migration.revert( TestServer.getTestConnection());
+		migration.revert( base.getStore().getConnection());
 	}
 	
 	public static interface TestMappableRecord extends MappableRecord

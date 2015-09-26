@@ -26,6 +26,11 @@ package de.doe300.activerecord;
 
 import de.doe300.activerecord.migration.AutomaticMigrationTest;
 import de.doe300.activerecord.migration.ManualMigrationTest;
+import de.doe300.activerecord.store.RecordStore;
+import de.doe300.activerecord.store.impl.CachedJDBCRecordStore;
+import de.doe300.activerecord.store.impl.SimpleJDBCRecordStore;
+import de.doe300.activerecord.store.impl.memory.MemoryMigrationTest;
+import de.doe300.activerecord.store.impl.memory.MemoryRecordStore;
 import java.io.PrintWriter;
 import java.sql.Connection;
 import java.sql.DatabaseMetaData;
@@ -34,6 +39,7 @@ import java.sql.DriverManager;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.Enumeration;
+import javax.annotation.Nonnull;
 import org.hsqldb.Server;
 import org.junit.Assert;
 import org.junit.Test;
@@ -68,6 +74,43 @@ public class TestServer extends Assert
 		hsqlServer.start();
 	}
 	
+	/*
+	 * XXX: Need to test all test-cases for the various record-store implementations
+	 */
+	public static final Class<? extends RecordStore> testStore = SimpleJDBCRecordStore.class;
+	
+	@Nonnull
+	public static RecordCore getTestCore() throws SQLException
+	{
+		return getTestCore( testStore );
+	}
+	
+	@Nonnull
+	public static RecordCore getTestCore(@Nonnull final Class<? extends RecordStore> storeType) throws SQLException
+	{
+		RecordCore core = RecordCore.getCore( storeType.getSimpleName());
+		if(core == null)
+		{
+			if(storeType == CachedJDBCRecordStore.class)
+			{
+				core = RecordCore.fromStore(storeType.getSimpleName(), new CachedJDBCRecordStore(getTestConnection()));
+			}
+			else if(storeType == SimpleJDBCRecordStore.class)
+			{
+				core = RecordCore.fromStore( storeType.getSimpleName(), new SimpleJDBCRecordStore(getTestConnection()));
+			}
+			else if(storeType == MemoryRecordStore.class)
+			{
+				core = RecordCore.fromStore( storeType.getSimpleName(), new MemoryRecordStore());
+			}
+			else
+			{
+				throw new IllegalArgumentException("Unrecognized store-type: " + storeType);
+			}
+		}
+		return core;
+	}
+	
 	private static Connection con;
 	
 	public static Connection getTestConnection() throws SQLException
@@ -94,6 +137,8 @@ public class TestServer extends Assert
 			//FIXME need testing:
 //			con = DriverManager.getConnection( "jdbc:postgresql:database");
 			
+			//TODO run all tests with MemoryRecordStore
+			
 		}
 		return con;
 	}
@@ -111,24 +156,29 @@ public class TestServer extends Assert
 	
 	public static void buildTestTables() throws SQLException, Exception
 	{
-		AutomaticMigrationTest.testDataMigration.testApply();
-		ManualMigrationTest.init();
-		new ManualMigrationTest().testApply();
-		//print existing tables
-//		try(ResultSet set = getTestConnection().getMetaData().getTables( null, null, null, null))
-//		{
-//			while(set.next())
-//			{
-//				System.out.println( set.getString( "TABLE_CAT" ) + " " + set.getString( "TABLE_SCHEM") + " " + set.getString( "TABLE_NAME" ));
-//			}
-//		}
-		
+		if(testStore == MemoryRecordStore.class )
+		{
+			new MemoryMigrationTest().testApply();
+		}
+		else
+		{
+			AutomaticMigrationTest.testDataMigration.testApply();
+			ManualMigrationTest.init();
+			new ManualMigrationTest().testApply();
+		}
 	}
 	
 	public static void destroyTestTables() throws SQLException, Exception
 	{
-		AutomaticMigrationTest.testDataMigration.testRevert();
-		new ManualMigrationTest().testRevert();
+		if(testStore == MemoryRecordStore.class)
+		{
+			new MemoryMigrationTest().testRevert();
+		}
+		else
+		{
+			AutomaticMigrationTest.testDataMigration.testRevert();
+			new ManualMigrationTest().testRevert();
+		}
 	}
 	
 	@Test

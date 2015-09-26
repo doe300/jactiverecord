@@ -25,7 +25,6 @@
 package de.doe300.activerecord.record.association;
 
 import de.doe300.activerecord.RecordBase;
-import de.doe300.activerecord.RecordCore;
 import de.doe300.activerecord.TestInterface;
 import de.doe300.activerecord.TestServer;
 import de.doe300.activerecord.dsl.Comparison;
@@ -63,7 +62,7 @@ public class HasManyThroughAssociationSetTest extends Assert
 	public static void setUpClass() throws Exception
 	{
 		TestServer.buildTestTables();
-		base = RecordCore.fromDatabase( TestServer.getTestConnection(), true).getBase( TestInterface.class );
+		base = TestServer.getTestCore().getBase( TestInterface.class );
 		assocI = base.createRecord();
 		set = AssociationHelper.getHasManyThroughSet(assocI, TestInterface.class, "mappingTable", "fk_test1", "fk_test2" );
 		

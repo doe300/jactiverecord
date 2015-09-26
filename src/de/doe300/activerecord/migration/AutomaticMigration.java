@@ -49,6 +49,7 @@ import de.doe300.activerecord.record.association.RecordSet;
 import de.doe300.activerecord.record.attributes.AttributeGetter;
 import de.doe300.activerecord.record.attributes.AttributeSetter;
 import de.doe300.activerecord.record.attributes.Attributes;
+import java.math.BigDecimal;
 
 /**
  * This migration is used to automatically create a table from a given record-type.
@@ -81,9 +82,9 @@ import de.doe300.activerecord.record.attributes.Attributes;
  */
 public class AutomaticMigration implements Migration
 {
-	private final Class<? extends ActiveRecord> recordType;
-	private final boolean dropColumnsOnUpdate;
-	private VendorSpecific vendorSpecifics;
+	protected final Class<? extends ActiveRecord> recordType;
+	protected final boolean dropColumnsOnUpdate;
+	protected VendorSpecific vendorSpecifics;
 
 	/**
 	 * @param recordType the type to create and drop the table for
@@ -111,7 +112,7 @@ public class AutomaticMigration implements Migration
 	@Override
 	public boolean apply( final Connection con ) throws SQLException
 	{
-		final String tableName = AutomaticMigration.getTableName( recordType );
+		final String tableName = getTableName( recordType );
 		//1. check if table exists
 		if(structureExists( con, tableName))
 		{
@@ -172,7 +173,7 @@ public class AutomaticMigration implements Migration
 	@Override
 	public boolean update( final Connection con) throws SQLException
 	{
-		final String tableName = AutomaticMigration.getTableName( recordType );
+		final String tableName = getTableName( recordType );
 		//1. check if table exists
 		if(structureExists( con, tableName))
 		{
@@ -243,7 +244,7 @@ public class AutomaticMigration implements Migration
 	@Override
 	public boolean revert( final Connection con ) throws SQLException
 	{
-		final String tableName = AutomaticMigration.getTableName( recordType );
+		final String tableName = getTableName( recordType );
 		//1. check if table exists
 		if(!structureExists( con, tableName))
 		{
@@ -274,7 +275,7 @@ public class AutomaticMigration implements Migration
 		return true;
 	}
 
-	private static String getTableName(final Class<? extends ActiveRecord> type)
+	protected String getTableName(final Class<? extends ActiveRecord> type)
 	{
 		if(type.isAnnotationPresent(RecordType.class))
 		{
@@ -283,7 +284,7 @@ public class AutomaticMigration implements Migration
 		return type.getSimpleName();
 	}
 
-	private static String getPrimaryColumn(final Class<? extends ActiveRecord> type)
+	protected String getPrimaryColumn(final Class<? extends ActiveRecord> type)
 	{
 		if(type.isAnnotationPresent(RecordType.class))
 		{
@@ -297,7 +298,7 @@ public class AutomaticMigration implements Migration
 	 * @param recordType
 	 * @return the columns
 	 */
-	private Map<String,String> getColumnsFromModel(final Class<? extends ActiveRecord> recordType) throws IllegalArgumentException
+	protected Map<String,String> getColumnsFromModel(final Class<? extends ActiveRecord> recordType) throws IllegalArgumentException
 	{
 		//TODO move ID to first column
 		final HashMap<String,String> columns = new HashMap<>(10);
@@ -400,7 +401,7 @@ public class AutomaticMigration implements Migration
 			columns.put(TimestampedRecord.COLUMN_UPDATED_AT, getSQLType( java.sql.Timestamp.class));
 		}
 		//5. mark or add primary key, add constraints
-		final String primaryColumn = AutomaticMigration.getPrimaryColumn( recordType).toLowerCase();
+		final String primaryColumn = getPrimaryColumn( recordType).toLowerCase();
 		columns.putIfAbsent( primaryColumn, getSQLType( Integer.class));
 		//FIXME somehow make sure, reserved keywords are not used as columns or rewrite them
 		columns.put( primaryColumn, columns.get( primaryColumn)+" "+vendorSpecifics.getAutoIncrementKeyword()+" PRIMARY KEY");
@@ -512,5 +513,65 @@ public class AutomaticMigration implements Migration
 			return "VARCHAR(255)";
 		}
 		throw new IllegalArgumentException("Type not mapped: "+javaType);
+	}
+	
+	/**
+	 * This is the inverted method of {@link #getSQLType(java.lang.Class) }
+	 * @param sqlType
+	 * @return the java class-type
+	 * @throws IllegalArgumentException 
+	 * @since 0.3
+	 */
+	public Class<?> getJavaType(final String sqlType) throws IllegalArgumentException
+	{
+		if(sqlType.startsWith( "VARCHAR") || sqlType.startsWith( "CHAR"))
+		{
+			return String.class;
+		}
+		if(sqlType.startsWith( "NUMERIC"))
+		{
+			return BigDecimal.class;
+		}
+		if(sqlType.startsWith("BIT"))
+		{
+			return Boolean.class;
+		}
+		if(sqlType.startsWith( "TINYINT"))
+		{
+			return Byte.class;
+		}
+		if(sqlType.startsWith( "SHORTINT"))
+		{
+			return Short.class;
+		}
+		if(sqlType.startsWith("INTEGER"))
+		{
+			return Integer.class;
+		}
+		if(sqlType.startsWith("BIGINT"))
+		{
+			return Long.class;
+		}
+		if(sqlType.startsWith("REAL"))
+		{
+			return Float.class;
+		}
+		if(sqlType.startsWith("DOUBLE"))
+		{
+			return Double.class;
+		}
+		if(sqlType.startsWith("DATE"))
+		{
+			return java.sql.Date.class;
+		}
+		if(sqlType.startsWith("TIMESTAMP"))
+		{
+			return java.sql.Timestamp.class;
+		}
+		if(sqlType.startsWith("TIME"))
+		{
+			return java.sql.Time.class;
+		}
+		throw new IllegalArgumentException("Type not mapped: "+sqlType);
 	}
 }

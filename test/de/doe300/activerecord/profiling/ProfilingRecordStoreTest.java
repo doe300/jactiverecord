@@ -33,6 +33,9 @@ import de.doe300.activerecord.record.association.AssociationHelper;
 import de.doe300.activerecord.store.RecordStore;
 import de.doe300.activerecord.store.impl.CachedJDBCRecordStore;
 import de.doe300.activerecord.store.impl.SimpleJDBCRecordStore;
+import de.doe300.activerecord.store.impl.memory.MemoryColumn;
+import de.doe300.activerecord.store.impl.memory.MemoryMigration;
+import de.doe300.activerecord.store.impl.memory.MemoryRecordStore;
 import java.sql.SQLException;
 import java.util.Arrays;
 import java.util.Collection;
@@ -51,11 +54,22 @@ public class ProfilingRecordStoreTest extends Assert
 	private final ProfilingRecordBase<TestInterface> base;
 	private final String name;
 	
+	//TODO output is not correct, doesn't print anything for cached/memory
+	
 	public ProfilingRecordStoreTest(String name, RecordStore store)
 	{
 		this.name = name;
 		this.recordStore = new ProfilingRecordStore(store );
 		base = new ProfilingRecordBase<>(RecordCore.fromStore( name, recordStore ).getBase( TestInterface.class));
+		if(store instanceof MemoryRecordStore)
+		{
+			new MemoryMigration(( MemoryRecordStore ) store, TestInterface.class, true).apply(null);
+			new MemoryMigration(( MemoryRecordStore ) store, "mappingTable", new MemoryColumn[]{
+				new MemoryColumn("id", Integer.class),
+				new MemoryColumn("fk_test1", Integer.class),
+				new MemoryColumn("fk_test2", Integer.class)
+			}, "id").apply(null);
+		}
 	}
 	
 	@Parameterized.Parameters
@@ -63,7 +77,8 @@ public class ProfilingRecordStoreTest extends Assert
 	{
 		return Arrays.asList(
 			new Object[]{"TestSimple", new SimpleJDBCRecordStore(new ProfilingConnection(TestServer.getTestConnection()))},
-			new Object[]{"TestCache", new CachedJDBCRecordStore(new ProfilingConnection(TestServer.getTestConnection()))}
+			new Object[]{"TestCache", new CachedJDBCRecordStore(new ProfilingConnection(TestServer.getTestConnection()))},
+			new Object[]{"TestMemory", new MemoryRecordStore()}
 		);
 	}
 	
@@ -129,7 +144,10 @@ public class ProfilingRecordStoreTest extends Assert
 		recordStore.getProfiler().printStatistics(true);
 		System.out.println(  );
 		System.out.println( "Connection:" );
-		((ProfilingConnection)recordStore.getConnection()).getProfiler().printStatistics(true);
+		if(recordStore.getConnection() != null)
+		{
+			((ProfilingConnection)recordStore.getConnection()).getProfiler().printStatistics(true);
+		}
 		System.out.println(  );
 		System.out.println(  );
 	}

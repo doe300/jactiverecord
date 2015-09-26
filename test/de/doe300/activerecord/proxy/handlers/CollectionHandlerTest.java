@@ -25,7 +25,6 @@
 package de.doe300.activerecord.proxy.handlers;
 
 import de.doe300.activerecord.RecordBase;
-import de.doe300.activerecord.RecordCore;
 import de.doe300.activerecord.TestInterface;
 import de.doe300.activerecord.TestServer;
 import de.doe300.activerecord.record.RecordType;
@@ -52,7 +51,7 @@ public class CollectionHandlerTest extends Assert
 	{
 		TestServer.buildTestTables();
 		handler = new CollectionHandler();
-		base = RecordCore.fromDatabase( TestServer.getTestConnection(), false).getBase(CollectionHandlerTest.TestCollectionInterface.class, handler);
+		base = TestServer.getTestCore().getBase(CollectionHandlerTest.TestCollectionInterface.class, handler);
 		record = base.createRecord();
 	}
 	

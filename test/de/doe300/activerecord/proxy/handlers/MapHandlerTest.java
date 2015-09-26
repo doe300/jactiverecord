@@ -25,7 +25,6 @@
 package de.doe300.activerecord.proxy.handlers;
 
 import de.doe300.activerecord.RecordBase;
-import de.doe300.activerecord.RecordCore;
 import de.doe300.activerecord.TestInterface;
 import de.doe300.activerecord.TestServer;
 import de.doe300.activerecord.record.RecordType;
@@ -55,7 +54,7 @@ public class MapHandlerTest extends Assert
 	{
 		TestServer.buildTestTables();
 		handler = new MapHandler();
-		base = RecordCore.fromDatabase( TestServer.getTestConnection(), false).getBase( TestMapInterface.class, handler);
+		base = TestServer.getTestCore().getBase( TestMapInterface.class, handler);
 		record = base.createRecord();
 	}
 	

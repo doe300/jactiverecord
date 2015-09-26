@@ -37,6 +37,7 @@ import java.lang.annotation.Target;
  * 
  * @author doe300
  * @see Attribute
+ * @since 0.3
  */
 @Documented
 @Retention(RetentionPolicy.RUNTIME)

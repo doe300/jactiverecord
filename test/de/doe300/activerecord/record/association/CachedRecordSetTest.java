@@ -25,7 +25,6 @@
 package de.doe300.activerecord.record.association;
 
 import de.doe300.activerecord.RecordBase;
-import de.doe300.activerecord.RecordCore;
 import de.doe300.activerecord.TestInterface;
 import de.doe300.activerecord.TestServer;
 import de.doe300.activerecord.dsl.Comparison;
@@ -50,7 +49,7 @@ public class CachedRecordSetTest extends Assert
 	public static void createTables() throws Exception
 	{
 		TestServer.buildTestTables();
-		base = RecordCore.fromDatabase( TestServer.getTestConnection(), true).getBase( TestInterface.class );
+		base = TestServer.getTestCore().getBase( TestInterface.class );
 		set = new CachedRecordSet<>(new TableSet<TestInterface>(base ));
 		
 		//fill set
