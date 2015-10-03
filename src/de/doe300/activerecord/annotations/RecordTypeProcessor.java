@@ -219,7 +219,7 @@ public class RecordTypeProcessor extends AbstractProcessor
 			//if type is concrete class and not single-inheritance, the constructor must accept (int, POJOBase)
 			if(ElementKind.CLASS == recordTypeElement.getKind())
 			{
-				//XXX needs testing
+				//TODO doesn't accept constructor (int, POJOBase<X>)
 				final TypeMirror integerType = processingEnv.getElementUtils().getTypeElement( Integer.class.getCanonicalName()).asType();
 				final TypeMirror recordBaseType = processingEnv.getElementUtils().getTypeElement( RecordBase.class.getCanonicalName()).asType();
 				if(!ElementFilter.constructorsIn( recordTypeElement.getEnclosedElements()).stream().

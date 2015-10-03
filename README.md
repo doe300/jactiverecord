@@ -32,13 +32,15 @@ Usage
 **RecordStore**: the wrapper for the database-connection. JDBC-based RecordStore is provided by this library. Additional RecordStores can be added easily.
 
 
-There are 2 ways to use JActiveRecord which differ only in the type of the record:
+There are 3 ways to use JActiveRecord which differ only in the type of the record:
 
 - Use an *Interface* (which extends *ActiveRecord*) as record-type. Instances of this Interface will be automatically created and maintained via Java's Proxy-API.
 - Use a *plain-old-java-object* (POJO) to be managed by the corresponding *RecordBase*. 
 The class **must** implement *ActiveRecord* and provide a public constructor accepting the record's ID (*Integer*) and the *RecordBase* and **should** not be instantiated outside of JActiveRecord to prevent confusion.
-This version of *ActiveRecord* supports class hierarchy via the *Single Table Inheritance* principle (all objects of the class and its subclasses are stored in the same table).
+This version of *ActiveRecord* supports class hierarchy via the *Single Table Inheritance* principle (all objects of the class and its subclasses are stored in the same table) by annotating with *SingleTableInheritance*.
 Thus the subclasses can't introduce new persistent attributes but re-use the attributes defined by the super-class and override its methods.
+- Use an *Interface* or a *plain-old-java-object* and add attributes via *AddAttribute* and *AddAttributes*. 
+This will run an *AnnotationProcessor* generating an interface in the same package as the originating type containing the getter- and setter-methods for the specified attributes.
 
 
 For an example on how to use it, see the test-cases, especially *TestActiveRecordSyntax* and the *TestInterface* and *TestPOJO*.

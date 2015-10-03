@@ -148,5 +148,10 @@ public class AttributesTest
 		
 		assertEquals( 42, Attributes.getLength( i, "fk_test_id", (Object obj) -> (obj instanceof Number) ? 42 : -1, null));
 	}
-	
+
+	@Test
+	public void testToCamelCase()
+	{
+		assertEquals( "AttributeWithCamelCase", Attributes.toCamelCase( "attribute_with_camel_case"));
+	}	
 }

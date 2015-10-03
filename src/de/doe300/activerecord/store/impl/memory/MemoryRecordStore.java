@@ -76,6 +76,7 @@ public class MemoryRecordStore implements RecordStore
 		return table;
 	}
 	
+	@Nonnull
 	private MemoryTable createTableIfNotExists(@Nonnull final RecordBase<?> recordBase) throws IllegalArgumentException
 	{
 		MemoryTable table = tables.get( recordBase.getTableName());

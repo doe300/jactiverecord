@@ -83,6 +83,44 @@ public final class Attributes
 		}
 		return res.deleteCharAt( 0 ).toString().toLowerCase();
 	}
+	
+	/**
+	 * Converts the attribute to camel-case to be used for generating getter/setter
+	 * 
+	 * @param attribute
+	 * @return the attribute in camel-case
+	 * @since 0.3
+	 */
+	@Nonnull
+	public static String toCamelCase(@Nonnull final String attribute)
+	{
+		final StringBuilder res = new StringBuilder( attribute.length() );
+		boolean nextUpperCase = true;
+		for ( final char c : attribute.toCharArray() )
+		{
+			//skip whitespaces
+			if( Character.isWhitespace( c))
+			{
+				continue;
+			}
+			//convert '_' to camel-case
+			if ( c == '_' )
+			{
+				nextUpperCase = true;
+				continue;
+			}
+			if(nextUpperCase)
+			{
+				res.append( Character.toUpperCase( c));
+				nextUpperCase = false;
+			}
+			else
+			{
+				res.append( c );
+			}
+		}
+		return res.toString();
+	}
 
 	/**
 	 *

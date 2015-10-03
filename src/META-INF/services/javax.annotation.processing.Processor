@@ -1,2 +1,3 @@
 de.doe300.activerecord.annotations.RecordTypeProcessor
 de.doe300.activerecord.annotations.AttributeProcessor
+de.doe300.activerecord.generation.AttributeGenerator

@@ -49,7 +49,7 @@ import javax.lang.model.util.ElementFilter;
  * @author doe300
  * @since 0.3
  */
-final class ProcessorUtils
+public final class ProcessorUtils
 {
 	
 	@Nullable
@@ -78,7 +78,13 @@ final class ProcessorUtils
 		return null;
 	}
 	
-	static List<String> getAllAttributeNames(@Nonnull final TypeElement classElement)
+	/**
+	 * @param classElement
+	 * @return a list of all used attribute-names
+	 * @since 0.3
+	 */
+	@Nonnull
+	public static List<String> getAllAttributeNames(@Nonnull final TypeElement classElement)
 	{
 		//XXX include inherited attribute-names
 		List<String> attributeNames = new ArrayList<>(20);
