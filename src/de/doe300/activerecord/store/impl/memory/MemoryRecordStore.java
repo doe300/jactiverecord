@@ -24,10 +24,6 @@
  */
 package de.doe300.activerecord.store.impl.memory;
 
-import de.doe300.activerecord.RecordBase;
-import de.doe300.activerecord.dsl.Condition;
-import de.doe300.activerecord.scope.Scope;
-import de.doe300.activerecord.store.RecordStore;
 import java.sql.Connection;
 import java.util.Collections;
 import java.util.HashMap;
@@ -36,7 +32,15 @@ import java.util.Set;
 import java.util.SortedMap;
 import java.util.TreeMap;
 import java.util.stream.Stream;
+
 import javax.annotation.Nonnull;
+
+import de.doe300.activerecord.RecordBase;
+import de.doe300.activerecord.dsl.Condition;
+import de.doe300.activerecord.record.TimestampedRecord;
+import de.doe300.activerecord.scope.Scope;
+import de.doe300.activerecord.store.RecordStore;
+import javax.annotation.Nonnegative;
 
 /**
  *
@@ -47,7 +51,9 @@ public class MemoryRecordStore implements RecordStore
 {
 	private final SortedMap<String, MemoryTable> tables;
 
-	//TODO release 0.3 after all/most tests run with memory-store
+	/**
+	 *
+	 */
 	public MemoryRecordStore()
 	{
 		this.tables = new TreeMap<>();
@@ -58,28 +64,28 @@ public class MemoryRecordStore implements RecordStore
 	{
 		return null;
 	}
-	
+
 	@Override
-	public boolean exists( String tableName )
+	public boolean exists( final String tableName )
 	{
 		return tables.containsKey( tableName);
 	}
-	
+
 	@Nonnull
 	private MemoryTable assertTableExists(@Nonnull final String tableName) throws IllegalArgumentException
 	{
-		MemoryTable table = tables.get( tableName);
+		final MemoryTable table = tables.get( tableName);
 		if(table == null)
 		{
 			throw new IllegalArgumentException("No such table");
 		}
 		return table;
 	}
-	
+
 	@Nonnull
 	private MemoryTable createTableIfNotExists(@Nonnull final RecordBase<?> recordBase) throws IllegalArgumentException
 	{
-		MemoryTable table = tables.get( recordBase.getTableName());
+		final MemoryTable table = tables.get( recordBase.getTableName());
 		if(table == null)
 		{
 			if(recordBase.isAutoCreate())
@@ -96,74 +102,77 @@ public class MemoryRecordStore implements RecordStore
 	}
 
 	@Override
-	public Set<String> getAllColumnNames( String tableName ) throws UnsupportedOperationException
+	public Set<String> getAllColumnNames( final String tableName ) throws UnsupportedOperationException
 	{
-		MemoryTable table = assertTableExists( tableName );
+		final MemoryTable table = assertTableExists( tableName );
 		return table.getColumnNames();
 	}
 
 	@Override
 	public void setValue(
-			RecordBase<?> base, int primaryKey, String name, Object value ) throws IllegalArgumentException
+		final RecordBase<?> base, final int primaryKey, final String name, final Object value ) throws IllegalArgumentException
 	{
-		MemoryTable table = assertTableExists( base.getTableName() );
+		final MemoryTable table = assertTableExists( base.getTableName() );
 		table.putValue( primaryKey, name, value );
+		updateTimestamps( base, primaryKey );
 	}
 
 	@Override
 	public void setValues(
-			RecordBase<?> base, int primaryKey, String[] names, Object[] values ) throws IllegalArgumentException
+		final RecordBase<?> base, final int primaryKey, final String[] names, final Object[] values ) throws IllegalArgumentException
 	{
-		MemoryTable table = assertTableExists( base.getTableName() );
+		final MemoryTable table = assertTableExists( base.getTableName() );
 		table.putValues( primaryKey, names, values );
+		updateTimestamps( base, primaryKey );
 	}
 
 	@Override
 	public void setValues(
-			RecordBase<?> base, int primaryKey, Map<String, Object> values ) throws IllegalArgumentException
+		final RecordBase<?> base, final int primaryKey, final Map<String, Object> values ) throws IllegalArgumentException
 	{
-		MemoryTable table = assertTableExists( base.getTableName() );
+		final MemoryTable table = assertTableExists( base.getTableName() );
 		table.putValues( primaryKey, values );
+		updateTimestamps( base, primaryKey );
 	}
 
 	@Override
 	public Object getValue(
-			RecordBase<?> base, int primaryKey, String name ) throws IllegalArgumentException
+		final RecordBase<?> base, final int primaryKey, final String name ) throws IllegalArgumentException
 	{
-		MemoryTable table = assertTableExists( base.getTableName() );
+		final MemoryTable table = assertTableExists( base.getTableName() );
 		return table.getValue( primaryKey, name );
 	}
 
 	@Override
 	public Map<String, Object> getValues(
-			RecordBase<?> base, int primaryKey, String[] columns ) throws IllegalArgumentException
+		final RecordBase<?> base, final int primaryKey, final String[] columns ) throws IllegalArgumentException
 	{
-		MemoryTable table = assertTableExists( base.getTableName() );
+		final MemoryTable table = assertTableExists( base.getTableName() );
 		return table.getValues( primaryKey, columns);
 	}
 
 	@Override
-	public Stream<Object> getValues( String tableName, String column, String condColumn, Object condValue ) throws
-			IllegalArgumentException
+	public Stream<Object> getValues( final String tableName, final String column, final String condColumn, final Object condValue ) throws
+	IllegalArgumentException
 	{
-		MemoryTable table = assertTableExists( tableName );
+		final MemoryTable table = assertTableExists( tableName );
 		return table.getValues( column, condColumn, condValue );
 	}
 
 	@Override
-	public boolean addRow( String tableName, String[] columns, Object[] values ) throws IllegalArgumentException
+	public boolean addRow( final String tableName, final String[] columns, final Object[] values ) throws IllegalArgumentException
 	{
-		MemoryTable table = assertTableExists( tableName );
-		int index = table.insertRow();
+		final MemoryTable table = assertTableExists( tableName );
+		final int index = table.insertRow();
 		table.putValues( index, columns, values );
 		return true;
 	}
 
 	@Override
-	public boolean removeRow( String tableName, Condition cond ) throws IllegalArgumentException
+	public boolean removeRow( final String tableName, final Condition cond ) throws IllegalArgumentException
 	{
-		MemoryTable table = assertTableExists( tableName );
-		Map.Entry<Integer, MemoryRow> row = table.findFirstRow( new Scope(cond, null, Scope.NO_LIMIT) );
+		final MemoryTable table = assertTableExists( tableName );
+		final Map.Entry<Integer, MemoryRow> row = table.findFirstRow( new Scope(cond, null, Scope.NO_LIMIT) );
 		if(row != null && row.getKey() >= 0)
 		{
 			table.removeRow( row.getKey() );
@@ -173,20 +182,21 @@ public class MemoryRecordStore implements RecordStore
 	}
 
 	@Override
-	public boolean save(RecordBase<?> base, int primaryKey )
+	public boolean save(final RecordBase<?> base, final int primaryKey )
 	{
 		return false;
 	}
 
 	@Override
-	public boolean saveAll(RecordBase<?> base )
+	public boolean saveAll(final RecordBase<?> base )
 	{
 		return false;
 	}
 
 	@Override
-	public void clearCache(RecordBase<?> base, int primaryKey )
+	public void clearCache(final RecordBase<?> base, final int primaryKey )
 	{
+		// no cache
 	}
 
 	@Override
@@ -196,45 +206,46 @@ public class MemoryRecordStore implements RecordStore
 	}
 
 	@Override
-	public int insertNewRecord(RecordBase<?> base, Map<String, Object> columnData )
+	public int insertNewRecord(final RecordBase<?> base, final Map<String, Object> columnData )
 	{
-		MemoryTable table = createTableIfNotExists(base );
-		int rowIndex = table.insertRow();
+		final MemoryTable table = createTableIfNotExists(base );
+		final int rowIndex = table.insertRow();
 		if(columnData != null)
 		{
-			for(Map.Entry<String, Object> e : columnData.entrySet())
+			for(final Map.Entry<String, Object> e : columnData.entrySet())
 			{
 				table.putValue( rowIndex, e.getKey(), e.getValue());
 			}
 		}
+		updateTimestamps( base, rowIndex );
 		return rowIndex;
 	}
 
 	@Override
-	public boolean isSynchronized(RecordBase<?> base, int primaryKey )
+	public boolean isSynchronized(final RecordBase<?> base, final int primaryKey )
 	{
 		return true;
 	}
 
 	@Override
-	public boolean containsRecord(RecordBase<?> base, int primaryKey )
+	public boolean containsRecord(final RecordBase<?> base, final int primaryKey )
 	{
-		MemoryTable table = assertTableExists( base.getTableName() );
+		final MemoryTable table = assertTableExists( base.getTableName() );
 		return table.containsValue(primaryKey, base.getPrimaryColumn());
 	}
 
 	@Override
-	public void destroy(RecordBase<?> base, int primaryKey )
+	public void destroy(final RecordBase<?> base, final int primaryKey )
 	{
-		MemoryTable table = assertTableExists( base.getTableName() );
+		final MemoryTable table = assertTableExists( base.getTableName() );
 		table.removeRow( primaryKey );
 	}
 
 	@Override
-	public Map<String, Object> findFirstWithData(RecordBase<?> base, String[] columns, Scope scope )
+	public Map<String, Object> findFirstWithData(final RecordBase<?> base, final String[] columns, final Scope scope )
 	{
-		MemoryTable table = assertTableExists( base.getTableName() );
-		Map.Entry<Integer, MemoryRow> row = table.findFirstRow( scope);
+		final MemoryTable table = assertTableExists( base.getTableName() );
+		final Map.Entry<Integer, MemoryRow> row = table.findFirstRow( scope);
 		if(row != null)
 		{
 			return new HashMap<>(row.getValue().getRowMap());
@@ -243,24 +254,25 @@ public class MemoryRecordStore implements RecordStore
 	}
 
 	@Override
-	public Stream<Map<String, Object>> streamAllWithData(RecordBase<?> base, String[] columns, Scope scope )
+	public Stream<Map<String, Object>> streamAllWithData(final RecordBase<?> base, final String[] columns, final Scope scope )
 	{
-		MemoryTable table = assertTableExists( base.getTableName() );
-		return table.findAllRows( scope ).map( (Map.Entry<Integer, MemoryRow> e) -> e.getValue().getRowMap());
+		final MemoryTable table = assertTableExists( base.getTableName() );
+		return table.findAllRows( scope ).map( (final Map.Entry<Integer, MemoryRow> e) -> e.getValue().getRowMap());
 	}
 
 	@Override
 	public void close() throws Exception
 	{
+		// nothing to close
 	}
 
 	////
 	// Package-private table-manipulation methods
 	////
-	
+
 	/**
 	 * Adds a new table to the set of memory-tables
-	 * 
+	 *
 	 * @param tableName the name of the new table
 	 * @param columns the columns for the new table
 	 * @param primaryColumn the name of the column holding the primary-keys
@@ -275,9 +287,26 @@ public class MemoryRecordStore implements RecordStore
 		tables.put( tableName, new MemoryTable(primaryColumn, columns));
 		return true;
 	}
-	
+
 	boolean removeTable(@Nonnull final String tableName)
 	{
 		return tables.remove( tableName) != null;
+	}
+	
+	private void updateTimestamps(@Nonnull final RecordBase<?> base, @Nonnegative final int primaryKey)
+	{
+		if(!base.isTimestamped())
+		{
+			return;
+		}
+		MemoryTable table = assertTableExists( base.getTableName());
+		table.putValues( primaryKey, new String[]{
+			TimestampedRecord.COLUMN_CREATED_AT,
+			TimestampedRecord.COLUMN_UPDATED_AT
+		}, new Object[]{
+			new java.sql.Timestamp(System.currentTimeMillis()),
+			new java.sql.Timestamp(System.currentTimeMillis())
+		} );
+		
 	}
 }

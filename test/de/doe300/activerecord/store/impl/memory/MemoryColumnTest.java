@@ -40,13 +40,13 @@ public class MemoryColumnTest extends Assert
 	}
 
 	@Test
-	public void testConvertValue()
+	public void testCheckValue()
 	{
 		MemoryColumn column = new MemoryColumn("testC", Integer.class);
-		assertEquals( 5, column.convertValue( 5));
+		assertEquals( 5, column.checkValue( 5));
 		
 		MemoryColumn column1 = new MemoryColumn("testC", String.class);
-		assertEquals( "5", column1.convertValue(5));
+		assertEquals( "5", column1.checkValue(5));
 	}
 
 	@Test

@@ -80,27 +80,22 @@ class MemoryTable
 		return columnNames;
 	}
 	
-	private MemoryRow checkRow(@Nonnegative final int primaryKey)
-	{
-		if(!data.containsKey( primaryKey))
-		{
-			throw new IllegalArgumentException("Invalid row ID: " + primaryKey);
-		}
-		return data.get( primaryKey);
-	}
-	
 	private Object checkColumn(@Nonnull final String columnName, @Nullable final Object value)
 	{
 		if(!columns.containsKey( columnName))
 		{
 			throw new IllegalArgumentException("Invalid column-name: "+ columnName);
 		}
-		return columns.get( columnName).convertValue( value );
+		return columns.get( columnName).checkValue( value );
 	}
 	
 	public boolean putValue(@Nonnegative int primaryKey, @Nonnull final String columnName, @Nullable final Object value)
 	{
-		checkRow( primaryKey ).putRowValue( columnName, checkColumn( columnName, value ) );
+		if(!data.containsKey( primaryKey))
+		{
+			return false;
+		}
+		data.get(primaryKey ).putRowValue( columnName, checkColumn( columnName, value ) );
 		return true;
 	}
 	
@@ -115,7 +110,11 @@ class MemoryTable
 	
 	public boolean putValues(@Nonnegative int primaryKey, @Nonnull final Map<String, Object> values)
 	{
-		MemoryRow row = checkRow( primaryKey );
+		MemoryRow row = data.get(primaryKey );
+		if(row == null)
+		{
+			return false;
+		}
 		for(Map.Entry<String, Object> e : values.entrySet())
 		{
 			row.putRowValue( e.getKey(), checkColumn( e.getKey(), e.getValue()));
@@ -135,7 +134,11 @@ class MemoryTable
 		{
 			throw new IllegalArgumentException("Invalid column-name: "+ columnName);
 		}
-		return checkRow( primaryKey ).getRowValue( columnName );
+		if(!data.containsKey( primaryKey))
+		{
+			return null;
+		}
+		return data.get(primaryKey ).getRowValue( columnName );
 	}
 	
 	@Nonnull

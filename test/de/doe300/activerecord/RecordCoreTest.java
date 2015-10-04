@@ -27,7 +27,7 @@ package de.doe300.activerecord;
 import de.doe300.activerecord.proxy.handlers.MapHandler;
 import de.doe300.activerecord.record.ActiveRecord;
 import de.doe300.activerecord.store.impl.CachedJDBCRecordStore;
-import de.doe300.activerecord.store.impl.MapRecordStore;
+import de.doe300.activerecord.store.impl.memory.MemoryRecordStore;
 import org.junit.AfterClass;
 import org.junit.Assert;
 import org.junit.BeforeClass;
@@ -74,7 +74,7 @@ public class RecordCoreTest extends Assert
 	@Test
 	public void testFromStore() throws Exception
 	{
-		assertNotNull( RecordCore.fromStore( "test2", new MapRecordStore()));
+		assertNotNull( RecordCore.fromStore( "test2", new MemoryRecordStore()));
 	}
 
 	@Test

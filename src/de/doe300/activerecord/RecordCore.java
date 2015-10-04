@@ -50,8 +50,8 @@ import de.doe300.activerecord.record.ActiveRecord;
 import de.doe300.activerecord.record.SingleTableInheritance;
 import de.doe300.activerecord.store.RecordStore;
 import de.doe300.activerecord.store.impl.CachedJDBCRecordStore;
-import de.doe300.activerecord.store.impl.MapRecordStore;
 import de.doe300.activerecord.store.impl.SimpleJDBCRecordStore;
+import de.doe300.activerecord.store.impl.memory.MemoryRecordStore;
 import de.doe300.activerecord.validation.Validate;
 import de.doe300.activerecord.validation.ValidatedRecord;
 import de.doe300.activerecord.validation.Validates;
@@ -102,16 +102,14 @@ public final class RecordCore implements AutoCloseable
 	/**
 	 * @param name
 	 * @return the existing or newly created RecordCore
-	 * @deprecated Implementation incomplete
 	 */
 	@Nonnull
-	@Deprecated
-	public static RecordCore newMemoryStore(final String name)
+	public static RecordCore newMemoryStore(@Nonnull final String name)
 	{
 		RecordCore core = RecordCore.cores.get( name );
 		if(core==null)
 		{
-			core = new RecordCore(new MapRecordStore());
+			core = new RecordCore(new MemoryRecordStore());
 			RecordCore.cores.put( name, core );
 			Logging.getLogger().info( "RecordCore", "registered new record-core for memory-store: "+name);
 		}

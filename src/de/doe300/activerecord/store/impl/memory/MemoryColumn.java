@@ -39,14 +39,22 @@ public class MemoryColumn implements Comparable<MemoryColumn>
 	private final String name;
 	private final Class<?> type;
 
+	/**
+	 * @param name
+	 * @param type
+	 */
 	public MemoryColumn(@Nonnull final String name, @Nonnull final Class<?> type )
 	{
 		this.name = name;
 		this.type = type;
 	}
-	
+
+	/**
+	 * @param value
+	 * @return the checked value
+	 */
 	@Nullable
-	public Object convertValue(Object value)
+	public Object checkValue(final Object value)
 	{
 		if(value == null)
 		{

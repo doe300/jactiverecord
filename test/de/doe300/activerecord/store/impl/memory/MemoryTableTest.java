@@ -124,7 +124,7 @@ public class MemoryTableTest extends Assert
 		assertTrue( row >= 0);
 	}
 
-	@Test(expected = IllegalArgumentException.class)
+	@Test
 	public void testRemoveRow()
 	{
 		int row = table.insertRow();
@@ -132,8 +132,7 @@ public class MemoryTableTest extends Assert
 		table.putValue( row, "name", "Eve");
 		table.removeRow( row );
 		
-		//failure test
-		table.getValue( row, "name");
+		assertNull( table.getValue( row, "name"));
 	}
 
 	@Test

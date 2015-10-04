@@ -24,14 +24,16 @@
  */
 package de.doe300.activerecord.store.impl.memory;
 
+import java.sql.Connection;
+import java.util.Arrays;
+import java.util.Map;
+
+import javax.annotation.Nonnull;
+
 import de.doe300.activerecord.jdbc.VendorSpecific;
 import de.doe300.activerecord.logging.Logging;
 import de.doe300.activerecord.migration.AutomaticMigration;
 import de.doe300.activerecord.record.ActiveRecord;
-import java.sql.Connection;
-import java.util.Arrays;
-import java.util.Map;
-import javax.annotation.Nonnull;
 
 /**
  *
@@ -44,6 +46,11 @@ public class MemoryMigration extends AutomaticMigration
 	private MemoryColumn[] columns;
 	private String tableName, primaryColumn;
 
+	/**
+	 * @param memoryStore
+	 * @param recordType
+	 * @param dropColumnsOnUpdate
+	 */
 	public MemoryMigration(@Nonnull final MemoryRecordStore memoryStore, @Nonnull final Class<? extends ActiveRecord> recordType, final boolean dropColumnsOnUpdate )
 	{
 		super(recordType, dropColumnsOnUpdate);
@@ -51,7 +58,13 @@ public class MemoryMigration extends AutomaticMigration
 		vendorSpecifics = VendorSpecific.MYSQL;
 		convertColumns();
 	}
-	
+
+	/**
+	 * @param memoryStore
+	 * @param tableName
+	 * @param columns
+	 * @param primaryColumn
+	 */
 	public MemoryMigration(@Nonnull final MemoryRecordStore memoryStore, @Nonnull final String tableName, @Nonnull final MemoryColumn[] columns, @Nonnull final String primaryColumn)
 	{
 		super( null, false, VendorSpecific.MYSQL );
@@ -60,15 +73,15 @@ public class MemoryMigration extends AutomaticMigration
 		this.columns = columns;
 		this.primaryColumn = primaryColumn;
 	}
-	
+
 	private void convertColumns()
 	{
 		tableName = getTableName(recordType);
-		Map<String, String> sqlColumns = getColumnsFromModel( recordType );
+		final Map<String, String> sqlColumns = getColumnsFromModel( recordType );
 		columns = new MemoryColumn[sqlColumns.size()];
 		int index = 0;
 		primaryColumn = null;
-		for(Map.Entry<String, String> column : sqlColumns.entrySet())
+		for(final Map.Entry<String, String> column : sqlColumns.entrySet())
 		{
 			columns[index] = new MemoryColumn(column.getKey(), getJavaType( column.getValue()));
 			index++;
@@ -84,7 +97,7 @@ public class MemoryMigration extends AutomaticMigration
 	}
 
 	@Override
-	public boolean apply( Connection con )
+	public boolean apply( final Connection con )
 	{
 		Logging.getLogger().info( recordType != null ? recordType.getSimpleName() : tableName, "Creating memory-table...");
 		Logging.getLogger().info( recordType != null ? recordType.getSimpleName() : tableName, Arrays.toString( columns));
@@ -92,14 +105,14 @@ public class MemoryMigration extends AutomaticMigration
 	}
 
 	@Override
-	public boolean revert( Connection con )
+	public boolean revert( final Connection con )
 	{
 		Logging.getLogger().info( recordType != null ? recordType.getSimpleName() : tableName, "Dropping memory-table...");
 		return memoryStore.removeTable( tableName );
 	}
 
 	@Override
-	public boolean update( Connection con )
+	public boolean update( final Connection con )
 	{
 		throw new UnsupportedOperationException( "Updating memory-tables is not supported." );
 	}
