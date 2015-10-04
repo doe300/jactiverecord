@@ -95,7 +95,7 @@ public class HasOneCondition implements Condition
 		{
 			return false;
 		}
-		final ActiveRecord associatedRecord = AssociationHelper.getHasOne( record, associatedTableBase.getRecordType(), associatedTableForeignKeyColumn);
+		final ActiveRecord associatedRecord = AssociationHelper.getHasOne( record.getPrimaryKey(), associatedTableBase, associatedTableForeignKeyColumn);
 		if (associatedRecord == null)
 		{
 			return false;
@@ -106,7 +106,16 @@ public class HasOneCondition implements Condition
 	@Override
 	public boolean test( final Map<String, Object> map )
 	{
-		throw new UnsupportedOperationException( "Can't resolve an AssociationCondition from column-values!" );
+		if (map == null || map.isEmpty())
+		{
+			return false;
+		}
+		final ActiveRecord associatedRecord = AssociationHelper.getHasOne( map.get( associationKeyColumn), associatedTableBase, associatedTableForeignKeyColumn);
+		if (associatedRecord == null)
+		{
+			return false;
+		}
+		return associatedTableCond.test( associatedRecord);
 	}
 
 	@Override

@@ -109,7 +109,7 @@ public class HasManyThroughConditionTest extends Assert
 		assertTrue( cond3.test( t3));
 	}
 
-	@Test(expected = UnsupportedOperationException.class)
+	@Test
 	public void testTest_Map()
 	{
 		cond1.test( new HashMap<String, Object>(0) );

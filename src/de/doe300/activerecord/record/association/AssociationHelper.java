@@ -24,6 +24,7 @@
  */
 package de.doe300.activerecord.record.association;
 
+import de.doe300.activerecord.ReadOnlyRecordBase;
 import java.util.function.Consumer;
 import java.util.stream.Stream;
 
@@ -36,6 +37,7 @@ import de.doe300.activerecord.dsl.Comparison;
 import de.doe300.activerecord.dsl.Condition;
 import de.doe300.activerecord.dsl.SimpleCondition;
 import de.doe300.activerecord.record.ActiveRecord;
+import javax.annotation.Nonnegative;
 
 /**
  * Helper methods to be used by {@link ActiveRecord} implementations for mapping associations
@@ -56,11 +58,28 @@ public final class AssociationHelper
 		@Nonnull final Class<T> type, @Nonnull final String foreignKeyColumn)
 	{
 		final Integer foreignKey = ( Integer ) record.getBase().getStore().getValue( record.getBase(), record.getPrimaryKey(), foreignKeyColumn);
-		if(foreignKey==null)
+		if(foreignKey == null)
 		{
 			return null;
 		}
-		return record.getBase().getCore().getBase( type).getRecord(foreignKey);
+		RecordBase<T> otherBase = record.getBase().getCore().getBase( type);
+		return getBelongsTo( foreignKey, otherBase, otherBase.getPrimaryColumn() );
+	}
+	
+	/**
+	 * In a belongs-to association, the foreign key is stored in the table represented by <code>record</code>
+	 * @param <T>
+	 * @param thisAssociationValue the association-value of this record
+	 * @param otherBase the record-base of the associated record-type
+	 * @param otherKeyColumn the column (of the other model) to be matched with <code>thisAssociationValue</code>
+	 * @return the associated record or <code>null</code>
+	 * @since 0.3
+	 */
+	@Nullable
+	public static <T extends ActiveRecord> T getBelongsTo(@Nonnull final Object thisAssociationValue,
+		@Nonnull final ReadOnlyRecordBase<T> otherBase, @Nonnull final String otherKeyColumn)
+	{
+		return otherBase.findFirstFor( otherKeyColumn, thisAssociationValue );
 	}
 
 	/**
@@ -88,7 +107,23 @@ public final class AssociationHelper
 		@Nonnull final String foreignKeyColumn)
 	{
 		final RecordBase<T> base = record.getBase().getCore().getBase( type);
-		return base.findFirst( new SimpleCondition(foreignKeyColumn, record.getPrimaryKey(), Comparison.IS));
+		return getHasOne( record.getPrimaryKey(), base, foreignKeyColumn);
+	}
+	
+	/**
+	 * In a has-one association, the other model represented by <code>type</code> stores the foreign-key to this model represented by <code>record</code>
+	 * @param <T>
+	 * @param thisAssociationValue the value of this record to be matched by the associated record
+	 * @param otherBase the record-base of the result record-type
+	 * @param foreignKeyColumn the column in the other model storing the foreign-key for the given <code>record</code> of this model
+	 * @return the associated record or <code>null</code>
+	 * @since 0.3
+	 */
+	@Nullable
+	public static <T extends ActiveRecord> T getHasOne(@Nonnull final Object thisAssociationValue, @Nonnull final ReadOnlyRecordBase<T> otherBase,
+		@Nonnull final String foreignKeyColumn)
+	{
+		return otherBase.findFirst( new SimpleCondition(foreignKeyColumn, thisAssociationValue, Comparison.IS));
 	}
 
 	/**
@@ -195,9 +230,27 @@ public final class AssociationHelper
 		@Nonnull final Class<T> type, @Nonnull final String associationTable,
 		@Nonnull final String thisForeignKeyColumn, @Nonnull final String otherForeignKeyColumn)
 	{
-		final RecordBase<T> otherBase = record.getBase().getCore().getBase( type );
-		final Stream<Object> foreignKeys = record.getBase().getStore().getValues( associationTable, otherForeignKeyColumn,
-				thisForeignKeyColumn, record.getPrimaryKey());
+		return getHasManyThrough( record.getPrimaryKey(), record.getBase().getCore().getBase( type), associationTable, thisForeignKeyColumn, otherForeignKeyColumn);
+	}
+	
+	/**
+	 * This helper is used to retrieve all associated records of the other model defined by <code>type</code> in a has-many through (the <code>associationTable</code>) association.
+	 * @param <T>
+	 * @param thisPrimaryKey the primary key of this record
+	 * @param otherBase the record-base of the other record-type
+	 * @param associationTable the table storing pairs of foreign keys to both models
+	 * @param thisForeignKeyColumn the name of the column in the <code>associationTable</code> storing the foreign key to <code>record</code>
+	 * @param otherForeignKeyColumn the name of the column in the <code>associationTable</code> storing the foreign key to the other model defined by <code>type</code>
+	 * @return all matching associations or an empty stream
+	 * @since 0.3
+	 */
+	@Nonnull
+	public static <T extends ActiveRecord> Stream<T> getHasManyThrough(@Nonnegative final int thisPrimaryKey, 
+			@Nonnull final RecordBase<T> otherBase, @Nonnull final String associationTable,
+		@Nonnull final String thisForeignKeyColumn, @Nonnull final String otherForeignKeyColumn)
+	{
+		final Stream<Object> foreignKeys = otherBase.getStore().getValues( associationTable, otherForeignKeyColumn,
+				thisForeignKeyColumn, thisPrimaryKey);
 		return foreignKeys.filter((final Object obj) -> obj != null).map((final Object obj) ->
 		{
 			try

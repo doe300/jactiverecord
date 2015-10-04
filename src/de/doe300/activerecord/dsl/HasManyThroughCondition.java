@@ -29,6 +29,7 @@ import java.util.Map;
 import javax.annotation.Nonnull;
 
 import de.doe300.activerecord.ReadOnlyRecordBase;
+import de.doe300.activerecord.RecordBase;
 import de.doe300.activerecord.jdbc.VendorSpecific;
 import de.doe300.activerecord.record.ActiveRecord;
 import de.doe300.activerecord.record.association.AssociationHelper;
@@ -110,14 +111,19 @@ public class HasManyThroughCondition implements Condition
 		{
 			return false;
 		}
-		return AssociationHelper.getHasManyThrough( record, associatedBase.getRecordType(), associationTable, associationTableThisForeignKey, associationTableOtherForeignKey).
+		return AssociationHelper.getHasManyThrough( record.getPrimaryKey(), (RecordBase<?>)associatedBase, associationTable, associationTableThisForeignKey, associationTableOtherForeignKey).
 			anyMatch(associatedBaseCondition);
 	}
 
 	@Override
 	public boolean test( final Map<String, Object> map )
 	{
-		throw new UnsupportedOperationException( "Can't resolve an AssociationCondition from column-values!" );
+		if(map == null || map.isEmpty())
+		{
+			return false;
+		}
+		return AssociationHelper.getHasManyThrough( (Integer)map.get( thisBase.getPrimaryColumn()), (RecordBase<?>)associatedBase, associationTable, associationTableThisForeignKey, associationTableOtherForeignKey).
+			anyMatch(associatedBaseCondition);
 	}
 
 	@Override
