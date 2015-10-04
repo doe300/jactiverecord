@@ -78,12 +78,6 @@ public class RecordCoreTest extends Assert
 	}
 
 	@Test
-	public void testGetCore()
-	{
-		assertNotNull( RecordCore.getCore( "PUBLIC"));
-	}
-
-	@Test
 	public void testBuildBase()
 	{
 		assertNotNull( core.getBase( TestInterface.class, new MapHandler()) );

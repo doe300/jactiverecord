@@ -53,7 +53,7 @@ public class RecordBaseTest<T extends TestInterface> extends Assert
 	private final RecordBase<T> base;
 	private final Class<T> type;
 	
-	//FIXME validations fail for simple jdbc record-store
+	//FIXME validations fail for simple jdbc record-store / memory store /anything without cache??)
 	
 	public RecordBaseTest(Class<T> type, RecordBase<T> base) throws SQLException
 	{
@@ -189,7 +189,14 @@ public class RecordBaseTest<T extends TestInterface> extends Assert
 		assertFalse( base.saveAll() );
 		T t = base.createRecord();
 		t.setName( "Idiot");
-		assertTrue( base.saveAll());
+		if(base.getStore().isCached())
+		{
+			assertTrue( base.saveAll());
+		}
+		else
+		{
+			assertFalse( base.saveAll());
+		}
 	}
 
 	@Test
@@ -205,7 +212,16 @@ public class RecordBaseTest<T extends TestInterface> extends Assert
 		assertNotNull( t );
 		t.setAge( 23);
 		t.setName( "Adam");
-		assertTrue( t.save());
+		if(base.getStore().isCached())
+		{
+			//we're writing the cache to the storage
+			assertTrue( t.save());
+		}
+		else
+		{
+			//we already have everything in storage
+			assertFalse( t.save());
+		}
 		base.reload( t);
 		assertEquals(23, t.getAge());
 		assertEquals( 23, base.getStore().getValue( base, t.getPrimaryKey(), "age"));
@@ -217,9 +233,12 @@ public class RecordBaseTest<T extends TestInterface> extends Assert
 		base.destroy( 101);
 		T t = base.newRecord( 101);
 		t.setName( "Johny");
-		assertFalse( t.isSynchronized());
-		assertTrue( base.createRecord().isSynchronized());
-		assertTrue( t.save());
+		if(base.getStore().isCached())
+		{
+			assertFalse( t.isSynchronized());
+			assertTrue( base.createRecord().isSynchronized());
+			assertTrue( t.save());
+		}
 		assertTrue( t.isSynchronized());
 	}
 
@@ -231,16 +250,29 @@ public class RecordBaseTest<T extends TestInterface> extends Assert
 		t.setAge( 12);
 		t.setName( "Test123");
 		assertEquals( 12, t.getAge());
-		assertFalse( t.isSynchronized());
+		if(base.getStore().isCached())
+		{
+			assertFalse( t.isSynchronized());
+		}
 		assertTrue( t.inRecordStore());
-		assertTrue( t.save());
+		if(base.getStore().isCached())
+		{
+			assertTrue( t.save());
+		}
 		
 		base.getStore().setValue( base, t.getPrimaryKey(), "age", 13);
 		//or t.setAge(13);
 		t.reload();
 		assertTrue( t.inRecordStore());
 		assertTrue( t.isSynchronized());
-		assertEquals(12, t.getAge() );
+		if(base.getStore().isCached())
+		{
+			assertEquals(12, t.getAge() );
+		}
+		else
+		{
+			assertEquals( 13, t.getAge());
+		}
 	}
 
 	@Test

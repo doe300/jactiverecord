@@ -77,7 +77,7 @@ public class TestServer extends Assert
 	/*
 	 * XXX: Need to test all test-cases for the various record-store implementations
 	 */
-	public static final Class<? extends RecordStore> testStore = SimpleJDBCRecordStore.class;
+	public static final Class<? extends RecordStore> testStore = MemoryRecordStore.class;
 	
 	@Nonnull
 	public static RecordCore getTestCore() throws SQLException
@@ -156,6 +156,11 @@ public class TestServer extends Assert
 	
 	public static void buildTestTables() throws SQLException, Exception
 	{
+		buildTestTables(testStore);
+	}
+	
+	public static void buildTestTables(@Nonnull final Class<? extends RecordStore> testStore) throws SQLException, Exception
+	{
 		if(testStore == MemoryRecordStore.class )
 		{
 			new MemoryMigrationTest().testApply();
@@ -169,6 +174,11 @@ public class TestServer extends Assert
 	}
 	
 	public static void destroyTestTables() throws SQLException, Exception
+	{
+		destroyTestTables(testStore);
+	}
+	
+	public static void destroyTestTables(@Nonnull final Class<? extends RecordStore> testStore) throws SQLException, Exception
 	{
 		if(testStore == MemoryRecordStore.class)
 		{

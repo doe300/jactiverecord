@@ -47,7 +47,7 @@ import java.util.stream.Stream;
  * @author doe300
  */
 @Searchable(searchableColumns = {"name", "age"})
-@RecordType(typeName = "testTable", primaryKey = "id", defaultColumns = {"id", "name", "age"})
+@RecordType(typeName = "TESTTABLE", primaryKey = "id", defaultColumns = {"id", "name", "age"})
 @Validates({
 	@Validate(attribute = "age", type = ValidationType.POSITIVE),
 	@Validate(attribute = "name", type = ValidationType.NOT_NULL),

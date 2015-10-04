@@ -60,7 +60,7 @@ public class CachedJDBCRecordStoreTest extends Assert
 	@BeforeClass
 	public static void createTables() throws Exception
 	{
-		TestServer.buildTestTables();
+		TestServer.buildTestTables(CachedJDBCRecordStore.class);
 		store = new CachedJDBCRecordStore(TestServer.getTestConnection());
 		base = RecordCore.fromStore( "Test1", store).getBase(TestInterface.class);
 		assertNotNull( base );
@@ -70,7 +70,7 @@ public class CachedJDBCRecordStoreTest extends Assert
 	@AfterClass
 	public static void destroyTables() throws Exception
 	{
-		TestServer.destroyTestTables();
+		TestServer.destroyTestTables(CachedJDBCRecordStore.class);
 	}
 	
 	@Test
