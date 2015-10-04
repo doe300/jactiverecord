@@ -43,4 +43,5 @@ Thus the subclasses can't introduce new persistent attributes but re-use the att
 This will run an *AnnotationProcessor* generating an interface in the same package as the originating type containing the getter- and setter-methods for the specified attributes.
 
 
-For an example on how to use it, see the test-cases, especially *TestActiveRecordSyntax* and the *TestInterface* and *TestPOJO*.
+For an example on how to use it, see the test-cases, especially *TestActiveRecordSyntax* and the *TestInterface* and *TestPOJO*
+or [Wiki: RecordType](https://github.com/doe300/jactiverecord/wiki/RecordTypes).

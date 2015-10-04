@@ -84,8 +84,8 @@ public class AttributeGenerator extends AbstractProcessor
 			//we can't write into an existing source-file so we must create a new one
 			try
 			{
-				final String generatedFileName = recordTypeElement.getSimpleName()+ "Generated";
-				JavaFileObject destFile = processingEnv.getFiler().createSourceFile( recordTypeElement.getQualifiedName()+"Generated", recordTypeElement);
+				final String generatedFileName = recordTypeElement.getSimpleName()+ "Attributes";
+				JavaFileObject destFile = processingEnv.getFiler().createSourceFile( recordTypeElement.getQualifiedName()+"Attributes", recordTypeElement);
 				try(Writer writer = destFile.openWriter())
 				{
 					//we create an interface with given attribute-methods as default-methods and extending ActiveRecord

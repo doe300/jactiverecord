@@ -233,6 +233,7 @@ public class AttributeProcessor extends AbstractProcessor
 			//check existence of validator
 			if(!setterAnnotation.validatorClass().equals( Void.class))
 			{
+				//TODO doesn't work (access to class)
 				Method validatorMethod = null;
 				for(final Method m: setterAnnotation.validatorClass().getMethods())
 				{
@@ -280,6 +281,7 @@ public class AttributeProcessor extends AbstractProcessor
 				Method converterMethod = null;
 				for(final Method m: setterAnnotation.converterClass().getMethods())
 				{
+					//TODO doesn't work (access to class)
 					if(m.getName().equals( setterAnnotation.converterMethod()))
 					{
 						if(m.getParameterCount() == 1 && Modifier.isStatic( m.getModifiers()) && Modifier.isPublic( m.getModifiers()))
@@ -341,6 +343,7 @@ public class AttributeProcessor extends AbstractProcessor
 			//check existence of converter
 			if(!getterAnnotation.converterClass().equals( Void.class))
 			{
+				//TODO doesn't work (access to class)
 				Method converterMethod = null;
 				for(final Method m: getterAnnotation.converterClass().getMethods())
 				{

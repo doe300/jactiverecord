@@ -31,7 +31,7 @@ import java.lang.annotation.Target;
 
 /**
  * Grouped annotation for {@link AddAttributes}
- * 
+ *
  * @author doe300
  * @see AddAttributes
  */
@@ -39,5 +39,8 @@ import java.lang.annotation.Target;
 @Target(ElementType.TYPE)
 public @interface AddAttributes
 {
+	/**
+	 * @return the add-attribute values
+	 */
 	public AddAttribute[] value();
 }

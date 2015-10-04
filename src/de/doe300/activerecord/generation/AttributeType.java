@@ -28,7 +28,7 @@ import javax.annotation.Nonnull;
 
 /**
  * The data-type of an attribute
- * 
+ *
  * @author doe300
  */
 public enum AttributeType
@@ -44,7 +44,7 @@ public enum AttributeType
 	TIME(java.sql.Time.class.getCanonicalName(), java.sql.Types.TIME),
 	TIMESTAMP(java.sql.Timestamp.class.getCanonicalName(), java.sql.Types.TIMESTAMP),
 	STRING(String.class.getCanonicalName(), java.sql.Types.VARCHAR);
-	
+
 	private final String javaType;
 	private final int sqlType;
 
@@ -53,13 +53,19 @@ public enum AttributeType
 		this.javaType = javaType;
 		this.sqlType = sqlType;
 	}
-	
+
+	/**
+	 * @return the java-type
+	 */
 	@Nonnull
 	public String getType()
 	{
 		return javaType;
 	}
-	
+
+	/**
+	 * @return the SQL-type
+	 */
 	public int getSQLType()
 	{
 		return sqlType;
