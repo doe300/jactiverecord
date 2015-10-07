@@ -55,10 +55,10 @@ import de.doe300.activerecord.store.impl.CachedJDBCRecordStore;
 import de.doe300.activerecord.store.impl.SimpleJDBCRecordStore;
 import de.doe300.activerecord.store.impl.memory.MemoryMigration;
 import de.doe300.activerecord.store.impl.memory.MemoryRecordStore;
-import de.doe300.activerecord.validation.Validate;
-import de.doe300.activerecord.validation.ValidatedRecord;
-import de.doe300.activerecord.validation.Validates;
-import de.doe300.activerecord.validation.ValidationHandler;
+import de.doe300.activerecord.record.validation.Validate;
+import de.doe300.activerecord.record.validation.ValidatedRecord;
+import de.doe300.activerecord.record.validation.Validates;
+import de.doe300.activerecord.record.validation.ValidationHandler;
 import java.util.Collection;
 
 /**
@@ -306,7 +306,7 @@ public final class RecordCore implements AutoCloseable
 	 * @param recordType
 	 * @return whether the data-store was created
 	 * @throws java.sql.SQLException
-	 * @sicne 0.3
+	 * @sicne 0.4
 	 */
 	public boolean createTable(@Nonnull final Class<? extends ActiveRecord> recordType) throws SQLException
 	{
@@ -326,7 +326,7 @@ public final class RecordCore implements AutoCloseable
 	 * @param recordType
 	 * @return whether the data-store was deleted
 	 * @throws java.sql.SQLException
-	 * @since 0.3
+	 * @since 0.4
 	 */
 	public boolean dropTable(@Nonnull final Class<? extends ActiveRecord> recordType) throws SQLException
 	{

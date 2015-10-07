@@ -22,7 +22,7 @@
  * SOFTWARE.
  *
  */
-package de.doe300.activerecord.generation;
+package de.doe300.activerecord.record.attributes.generation;
 
 import de.doe300.activerecord.annotations.ProcessorUtils;
 import de.doe300.activerecord.migration.Attribute;
@@ -57,8 +57,8 @@ import javax.tools.JavaFileObject;
  */
 @SupportedSourceVersion(SourceVersion.RELEASE_8)
 @SupportedAnnotationTypes({
-	"de.doe300.activerecord.generation.AddAttribute",
-	"de.doe300.activerecord.generation.AddAttributes",
+	"de.doe300.activerecord.record.attributes.generation.AddAttribute",
+	"de.doe300.activerecord.record.attributes.generation.AddAttributes",
 })
 public class AttributeGenerator extends AbstractProcessor
 {

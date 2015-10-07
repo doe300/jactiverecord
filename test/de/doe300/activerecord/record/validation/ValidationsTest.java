@@ -22,62 +22,69 @@
  * SOFTWARE.
  *
  */
+package de.doe300.activerecord.record.validation;
 
-package de.doe300.activerecord.validation;
-
-import de.doe300.activerecord.RecordBase;
-import de.doe300.activerecord.TestInterface;
-import de.doe300.activerecord.TestServer;
-import org.junit.AfterClass;
+import de.doe300.activerecord.record.validation.Validations;
+import de.doe300.activerecord.record.validation.ValidationFailed;
+import java.util.Collections;
 import org.junit.Assert;
-import org.junit.BeforeClass;
 import org.junit.Test;
 
 /**
  *
  * @author daniel
  */
-
-
-public class ValidationHandlerTest extends Assert
+public class ValidationsTest extends Assert
 {
-	private static RecordBase<TestInterface> base;
 	
-	public ValidationHandlerTest()
+	public ValidationsTest()
 	{
 	}
-	
-	@BeforeClass
-	public static void createTables() throws Exception
+
+	@Test
+	public void testNotEmpty()
 	{
-		TestServer.buildTestTables();
-		base = TestServer.getTestCore().getBase(TestInterface.class);
+		assertTrue( Validations.notEmpty("aa"));
+		assertFalse( Validations.notEmpty(""));
 	}
-	
-	@AfterClass
-	public static void destroyTables() throws Exception
+
+	@Test(expected = ValidationFailed.class)
+	public void testValidate()
 	{
-		TestServer.destroyTestTables();
+		Validations.validate("name", null, (Object obj) -> obj != null, "is null");
 	}
 
 	@Test
 	public void testIsValid()
 	{
-		TestInterface i = base.createRecord();
-		assertFalse( i.isValid());
-		i.setAge( 23);
-		i.setName( "Adfan");
-		assertTrue( i.isValid());
+	}
+
+	@Test
+	public void testIsEmpty()
+	{
+		assertTrue( Validations.isEmpty( ""));
+		assertFalse( Validations.isEmpty( Collections.singleton( "")));
+	}
+
+	@Test(expected = IllegalArgumentException.class)
+	public void testPositiveNumber()
+	{
+		assertTrue( Validations.positiveNumber( 3));
+		assertFalse( Validations.positiveNumber( -5));
+		Validations.positiveNumber( "23");
+	}
+
+	@Test(expected = IllegalArgumentException.class)
+	public void testNegativeNumber()
+	{
+		assertTrue( Validations.negativeNumber( -4346.4));
+		assertFalse( Validations.negativeNumber( 345));
+		Validations.negativeNumber( 'c' );
+	}
+
+	@Test
+	public void testGetValidationMethod()
+	{
 	}
 	
-	@Test
-	public void testValidate()
-	{
-		TestInterface i = base.createRecord();
-		i.setAge( 23);
-		i.setName( "Adam");
-		i.validate();
-		i.setAge(-100 );
-		i.validate();
-	}
 }

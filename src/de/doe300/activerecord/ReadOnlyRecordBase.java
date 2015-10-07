@@ -37,7 +37,7 @@ import de.doe300.activerecord.record.RecordType;
 import de.doe300.activerecord.record.Searchable;
 import de.doe300.activerecord.record.association.RecordSet;
 import de.doe300.activerecord.scope.Scope;
-import de.doe300.activerecord.validation.ValidatedRecord;
+import de.doe300.activerecord.record.validation.ValidatedRecord;
 import javax.annotation.Nonnegative;
 
 /**

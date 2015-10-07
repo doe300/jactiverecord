@@ -23,7 +23,7 @@
  *
  */
 
-package de.doe300.activerecord.validation;
+package de.doe300.activerecord.record.validation;
 
 import java.lang.annotation.ElementType;
 import java.lang.annotation.Inherited;

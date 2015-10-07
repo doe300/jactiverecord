@@ -22,35 +22,25 @@
  * SOFTWARE.
  *
  */
-package de.doe300.activerecord.validation;
+package de.doe300.activerecord.record.attributes.generation;
 
-import de.doe300.activerecord.logging.Logging;
-import de.doe300.activerecord.record.ActiveRecord;
+import java.lang.annotation.ElementType;
+import java.lang.annotation.Retention;
+import java.lang.annotation.RetentionPolicy;
+import java.lang.annotation.Target;
 
 /**
- * An {@link ActiveRecord} which runs validations on its attributes.
- * Both validation methods should use the same validation-algorithm
+ * Grouped annotation for {@link AddAttributes}
+ *
  * @author doe300
- * @see Validate
+ * @see AddAttributes
  */
-public interface ValidatedRecord extends ActiveRecord
+@Retention(RetentionPolicy.CLASS)
+@Target(ElementType.TYPE)
+public @interface AddAttributes
 {
 	/**
-	 * @return whether this record is valid
+	 * @return the add-attribute values
 	 */
-	public default boolean isValid()
-	{
-		Logging.getLogger().info( getBase().getRecordType().getSimpleName(), "Default implementation of isValid() called");
-		return false;
-	}
-
-	/**
-	 * This method is called before {@link #save()}
-	 * @throws ValidationFailed the validation-error
-	 */
-	public default void validate() throws ValidationFailed
-	{
-		Logging.getLogger().info( getBase().getRecordType().getSimpleName(), "Default implementation of validate() called");
-		throw new ValidationFailed(null, null, "Validation not implemented" );
-	}
+	public AddAttribute[] value();
 }

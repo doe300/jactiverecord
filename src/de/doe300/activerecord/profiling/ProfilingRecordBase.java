@@ -36,7 +36,7 @@ import de.doe300.activerecord.dsl.QueryResult;
 import de.doe300.activerecord.record.ActiveRecord;
 import de.doe300.activerecord.scope.Scope;
 import de.doe300.activerecord.store.RecordStore;
-import de.doe300.activerecord.validation.ValidationFailed;
+import de.doe300.activerecord.record.validation.ValidationFailed;
 
 /**
  * A wrapper around another RecordBase profiling all method-calls

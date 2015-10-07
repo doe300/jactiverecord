@@ -22,7 +22,7 @@
  * SOFTWARE.
  *
  */
-package de.doe300.activerecord.validation;
+package de.doe300.activerecord.record.validation;
 
 import de.doe300.activerecord.proxy.RecordHandler;
 import de.doe300.activerecord.proxy.handlers.ProxyHandler;

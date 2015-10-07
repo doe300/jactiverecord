@@ -34,11 +34,11 @@ import de.doe300.activerecord.record.Searchable;
 import de.doe300.activerecord.record.TimestampedRecord;
 import de.doe300.activerecord.record.attributes.AttributeGetter;
 import de.doe300.activerecord.record.attributes.AttributeSetter;
-import de.doe300.activerecord.validation.Validate;
-import de.doe300.activerecord.validation.ValidatedRecord;
-import de.doe300.activerecord.validation.Validates;
-import de.doe300.activerecord.validation.ValidationFailed;
-import de.doe300.activerecord.validation.ValidationType;
+import de.doe300.activerecord.record.validation.Validate;
+import de.doe300.activerecord.record.validation.ValidatedRecord;
+import de.doe300.activerecord.record.validation.Validates;
+import de.doe300.activerecord.record.validation.ValidationFailed;
+import de.doe300.activerecord.record.validation.ValidationType;
 import java.sql.Types;
 import java.util.stream.Stream;
 

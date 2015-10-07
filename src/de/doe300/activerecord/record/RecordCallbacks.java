@@ -25,7 +25,7 @@
 package de.doe300.activerecord.record;
 
 import de.doe300.activerecord.RecordBase;
-import de.doe300.activerecord.validation.ValidatedRecord;
+import de.doe300.activerecord.record.validation.ValidatedRecord;
 
 /**
  * Callbacks are executed at before/after specific actions

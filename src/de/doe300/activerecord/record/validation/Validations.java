@@ -22,7 +22,7 @@
  * SOFTWARE.
  *
  */
-package de.doe300.activerecord.validation;
+package de.doe300.activerecord.record.validation;
 
 import java.lang.reflect.Array;
 import java.lang.reflect.Method;

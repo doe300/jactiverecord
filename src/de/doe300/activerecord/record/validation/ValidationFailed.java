@@ -22,7 +22,7 @@
  * SOFTWARE.
  *
  */
-package de.doe300.activerecord.validation;
+package de.doe300.activerecord.record.validation;
 
 /**
  * One single error in validation

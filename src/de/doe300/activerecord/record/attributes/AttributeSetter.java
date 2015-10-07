@@ -32,7 +32,7 @@ import java.util.function.Function;
 
 import javax.annotation.Nonnull;
 
-import de.doe300.activerecord.validation.ValidationFailed;
+import de.doe300.activerecord.record.validation.ValidationFailed;
 
 /**
  * Setter for a attribute. Use this annotation if the setter name does not conform with beans-standard or you need to convert the data to the correct type.

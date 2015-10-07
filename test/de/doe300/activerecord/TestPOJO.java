@@ -30,8 +30,8 @@ import de.doe300.activerecord.record.ActiveRecord;
 import de.doe300.activerecord.record.RecordType;
 import de.doe300.activerecord.record.Searchable;
 import de.doe300.activerecord.record.TimestampedRecord;
-import de.doe300.activerecord.validation.Validate;
-import de.doe300.activerecord.validation.ValidationType;
+import de.doe300.activerecord.record.validation.Validate;
+import de.doe300.activerecord.record.validation.ValidationType;
 import java.sql.Timestamp;
 
 /**

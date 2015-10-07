@@ -32,7 +32,7 @@ import de.doe300.activerecord.record.attributes.AttributeGetter;
 import de.doe300.activerecord.record.attributes.AttributeSetter;
 import de.doe300.activerecord.record.attributes.Attributes;
 import de.doe300.activerecord.record.security.EncryptedAttribute;
-import de.doe300.activerecord.validation.ValidationFailed;
+import de.doe300.activerecord.record.validation.ValidationFailed;
 import java.lang.reflect.Field;
 import java.lang.reflect.Method;
 import java.lang.reflect.Modifier;
@@ -341,7 +341,7 @@ public class AttributeProcessor extends AbstractProcessor
 			}
 
 			//check existence of converter
-			if(!getterAnnotation.converterClass().equals( Void.class))
+			if(false && !getterAnnotation.converterClass().equals( Void.class))
 			{
 				//TODO doesn't work (access to class)
 				Method converterMethod = null;

@@ -22,25 +22,52 @@
  * SOFTWARE.
  *
  */
-package de.doe300.activerecord.generation;
 
-import java.lang.annotation.ElementType;
-import java.lang.annotation.Retention;
-import java.lang.annotation.RetentionPolicy;
-import java.lang.annotation.Target;
+package de.doe300.activerecord.record.validation;
 
 /**
- * Grouped annotation for {@link AddAttributes}
- *
+ * The type of validation to run
  * @author doe300
- * @see AddAttributes
+ * @see Validate
  */
-@Retention(RetentionPolicy.CLASS)
-@Target(ElementType.TYPE)
-public @interface AddAttributes
+public enum ValidationType
 {
 	/**
-	 * @return the add-attribute values
+	 * Runs the validation specified in {@link Validate#customClass() } and  {@link Validate#customMethod()}
 	 */
-	public AddAttribute[] value();
+	CUSTOM,
+	/**
+	 * Validates that the given value is <code>null</code>
+	 * @see #NOT_NULL
+	 */
+	IS_NULL,
+	/**
+	 * Validates that the given value is empty.
+	 * Validation for empty is currently only supported for String, Array, Collections and Maps.
+	 * Additionally, any Number with the value 0 is considered empty.
+	 * @see #NOT_EMPTY
+	 */
+	IS_EMPTY,
+	/**
+	 * Validates that the given value is not <code>null</code>
+	 * @see #IS_NULL
+	 */
+	NOT_NULL,
+	/**
+	 * Validates that the given value is not empty.
+	 * Validation for empty is currently only supported for String, Array, Collections and Maps
+	 * Additionally, any Number with the value 0 is considered empty.
+	 * @see #IS_EMPTY
+	 */
+	NOT_EMPTY,
+	/**
+	 * Validates that the value is a positive number
+	 * @see #NEGATIVE
+	 */
+	POSITIVE,
+	/**
+	 * Validates the value to be a negative number
+	 * @see #POSITIVE
+	 */
+	NEGATIVE
 }

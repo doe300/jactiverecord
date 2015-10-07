@@ -45,10 +45,10 @@ import javax.lang.model.element.TypeElement;
 import javax.lang.model.type.TypeMirror;
 import javax.tools.Diagnostic;
 
-import de.doe300.activerecord.validation.Validate;
-import de.doe300.activerecord.validation.ValidatedRecord;
-import de.doe300.activerecord.validation.Validates;
-import de.doe300.activerecord.validation.ValidationType;
+import de.doe300.activerecord.record.validation.Validate;
+import de.doe300.activerecord.record.validation.ValidatedRecord;
+import de.doe300.activerecord.record.validation.Validates;
+import de.doe300.activerecord.record.validation.ValidationType;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashSet;
@@ -74,7 +74,7 @@ import javax.lang.model.util.ElementFilter;
 @SupportedAnnotationTypes({
 	"de.doe300.activerecord.record.RecordType", "de.doe300.activerecord.record.Searchable",
 	"de.doe300.activerecord.migration.constraints.Index","de.doe300.activerecord.record.SingleTableInheritance",
-	"de.doe300.activerecord.validation.Validate", "de.doe300.activerecord.validation.Validates",
+	"de.doe300.activerecord.record.validation.Validate", "de.doe300.activerecord.record.validation.Validates",
 })
 @SupportedOptions({AttributeProcessor.OPTION_CHECK_ATTRIBUTES})
 public class RecordTypeProcessor extends AbstractProcessor
@@ -96,11 +96,23 @@ public class RecordTypeProcessor extends AbstractProcessor
 		//default order - suggest every used key ASC/DESC
 		if(member.getSimpleName().contentEquals( "defaultOrder"))
 		{
-			return ProcessorUtils.getAllAttributeNames((TypeElement)element).stream().
+			Stream<Completion> indexCompletions = Stream.empty();
+			if(element.getAnnotation( Index.class) != null || element.getAnnotation( Indices.class) != null)
+			{
+				indexCompletions = Arrays.stream( element.getAnnotationsByType( Index.class)).
+						flatMap( ( Index t ) -> 
+						{
+							return Stream.of( Arrays.stream( t.columns()).collect( Collectors.joining( " ASC, ", "\"", " ASC\"")),
+									Arrays.stream( t.columns()).collect( Collectors.joining( " DESC, ", "\"", " DESC\"")));
+						}
+				).map((String s) -> Completions.of( s, "Sort by Index"));
+			}
+			//XXX remove duplicates
+			return Stream.concat( indexCompletions, ProcessorUtils.getAllAttributeNames((TypeElement)element).stream().
 					flatMap( (String name) -> Stream.of( 
 							Completions.of( '"' + name + " ASC\""),
 							Completions.of( '"' + name + " DESC\"")
-							)).collect( Collectors.toList());
+							))).collect( Collectors.toList());
 		}
 		//single inheritance type-column / record-type primary-key / validate attribute
 		if(member.getSimpleName().contentEquals( "typeColumnName") || member.getSimpleName().contentEquals( "primaryKey")

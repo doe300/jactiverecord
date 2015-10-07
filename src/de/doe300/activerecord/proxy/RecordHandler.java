@@ -33,7 +33,7 @@ import de.doe300.activerecord.record.attributes.AttributeGetter;
 import de.doe300.activerecord.record.attributes.AttributeSetter;
 import de.doe300.activerecord.record.attributes.Attributes;
 import de.doe300.activerecord.store.RecordStore;
-import de.doe300.activerecord.validation.ValidationFailed;
+import de.doe300.activerecord.record.validation.ValidationFailed;
 import java.lang.invoke.MethodHandles;
 import java.lang.reflect.Constructor;
 import java.lang.reflect.InvocationHandler;

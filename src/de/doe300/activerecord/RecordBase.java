@@ -52,8 +52,8 @@ import de.doe300.activerecord.record.association.RecordSet;
 import de.doe300.activerecord.record.association.TableSet;
 import de.doe300.activerecord.scope.Scope;
 import de.doe300.activerecord.store.RecordStore;
-import de.doe300.activerecord.validation.ValidatedRecord;
-import de.doe300.activerecord.validation.ValidationFailed;
+import de.doe300.activerecord.record.validation.ValidatedRecord;
+import de.doe300.activerecord.record.validation.ValidationFailed;
 import javax.annotation.Nonnegative;
 
 /**

@@ -22,7 +22,7 @@
  * SOFTWARE.
  *
  */
-package de.doe300.activerecord.generation;
+package de.doe300.activerecord.record.attributes.generation;
 
 import javax.annotation.Nonnull;
 

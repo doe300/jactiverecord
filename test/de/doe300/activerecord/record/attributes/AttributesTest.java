@@ -28,7 +28,7 @@ import de.doe300.activerecord.RecordBase;
 import de.doe300.activerecord.TestInterface;
 import de.doe300.activerecord.TestServer;
 import de.doe300.activerecord.record.TimestampedRecord;
-import de.doe300.activerecord.validation.ValidatedRecord;
+import de.doe300.activerecord.record.validation.ValidatedRecord;
 import java.lang.reflect.Method;
 import org.junit.AfterClass;
 import static org.junit.Assert.assertEquals;

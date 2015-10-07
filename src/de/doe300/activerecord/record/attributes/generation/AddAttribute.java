@@ -22,7 +22,7 @@
  * SOFTWARE.
  *
  */
-package de.doe300.activerecord.generation;
+package de.doe300.activerecord.record.attributes.generation;
 
 import de.doe300.activerecord.migration.Attribute;
 import de.doe300.activerecord.migration.constraints.ReferenceRule;

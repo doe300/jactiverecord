@@ -23,26 +23,61 @@
  *
  */
 
+package de.doe300.activerecord.record.validation;
 
-package de.doe300.activerecord.validation;
-
-import java.lang.annotation.ElementType;
-import java.lang.annotation.Inherited;
-import java.lang.annotation.Retention;
-import java.lang.annotation.RetentionPolicy;
-import java.lang.annotation.Target;
+import de.doe300.activerecord.RecordBase;
+import de.doe300.activerecord.TestInterface;
+import de.doe300.activerecord.TestServer;
+import org.junit.AfterClass;
+import org.junit.Assert;
+import org.junit.BeforeClass;
+import org.junit.Test;
 
 /**
  *
- * @author doe300
+ * @author daniel
  */
-@Retention(RetentionPolicy.RUNTIME)
-@Target(ElementType.TYPE)
-@Inherited
-public @interface Validates
+
+
+public class ValidationHandlerTest extends Assert
 {
-	/**
-	 * @return the validations
-	 */
-	public Validate[] value();
+	private static RecordBase<TestInterface> base;
+	
+	public ValidationHandlerTest()
+	{
+	}
+	
+	@BeforeClass
+	public static void createTables() throws Exception
+	{
+		TestServer.buildTestTables();
+		base = TestServer.getTestCore().getBase(TestInterface.class);
+	}
+	
+	@AfterClass
+	public static void destroyTables() throws Exception
+	{
+		TestServer.destroyTestTables();
+	}
+
+	@Test
+	public void testIsValid()
+	{
+		TestInterface i = base.createRecord();
+		assertFalse( i.isValid());
+		i.setAge( 23);
+		i.setName( "Adfan");
+		assertTrue( i.isValid());
+	}
+	
+	@Test
+	public void testValidate()
+	{
+		TestInterface i = base.createRecord();
+		i.setAge( 23);
+		i.setName( "Adam");
+		i.validate();
+		i.setAge(-100 );
+		i.validate();
+	}
 }

@@ -29,7 +29,7 @@ import de.doe300.activerecord.dsl.QueryResult;
 import de.doe300.activerecord.dsl.SimpleCondition;
 import de.doe300.activerecord.record.RecordType;
 import de.doe300.activerecord.scope.Scope;
-import de.doe300.activerecord.validation.ValidationFailed;
+import de.doe300.activerecord.record.validation.ValidationFailed;
 import java.lang.reflect.UndeclaredThrowableException;
 import java.sql.SQLException;
 import java.util.Arrays;

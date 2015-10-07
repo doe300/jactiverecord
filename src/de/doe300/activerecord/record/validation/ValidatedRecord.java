@@ -22,52 +22,35 @@
  * SOFTWARE.
  *
  */
+package de.doe300.activerecord.record.validation;
 
-package de.doe300.activerecord.validation;
+import de.doe300.activerecord.logging.Logging;
+import de.doe300.activerecord.record.ActiveRecord;
 
 /**
- * The type of validation to run
+ * An {@link ActiveRecord} which runs validations on its attributes.
+ * Both validation methods should use the same validation-algorithm
  * @author doe300
  * @see Validate
  */
-public enum ValidationType
+public interface ValidatedRecord extends ActiveRecord
 {
 	/**
-	 * Runs the validation specified in {@link Validate#customClass() } and  {@link Validate#customMethod()}
+	 * @return whether this record is valid
 	 */
-	CUSTOM,
+	public default boolean isValid()
+	{
+		Logging.getLogger().info( getBase().getRecordType().getSimpleName(), "Default implementation of isValid() called");
+		return false;
+	}
+
 	/**
-	 * Validates that the given value is <code>null</code>
-	 * @see #NOT_NULL
+	 * This method is called before {@link #save()}
+	 * @throws ValidationFailed the validation-error
 	 */
-	IS_NULL,
-	/**
-	 * Validates that the given value is empty.
-	 * Validation for empty is currently only supported for String, Array, Collections and Maps.
-	 * Additionally, any Number with the value 0 is considered empty.
-	 * @see #NOT_EMPTY
-	 */
-	IS_EMPTY,
-	/**
-	 * Validates that the given value is not <code>null</code>
-	 * @see #IS_NULL
-	 */
-	NOT_NULL,
-	/**
-	 * Validates that the given value is not empty.
-	 * Validation for empty is currently only supported for String, Array, Collections and Maps
-	 * Additionally, any Number with the value 0 is considered empty.
-	 * @see #IS_EMPTY
-	 */
-	NOT_EMPTY,
-	/**
-	 * Validates that the value is a positive number
-	 * @see #NEGATIVE
-	 */
-	POSITIVE,
-	/**
-	 * Validates the value to be a negative number
-	 * @see #POSITIVE
-	 */
-	NEGATIVE
+	public default void validate() throws ValidationFailed
+	{
+		Logging.getLogger().info( getBase().getRecordType().getSimpleName(), "Default implementation of validate() called");
+		throw new ValidationFailed(null, null, "Validation not implemented" );
+	}
 }
