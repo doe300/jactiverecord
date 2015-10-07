@@ -38,6 +38,7 @@ import java.util.Set;
 import java.util.SortedMap;
 import java.util.Spliterator;
 import java.util.TreeMap;
+import java.util.TreeSet;
 import java.util.function.Consumer;
 import java.util.stream.Stream;
 import java.util.stream.StreamSupport;
@@ -171,15 +172,15 @@ class MemoryTable
 	{
 		return StreamSupport.stream( new Spliterator<Object>()
 		{
-			private final Iterator<Integer> rowKeys = data.keySet().iterator();
+			//i.e. for HasManyThroughAssociationSet#removeAll(), elements are removed while map is traversed
+			//so we need to copy the indices and traverse the copy
+			private final Iterator<Integer> rowKeys = new TreeSet<Integer>(data.keySet()).iterator();
 			@Override
 			public boolean tryAdvance(final Consumer<? super Object> action )
 			{
 				int rowIndex;
 				while(rowKeys.hasNext())
 				{
-					//TODO throws concurrentmodification exception
-					//is the iterator not synchronized??
 					rowIndex = rowKeys.next();
 					if(Objects.equals( data.get( rowIndex).getRowValue( condColumn), condValue))
 					{

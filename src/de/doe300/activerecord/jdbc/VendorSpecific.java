@@ -214,7 +214,7 @@ public enum VendorSpecific
 	{
 		return ( boolean ) value;
 	}
-
+	
 
 	/**
 	 * Converts the input identifier to the case used in the DB

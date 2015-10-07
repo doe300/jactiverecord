@@ -119,7 +119,7 @@ public interface TestTypesInterface extends ActiveRecord
 		TypeMappings.writeDBMappable( obj, this, "db_mappable");
 	}
 	
-	@Attribute(name = "xml", type = Types.VARCHAR, typeName = "VARCHAR(1)")
+	@Attribute(name = "xml", type = Types.SQLXML)
 	public default InputStream readXML() throws SQLException
 	{
 		return TypeMappings.readXML( this, "xml");
