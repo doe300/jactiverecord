@@ -38,14 +38,11 @@ import java.util.logging.Level;
 import java.util.logging.Logger;
 import javax.annotation.Nonnull;
 import javax.annotation.processing.AbstractProcessor;
-import javax.annotation.processing.Completion;
 import javax.annotation.processing.RoundEnvironment;
 import javax.annotation.processing.SupportedAnnotationTypes;
 import javax.annotation.processing.SupportedSourceVersion;
 import javax.lang.model.SourceVersion;
-import javax.lang.model.element.AnnotationMirror;
 import javax.lang.model.element.Element;
-import javax.lang.model.element.ExecutableElement;
 import javax.lang.model.element.TypeElement;
 import javax.tools.Diagnostic;
 import javax.tools.JavaFileObject;
@@ -73,82 +70,86 @@ public class AttributeGenerator extends AbstractProcessor
 		roundEnv.getElementsAnnotatedWith( AddAttribute.class).forEach((final Element e)->{
 			final AddAttribute[] addAttributes = e.getAnnotationsByType( AddAttribute.class);
 			final TypeElement recordTypeElement = (TypeElement)e;
-			if(processedElements.contains( recordTypeElement.getQualifiedName().toString()))
-			{
-				return;
-			}
-			processedElements.add( recordTypeElement.getQualifiedName().toString());
-			
-			final List<String> usedAttributeNames = ProcessorUtils.getAllAttributeNames( recordTypeElement);
-			
-			//we can't write into an existing source-file so we must create a new one
-			try
-			{
-				final String generatedFileName = recordTypeElement.getSimpleName()+ "Attributes";
-				JavaFileObject destFile = processingEnv.getFiler().createSourceFile( recordTypeElement.getQualifiedName()+"Attributes", recordTypeElement);
-				try(Writer writer = destFile.openWriter())
-				{
-					//we create an interface with given attribute-methods as default-methods and extending ActiveRecord
-					writer.append( "package ");
-					writer.append( processingEnv.getElementUtils().getPackageOf( recordTypeElement).getQualifiedName().toString());
-					writer.append( ";\n");
-					
-					writer.append( "import ").append( Attribute.class.getCanonicalName()).append( ";\n");
-					
-					//TODO write @Generated annotation (somehow netbeans can't find it)
-					
-					writer.append( "interface ").append( generatedFileName ).append(" extends ").
-							append( ActiveRecord.class.getCanonicalName());
-					
-					writer.append(" {\n\n");
-					
-					//write attribute-methods to file
-					for(final AddAttribute addAttribute : addAttributes)
-					{
-						//check if methods for attribute already exist
-						if(usedAttributeNames.contains( addAttribute.name()))
-						{
-							processingEnv.getMessager().printMessage( Diagnostic.Kind.WARNING, "Attribute-name '" + addAttribute.name()+ "' already in use, skipping", recordTypeElement);
-							return;
-						}
-						//generate @Attribute-annotations
-						final String attributeAnnotation = generateAttributeAnnotation( addAttribute );
-
-						//generate getter/setter (is for boolean)
-						if(addAttribute.hasSetter())
-						{
-							writer.append( attributeAnnotation);
-							writer.append( generateSetter( addAttribute));
-						}
-						if(addAttribute.hasGetter())
-						{
-							writer.append( attributeAnnotation);
-							writer.append( generateGetter( addAttribute));
-						}
-					}
-					
-					writer.append( "}");
-				}
-				processingEnv.getMessager().printMessage( Diagnostic.Kind.NOTE, "Generated: " + 
-						processingEnv.getElementUtils().getPackageOf( recordTypeElement).getQualifiedName().toString()+ '.' +generatedFileName,
-						recordTypeElement);
-			}
-			catch ( IOException ex )
-			{
-				Logger.getLogger( AttributeGenerator.class.getName() ).log( Level.SEVERE, null, ex );
-			}
+			processAddAttributes( recordTypeElement, addAttributes );
+		});
+		
+		roundEnv.getElementsAnnotatedWith( AddAttributes.class).forEach((final Element e)->{
+			final AddAttribute[] addAttributes = e.getAnnotation(AddAttributes.class).value();
+			final TypeElement recordTypeElement = (TypeElement)e;
+			processAddAttributes( recordTypeElement, addAttributes );
 		});
 		
 		return true;
 	}
-
-	@Override
-	public Iterable<? extends Completion> getCompletions( Element element, AnnotationMirror annotation,
-			ExecutableElement member, String userText )
-	{
-		return super.getCompletions( element, annotation, member, userText ); //To change body of generated methods, choose Tools | Templates.
-	}
 	
+	private void processAddAttributes(final TypeElement recordTypeElement, final AddAttribute[] addAttributes)
+	{
+		if(processedElements.contains( recordTypeElement.getQualifiedName().toString()))
+		{
+			return;
+		}
+		processedElements.add( recordTypeElement.getQualifiedName().toString());
+
+		final List<String> usedAttributeNames = ProcessorUtils.getAllAttributeNames( recordTypeElement);
+
+		//we can't write into an existing source-file so we must create a new one
+		try
+		{
+			final String generatedFileName = recordTypeElement.getSimpleName()+ "Attributes";
+			JavaFileObject destFile = processingEnv.getFiler().createSourceFile( recordTypeElement.getQualifiedName()+"Attributes", recordTypeElement);
+			try(Writer writer = destFile.openWriter())
+			{
+				//we create an interface with given attribute-methods as default-methods and extending ActiveRecord
+				writer.append( "package ");
+				writer.append( processingEnv.getElementUtils().getPackageOf( recordTypeElement).getQualifiedName().toString());
+				writer.append( ";\n");
+
+				writer.append( "import ").append( Attribute.class.getCanonicalName()).append( ";\n");
+
+				//TODO write @Generated annotation (somehow netbeans can't find it)
+
+				writer.append( "interface ").append( generatedFileName ).append(" extends ").
+						append( ActiveRecord.class.getCanonicalName());
+
+				writer.append(" {\n\n");
+
+				//write attribute-methods to file
+				for(final AddAttribute addAttribute : addAttributes)
+				{
+					//check if methods for attribute already exist
+					if(usedAttributeNames.contains( addAttribute.name()))
+					{
+						processingEnv.getMessager().printMessage( Diagnostic.Kind.WARNING, "Attribute-name '" + addAttribute.name()+ "' already in use, skipping", recordTypeElement);
+						return;
+					}
+					//generate @Attribute-annotations
+					final String attributeAnnotation = generateAttributeAnnotation( addAttribute );
+
+					//generate getter/setter (is for boolean)
+					if(addAttribute.hasSetter())
+					{
+						writer.append( attributeAnnotation);
+						writer.append( generateSetter( addAttribute));
+					}
+					if(addAttribute.hasGetter())
+					{
+						writer.append( attributeAnnotation);
+						writer.append( generateGetter( addAttribute));
+					}
+				}
+
+				writer.append( "}");
+			}
+			processingEnv.getMessager().printMessage( Diagnostic.Kind.NOTE, "Generated: " + 
+					processingEnv.getElementUtils().getPackageOf( recordTypeElement).getQualifiedName().toString()+ '.' +generatedFileName,
+					recordTypeElement);
+		}
+		catch ( IOException ex )
+		{
+			Logger.getLogger( AttributeGenerator.class.getName() ).log( Level.SEVERE, null, ex );
+		}
+	}
+
 	@Nonnull
 	private static String generateAttributeAnnotation(@Nonnull final AddAttribute source)
 	{

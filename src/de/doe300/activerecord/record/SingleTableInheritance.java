@@ -42,7 +42,7 @@ import de.doe300.activerecord.pojo.POJOBase;
  * and a non-null column for the {@link #typeColumnName() type-column}.
  * Otherwise the instantiation of the correct subclass can not be guaranteed.
  * <br>
- * This annotation can only be used in combination with {@link RecordType}. It also only works on POJO-records.
+ * This annotation can only be used on POJO-records.
  *
  * @author doe300
  * @see RecordType

@@ -26,6 +26,7 @@ package de.doe300.activerecord.annotations;
 
 import de.doe300.activerecord.RecordBase;
 import de.doe300.activerecord.migration.constraints.Index;
+import de.doe300.activerecord.migration.constraints.Indices;
 import de.doe300.activerecord.pojo.POJOBase;
 import de.doe300.activerecord.record.ActiveRecord;
 import de.doe300.activerecord.record.RecordType;
@@ -46,6 +47,7 @@ import javax.tools.Diagnostic;
 
 import de.doe300.activerecord.validation.Validate;
 import de.doe300.activerecord.validation.ValidatedRecord;
+import de.doe300.activerecord.validation.Validates;
 import de.doe300.activerecord.validation.ValidationType;
 import java.util.Arrays;
 import java.util.Collections;
@@ -159,268 +161,286 @@ public class RecordTypeProcessor extends AbstractProcessor
 	public boolean process(final Set<? extends TypeElement> annotations, final RoundEnvironment roundEnv )
 	{	
 		//type-annotations
-		processRecordType( roundEnv );
-		processSingleTableInheritance( roundEnv );
-		processIndex( roundEnv );
-		processSearchables( roundEnv );
-		processValidate( roundEnv );
+		roundEnv.getElementsAnnotatedWith( RecordType.class).forEach( (final Element e) -> {
+			processRecordType( (TypeElement)e, e.getAnnotation( RecordType.class));
+		});
+		roundEnv.getElementsAnnotatedWith( SingleTableInheritance.class).forEach( (final Element e) -> {
+			processSingleTableInheritance((TypeElement)e, e.getAnnotation( SingleTableInheritance.class));
+		});
+		roundEnv.getElementsAnnotatedWith( Index.class).forEach( (final Element e) -> {
+			processIndex((TypeElement)e, e.getAnnotation( Index.class));
+		});
+		roundEnv.getElementsAnnotatedWith( Indices.class).forEach( (final Element e) -> {
+			for(Index index : e.getAnnotation( Indices.class).value())
+			{
+				processIndex( (TypeElement)e, index);
+			}
+		});
+		roundEnv.getElementsAnnotatedWith( Searchable.class).forEach( (final Element e) -> {
+			processSearchables( (TypeElement)e, e.getAnnotation( Searchable.class));
+		});
+		roundEnv.getElementsAnnotatedWith( Validate.class).forEach( (final Element e) -> {
+			processValidate( (TypeElement)e, e.getAnnotation( Validate.class));
+		});
+		roundEnv.getElementsAnnotatedWith( Validates.class).forEach( (final Element e) -> {
+			for(Validate validate : e.getAnnotation( Validates.class).value())
+			{
+				processValidate( (TypeElement)e, validate);
+			}
+		});
 		return true;
 	}
 	
-	private void processRecordType(final RoundEnvironment roundEnv)
+	private void processRecordType(final TypeElement recordTypeElement, final RecordType recordType)
 	{
-		roundEnv.getElementsAnnotatedWith( RecordType.class).forEach((final Element e)->{
-			final RecordType recordType = e.getAnnotation( RecordType.class);
-			final TypeElement recordTypeElement = (TypeElement)e;
-			boolean activeRecordFound = false;
-			for(final TypeMirror i :recordTypeElement.getInterfaces())
+		boolean activeRecordFound = false;
+		for(final TypeMirror i :recordTypeElement.getInterfaces())
+		{
+			if(processingEnv.getTypeUtils().isSubtype( i, processingEnv.getElementUtils().getTypeElement( ActiveRecord.class.getCanonicalName()).asType() ))
 			{
-				if(processingEnv.getTypeUtils().isSubtype( i, processingEnv.getElementUtils().getTypeElement( ActiveRecord.class.getCanonicalName()).asType() ))
-				{
-					activeRecordFound = true;
-					break;
-				}
+				activeRecordFound = true;
+				break;
 			}
-			//Must extend ActiveRecord
-			if(!activeRecordFound)
+		}
+		//Must extend ActiveRecord
+		if(!activeRecordFound)
+		{
+			processingEnv.getMessager().printMessage( Diagnostic.Kind.ERROR, "A record-type must extend ActiveRecord",recordTypeElement);
+		}
+		//type-name must not be empty
+		if(recordType.typeName().isEmpty())
+		{
+			processingEnv.getMessager().printMessage( Diagnostic.Kind.ERROR, "record-type name must not be empty", recordTypeElement);
+		}
+		//type-name must not contain spaces
+		if(recordType.typeName().chars().anyMatch( (final int i)-> i == ' '))
+		{
+			processingEnv.getMessager().printMessage( Diagnostic.Kind.ERROR, "record-type name must not contain any spaces", recordTypeElement);
+		}
+		//primary-key must not be empty
+		if(recordType.primaryKey().isEmpty())
+		{
+			processingEnv.getMessager().printMessage( Diagnostic.Kind.ERROR, "primary-key column must not be empty", recordTypeElement);
+		}
+		//primary-key must not contain spaces
+		if(recordType.primaryKey().chars().anyMatch( (final int i)-> i == ' '))
+		{
+			processingEnv.getMessager().printMessage( Diagnostic.Kind.ERROR, "primary-key column must not contain any spaces", recordTypeElement);
+		}
+		//default-columns should not be empty
+		if(recordType.defaultColumns().length == 0)
+		{
+			processingEnv.getMessager().printMessage( Diagnostic.Kind.WARNING, "Default columns should not be empty.", recordTypeElement);
+		}
+		//default-columns should contain primary-key
+		if(!Arrays.stream( recordType.defaultColumns()).anyMatch( (String column) -> recordType.primaryKey().equals( column)))
+		{
+			processingEnv.getMessager().printMessage( Diagnostic.Kind.WARNING, "Default columns should contain the primary-key column", recordTypeElement);
+		}
+		//if type is concrete class and not single-inheritance, the constructor must accept (int, POJOBase)
+		if(ElementKind.CLASS == recordTypeElement.getKind())
+		{
+			//TODO doesn't accept constructor (int, POJOBase<X>)
+			final TypeMirror integerType = processingEnv.getElementUtils().getTypeElement( Integer.class.getCanonicalName()).asType();
+			final TypeMirror recordBaseType = processingEnv.getElementUtils().getTypeElement( RecordBase.class.getCanonicalName()).asType();
+			if(!ElementFilter.constructorsIn( recordTypeElement.getEnclosedElements()).stream().
+					anyMatch( (ExecutableElement constructor) -> {
+						return constructor.getParameters().size() == 2 && 
+								processingEnv.getTypeUtils().isSubtype( constructor.getParameters().get(0).asType(), integerType) &&
+								processingEnv.getTypeUtils().isSubtype( constructor.getParameters().get(1).asType(), recordBaseType );
+					}))
 			{
-				processingEnv.getMessager().printMessage( Diagnostic.Kind.ERROR, "A record-type must extend ActiveRecord",e);
+				processingEnv.getMessager().printMessage( Diagnostic.Kind.WARNING, "No suitable constructor found", recordTypeElement);
 			}
-			//type-name must not be empty
-			if(recordType.typeName().isEmpty())
-			{
-				processingEnv.getMessager().printMessage( Diagnostic.Kind.ERROR, "record-type name must not be empty", e);
-			}
-			//type-name must not contain spaces
-			if(recordType.typeName().chars().anyMatch( (final int i)-> i == ' '))
-			{
-				processingEnv.getMessager().printMessage( Diagnostic.Kind.ERROR, "record-type name must not contain any spaces", e);
-			}
-			//primary-key must not be empty
-			if(recordType.primaryKey().isEmpty())
-			{
-				processingEnv.getMessager().printMessage( Diagnostic.Kind.ERROR, "primary-key column must not be empty", e);
-			}
-			//primary-key must not contain spaces
-			if(recordType.primaryKey().chars().anyMatch( (final int i)-> i == ' '))
-			{
-				processingEnv.getMessager().printMessage( Diagnostic.Kind.ERROR, "primary-key column must not contain any spaces", e);
-			}
-			//default-columns should not be empty
-			if(recordType.defaultColumns().length == 0)
-			{
-				processingEnv.getMessager().printMessage( Diagnostic.Kind.WARNING, "Default columns should not be empty.", e);
-			}
-			//default-columns should contain primary-key
-			if(!Arrays.stream( recordType.defaultColumns()).anyMatch( (String column) -> recordType.primaryKey().equals( column)))
-			{
-				processingEnv.getMessager().printMessage( Diagnostic.Kind.WARNING, "Default columns should contain the primary-key column", e);
-			}
-			//if type is concrete class and not single-inheritance, the constructor must accept (int, POJOBase)
-			if(ElementKind.CLASS == recordTypeElement.getKind())
-			{
-				//TODO doesn't accept constructor (int, POJOBase<X>)
-				final TypeMirror integerType = processingEnv.getElementUtils().getTypeElement( Integer.class.getCanonicalName()).asType();
-				final TypeMirror recordBaseType = processingEnv.getElementUtils().getTypeElement( RecordBase.class.getCanonicalName()).asType();
-				if(!ElementFilter.constructorsIn( recordTypeElement.getEnclosedElements()).stream().
-						anyMatch( (ExecutableElement constructor) -> {
-							return constructor.getParameters().size() == 2 && 
-									processingEnv.getTypeUtils().isSubtype( constructor.getParameters().get(0).asType(), integerType) &&
-									processingEnv.getTypeUtils().isSubtype( constructor.getParameters().get(1).asType(), recordBaseType );
-						}))
-				{
-					processingEnv.getMessager().printMessage( Diagnostic.Kind.WARNING, "No suitable constructor found", e);
-				}
-			}
-		});
+		}
 	}
 	
-	private void processSingleTableInheritance(final RoundEnvironment roundEnv)
+	private void processSingleTableInheritance(final TypeElement type, final SingleTableInheritance inheritanceAnnotation)
 	{
-		roundEnv.getElementsAnnotatedWith( SingleTableInheritance.class).forEach((final Element e)->{
-			final SingleTableInheritance inheritanceAnnotation= e.getAnnotation( SingleTableInheritance.class);
-			final TypeElement type = (TypeElement)e;
-			boolean activeRecordFound = false;
-			for(final TypeMirror i :type.getInterfaces())
+		boolean activeRecordFound = false;
+		for(final TypeMirror i :type.getInterfaces())
+		{
+			if(processingEnv.getTypeUtils().isSubtype( i, processingEnv.getElementUtils().getTypeElement( ActiveRecord.class.getCanonicalName()).asType() ))
 			{
-				if(processingEnv.getTypeUtils().isSubtype( i, processingEnv.getElementUtils().getTypeElement( ActiveRecord.class.getCanonicalName()).asType() ))
-				{
-					activeRecordFound = true;
-					break;
-				}
+				activeRecordFound = true;
+				break;
 			}
-			//Must extend ActiveRecord
-			if(!activeRecordFound)
+		}
+		//Must extend ActiveRecord
+		if(!activeRecordFound)
+		{
+			processingEnv.getMessager().printMessage( Diagnostic.Kind.ERROR, "A single-inheritance type must extend ActiveRecord", type);
+		}
+		//column-name must not be empty
+		if(inheritanceAnnotation.typeColumnName().isEmpty())
+		{
+			processingEnv.getMessager().printMessage( Diagnostic.Kind.ERROR, "inheritance-column must not be empty", type);
+		}
+		//column-name must not contain spaces
+		if(inheritanceAnnotation.typeColumnName().chars().anyMatch( (final int i)-> i == ' '))
+		{
+			processingEnv.getMessager().printMessage( Diagnostic.Kind.ERROR, "inheritance-column must not contain any spaces", type);
+		}
+		try
+		{
+			//factory-method must exist in factory-class and have the correct signature
+			Method factoryMethod = inheritanceAnnotation.factoryClass().getMethod( inheritanceAnnotation.factoryMethod(), POJOBase.class, Integer.TYPE, Object.class );
+			if(!ActiveRecord.class.isAssignableFrom( factoryMethod.getReturnType()))
 			{
-				processingEnv.getMessager().printMessage( Diagnostic.Kind.ERROR, "A single-inheritance type must extend ActiveRecord",e);
+				processingEnv.getMessager().printMessage( Diagnostic.Kind.ERROR, "Factory-method does not return a subtype of ActiveRecord", type);
 			}
-			//column-name must not be empty
-			if(inheritanceAnnotation.typeColumnName().isEmpty())
-			{
-				processingEnv.getMessager().printMessage( Diagnostic.Kind.ERROR, "inheritance-column must not be empty", e);
-			}
-			//column-name must not contain spaces
-			if(inheritanceAnnotation.typeColumnName().chars().anyMatch( (final int i)-> i == ' '))
-			{
-				processingEnv.getMessager().printMessage( Diagnostic.Kind.ERROR, "inheritance-column must not contain any spaces", e);
-			}
-			try
-			{
-				//factory-method must exist in factory-class and have the correct signature
-				Method factoryMethod = inheritanceAnnotation.factoryClass().getMethod( inheritanceAnnotation.factoryMethod(), POJOBase.class, Integer.TYPE, Object.class );
-				if(!ActiveRecord.class.isAssignableFrom( factoryMethod.getReturnType()))
-				{
-					processingEnv.getMessager().printMessage( Diagnostic.Kind.ERROR, "Factory-method does not return a subtype of ActiveRecord", e);
-				}
-			}
-			catch ( NoSuchMethodException | SecurityException ex )
-			{
-				processingEnv.getMessager().printMessage( Diagnostic.Kind.ERROR, "No factory-method found with the correct signature", e);
-				processingEnv.getMessager().printMessage( Diagnostic.Kind.WARNING, "The correct signature for a single-inheritance factory-method is:");
-				processingEnv.getMessager().printMessage( Diagnostic.Kind.WARNING, "\"public static <T extends ActiveRecord> T methodName(POJOBase<T> base, int primaryKey, Object type);\"");
-			}
-		});
+		}
+		catch ( NoSuchMethodException | SecurityException ex )
+		{
+			processingEnv.getMessager().printMessage( Diagnostic.Kind.ERROR, "No factory-method found with the correct signature", type);
+			processingEnv.getMessager().printMessage( Diagnostic.Kind.WARNING, "The correct signature for a single-inheritance factory-method is:");
+			processingEnv.getMessager().printMessage( Diagnostic.Kind.WARNING, "\"public static <T extends ActiveRecord> T methodName(POJOBase<T> base, int primaryKey, Object type);\"");
+		}
 	}
 	
-	private void processIndex(final RoundEnvironment roundEnv)
+	private void processIndex(final TypeElement type, final Index indexAnnotation)
 	{
-		roundEnv.getElementsAnnotatedWith( Index.class).forEach((final Element e)->{
-			final Index indexAnnotation= e.getAnnotation( Index.class);
-			final TypeElement type = (TypeElement)e;
-			boolean activeRecordFound = false;
-			for(final TypeMirror i :type.getInterfaces())
+		boolean activeRecordFound = false;
+		for(final TypeMirror i :type.getInterfaces())
+		{
+			if(processingEnv.getTypeUtils().isSubtype( i, processingEnv.getElementUtils().getTypeElement( ActiveRecord.class.getCanonicalName()).asType() ))
 			{
-				if(processingEnv.getTypeUtils().isSubtype( i, processingEnv.getElementUtils().getTypeElement( ActiveRecord.class.getCanonicalName()).asType() ))
-				{
-					activeRecordFound = true;
-					break;
-				}
+				activeRecordFound = true;
+				break;
 			}
-			//Must extend ActiveRecord
-			if(!activeRecordFound)
+		}
+		//Must extend ActiveRecord
+		if(!activeRecordFound)
+		{
+			processingEnv.getMessager().printMessage( Diagnostic.Kind.ERROR, "An indexed type must extend ActiveRecord", type);
+		}
+		//index-name must not be empty
+		if(indexAnnotation.name().isEmpty())
+		{
+			processingEnv.getMessager().printMessage( Diagnostic.Kind.ERROR, "Index-name must not be empty", type);
+		}
+		//index-name must not have any spaces
+		if(indexAnnotation.name().chars().anyMatch( (final int i)-> i == ' '))
+		{
+			processingEnv.getMessager().printMessage( Diagnostic.Kind.ERROR, "Index-name must not contain any spaces", type);
+		}
+		//attributes need to exist for index-columns
+		for(String column : indexAnnotation.columns())
+		{
+			if(!AttributeProcessor.testAttributeExists(processingEnv, type, column ))
 			{
-				processingEnv.getMessager().printMessage( Diagnostic.Kind.ERROR, "An indexed type must extend ActiveRecord",e);
+				processingEnv.getMessager().printMessage( Diagnostic.Kind.WARNING, "Column '"+column+"' is indexed but was not found (could be a false positive)", type);
 			}
-			//index-name must not be empty
-			if(indexAnnotation.name().isEmpty())
-			{
-				processingEnv.getMessager().printMessage( Diagnostic.Kind.ERROR, "Index-name must not be empty", e);
-			}
-			//index-name must not have any spaces
-			if(indexAnnotation.name().chars().anyMatch( (final int i)-> i == ' '))
-			{
-				processingEnv.getMessager().printMessage( Diagnostic.Kind.ERROR, "Index-name must not contain any spaces", e);
-			}
-			//attributes need to exist for index-columns
-			for(String column : indexAnnotation.columns())
-			{
-				if(!AttributeProcessor.testAttributeExists(processingEnv, type, column ))
-				{
-					processingEnv.getMessager().printMessage( Diagnostic.Kind.WARNING, "Column '"+column+"' is indexed but was not found (could be a false positive)", e);
-				}
-			}
-			//index-names should be globally unique (e.g. for SQLite)
-			if(globalIndices.contains( indexAnnotation.name()))
-			{
-				processingEnv.getMessager().printMessage( Diagnostic.Kind.WARNING, "Index-name should be globally unique. This is required on some DBMS");
-			}
-			globalIndices.add( indexAnnotation.name());
-		});
+		}
+		//index-names should be globally unique (e.g. for SQLite)
+		if(globalIndices.contains( indexAnnotation.name()))
+		{
+			processingEnv.getMessager().printMessage( Diagnostic.Kind.WARNING, "Index-name should be globally unique. This is required on some DBMS");
+		}
+		globalIndices.add( indexAnnotation.name());
 	}
 	
-	private void processValidate(final RoundEnvironment roundEnv)
+	private void processValidate(final TypeElement type, final Validate validateAnnotation)
 	{
-		roundEnv.getElementsAnnotatedWith( Validate.class).forEach((final Element e)->{
-			final Validate validateAnnotation= e.getAnnotation( Validate.class);
-			final TypeElement type = (TypeElement)e;
-			boolean activeRecordFound = false;
-			for(final TypeMirror i :type.getInterfaces())
+		boolean activeRecordFound = false;
+		for(final TypeMirror i :type.getInterfaces())
+		{
+			if(processingEnv.getTypeUtils().isSubtype( i, processingEnv.getElementUtils().getTypeElement( ValidatedRecord.class.getCanonicalName()).asType() ))
 			{
-				if(processingEnv.getTypeUtils().isSubtype( i, processingEnv.getElementUtils().getTypeElement( ValidatedRecord.class.getCanonicalName()).asType() ))
-				{
-					activeRecordFound = true;
-					break;
-				}
+				activeRecordFound = true;
+				break;
 			}
-			//any type annotated with validate must be of ValidatedRecord
-			if(!activeRecordFound)
+		}
+		//any type annotated with validate must be of ValidatedRecord
+		if(!activeRecordFound)
+		{
+			processingEnv.getMessager().printMessage( Diagnostic.Kind.ERROR, "A validated type must extend ValidatedRecord",type);
+		}
+		//attribute-name of the validation must not be empty
+		if(validateAnnotation.attribute().isEmpty())
+		{
+			processingEnv.getMessager().printMessage( Diagnostic.Kind.ERROR, "validated attribute-name must not be empty", type);
+		}
+		//attribute-name of the validation must not contain spaces
+		if(validateAnnotation.attribute().chars().anyMatch( (final int i)-> i == ' '))
+		{
+			processingEnv.getMessager().printMessage( Diagnostic.Kind.ERROR, "validated attribute-name must not contain any spaces", type);
+		}
+		//if type is set to custom, custom-class and custom-method must exist
+		if(validateAnnotation.type() == ValidationType.CUSTOM)
+		{
+			if(Void.class.equals( validateAnnotation.customClass()))
 			{
-				processingEnv.getMessager().printMessage( Diagnostic.Kind.ERROR, "A validated type must extend ValidatedRecord",e);
+				processingEnv.getMessager().printMessage( Diagnostic.Kind.ERROR, "Custom validation class must be set", type);
+				return;
 			}
-			//attribute-name of the validation must not be empty
-			
-			if(validateAnnotation.attribute().isEmpty())
+			//TODO doesn't work with class
+			String customMethodName = validateAnnotation.customMethod();
+//			TypeElement customClassElement = processingEnv.getElementUtils().getTypeElement( validateAnnotation.customClass());
+//			if(customClassElement == null)
+//			{
+//				processingEnv.getMessager().printMessage( Diagnostic.Kind.ERROR, "Could not find custom valdation-class: " + validateAnnotation.customClass(), type);
+//			}
+//			//if custom-class is set, custom-method must be set too
+//			else 
+			if(customMethodName.isEmpty())
 			{
-				processingEnv.getMessager().printMessage( Diagnostic.Kind.ERROR, "validated attribute-name must not be empty", e);
+				processingEnv.getMessager().printMessage( Diagnostic.Kind.ERROR, "Custom validation-method must be set", type);
 			}
-			//attribute-name of the validation must not contain spaces
-			if(validateAnnotation.attribute().chars().anyMatch( (final int i)-> i == ' '))
+//			//custom-method must be a Predicate<Object>
+//			else if(ElementFilter.methodsIn( processingEnv.getElementUtils().getAllMembers( customClassElement)).stream().
+//					filter( (ExecutableElement ee) -> {
+//						return ee.getReturnType().getKind() == TypeKind.BOOLEAN && ee.getSimpleName().contentEquals( customMethodName )
+//								&& ee.getParameters().size() == 1;
+//					}).count() == 0)
+//			{
+//				processingEnv.getMessager().printMessage( Diagnostic.Kind.ERROR, "Validation-method must return a boolean value", type);
+//			}
+		}
+		//if type is set to non-custom, warn about custom-class/-method not being used
+		else
+		{
+			//TODO doesn#t work, can't access class
+			if(/*!Void.class.equals( validateAnnotation.customClass()) ||*/ !validateAnnotation.customMethod().isEmpty())
 			{
-				processingEnv.getMessager().printMessage( Diagnostic.Kind.ERROR, "validated attribute-name must not contain any spaces", e);
+				processingEnv.getMessager().printMessage( Diagnostic.Kind.WARNING, "Custom-Class and -method will not be used unless the ValidationType is set to CUSTOM", type);
 			}
-			//if type is set to custom, custom-class and custom-method must exist
-			if(validateAnnotation.type() == ValidationType.CUSTOM)
-			{
-				if(Void.class.equals( validateAnnotation.customClass()))
-				{
-					processingEnv.getMessager().printMessage( Diagnostic.Kind.ERROR, "Custom validation class must be set", e);
-					return;
-				}
-				try
-				{
-					//if custom-class is set, custom-method must be a Predicate<Object>
-					Method validationMethod = validateAnnotation.customClass().getMethod( validateAnnotation.customMethod(), Object.class);
-					if(!Boolean.TYPE.isAssignableFrom( validationMethod.getReturnType()) && !Boolean.class.isAssignableFrom( validationMethod.getReturnType()))
-					{
-						processingEnv.getMessager().printMessage( Diagnostic.Kind.ERROR, "Validation-method must return a boolean value", e);
-					}
-				}
-				catch ( NoSuchMethodException | SecurityException ex )
-				{
-					processingEnv.getMessager().printMessage( Diagnostic.Kind.ERROR, "No validation-method found with the correct signature", e);
-					processingEnv.getMessager().printMessage( Diagnostic.Kind.WARNING, "A validation-method must be a Predicate<Object>");
-				}
-			}
-			//an attribure for the validated column must exist
-			if(!AttributeProcessor.testAttributeExists(processingEnv, type, validateAnnotation.attribute()))
-			{
-				processingEnv.getMessager().printMessage( Diagnostic.Kind.WARNING, "Column '"+validateAnnotation.attribute()+"' is validated but was not found (could be a false positive)", e);
-			}
-		});
+		}
+		//an attribure for the validated column must exist
+		if(!AttributeProcessor.testAttributeExists(processingEnv, type, validateAnnotation.attribute()))
+		{
+			processingEnv.getMessager().printMessage( Diagnostic.Kind.WARNING, "Column '"+validateAnnotation.attribute()+"' is validated but was not found (could be a false positive)", type);
+		}
 	}
 	
-	private void processSearchables(final RoundEnvironment roundEnv)
+	private void processSearchables(final TypeElement searchableType, final Searchable searchable)
 	{
-		roundEnv.getElementsAnnotatedWith( Searchable.class).forEach( (final Element e)->{
-			final Searchable searchable = e.getAnnotation( Searchable.class);
-			final TypeElement searchableType = ( TypeElement ) e;
-			boolean activeRecordFound = false;
-			for(final TypeMirror i :searchableType.getInterfaces())
+		boolean activeRecordFound = false;
+		for(final TypeMirror i :searchableType.getInterfaces())
+		{
+			if(processingEnv.getTypeUtils().isSubtype( i, processingEnv.getElementUtils().getTypeElement( ActiveRecord.class.getCanonicalName()).asType() ))
 			{
-				if(processingEnv.getTypeUtils().isSubtype( i, processingEnv.getElementUtils().getTypeElement( ActiveRecord.class.getCanonicalName()).asType() ))
-				{
-					activeRecordFound = true;
-					break;
-				}
+				activeRecordFound = true;
+				break;
 			}
-			//Must extend ActiveRecord
-			if(!activeRecordFound)
+		}
+		//Must extend ActiveRecord
+		if(!activeRecordFound)
+		{
+			processingEnv.getMessager().printMessage( Diagnostic.Kind.ERROR, "A Searchable type must extend ActiveRecord",searchableType);
+		}
+		//Should have a non-empty searchable-columns list
+		if(searchable.searchableColumns().length==0)
+		{
+			processingEnv.getMessager().printMessage( Diagnostic.Kind.WARNING, "Empty searchableColumns!", searchableType);
+		}
+		//Should have (or inherit) attributes for all columns listed in the searchable-columns
+		for(String column : searchable.searchableColumns())
+		{
+			if(!AttributeProcessor.testAttributeExists(processingEnv, searchableType, column ))
 			{
-				processingEnv.getMessager().printMessage( Diagnostic.Kind.ERROR, "A Searchable type must extend ActiveRecord",e);
+				processingEnv.getMessager().printMessage( Diagnostic.Kind.NOTE, "Column '"+column+"' is searchable but does not exist (This could be wrong)", searchableType);
 			}
-			//Should have a non-empty searchable-columns list
-			if(searchable.searchableColumns().length==0)
-			{
-				processingEnv.getMessager().printMessage( Diagnostic.Kind.WARNING, "Empty searchableColumns!", e);
-			}
-			//Should have (or inherit) attributes for all columns listed in the searchable-columns
-			for(String column : searchable.searchableColumns())
-			{
-				if(!AttributeProcessor.testAttributeExists(processingEnv, searchableType, column ))
-				{
-					processingEnv.getMessager().printMessage( Diagnostic.Kind.NOTE, "Column '"+column+"' is searchable but does not exist (This could be wrong)", e);
-				}
-			}
-		});
+		}
 	}
 }
