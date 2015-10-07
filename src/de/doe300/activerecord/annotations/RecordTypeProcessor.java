@@ -200,7 +200,8 @@ public class RecordTypeProcessor extends AbstractProcessor
 				processValidate( (TypeElement)e, validate);
 			}
 		});
-		return true;
+		//we do not claim the annotations, another processor may use them
+		return false;
 	}
 	
 	private void processRecordType(final TypeElement recordTypeElement, final RecordType recordType)

@@ -34,8 +34,6 @@ import java.io.Writer;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
-import java.util.logging.Level;
-import java.util.logging.Logger;
 import javax.annotation.Nonnull;
 import javax.annotation.processing.AbstractProcessor;
 import javax.annotation.processing.RoundEnvironment;
@@ -119,8 +117,8 @@ public class AttributeGenerator extends AbstractProcessor
 					//check if methods for attribute already exist
 					if(usedAttributeNames.contains( addAttribute.name()))
 					{
-						processingEnv.getMessager().printMessage( Diagnostic.Kind.WARNING, "Attribute-name '" + addAttribute.name()+ "' already in use, skipping", recordTypeElement);
-						return;
+						processingEnv.getMessager().printMessage( Diagnostic.Kind.NOTE, "Attribute-name '" + addAttribute.name()+ "' already in use, skipping", recordTypeElement);
+						continue;
 					}
 					//generate @Attribute-annotations
 					final String attributeAnnotation = generateAttributeAnnotation( addAttribute );
@@ -146,14 +144,14 @@ public class AttributeGenerator extends AbstractProcessor
 		}
 		catch ( IOException ex )
 		{
-			Logger.getLogger( AttributeGenerator.class.getName() ).log( Level.SEVERE, null, ex );
+			processingEnv.getMessager().printMessage( Diagnostic.Kind.ERROR, ex.getMessage(), recordTypeElement);
 		}
 	}
 
 	@Nonnull
 	private static String generateAttributeAnnotation(@Nonnull final AddAttribute source)
 	{
-		return "@Attribute( name = \"" + source.name() + "\", type = " + source.type().getSQLType() 
+		return "\t@Attribute( name = \"" + source.name() + "\", type = " + source.type().getSQLType() 
 				+ ", typeName = \"" + source.customSQLType() + "\", mayBeNull = " 
 				+ source.mayBeNull() + ", defaultValue = \"" + source.defaultValue() + "\", isUnique = " 
 				+ source.isUnique() + ", foreignKeyTable = \"" + source.foreignKeyTable() + "\", foreignKeyColumn = \"" 
@@ -166,22 +164,22 @@ public class AttributeGenerator extends AbstractProcessor
 	private static String generateSetter(@Nonnull final AddAttribute source)
 	{
 		//public default void setAttributeName(final Type value) {
-		return "public default void set" + Attributes.toCamelCase( source.name()) + "( final "
+		return "\tpublic default void set" + Attributes.toCamelCase( source.name()) + "( final "
 				+ source.type().getType() + " value) {\n"
 				//getBase.getStore.setValue(getBase(), getPrimaryKey(), "attributeName", value);
-				+ "\tgetBase().getStore().setValue(getBase(), getPrimaryKey(), \"" + source.name() + "\", value);\n"
+				+ "\t\tgetBase().getStore().setValue(getBase(), getPrimaryKey(), \"" + source.name() + "\", value);\n"
 				//}
-				+ "}\n\n";
+				+ "\t}\n\n";
 	}
 	
 	private static String generateGetter(@Nonnull final AddAttribute source)
 	{
 		//public default Type get(is)AttributeName() {
-		return "public default " + source.type().getType() + (source.type() == AttributeType.BOOLEAN ? " is" : " get") 
+		return "\tpublic default " + source.type().getType() + (source.type() == AttributeType.BOOLEAN ? " is" : " get") 
 				+ Attributes.toCamelCase( source.name()) + "() {\n"
 				//return Type.cast(getBase.getStore.getValue(getBase(), getPrimaryKey(), "attributeName"));
-				+ "\treturn " + source.type().getType() + ".class.cast(getBase().getStore().getValue(getBase(), getPrimaryKey(), \"" + source.name() + "\"));\n"
+				+ "\t\treturn " + source.type().getType() + ".class.cast(getBase().getStore().getValue(getBase(), getPrimaryKey(), \"" + source.name() + "\"));\n"
 				//}
-				+ "}\n\n";
+				+ "\t}\n\n";
 	}
 }

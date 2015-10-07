@@ -85,7 +85,8 @@ public class AttributeProcessor extends AbstractProcessor
 		processAttributeGetter( roundEnv );
 		processAttributeSetter( roundEnv );
 		processEncryptedAttributes( roundEnv );
-		return true;
+		//we do not claim the annotations, another processor may use them
+		return false;
 	}
 	
 	@Override
