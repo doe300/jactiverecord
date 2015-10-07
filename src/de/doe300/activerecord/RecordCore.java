@@ -24,6 +24,7 @@
  */
 package de.doe300.activerecord;
 
+import de.doe300.activerecord.jdbc.VendorSpecific;
 import java.lang.reflect.Proxy;
 import java.sql.Connection;
 import java.sql.SQLException;
@@ -40,6 +41,7 @@ import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 
 import de.doe300.activerecord.logging.Logging;
+import de.doe300.activerecord.migration.AutomaticMigration;
 import de.doe300.activerecord.pojo.POJOBase;
 import de.doe300.activerecord.pojo.SingleInheritanceBase;
 import de.doe300.activerecord.proxy.ProxyBase;
@@ -51,6 +53,7 @@ import de.doe300.activerecord.record.SingleTableInheritance;
 import de.doe300.activerecord.store.RecordStore;
 import de.doe300.activerecord.store.impl.CachedJDBCRecordStore;
 import de.doe300.activerecord.store.impl.SimpleJDBCRecordStore;
+import de.doe300.activerecord.store.impl.memory.MemoryMigration;
 import de.doe300.activerecord.store.impl.memory.MemoryRecordStore;
 import de.doe300.activerecord.validation.Validate;
 import de.doe300.activerecord.validation.ValidatedRecord;
@@ -296,5 +299,45 @@ public final class RecordCore implements AutoCloseable
 				Logging.getLogger().debug( "RecordCore", "Records saved for: "+b.getRecordType().getSimpleName());
 			}
 		}
+	}
+	
+	/**
+	 * Creates the data-store for the given record-type
+	 * @param recordType
+	 * @return whether the data-store was created
+	 * @throws java.sql.SQLException
+	 * @sicne 0.3
+	 */
+	public boolean createTable(@Nonnull final Class<? extends ActiveRecord> recordType) throws SQLException
+	{
+		if(MemoryRecordStore.class.isInstance( store))
+		{
+			return new MemoryMigration((MemoryRecordStore)store, recordType, false).apply( null );
+		}
+		else if (SimpleJDBCRecordStore.class.isInstance( store) || store.getConnection() != null)
+		{
+			return new AutomaticMigration(recordType, false, VendorSpecific.guessDatabaseVendor( store.getConnection())).apply( store.getConnection());
+		}
+		throw new IllegalArgumentException("No automatic migration supported for this record-store: " + store.getClass());
+	}
+	
+	/**
+	 * Deletes the data-store for the given record-type
+	 * @param recordType
+	 * @return whether the data-store was deleted
+	 * @throws java.sql.SQLException
+	 * @since 0.3
+	 */
+	public boolean dropTable(@Nonnull final Class<? extends ActiveRecord> recordType) throws SQLException
+	{
+		if(MemoryRecordStore.class.isInstance( store))
+		{
+			return new MemoryMigration((MemoryRecordStore)store, recordType, false).revert(null );
+		}
+		else if (SimpleJDBCRecordStore.class.isInstance( store) || store.getConnection() != null)
+		{
+			return new AutomaticMigration(recordType, false, VendorSpecific.guessDatabaseVendor( store.getConnection())).revert(store.getConnection());
+		}
+		throw new IllegalArgumentException("No automatic migration supported for this record-store: " + store.getClass());
 	}
 }

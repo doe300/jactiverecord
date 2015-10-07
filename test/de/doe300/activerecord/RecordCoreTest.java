@@ -126,4 +126,11 @@ public class RecordCoreTest extends Assert
 		core.fireRecordEvent( RecordListener.RecordEvent.RECORD_CREATED, core.getBase( TestInterface.class ), core.getBase( TestInterface.class).createRecord());
 		core.removeRecordListener( TestInterface.class, l);
 	}
+
+	@Test
+	public void testCreateTable() throws Exception
+	{
+		assertTrue( core.dropTable( TestInterface.class));
+		assertTrue( core.createTable( TestInterface.class));
+	}
 }

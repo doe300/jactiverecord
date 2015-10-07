@@ -40,9 +40,9 @@ import java.sql.SQLException;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
-import org.junit.AfterClass;
+import org.junit.After;
 import org.junit.Assert;
-import org.junit.BeforeClass;
+import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.junit.runners.Parameterized;
@@ -82,16 +82,16 @@ public class ProfilingRecordStoreTest extends Assert
 		);
 	}
 	
-	@BeforeClass
-	public static void setUpClass() throws Exception
+	@Before
+	public void setUp() throws Exception
 	{
-		TestServer.buildTestTables();
+		TestServer.buildTestTables(recordStore.getClass());
 	}
 	
-	@AfterClass
-	public static void tearDownClass() throws Exception
+	@After
+	public void tearDown() throws Exception
 	{
-		TestServer.destroyTestTables();
+		TestServer.destroyTestTables(recordStore.getClass());
 	}
 
 	@Test
