@@ -56,7 +56,16 @@ import javax.lang.model.util.ElementFilter;
 public final class ProcessorUtils
 {
 	
+	/**
+	 * Option to check if the used attributes exists
+	 * @since 0.4
+	 */
 	public static final String OPTION_CHECK_ATTRIBUTES = "record.annotations.checkAttributes";
+	
+	/**
+	 * Option to enable <code>@Nullable</code> and <code>@Nonnull</code> annotations for generated code
+	 * @since 0.4
+	 */
 	public static final String OPTION_ADD_NULLABLE_ANNOTATIONS = "record.annotations.nullableAnnotations";
 	
 	@Nullable

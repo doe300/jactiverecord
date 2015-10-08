@@ -104,11 +104,10 @@ public class ValidationGenerator extends AbstractProcessor
 				writer.append( "import ").append( ValidatedRecord.class.getCanonicalName()).append( ";\n");
 				writer.append( "import ").append( ValidationFailed.class.getCanonicalName()).append( ";\n");
 				writer.append( "import ").append( Validations.class.getCanonicalName()).append( ";\n");
-
+				
 				//TODO write @Generated annotation (somehow netbeans can't find it)
 
-				writer.append( "interface ").append( generatedFileName ).append(" extends ").
-						append( ValidatedRecord.class.getCanonicalName());
+				writer.append( "interface ").append( generatedFileName ).append(" extends ValidatedRecord");
 
 				writer.append(" {\n\n");
 
@@ -169,7 +168,8 @@ public class ValidationGenerator extends AbstractProcessor
 	private static String generateValidateMethod(@Nonnull final Validate[] validations)
 	{
 		//public default void validate() throws ValidationFailed {
-		return "\tpublic default void validate() throws ValidationFailed {\n"
+		return "\t@Override\n" +
+				"\tpublic default void validate() throws ValidationFailed {\n"
 				//print validation-methods
 				+ Arrays.stream(validations).map( (Validate validation) -> toAssertionCall(validation)).
 						collect( Collectors.joining( "\n", "", "\n") )
@@ -180,7 +180,8 @@ public class ValidationGenerator extends AbstractProcessor
 	private static String generateIsValidMethod(@Nonnull final Validate[] validations)
 	{
 		//public default boolean isValid() {
-		return "\tpublic default boolean isValid() {\n"
+		return "\t@Override\n" +
+				"\tpublic default boolean isValid() {\n"
 				//print validation-methods
 				+ Arrays.stream(validations).map( (Validate validation) -> toValidationCheck(validation)).
 						collect( Collectors.joining( "\n", "", "\n") )
