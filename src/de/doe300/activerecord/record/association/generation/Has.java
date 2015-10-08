@@ -24,6 +24,7 @@
  */
 package de.doe300.activerecord.record.association.generation;
 
+import de.doe300.activerecord.record.ActiveRecord;
 import java.lang.annotation.ElementType;
 import java.lang.annotation.Target;
 
@@ -49,7 +50,7 @@ public @interface Has
 	/**
 	 * @return the record-type of the associated table
 	 */
-	public String associatedType();
+	public Class<? extends ActiveRecord> associatedType();
 	
 	/**
 	 * @return the column-name for the key (of the associated table) used by the association

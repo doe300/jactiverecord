@@ -60,7 +60,10 @@ import javax.lang.model.element.AnnotationMirror;
 import javax.lang.model.element.AnnotationValue;
 import javax.lang.model.element.ElementKind;
 import javax.lang.model.element.ExecutableElement;
+import javax.lang.model.element.Modifier;
 import javax.lang.model.element.VariableElement;
+import javax.lang.model.type.DeclaredType;
+import javax.lang.model.type.TypeKind;
 import javax.lang.model.util.ElementFilter;
 
 /**
@@ -106,7 +109,7 @@ public class RecordTypeProcessor extends AbstractProcessor
 				).map((String s) -> Completions.of( s, "Sort by Index"));
 			}
 			//XXX remove duplicates
-			return Stream.concat( indexCompletions, ProcessorUtils.getAllAttributeNames((TypeElement)element).stream().
+			return Stream.concat( indexCompletions, ProcessorUtils.getAllAttributeNames(processingEnv, (TypeElement)element).stream().
 					flatMap( (String name) -> Stream.of( 
 							Completions.of( '"' + name + " ASC\""),
 							Completions.of( '"' + name + " DESC\"")
@@ -130,9 +133,12 @@ public class RecordTypeProcessor extends AbstractProcessor
 			{
 				return Collections.emptySet();
 			}
-			//TODO problem: class-values are not present at compile-time!
-			Class<?> factoryClass = ( Class<?> ) factoryClassValue.getValue();
-			return Arrays.stream( factoryClass.getMethods()).map( (Method m) -> Completions.of( '"'+m.getName()+'"')).collect( Collectors.toList());
+			TypeElement factoryClass = (TypeElement)ProcessorUtils.getTypeMirror(processingEnv, () -> (Class<?>)factoryClassValue.getValue()).asElement();
+			return ProcessorUtils.getClassMethods( processingEnv, factoryClass, null, (ExecutableElement ee) -> {
+				return (userText == null || ee.getSimpleName().toString().toLowerCase().startsWith( userText.toLowerCase()));
+			}, Modifier.PUBLIC, Modifier.STATIC ).
+					map( (ExecutableElement method) ->Completions.of( method.getSimpleName().toString())).
+					collect( Collectors.toSet());
 		}
 		//searchable searchable columns / index columns / record-type default-columns
 		if(member.getSimpleName().contentEquals( "searchableColumns") || member.getSimpleName().contentEquals( "columns" ) || member.getSimpleName().contentEquals( "defaultColumns"))
@@ -146,7 +152,7 @@ public class RecordTypeProcessor extends AbstractProcessor
 					//only primary key
 					Completions.of( '"'+element.getAnnotation( RecordType.class).primaryKey()+'"', "primary key" ),
 					//all attribute-names
-					Completions.of( ProcessorUtils.getAllAttributeNames( (TypeElement)element).stream().
+					Completions.of( ProcessorUtils.getAllAttributeNames(processingEnv, (TypeElement)element).stream().
 							map( (String name) -> '"'+name+'"').collect( Collectors.joining( ",", "{","}")), "all attributes")
 					);
 		}
@@ -251,12 +257,13 @@ public class RecordTypeProcessor extends AbstractProcessor
 		//if type is concrete class and not single-inheritance, the constructor must accept (int, POJOBase)
 		if(ElementKind.CLASS == recordTypeElement.getKind())
 		{
-			//TODO doesn't accept constructor (int, POJOBase<X>)
-			final TypeMirror integerType = processingEnv.getElementUtils().getTypeElement( Integer.class.getCanonicalName()).asType();
-			final TypeMirror recordBaseType = processingEnv.getElementUtils().getTypeElement( RecordBase.class.getCanonicalName()).asType();
+			final TypeMirror integerType = ProcessorUtils.getTypeMirror( processingEnv, () -> Integer.class);
+			final TypeMirror recordBaseType = ProcessorUtils.getTypeMirror( processingEnv, () -> RecordBase.class);
 			if(!ElementFilter.constructorsIn( recordTypeElement.getEnclosedElements()).stream().
 					anyMatch( (ExecutableElement constructor) -> {
-						return constructor.getParameters().size() == 2 && 
+						return constructor.getModifiers().contains( Modifier.PUBLIC) && 
+								constructor.getParameters().size() == 2 && 
+								//TODO doesn't accept constructor (int, POJOBase<X>)
 								processingEnv.getTypeUtils().isSubtype( constructor.getParameters().get(0).asType(), integerType) &&
 								processingEnv.getTypeUtils().isSubtype( constructor.getParameters().get(1).asType(), recordBaseType );
 					}))
@@ -380,39 +387,30 @@ public class RecordTypeProcessor extends AbstractProcessor
 		//if type is set to custom, custom-class and custom-method must exist
 		if(validateAnnotation.type() == ValidationType.CUSTOM)
 		{
-			if(Void.class.equals( validateAnnotation.customClass()))
+			DeclaredType customClass = ProcessorUtils.getTypeMirror( processingEnv, validateAnnotation::customClass);
+			if(!ProcessorUtils.isClassSet( processingEnv, customClass ))
 			{
 				processingEnv.getMessager().printMessage( Diagnostic.Kind.ERROR, "Custom validation class must be set", type);
 				return;
 			}
-			//TODO doesn't work with class
 			String customMethodName = validateAnnotation.customMethod();
-//			TypeElement customClassElement = processingEnv.getElementUtils().getTypeElement( validateAnnotation.customClass());
-//			if(customClassElement == null)
-//			{
-//				processingEnv.getMessager().printMessage( Diagnostic.Kind.ERROR, "Could not find custom valdation-class: " + validateAnnotation.customClass(), type);
-//			}
-//			//if custom-class is set, custom-method must be set too
-//			else 
 			if(customMethodName.isEmpty())
 			{
 				processingEnv.getMessager().printMessage( Diagnostic.Kind.ERROR, "Custom validation-method must be set", type);
 			}
-//			//custom-method must be a Predicate<Object>
-//			else if(ElementFilter.methodsIn( processingEnv.getElementUtils().getAllMembers( customClassElement)).stream().
-//					filter( (ExecutableElement ee) -> {
-//						return ee.getReturnType().getKind() == TypeKind.BOOLEAN && ee.getSimpleName().contentEquals( customMethodName )
-//								&& ee.getParameters().size() == 1;
-//					}).count() == 0)
-//			{
-//				processingEnv.getMessager().printMessage( Diagnostic.Kind.ERROR, "Validation-method must return a boolean value", type);
-//			}
+			//custom-method must be a Predicate<Object>
+			else if(ProcessorUtils.getClassMethods( processingEnv, (TypeElement)customClass.asElement(), customMethodName, 
+					(ExecutableElement ee) -> {
+						return ee.getReturnType().getKind() == TypeKind.BOOLEAN && ee.getParameters().size() == 1;
+					}, Modifier.PUBLIC, Modifier.STATIC ).count() == 0)
+			{
+				processingEnv.getMessager().printMessage( Diagnostic.Kind.ERROR, "Validation-method must return a boolean value", type);
+			}
 		}
 		//if type is set to non-custom, warn about custom-class/-method not being used
 		else
 		{
-			//TODO doesn#t work, can't access class
-			if(/*!Void.class.equals( validateAnnotation.customClass()) ||*/ !validateAnnotation.customMethod().isEmpty())
+			if(ProcessorUtils.isClassSet( processingEnv, ProcessorUtils.getTypeMirror( processingEnv, validateAnnotation::customClass) ) || !validateAnnotation.customMethod().isEmpty())
 			{
 				processingEnv.getMessager().printMessage( Diagnostic.Kind.WARNING, "Custom-Class and -method will not be used unless the ValidationType is set to CUSTOM", type);
 			}

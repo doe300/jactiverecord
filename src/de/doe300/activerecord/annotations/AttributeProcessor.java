@@ -34,8 +34,6 @@ import de.doe300.activerecord.record.attributes.Attributes;
 import de.doe300.activerecord.record.security.EncryptedAttribute;
 import de.doe300.activerecord.record.validation.ValidationFailed;
 import java.lang.reflect.Field;
-import java.lang.reflect.Method;
-import java.lang.reflect.Modifier;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
@@ -55,9 +53,12 @@ import javax.lang.model.element.AnnotationMirror;
 import javax.lang.model.element.AnnotationValue;
 import javax.lang.model.element.Element;
 import javax.lang.model.element.ExecutableElement;
+import javax.lang.model.element.Modifier;
 import javax.lang.model.element.TypeElement;
 import javax.lang.model.element.VariableElement;
+import javax.lang.model.type.DeclaredType;
 import javax.lang.model.type.TypeKind;
+import javax.lang.model.type.TypeMirror;
 import javax.lang.model.util.ElementFilter;
 import javax.tools.Diagnostic;
 
@@ -70,7 +71,7 @@ import javax.tools.Diagnostic;
 @SupportedSourceVersion(SourceVersion.RELEASE_8)
 @SupportedAnnotationTypes({
 	"de.doe300.activerecord.migration.Attribute", "de.doe300.activerecord.migration.ExcludeAttribute",
-	"de.doe300.activerecord.attributes.AttributeGetter", "de.doe300.activerecord.attributes.AttributeSetter",
+	"de.doe300.activerecord.attributes.record.AttributeGetter", "de.doe300.activerecord.record.attributes.AttributeSetter",
 })
 @SupportedOptions({ProcessorUtils.OPTION_CHECK_ATTRIBUTES})
 public class AttributeProcessor extends AbstractProcessor
@@ -103,7 +104,7 @@ public class AttributeProcessor extends AbstractProcessor
 		{
 			return Arrays.stream( java.sql.Types.class.getFields()).
 					//retain all public static int fields
-					filter( (Field f) -> Modifier.isStatic( f.getModifiers()) && Modifier.isPublic( f.getModifiers()) && Integer.TYPE.equals( f.getType())).
+					filter( (Field f) -> java.lang.reflect.Modifier.isStatic( f.getModifiers()) && java.lang.reflect.Modifier.isPublic( f.getModifiers()) && Integer.TYPE.equals( f.getType())).
 					map( (Field f) -> Completions.of( java.sql.Types.class.getCanonicalName() +"."+ f.getName())).
 					collect( Collectors.toList());
 		}
@@ -133,13 +134,13 @@ public class AttributeProcessor extends AbstractProcessor
 			{
 				return Collections.emptySet();
 			}
-			Class<?> converterClass = ( Class<?> ) converterClassValue.getValue();
-			return Arrays.stream( converterClass.getMethods()).
-					//retain all methods with matching signature
-					filter( (Method method) -> method.getParameterCount() == 1 && Modifier.isStatic( method.getModifiers()) && Modifier.isPublic( method.getModifiers())).
-					//retain only methods starting with the user-input
-					filter( (Method method) -> userText == null || method.getName().startsWith( userText)).
-					map( (Method method) ->Completions.of( method.getName() )).
+			TypeElement converterClass = (TypeElement)ProcessorUtils.getTypeMirror(processingEnv, () -> (Class<?>)converterClassValue.getValue()).asElement();
+			return ProcessorUtils.getClassMethods( processingEnv, converterClass, null, (ExecutableElement ee) -> {
+				return (userText == null || ee.getSimpleName().toString().toLowerCase().startsWith( userText.toLowerCase())) &&
+						//retain all methods with matching signature
+						ee.getParameters().size() == 1;
+			}, Modifier.PUBLIC, Modifier.STATIC ).
+					map( (ExecutableElement method) ->Completions.of( method.getSimpleName().toString() )).
 					collect( Collectors.toList());
 		}
 		//validator-method - suggest all methods in given validator-class, if any
@@ -151,13 +152,13 @@ public class AttributeProcessor extends AbstractProcessor
 			{
 				return Collections.emptySet();
 			}
-			Class<?> validatorClass = ( Class<?> ) validatorClassValue.getValue();
-			return Arrays.stream( validatorClass.getMethods()).
-					//retain all methods with matching signature
-					filter( (Method method) -> method.getParameterCount() == 1 && Modifier.isStatic( method.getModifiers()) && Modifier.isPublic( method.getModifiers())).
-					//retain only methods starting with the user-input
-					filter( (Method method) -> userText == null || method.getName().startsWith( userText)).
-					map( (Method method) ->Completions.of( method.getName() )).
+			TypeElement validatorClass = (TypeElement)ProcessorUtils.getTypeMirror(processingEnv, () -> (Class<?>)validatorClassValue.getValue()).asElement();
+			return ProcessorUtils.getClassMethods( processingEnv, validatorClass, null, (ExecutableElement ee) -> {
+				return (userText == null || ee.getSimpleName().toString().toLowerCase().startsWith( userText.toLowerCase())) &&
+						//retain all methods with matching signature
+						ee.getParameters().size() == 1;
+			}, Modifier.PUBLIC, Modifier.STATIC ).
+					map( (ExecutableElement method) ->Completions.of( method.getSimpleName().toString())).
 					collect( Collectors.toSet());
 		}
 		return Collections.emptySet();
@@ -209,6 +210,8 @@ public class AttributeProcessor extends AbstractProcessor
 	
 	private void processAttributeSetter(final RoundEnvironment roundEnv)
 	{
+		final TypeMirror validationFailedType = ProcessorUtils.getTypeMirror(processingEnv, () -> ValidationFailed.class);
+		
 		roundEnv.getElementsAnnotatedWith( AttributeSetter.class).forEach((final Element e)->{
 			final AttributeSetter setterAnnotation= e.getAnnotation( AttributeSetter.class);
 			final ExecutableElement setterMethod = (ExecutableElement)e;
@@ -230,25 +233,16 @@ public class AttributeProcessor extends AbstractProcessor
 			}
 
 			//check existence of validator
-			if(!setterAnnotation.validatorClass().equals( Void.class))
+			DeclaredType validatorClass = ProcessorUtils.getTypeMirror(processingEnv, setterAnnotation::validatorClass);
+			if(ProcessorUtils.isClassSet( processingEnv, validatorClass))
 			{
-				//TODO doesn't work (access to class)
-				Method validatorMethod = null;
-				for(final Method m: setterAnnotation.validatorClass().getMethods())
-				{
-					if(m.getName().equals( setterAnnotation.validatorMethod()))
-					{
-						if(m.getParameterCount() == 1 && Modifier.isStatic( m.getModifiers()) && Modifier.isPublic( m.getModifiers()))
-						{
-							//check if parameter-type is supertype of method return-value
-							if(processingEnv.getTypeUtils().isSubtype( setterMethod.getReturnType(), processingEnv.getElementUtils().getTypeElement( m.getParameterTypes()[0].getCanonicalName()).asType()))
-							{
-								validatorMethod = m;
-								break;
-							}
-						}
-					}
-				}
+				//TODO needs testing
+				ExecutableElement validatorMethod = ProcessorUtils.getClassMethod( processingEnv, (TypeElement) validatorClass.asElement(), 
+						setterAnnotation.validatorMethod(), (ExecutableElement ee) -> {
+							return ee.getParameters().size() == 1 &&
+								//check if parameter-type is supertype of method return-value
+								processingEnv.getTypeUtils().isSubtype( setterMethod.getReturnType(), ee.getParameters().get( 0).asType());
+						}, Modifier.PUBLIC, Modifier.STATIC );
 				//if validator-class is set, validator-method must be set too
 				if(validatorMethod == null)
 				{
@@ -257,15 +251,10 @@ public class AttributeProcessor extends AbstractProcessor
 				//check for validator-method throwing ValidationFailed
 				else
 				{
-					boolean validationErrorThrown = false;
-					for(final Class<?> exType : validatorMethod.getExceptionTypes())
+					boolean validationErrorThrown = validatorMethod.getThrownTypes().stream().anyMatch( (TypeMirror type) -> 
 					{
-						if(ValidationFailed.class.isAssignableFrom( exType))
-						{
-							validationErrorThrown = true;
-							break;
-						}
-					}
+						return processingEnv.getTypeUtils().isSubtype( type, validationFailedType);
+					});
 					//validator-method should throw ValidationFailed
 					if(!validationErrorThrown)
 					{
@@ -275,25 +264,15 @@ public class AttributeProcessor extends AbstractProcessor
 			}
 
 			//check existence of converter
-			if(!setterAnnotation.converterClass().equals( Void.class))
+			DeclaredType converterClass = ProcessorUtils.getTypeMirror(processingEnv, setterAnnotation::converterClass);
+			if(ProcessorUtils.isClassSet( processingEnv, converterClass))
 			{
-				Method converterMethod = null;
-				for(final Method m: setterAnnotation.converterClass().getMethods())
-				{
-					//TODO doesn't work (access to class)
-					if(m.getName().equals( setterAnnotation.converterMethod()))
-					{
-						if(m.getParameterCount() == 1 && Modifier.isStatic( m.getModifiers()) && Modifier.isPublic( m.getModifiers()))
-						{
-							//check if parameter-type is supertype of method return-value
-							if(processingEnv.getTypeUtils().isSubtype( setterMethod.getReturnType(), processingEnv.getElementUtils().getTypeElement( m.getParameterTypes()[0].getCanonicalName()).asType()))
-							{
-								converterMethod = m;
-								break;
-							}
-						}
-					}
-				}
+				ExecutableElement converterMethod = ProcessorUtils.getClassMethod( processingEnv, (TypeElement) converterClass.asElement(), 
+						setterAnnotation.converterMethod(), (ExecutableElement ee) -> {
+							return ee.getParameters().size() == 1 &&
+								//check if parameter-type of converter is supertype of setter parameter-type
+								processingEnv.getTypeUtils().isSubtype( ee.getParameters().get( 0).asType(), setterMethod.getParameters().get( 0).asType());
+						}, Modifier.PUBLIC, Modifier.STATIC );
 				//if converter-class is set, converter-method must be set too
 				if(converterMethod == null)
 				{
@@ -302,13 +281,8 @@ public class AttributeProcessor extends AbstractProcessor
 				//check for signature of converter-method
 				else
 				{
-					//converter-method must have exactly one parameter
-					if(converterMethod.getParameterCount()!=1)
-					{
-						processingEnv.getMessager().printMessage( Diagnostic.Kind.ERROR, "Converter-method must always have exactly one parameter", e );
-					}
 					//converter-method must not return void
-					if(converterMethod.getReturnType() == Void.class)
+					if(!ProcessorUtils.isClassSet( processingEnv, converterMethod.getReturnType()))
 					{
 						processingEnv.getMessager().printMessage( Diagnostic.Kind.ERROR, "Converter-method must have a non-void return type", e);
 					}
@@ -340,25 +314,15 @@ public class AttributeProcessor extends AbstractProcessor
 			}
 
 			//check existence of converter
-			if(false && !getterAnnotation.converterClass().equals( Void.class))
+			DeclaredType converterClass = ProcessorUtils.getTypeMirror(processingEnv, getterAnnotation::converterClass);
+			if(ProcessorUtils.isClassSet( processingEnv, converterClass ))
 			{
-				//TODO doesn't work (access to class)
-				Method converterMethod = null;
-				for(final Method m: getterAnnotation.converterClass().getMethods())
-				{
-					if(m.getName().equals( getterAnnotation.converterMethod()))
-					{
-						if(m.getParameterCount() == 1 && Modifier.isStatic( m.getModifiers()) && Modifier.isPublic( m.getModifiers()))
-						{
+				ExecutableElement converterMethod = ProcessorUtils.getClassMethod( processingEnv, (TypeElement)converterClass.asElement(), 
+						getterAnnotation.converterMethod(), (ExecutableElement ee )-> {
+							return ee.getParameters().size() == 1 &&
 							//check if return-type is subtype of getter-method return-type
-							if(processingEnv.getTypeUtils().isSubtype( processingEnv.getElementUtils().getTypeElement( m.getReturnType().getCanonicalName()).asType(), getterMethod.getReturnType() ))
-							{
-								converterMethod = m;
-								break;
-							}
-						}
-					}
-				}
+									processingEnv.getTypeUtils().isSubtype( ee.getReturnType(), getterMethod.getReturnType());
+						}, Modifier.PUBLIC, Modifier.STATIC );
 				//if converter-class is set, converter-method must be set too
 				if(converterMethod == null)
 				{
@@ -367,13 +331,8 @@ public class AttributeProcessor extends AbstractProcessor
 				//check for signature of converter-method
 				else
 				{
-					//converter-method must have exactly one parameter
-					if(converterMethod.getParameterCount() != 1)
-					{
-						processingEnv.getMessager().printMessage( Diagnostic.Kind.ERROR, "Converter-method must always have exactly one parameter", e );
-					}
 					//converter-method must not return void
-					if(converterMethod.getReturnType() == Void.class)
+					if(!ProcessorUtils.isClassSet( processingEnv, converterMethod.getReturnType()))
 					{
 						processingEnv.getMessager().printMessage( Diagnostic.Kind.ERROR, "Converter-method must have a non-void return type", e);
 					}

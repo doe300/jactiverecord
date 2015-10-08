@@ -24,6 +24,7 @@
  */
 package de.doe300.activerecord.record.validation;
 
+import de.doe300.activerecord.annotations.ProcessorUtils;
 import java.io.IOException;
 import java.io.Writer;
 import java.util.Arrays;
@@ -237,7 +238,7 @@ public class ValidationGenerator extends AbstractProcessor
 				return "Validations.negativeNumber(value)";
 			case CUSTOM:
 			default:
-				return validate.customClass().getCanonicalName()+'.'+validate.customMethod()+"(value)";
+				return ProcessorUtils.getTypeMirror( null, validate::customClass).toString()+'.'+validate.customMethod()+"(value)";
 		}
 	}
 }

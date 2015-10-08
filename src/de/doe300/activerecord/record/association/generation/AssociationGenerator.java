@@ -71,6 +71,7 @@ import javax.tools.JavaFileObject;
 @SupportedAnnotationTypes({
 	"de.doe300.activerecord.record.association.generation.BelongsTo",
 	"de.doe300.activerecord.record.association.generation.Has",
+	"de.doe300.activerecord.record.association.generation.HasManyThrough",
 	"de.doe300.activerecord.record.association.generation.Associations"
 })
 @SupportedOptions(ProcessorUtils.OPTION_ADD_NULLABLE_ANNOTATIONS)
@@ -95,7 +96,7 @@ public class AssociationGenerator extends AbstractProcessor
 		return true;
 		
 	}
-	
+
 	private void processAssociations(final TypeElement recordTypeElement)
 	{
 		//check if type already processed
@@ -104,7 +105,7 @@ public class AssociationGenerator extends AbstractProcessor
 			return;
 		}
 		//we store all used attribute-names, so we can check for collissions later
-		final Set<String> attributeNames = new HashSet<>(ProcessorUtils.getAllAttributeNames( recordTypeElement ));
+		final Set<String> attributeNames = new HashSet<>(ProcessorUtils.getAllAttributeNames(processingEnv, recordTypeElement ));
 		processedElements.put(recordTypeElement.getQualifiedName().toString(), attributeNames);
 		
 		//group all association-annotations
@@ -224,6 +225,7 @@ public class AssociationGenerator extends AbstractProcessor
 	{
 		StringBuilder code = new StringBuilder(1000);
 		final String thisAssociationKey = annotation.associationKey().isEmpty() ? annotation.name() : annotation.associationKey();
+		final String typeName = ProcessorUtils.getTypeMirror(null, annotation::associatedType).toString();
 		
 		//Getter-Method
 		
@@ -233,19 +235,19 @@ public class AssociationGenerator extends AbstractProcessor
 		}
 		code.append( generateAttributeAnnotation( annotation));
 		//public default <record-type> get<Name>() {
-		code.append( "\tpublic default ").append( annotation.associatedType()).append( " get").
+		code.append( "\tpublic default ").append( typeName).append( " get").
 				append( Attributes.toCamelCase( annotation.name())).append( "() {\n");
 		if(annotation.associationForeignKey().isEmpty())
 		{
 			//return AssociationHelper.getBelongsTo(this, <record-type>.class, <association-key>);
-			code.append( "\t\treturn AssociationHelper.getBelongsTo(this, ").append( annotation.associatedType()).
+			code.append( "\t\treturn AssociationHelper.getBelongsTo(this, ").append( typeName).
 					append(".class, \"").append(thisAssociationKey).append("\");\n");
 		}
 		else
 		{
 			//RecordBase<<record-type>> otherBase = getBase().getCore().getBase(<record-type>.class);
-			code.append( "\t\tRecordBase<").append(annotation.associatedType()).append("> otherBase = getBase().getCore().getBase(").
-					append( annotation.associatedType()).append( ".class);\n");
+			code.append( "\t\tRecordBase<").append(typeName).append("> otherBase = getBase().getCore().getBase(").
+					append( typeName).append( ".class);\n");
 			//Object foreignKey = getBase().getStore().getValue(getBase(), getPrimaryKey(), <association-key>);
 			code.append( "\t\tObject foreignKey = getBase().getStore().getValue( getBase(), getPrimaryKey(), \"").
 					append( thisAssociationKey).append( "\");\n");
@@ -262,7 +264,7 @@ public class AssociationGenerator extends AbstractProcessor
 		{
 			//public default void set<Name>(<record-type> value) {
 			code.append( "\tpublic default void set").append( Attributes.toCamelCase( annotation.name())).
-					append( '(').append((withNullControl ? "@Nullable " : "")).append( annotation.associatedType()).
+					append( '(').append((withNullControl ? "@Nullable " : "")).append( typeName).
 					append( " value) {\n");
 			if(annotation.associationForeignKey().isEmpty())
 			{
@@ -287,6 +289,7 @@ public class AssociationGenerator extends AbstractProcessor
 	private static String generateHasOne(@Nonnull final Has annotation, boolean withNullControl)
 	{
 		StringBuilder code = new StringBuilder(1000);
+		final String typeName = ProcessorUtils.getTypeMirror(null, annotation::associatedType).toString();
 		
 		//Getter-Method
 		
@@ -295,19 +298,19 @@ public class AssociationGenerator extends AbstractProcessor
 			code.append( "\t@Nullable\n");
 		}
 		//public default <record-type> get<Name>() {
-		code.append( "\tpublic default ").append( annotation.associatedType()).append( " get").
+		code.append( "\tpublic default ").append( typeName).append( " get").
 				append( Attributes.toCamelCase( annotation.name())).append( "() {\n");
 		if(annotation.associationForeignKey().isEmpty())
 		{
 			//return AssociationHelper.getHasOne(this, <record-type>.class, <association-key>)
-			code.append( "\t\treturn AssociationHelper.getHasOne(this, ").append( annotation.associatedType()).
+			code.append( "\t\treturn AssociationHelper.getHasOne(this, ").append( typeName).
 					append( ".class, \"").append( annotation.associationKey()).append( "\");\n");
 		}
 		else
 		{
 			//RecordBase<<record-type>> otherBase = getBase().getCore().getBase(<record-type>.class);
-			code.append( "\t\tRecordBase<").append(annotation.associatedType()).append("> otherBase = getBase().getCore().getBase(").
-					append( annotation.associatedType()).append( ".class);\n");
+			code.append( "\t\tRecordBase<").append(typeName).append("> otherBase = getBase().getCore().getBase(").
+					append( typeName).append( ".class);\n");
 			//Object foreignKey = getBase().getStore().getValue(getBase(), getPrimaryKey(), <association-foreign-key>);
 			code.append( "\t\tObject foreignKey = getBase().getStore().getValue(getBase(), getPrimaryKey(), \"").
 					append(annotation.associationForeignKey()).append( "\");\n");
@@ -324,7 +327,7 @@ public class AssociationGenerator extends AbstractProcessor
 		{
 			//public default void set<Name>(<record-type> value) {
 			code.append( "\tpublic default void set").append( Attributes.toCamelCase( annotation.name())).
-					append( '(').append((withNullControl ? "@Nullable " : "")).append( annotation.associatedType()).append( " value) {\n");
+					append( '(').append((withNullControl ? "@Nullable " : "")).append( typeName).append( " value) {\n");
 			//if(value == null) return;
 			code.append( "\t\tif(value == null) return;\n");
 			if(annotation.associationForeignKey().isEmpty())
@@ -352,6 +355,7 @@ public class AssociationGenerator extends AbstractProcessor
 	private static String generateHasMany(@Nonnull final Has annotation, boolean withNullControl)
 	{
 		StringBuilder code = new StringBuilder(1000);
+		final String typeName = ProcessorUtils.getTypeMirror(null, annotation::associatedType).toString();
 		
 		//Getter-Method
 		
@@ -360,20 +364,20 @@ public class AssociationGenerator extends AbstractProcessor
 			code.append( "\t@Nonnull\n");
 		}
 		//public default RecordSet<<record-type>> get<Name>() {
-		code.append( "\tpublic default RecordSet<").append( annotation.associatedType()).append( "> get").
+		code.append( "\tpublic default RecordSet<").append( typeName).append( "> get").
 				append( Attributes.toCamelCase( annotation.name()) ).append( "() {\n");
 		
 		if(annotation.associationForeignKey().isEmpty())
 		{
 			//return AssociationHelper.getHasManySet(this, <record-type>.class, <association-key>);
-			code.append( "\t\treturn AssociationHelper.getHasManySet(this, ").append(annotation.associatedType()).
+			code.append( "\t\treturn AssociationHelper.getHasManySet(this, ").append(typeName).
 					append(".class, \"" ).append( annotation.associationKey()).append( "\");\n");
 		}
 		else
 		{
 			//final RecordBase<<record-type>> otherBase = getBase().getCore().getBase( <record-type>.class);
-			code.append( "\t\tfinal RecordBase<").append(annotation.associatedType()).
-					append("> otherBase = getBase().getCore().getBase(" ).append( annotation.associatedType()).
+			code.append( "\t\tfinal RecordBase<").append(typeName).
+					append("> otherBase = getBase().getCore().getBase(" ).append( typeName).
 					append( ".class);\n");
 			//final Object foreignKey = getBase().getStore().getValue( getBase(), getPrimaryKey(), <association-foreign-key>);
 			code.append( "\t\tfinal Object foreignKey = getBase().getStore().getValue( getBase(), getPrimaryKey(), \"").
@@ -382,15 +386,15 @@ public class AssociationGenerator extends AbstractProcessor
 			code.append( "\t\tfinal SimpleCondition cond = new SimpleCondition(\"").append(annotation.associationKey()).
 					append("\", foreignKey, Comparison.IS);\n");
 			//final Consumer<<record-type>> setAssoc = (final <record-type> t) -> otherBase.getStore().setValue( otherBase, t.getPrimaryKey(), <association-key>, foreignKey );
-			code.append( "\t\tfinal Consumer<").append( annotation.associatedType()).append( "> setAssoc = (final ").
-					append( annotation.associatedType()).append( " t) -> otherBase.getStore().setValue( otherBase, t.getPrimaryKey(), \"").
+			code.append( "\t\tfinal Consumer<").append( typeName).append( "> setAssoc = (final ").
+					append( typeName).append( " t) -> otherBase.getStore().setValue( otherBase, t.getPrimaryKey(), \"").
 					append( annotation.associationKey()).append( "\", foreignKey);\n");
 			//final Consumer<<record-type>> unsetAssoc = (final <record-type> t) -> otherBase.getStore().setValue( otherBase, t.getPrimaryKey(), <association-key>, null );
-			code.append( "\t\tfinal Consumer<").append( annotation.associatedType()).append( "> unsetAssoc = (final ").
-					append( annotation.associatedType()).append( " t) -> otherBase.getStore().setValue( otherBase, t.getPrimaryKey(), \"").
+			code.append( "\t\tfinal Consumer<").append( typeName).append( "> unsetAssoc = (final ").
+					append( typeName).append( " t) -> otherBase.getStore().setValue( otherBase, t.getPrimaryKey(), \"").
 					append( annotation.associationKey() ).append( "\", null);\n");
 			//return new HasManyAssociationSet<<record-type>>(otherBase, cond, setAssoc, unsetAssoc );
-			code.append( "\t\treturn new HasManyAssociationSet<").append(annotation.associatedType()).
+			code.append( "\t\treturn new HasManyAssociationSet<").append(typeName).
 					append(">(otherBase, cond, setAssoc, unsetAssoc );");
 		}
 		
@@ -403,6 +407,7 @@ public class AssociationGenerator extends AbstractProcessor
 	private static String generateHasManyThrough(@Nonnull final HasManyThrough annotation, boolean withNullControl)
 	{
 		StringBuilder code = new StringBuilder(500);
+		final String typeName = ProcessorUtils.getTypeMirror(null, annotation::associatedType).toString();
 		
 		//Getter-Method
 		if(withNullControl)
@@ -410,11 +415,11 @@ public class AssociationGenerator extends AbstractProcessor
 			code.append( "\t@Nonnull\n");
 		}
 		//public default RecordSet<<record-type>> get<Name>() {
-		code.append( "\tpublic default RecordSet<").append( annotation.associatedType()).append( "> get").
+		code.append( "\tpublic default RecordSet<").append( typeName).append( "> get").
 				append( Attributes.toCamelCase( annotation.name()) ).append( "() {\n");
 		
 		//return AssociationHelper.getHasManyThroughSet(this, <record-type>.class, <mapping-table>, <mapping-this-key>, <mapping-other-key>);
-		code.append( "\t\treturn AssociationHelper.getHasManyThroughSet(this, " ).append( annotation.associatedType()).
+		code.append( "\t\treturn AssociationHelper.getHasManyThroughSet(this, " ).append( typeName).
 				append( ".class, \"").append( annotation.mappingTable()).append( "\", \"").
 				append( annotation.mappingTableThisKey()).append( "\", \"").append( annotation.mappingTableAssociatedKey()).
 				append( "\");\n");

@@ -91,7 +91,7 @@ public class AttributeGenerator extends AbstractProcessor
 		}
 		processedElements.add( recordTypeElement.getQualifiedName().toString());
 
-		final List<String> usedAttributeNames = ProcessorUtils.getAllAttributeNames( recordTypeElement);
+		final List<String> usedAttributeNames = ProcessorUtils.getAllAttributeNames(processingEnv, recordTypeElement);
 
 		//we can't write into an existing source-file so we must create a new one
 		try

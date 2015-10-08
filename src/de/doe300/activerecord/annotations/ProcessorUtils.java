@@ -29,22 +29,23 @@ import de.doe300.activerecord.migration.ExcludeAttribute;
 import de.doe300.activerecord.record.attributes.AttributeGetter;
 import de.doe300.activerecord.record.attributes.AttributeSetter;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
-import java.util.function.Function;
+import java.util.function.Predicate;
+import java.util.function.Supplier;
 import java.util.stream.Stream;
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 import javax.annotation.processing.ProcessingEnvironment;
 import javax.lang.model.element.AnnotationMirror;
 import javax.lang.model.element.AnnotationValue;
-import javax.lang.model.element.Element;
-import javax.lang.model.element.ElementKind;
 import javax.lang.model.element.ExecutableElement;
 import javax.lang.model.element.Modifier;
-import javax.lang.model.element.PackageElement;
 import javax.lang.model.element.TypeElement;
 import javax.lang.model.element.VariableElement;
+import javax.lang.model.type.DeclaredType;
+import javax.lang.model.type.MirroredTypeException;
 import javax.lang.model.type.TypeMirror;
 import javax.lang.model.util.ElementFilter;
 
@@ -95,16 +96,16 @@ public final class ProcessorUtils
 	}
 	
 	/**
+	 * @param processingEnv
 	 * @param classElement
 	 * @return a list of all used attribute-names
 	 * @since 0.3
 	 */
 	@Nonnull
-	public static List<String> getAllAttributeNames(@Nonnull final TypeElement classElement)
+	public static List<String> getAllAttributeNames(@Nonnull final ProcessingEnvironment processingEnv, @Nonnull final TypeElement classElement)
 	{
-		//XXX include inherited attribute-names
 		List<String> attributeNames = new ArrayList<>(20);
-		for(ExecutableElement ee : ElementFilter.methodsIn( classElement.getEnclosedElements()))
+		for(ExecutableElement ee : ElementFilter.methodsIn( processingEnv.getElementUtils().getAllMembers( classElement)))
 		{
 			if(ee.getAnnotation( ExcludeAttribute.class) != null)
 			{
@@ -137,61 +138,89 @@ public final class ProcessorUtils
 	
 	static Stream<VariableElement> getAllAttributeStringConstants(@Nonnull final ProcessingEnvironment processingEnv, @Nonnull final TypeElement classElement)
 	{
-		List<String> allAttributes = getAllAttributeNames( classElement );
+		List<String> allAttributes = getAllAttributeNames( processingEnv, classElement );
 		return getAllStringConstants( processingEnv, classElement ).
 				filter( (VariableElement ve) -> allAttributes.contains( (String)ve.getConstantValue()) );
 	}
 	
 	static Stream<VariableElement> getAllNonAttributeStringConstants(@Nonnull final ProcessingEnvironment processingEnv, @Nonnull final TypeElement classElement)
 	{
-		List<String> allAttributes = getAllAttributeNames( classElement );
+		List<String> allAttributes = getAllAttributeNames( processingEnv, classElement );
 		return getAllStringConstants( processingEnv, classElement ).
 				filter( (VariableElement ve) -> !allAttributes.contains( (String)ve.getConstantValue()) );
 	}
 	
-	@Nonnull
-	public static Stream<TypeElement> getAllTypes(@Nonnull final ProcessingEnvironment processingEnv, @Nullable final TypeElement currentType, @Nullable final String pathPart)
+	/**
+	 * Uses a neat trick to get a useful TypeMirror from an unusable Class
+	 * 
+	 * @param processingEnv
+	 * @param type
+	 * @return the type-mirror for this type
+	 * @since 0.4
+	 * @see http://blog.retep.org/2009/02/13/getting-class-values-from-annotations-in-an-annotationprocessor/
+	 */
+	public static DeclaredType getTypeMirror(@Nullable final ProcessingEnvironment processingEnv, @Nonnull final Supplier<Class<?>> type)
 	{
-		if(pathPart == null || pathPart.indexOf( '.') < 0)
-		{
-			//we don't have any path yet, so suggest classes in the same package as the currentType
-			if(currentType == null)
-			{
-				return Stream.empty();
-			}
-			final PackageElement packageEl = processingEnv.getElementUtils().getPackageOf( currentType);
-			if(packageEl == null)
-			{
-				return Stream.empty();
-			}
-			return getAllTypesInPackage( packageEl );
+		try{
+			type.get().getCanonicalName();
 		}
-		String packagePath = pathPart.substring( 0, pathPart.lastIndexOf( '.'));
-		PackageElement packageEl = processingEnv.getElementUtils().getPackageElement( packagePath);
-		return getAllTypesInPackage( packageEl );
+		catch(MirroredTypeException mte)
+		{
+			return ( DeclaredType ) mte.getTypeMirror();
+		}
+		//fall back to default behavior
+		if(processingEnv == null)
+		{
+			return null;
+		}
+		return ( DeclaredType )processingEnv.getElementUtils().getTypeElement( type.get().getCanonicalName()).asType();
 	}
 	
-	private static Stream<TypeElement> getAllTypesInPackage(@Nonnull final PackageElement packageEl)
+	/**
+	 * @param processingEnv
+	 * @param type
+	 * @return whether the type in the type-mirror is not {@link Void}
+	 * @since 0.4
+	 */
+	public static boolean isClassSet(@Nonnull final ProcessingEnvironment processingEnv, @Nonnull final TypeMirror type)
 	{
-		return packageEl.getEnclosedElements().stream().filter( (Element e) ->
-		{
-			return e.getKind() == ElementKind.CLASS || e.getKind() == ElementKind.INTERFACE || e.getKind() == ElementKind.PACKAGE;
-		}).flatMap( new Function<Element, Stream<? extends TypeElement>>()
-		{
-			@Override
-			public Stream<? extends TypeElement> apply( Element t )
-			{
-				if(t.getKind() == ElementKind.CLASS || t.getKind() == ElementKind.INTERFACE)
-				{
-					return Stream.of( (TypeElement)t );
-				}
-				if(t.getKind() == ElementKind.PACKAGE)
-				{
-					return getAllTypesInPackage( (PackageElement)t );
-				}
-				return Stream.empty();
-			}
-		});
+		final TypeMirror voidClass = processingEnv.getElementUtils().getTypeElement( Void.class.getCanonicalName()).asType();
+		return !processingEnv.getTypeUtils().isSameType( voidClass, type);
+	}
+	
+	/**
+	 * @param processingEnv
+	 * @param classElement
+	 * @param methodName
+	 * @param predicate
+	 * @param modifiers
+	 * @return the first method matching the given criteria
+	 * @since 0.4
+	 */
+	@Nullable
+	public static ExecutableElement getClassMethod(@Nonnull final ProcessingEnvironment processingEnv, @Nonnull final TypeElement classElement,
+			@Nonnull final String methodName, @Nonnull final Predicate<ExecutableElement> predicate, @Nullable final Modifier... modifiers)
+	{
+		return getClassMethods( processingEnv, classElement, methodName, predicate, modifiers ).findFirst().orElse( null);
+	}
+	
+	/**
+	 * @param processingEnv
+	 * @param classElement
+	 * @param methodName
+	 * @param predicate
+	 * @param modifiers
+	 * @return all methods matching the given criteria
+	 * @since 0.4
+	 */
+	public static Stream<ExecutableElement> getClassMethods(@Nonnull final ProcessingEnvironment processingEnv, @Nonnull final TypeElement classElement,
+			@Nullable final String methodName, @Nonnull final Predicate<ExecutableElement> predicate, @Nullable final Modifier... modifiers)
+	{
+		return ElementFilter.methodsIn( processingEnv.getElementUtils().
+				getAllMembers( classElement)).stream().
+				filter( (ExecutableElement ee) -> methodName == null || ee.getSimpleName().contentEquals( methodName)).
+				filter( (ExecutableElement ee) -> ee.getModifiers().containsAll( Arrays.asList( modifiers))).
+				filter( predicate);
 	}
 	
 	private ProcessorUtils()
