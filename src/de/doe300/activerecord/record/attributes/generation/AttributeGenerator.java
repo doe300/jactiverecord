@@ -39,6 +39,7 @@ import javax.annotation.Nullable;
 import javax.annotation.processing.AbstractProcessor;
 import javax.annotation.processing.RoundEnvironment;
 import javax.annotation.processing.SupportedAnnotationTypes;
+import javax.annotation.processing.SupportedOptions;
 import javax.annotation.processing.SupportedSourceVersion;
 import javax.lang.model.SourceVersion;
 import javax.lang.model.element.Element;
@@ -59,6 +60,7 @@ import javax.tools.JavaFileObject;
 	"de.doe300.activerecord.record.attributes.generation.AddAttribute",
 	"de.doe300.activerecord.record.attributes.generation.AddAttributes",
 })
+@SupportedOptions(ProcessorUtils.OPTION_ADD_NULLABLE_ANNOTATIONS)
 public class AttributeGenerator extends AbstractProcessor
 {
 	private final Set<String> processedElements = new HashSet<>(10);

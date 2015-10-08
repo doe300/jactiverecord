@@ -2,3 +2,4 @@ de.doe300.activerecord.annotations.RecordTypeProcessor
 de.doe300.activerecord.annotations.AttributeProcessor
 de.doe300.activerecord.record.attributes.generation.AttributeGenerator
 de.doe300.activerecord.record.validation.ValidationGenerator
+de.doe300.activerecord.record.association.generation.AssociationGenerator
