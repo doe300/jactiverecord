@@ -56,6 +56,9 @@ import javax.lang.model.util.ElementFilter;
 public final class ProcessorUtils
 {
 	
+	public static final String OPTION_CHECK_ATTRIBUTES = "record.annotations.checkAttributes";
+	public static final String OPTION_ADD_NULLABLE_ANNOTATIONS = "record.annotations.nullableAnnotations";
+	
 	@Nullable
 	static ExecutableElement getAnnotationMemberName(@Nonnull final AnnotationMirror mirror, @Nonnull final String name)
 	{

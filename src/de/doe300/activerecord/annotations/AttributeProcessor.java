@@ -72,11 +72,9 @@ import javax.tools.Diagnostic;
 	"de.doe300.activerecord.migration.Attribute", "de.doe300.activerecord.migration.ExcludeAttribute",
 	"de.doe300.activerecord.attributes.AttributeGetter", "de.doe300.activerecord.attributes.AttributeSetter",
 })
-@SupportedOptions({AttributeProcessor.OPTION_CHECK_ATTRIBUTES})
+@SupportedOptions({ProcessorUtils.OPTION_CHECK_ATTRIBUTES})
 public class AttributeProcessor extends AbstractProcessor
 {
-	static final String OPTION_CHECK_ATTRIBUTES = "record.annotations.checkAttributes";
-
 	@Override
 	public boolean process(Set<? extends TypeElement> annotations, RoundEnvironment roundEnv )
 	{
@@ -426,7 +424,7 @@ public class AttributeProcessor extends AbstractProcessor
 	
 	static boolean testAttributeExists(@Nonnull final ProcessingEnvironment processingEnv, @Nonnull final TypeElement element, @Nonnull final String attrName)
 	{
-		String optionValue = processingEnv.getOptions().get( OPTION_CHECK_ATTRIBUTES);
+		String optionValue = processingEnv.getOptions().get( ProcessorUtils.OPTION_CHECK_ATTRIBUTES);
 		if(optionValue == null || Boolean.parseBoolean( optionValue) != Boolean.TRUE)
 		{
 			//disable check for attributes

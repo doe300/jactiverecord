@@ -35,6 +35,7 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 import javax.annotation.Nonnull;
+import javax.annotation.Nullable;
 import javax.annotation.processing.AbstractProcessor;
 import javax.annotation.processing.RoundEnvironment;
 import javax.annotation.processing.SupportedAnnotationTypes;
@@ -103,6 +104,10 @@ public class AttributeGenerator extends AbstractProcessor
 				writer.append( ";\n");
 
 				writer.append( "import ").append( Attribute.class.getCanonicalName()).append( ";\n");
+				if(addNullableAnnotation())
+				{
+					writer.append( "import ").append( Nullable.class.getCanonicalName()).append( ";\n");
+				}
 
 				//TODO write @Generated annotation (somehow netbeans can't find it)
 
@@ -127,10 +132,14 @@ public class AttributeGenerator extends AbstractProcessor
 					if(addAttribute.hasSetter())
 					{
 						writer.append( attributeAnnotation);
-						writer.append( generateSetter( addAttribute));
+						writer.append( generateSetter( addAttribute, addNullableAnnotation()));
 					}
 					if(addAttribute.hasGetter())
 					{
+						if(addNullableAnnotation())
+						{
+							writer.append( "\t@Nullable\n");
+						}
 						writer.append( attributeAnnotation);
 						writer.append( generateGetter( addAttribute));
 					}
@@ -147,6 +156,12 @@ public class AttributeGenerator extends AbstractProcessor
 			processingEnv.getMessager().printMessage( Diagnostic.Kind.ERROR, ex.getMessage(), recordTypeElement);
 		}
 	}
+	
+	private boolean addNullableAnnotation()
+	{
+		String optionValue = processingEnv.getOptions().get( ProcessorUtils.OPTION_ADD_NULLABLE_ANNOTATIONS);
+		return optionValue != null && Boolean.TRUE.equals( Boolean.valueOf( optionValue));
+	}
 
 	@Nonnull
 	private static String generateAttributeAnnotation(@Nonnull final AddAttribute source)
@@ -161,10 +176,10 @@ public class AttributeGenerator extends AbstractProcessor
 	}
 	
 	@Nonnull
-	private static String generateSetter(@Nonnull final AddAttribute source)
+	private static String generateSetter(@Nonnull final AddAttribute source, boolean withNullable)
 	{
 		//public default void setAttributeName(final Type value) {
-		return "\tpublic default void set" + Attributes.toCamelCase( source.name()) + "( final "
+		return "\tpublic default void set" + Attributes.toCamelCase( source.name()) + "("+(withNullable ? "@Nullable" : "")+" final "
 				+ source.type().getType() + " value) {\n"
 				//getBase.getStore.setValue(getBase(), getPrimaryKey(), "attributeName", value);
 				+ "\t\tgetBase().getStore().setValue(getBase(), getPrimaryKey(), \"" + source.name() + "\", value);\n"

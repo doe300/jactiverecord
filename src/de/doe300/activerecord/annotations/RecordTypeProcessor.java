@@ -56,7 +56,6 @@ import java.util.stream.Collectors;
 import java.util.stream.Stream;
 import javax.annotation.processing.Completion;
 import javax.annotation.processing.Completions;
-import javax.annotation.processing.SupportedOptions;
 import javax.lang.model.element.AnnotationMirror;
 import javax.lang.model.element.AnnotationValue;
 import javax.lang.model.element.ElementKind;
@@ -76,7 +75,6 @@ import javax.lang.model.util.ElementFilter;
 	"de.doe300.activerecord.migration.constraints.Index","de.doe300.activerecord.record.SingleTableInheritance",
 	"de.doe300.activerecord.record.validation.Validate", "de.doe300.activerecord.record.validation.Validates",
 })
-@SupportedOptions({AttributeProcessor.OPTION_CHECK_ATTRIBUTES})
 public class RecordTypeProcessor extends AbstractProcessor
 {
 	private static final Set<String> globalIndices = new HashSet<>(20);
