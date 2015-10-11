@@ -33,6 +33,7 @@ import javax.annotation.Nonnull;
  */
 public enum AttributeType
 {
+	//TODO rewrite to allow arbitrary java and sql-types
 	BOOLEAN(Boolean.class.getCanonicalName(), java.sql.Types.BIT),
 	BYTE(Byte.class.getCanonicalName(), java.sql.Types.TINYINT),
 	SHORT(Short.class.getCanonicalName(), java.sql.Types.SMALLINT),

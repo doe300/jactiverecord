@@ -258,17 +258,23 @@ public class RecordTypeProcessor extends AbstractProcessor
 		if(ElementKind.CLASS == recordTypeElement.getKind())
 		{
 			final TypeMirror integerType = ProcessorUtils.getTypeMirror( processingEnv, () -> Integer.class);
-			final TypeMirror recordBaseType = ProcessorUtils.getTypeMirror( processingEnv, () -> RecordBase.class);
+			//we need to use erasure, because POJOBase<SomeType> is no supbyte of RecordBase<T>, but POJOBase is of RecordBase
+			final TypeMirror recordBaseType = processingEnv.getTypeUtils().erasure(ProcessorUtils.getTypeMirror( processingEnv, () -> RecordBase.class));
 			if(!ElementFilter.constructorsIn( recordTypeElement.getEnclosedElements()).stream().
 					anyMatch( (ExecutableElement constructor) -> {
 						return constructor.getModifiers().contains( Modifier.PUBLIC) && 
 								constructor.getParameters().size() == 2 && 
-								//TODO doesn't accept constructor (int, POJOBase<X>)
-								processingEnv.getTypeUtils().isSubtype( constructor.getParameters().get(0).asType(), integerType) &&
-								processingEnv.getTypeUtils().isSubtype( constructor.getParameters().get(1).asType(), recordBaseType );
+								//test for primitive int or Integer
+								(constructor.getParameters().get( 0).asType().getKind() == TypeKind.INT || 
+									processingEnv.getTypeUtils().isSubtype( constructor.getParameters().get(0).asType(), integerType)
+								) &&
+								processingEnv.getTypeUtils().isSubtype( 
+										processingEnv.getTypeUtils().erasure(constructor.getParameters().get( 1).asType()), 
+										recordBaseType 
+								);
 					}))
 			{
-				processingEnv.getMessager().printMessage( Diagnostic.Kind.WARNING, "No suitable constructor found", recordTypeElement);
+				processingEnv.getMessager().printMessage( Diagnostic.Kind.ERROR, "No suitable constructor found", recordTypeElement);
 			}
 		}
 	}

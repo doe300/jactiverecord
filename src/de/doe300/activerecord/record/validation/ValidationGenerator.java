@@ -159,6 +159,13 @@ public class ValidationGenerator extends AbstractProcessor
 			processingEnv.getMessager().printMessage( Diagnostic.Kind.NOTE, "Generated: " + 
 					processingEnv.getElementUtils().getPackageOf( recordTypeElement).getQualifiedName().toString()+ '.' +generatedFileName,
 					recordTypeElement);
+			
+			//warn if type does not extend generated type
+			if(!recordTypeElement.getInterfaces().stream().anyMatch( (TypeMirror interfaceMirror) -> interfaceMirror.toString().equals( generatedFileName)))
+			{
+				processingEnv.getMessager().printMessage( Diagnostic.Kind.WARNING, "Type '" + recordTypeElement.getSimpleName()
+						+ "' does not extend the generated type: " + generatedFileName, recordTypeElement);
+			}
 		}
 		catch ( IOException ex )
 		{

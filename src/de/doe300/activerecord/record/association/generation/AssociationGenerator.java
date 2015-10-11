@@ -55,6 +55,7 @@ import javax.annotation.processing.SupportedSourceVersion;
 import javax.lang.model.SourceVersion;
 import javax.lang.model.element.Element;
 import javax.lang.model.element.TypeElement;
+import javax.lang.model.type.TypeMirror;
 import javax.tools.Diagnostic;
 import javax.tools.JavaFileObject;
 
@@ -127,7 +128,8 @@ public class AssociationGenerator extends AbstractProcessor
 		try
 		{
 			final String generatedFileName = recordTypeElement.getSimpleName()+ "Associations";
-			JavaFileObject destFile = processingEnv.getFiler().createSourceFile( recordTypeElement.getQualifiedName()+"Associations", recordTypeElement);
+			final String qualifiedGeneratedFileName = recordTypeElement.getQualifiedName()+"Associations";
+			JavaFileObject destFile = processingEnv.getFiler().createSourceFile( qualifiedGeneratedFileName, recordTypeElement);
 			try(Writer writer = destFile.openWriter())
 			{
 				//we create an interface with given validation-methods as default-methods and extending ValidatedRecord
@@ -197,6 +199,13 @@ public class AssociationGenerator extends AbstractProcessor
 			processingEnv.getMessager().printMessage( Diagnostic.Kind.NOTE, "Generated: " + 
 					processingEnv.getElementUtils().getPackageOf( recordTypeElement).getQualifiedName().toString()+ '.' +generatedFileName,
 					recordTypeElement);
+			
+			//warn if type does not extend generated type
+			if(!recordTypeElement.getInterfaces().stream().anyMatch( (TypeMirror interfaceMirror) -> interfaceMirror.toString().equals( generatedFileName)))
+			{
+				processingEnv.getMessager().printMessage( Diagnostic.Kind.WARNING, "Type '" + recordTypeElement.getSimpleName()
+						+ "' does not extend the generated type: " + generatedFileName, recordTypeElement);
+			}
 		}
 		catch ( IOException ex )
 		{

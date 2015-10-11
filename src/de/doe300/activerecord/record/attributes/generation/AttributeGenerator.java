@@ -44,6 +44,7 @@ import javax.annotation.processing.SupportedSourceVersion;
 import javax.lang.model.SourceVersion;
 import javax.lang.model.element.Element;
 import javax.lang.model.element.TypeElement;
+import javax.lang.model.type.TypeMirror;
 import javax.tools.Diagnostic;
 import javax.tools.JavaFileObject;
 
@@ -152,6 +153,13 @@ public class AttributeGenerator extends AbstractProcessor
 			processingEnv.getMessager().printMessage( Diagnostic.Kind.NOTE, "Generated: " + 
 					processingEnv.getElementUtils().getPackageOf( recordTypeElement).getQualifiedName().toString()+ '.' +generatedFileName,
 					recordTypeElement);
+			
+			//warn if type does not extend generated type
+			if(!recordTypeElement.getInterfaces().stream().anyMatch( (TypeMirror interfaceMirror) -> interfaceMirror.toString().equals( generatedFileName)))
+			{
+				processingEnv.getMessager().printMessage( Diagnostic.Kind.WARNING, "Type '" + recordTypeElement.getSimpleName()
+						+ "' does not extend the generated type: " + generatedFileName, recordTypeElement);
+			}
 		}
 		catch ( IOException ex )
 		{
