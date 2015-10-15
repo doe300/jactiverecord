@@ -24,6 +24,7 @@
  */
 package de.doe300.activerecord;
 
+import de.doe300.activerecord.dsl.AggregateFunction;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.Map;
@@ -489,6 +490,12 @@ public abstract class RecordBase<T extends ActiveRecord> implements ReadOnlyReco
 	public int count(@Nullable final Condition condition)
 	{
 		return store.count( this, condition);
+	}
+
+	@Override
+	public <C, R> R aggregate( AggregateFunction<T, C, R> aggregateFunction, @Nullable final Condition condition )
+	{
+		return (R) getStore().aggregate( this, aggregateFunction, condition);
 	}
 
 	////

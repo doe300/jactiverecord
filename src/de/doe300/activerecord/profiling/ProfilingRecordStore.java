@@ -30,6 +30,7 @@ import java.util.Set;
 import java.util.stream.Stream;
 
 import de.doe300.activerecord.RecordBase;
+import de.doe300.activerecord.dsl.AggregateFunction;
 import de.doe300.activerecord.dsl.Condition;
 import de.doe300.activerecord.scope.Scope;
 import de.doe300.activerecord.store.RecordStore;
@@ -225,4 +226,12 @@ public class ProfilingRecordStore implements RecordStore
 	{
 		return profiler.profileInt("count", () -> store.count(base, condition));
 	}
+
+	@Override
+	public Object aggregate(RecordBase<?> base, AggregateFunction<?, ?, ?> aggregateFunction, Condition condition )
+	{
+		return profiler.profile( "aggregate", () -> store.aggregate( base, aggregateFunction, condition));
+	}
+	
+	
 }

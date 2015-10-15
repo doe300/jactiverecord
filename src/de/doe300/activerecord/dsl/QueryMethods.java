@@ -24,6 +24,7 @@
  */
 package de.doe300.activerecord.dsl;
 
+import de.doe300.activerecord.AggregateMethods;
 import java.util.stream.Stream;
 
 import javax.annotation.Nonnull;
@@ -39,7 +40,7 @@ import javax.annotation.Nonnegative;
  * @author doe300
  * @param <T>
  */
-public interface QueryMethods<T extends ActiveRecord> extends FinderMethods<T>
+public interface QueryMethods<T extends ActiveRecord> extends FinderMethods<T>, AggregateMethods<T>
 {
 	/**
 	 * Value for unknown size
@@ -118,5 +119,11 @@ public interface QueryMethods<T extends ActiveRecord> extends FinderMethods<T>
 	public default int count( @Nullable final Condition condition )
 	{
 		return ( int ) findWithScope(new Scope(condition, null, Scope.NO_LIMIT)).count();
+	}
+
+	@Override
+	public default <C, R> R aggregate( AggregateFunction<T, C, R> aggregateFunction, Condition condition )
+	{
+		return stream().filter( (T record) -> condition == null || condition.test( record)).collect( aggregateFunction );
 	}
 }

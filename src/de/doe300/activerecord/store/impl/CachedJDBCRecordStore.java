@@ -38,6 +38,7 @@ import java.util.stream.Stream;
 import javax.annotation.Nonnull;
 
 import de.doe300.activerecord.RecordBase;
+import de.doe300.activerecord.dsl.AggregateFunction;
 import de.doe300.activerecord.dsl.Condition;
 import de.doe300.activerecord.jdbc.VendorSpecific;
 import de.doe300.activerecord.logging.Logging;
@@ -323,6 +324,14 @@ public class CachedJDBCRecordStore extends SimpleJDBCRecordStore
 		//see #streamAllWithData for why there need to be a save
 		saveAll( base );
 		return super.count( base, condition );
+	}
+
+	@Override
+	public Object aggregate(RecordBase<?> base, AggregateFunction<?, ?, ?> aggregateFunction, Condition condition )
+	{
+		//see #streamAllWithData for why there need to be a save
+		saveAll( base );
+		return super.aggregate( base, aggregateFunction, condition );
 	}
 
 	@Override

@@ -24,6 +24,7 @@
  */
 package de.doe300.activerecord.record.association;
 
+import de.doe300.activerecord.AggregateMethods;
 import java.util.Comparator;
 import java.util.SortedSet;
 import java.util.stream.Stream;
@@ -44,7 +45,7 @@ import de.doe300.activerecord.record.ActiveRecord;
  * @author doe300
  * @param <T>
  */
-public interface RecordSet<T extends ActiveRecord> extends SortedSet<T>, FinderMethods<T>
+public interface RecordSet<T extends ActiveRecord> extends SortedSet<T>, FinderMethods<T>, AggregateMethods<T>
 {
 	@Override
 	@Nonnull

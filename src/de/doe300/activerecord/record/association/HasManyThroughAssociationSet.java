@@ -35,12 +35,14 @@ import javax.annotation.Nonnull;
 
 import de.doe300.activerecord.ReadOnlyRecordBase;
 import de.doe300.activerecord.RecordBase;
+import de.doe300.activerecord.dsl.AggregateFunction;
 import de.doe300.activerecord.dsl.AndCondition;
 import de.doe300.activerecord.dsl.Comparison;
 import de.doe300.activerecord.dsl.Condition;
 import de.doe300.activerecord.dsl.SimpleCondition;
 import de.doe300.activerecord.record.ActiveRecord;
 import de.doe300.activerecord.scope.Scope;
+import javax.annotation.Nullable;
 
 /**
  * has-many-through association represented as modifiable Set writing all changes into the backing record-store
@@ -189,6 +191,12 @@ public class HasManyThroughAssociationSet<T extends ActiveRecord> extends Abstra
 		return new HasManyThroughSubSet(cond);
 	}
 
+	@Override
+	public <C, R> R aggregate( AggregateFunction<T, C, R> aggregateFunction, @Nullable final Condition condition )
+	{
+		return stream().filter((T record) -> condition == null || condition.test( record )).collect( aggregateFunction );
+	}
+
 	private class HasManyThroughSubSet extends AbstractSet<T> implements RecordSet<T>
 	{
 		private final Condition subCondition;
@@ -290,6 +298,12 @@ public class HasManyThroughAssociationSet<T extends ActiveRecord> extends Abstra
 		public RecordSet<T> getForCondition( final Condition cond )
 		{
 			return new HasManyThroughSubSet(AndCondition.andConditions(subCondition,cond));
+		}
+
+		@Override
+		public <C, R> R aggregate( AggregateFunction<T, C, R> aggregateFunction, @Nullable final Condition condition )
+		{
+			return stream().filter((T record) -> condition == null || condition.test( record )).collect( aggregateFunction );
 		}
 	}
 }

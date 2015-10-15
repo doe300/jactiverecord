@@ -48,6 +48,7 @@ import javax.annotation.Nullable;
 import javax.annotation.WillNotClose;
 
 import de.doe300.activerecord.RecordBase;
+import de.doe300.activerecord.dsl.AggregateFunction;
 import de.doe300.activerecord.dsl.Condition;
 import de.doe300.activerecord.dsl.Order;
 import de.doe300.activerecord.dsl.SQLCommand;
@@ -438,6 +439,39 @@ public class SimpleJDBCRecordStore implements RecordStore
 		catch ( final SQLException ex )
 		{
 			Logging.getLogger().error( "JDBCStore", "Failed to count matches!");
+			Logging.getLogger().error( "JDBCStore", sql);
+			Logging.getLogger().error( "JDBCStore", ex);
+			throw new IllegalArgumentException(ex);
+		}
+	}
+
+	@Override
+	public Object aggregate(RecordBase<?> base, AggregateFunction<?, ?, ?> aggregateFunction, Condition condition )
+	{
+		checkTableExists( base );
+		String tableID = SQLCommand.getNextTableIdentifier( null );
+		final String sql = "SELECT " + aggregateFunction.toSQL() + " as result FROM "+base.getTableName()+" AS "+tableID+toWhereClause( condition, tableID );
+		Logging.getLogger().debug( "JDBCStore", sql);
+		try(PreparedStatement stm = con.prepareStatement(sql))
+		{
+			if(condition!=null)
+			{
+				fillStatement( stm, condition );
+			}
+			try (final ResultSet res = stm.executeQuery())
+			{
+				if (res.next())
+				{
+					return res.getObject("result");
+				}
+				Logging.getLogger().debug("JDBCStore", "No matching rows found");
+				return 0;
+			}
+
+		}
+		catch ( final SQLException ex )
+		{
+			Logging.getLogger().error( "JDBCStore", "Failed to aggregate matches!");
 			Logging.getLogger().error( "JDBCStore", sql);
 			Logging.getLogger().error( "JDBCStore", ex);
 			throw new IllegalArgumentException(ex);

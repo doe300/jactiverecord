@@ -36,6 +36,7 @@ import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 
 import de.doe300.activerecord.RecordBase;
+import de.doe300.activerecord.dsl.AggregateFunction;
 import de.doe300.activerecord.dsl.Condition;
 import de.doe300.activerecord.record.TimestampedRecord;
 import de.doe300.activerecord.scope.Scope;
@@ -316,4 +317,6 @@ public interface RecordStore extends AutoCloseable
 	{
 		return ( int ) streamAll( base, new Scope(condition, null, Scope.NO_LIMIT) ).count();
 	}
+	
+	public Object aggregate(@Nonnull final RecordBase<?> base, @Nonnull final AggregateFunction<?, ?, ?> aggregateFunction, @Nullable final Condition condition);
 }

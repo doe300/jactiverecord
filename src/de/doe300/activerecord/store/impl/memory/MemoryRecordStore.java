@@ -36,6 +36,7 @@ import java.util.stream.Stream;
 import javax.annotation.Nonnull;
 
 import de.doe300.activerecord.RecordBase;
+import de.doe300.activerecord.dsl.AggregateFunction;
 import de.doe300.activerecord.dsl.Condition;
 import de.doe300.activerecord.record.TimestampedRecord;
 import de.doe300.activerecord.scope.Scope;
@@ -258,6 +259,14 @@ public class MemoryRecordStore implements RecordStore
 	{
 		final MemoryTable table = assertTableExists( base.getTableName() );
 		return table.findAllRows( scope ).map( (final Map.Entry<Integer, MemoryRow> e) -> e.getValue().getRowMap());
+	}
+
+	@Override
+	public Object aggregate(RecordBase<?> base, AggregateFunction<?, ?, ?> aggregateFunction, Condition condition )
+	{
+		final MemoryTable table = assertTableExists( base.getTableName() );
+		return aggregateFunction.aggregate( table.findAllRows( new Scope(condition, null, Scope.NO_LIMIT)).
+				map( Map.Entry::getValue ).map(MemoryRow::getRowMap));
 	}
 
 	@Override

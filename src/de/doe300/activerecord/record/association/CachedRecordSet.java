@@ -34,9 +34,11 @@ import java.util.stream.Stream;
 import javax.annotation.Nonnull;
 
 import de.doe300.activerecord.ReadOnlyRecordBase;
+import de.doe300.activerecord.dsl.AggregateFunction;
 import de.doe300.activerecord.dsl.Condition;
 import de.doe300.activerecord.record.ActiveRecord;
 import de.doe300.activerecord.scope.Scope;
+import javax.annotation.Nullable;
 
 /**
  * A CachedRecordSet caches the records for successive calls, but will NOT be notified about changes in the underling DB.
@@ -194,4 +196,9 @@ public class CachedRecordSet<T extends ActiveRecord> extends AbstractSet<T> impl
 		return source.findFirstWithScope( scope );
 	}
 
+	@Override
+	public <C, R> R aggregate( AggregateFunction<T, C, R> aggregateFunction, @Nullable final Condition condition )
+	{
+		return stream().filter( (T record) -> condition == null || condition.test( record)).collect( aggregateFunction );
+	}
 }

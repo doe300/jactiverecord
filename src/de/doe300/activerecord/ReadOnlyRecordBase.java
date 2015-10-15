@@ -45,7 +45,7 @@ import javax.annotation.Nonnegative;
  * @author doe300
  * @param <T>
  */
-public interface ReadOnlyRecordBase<T extends ActiveRecord> extends FinderMethods<T>, AggregateFunctions<T>
+public interface ReadOnlyRecordBase<T extends ActiveRecord> extends FinderMethods<T>, AggregateMethods<T>
 {
 	/**
 	 * @return the data-type of the records

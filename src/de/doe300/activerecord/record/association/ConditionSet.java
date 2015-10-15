@@ -33,10 +33,13 @@ import java.util.stream.Stream;
 import javax.annotation.Nonnull;
 
 import de.doe300.activerecord.ReadOnlyRecordBase;
+import de.doe300.activerecord.RecordBase;
+import de.doe300.activerecord.dsl.AggregateFunction;
 import de.doe300.activerecord.dsl.AndCondition;
 import de.doe300.activerecord.dsl.Condition;
 import de.doe300.activerecord.record.ActiveRecord;
 import de.doe300.activerecord.scope.Scope;
+import javax.annotation.Nullable;
 
 /**
  * A RecordSet containing of records matching the given Condition.
@@ -191,5 +194,11 @@ public class ConditionSet<T extends ActiveRecord> extends AbstractSet<T> impleme
 	public RecordSet<T> getForCondition( final Condition cond )
 	{
 		return new ConditionSet<T>(base, AndCondition.andConditions(cond, condition), setConditionFunc, unsetConditionFunc);
+	}
+
+	@Override
+	public <C, R> R aggregate( AggregateFunction<T, C, R> aggregateFunction, @Nullable final Condition condition )
+	{
+		return ((RecordBase<T>) base).aggregate( aggregateFunction, AndCondition.andConditions( this.condition, condition));
 	}
 }

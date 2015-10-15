@@ -33,6 +33,8 @@ import java.util.stream.Stream;
 import javax.annotation.Nonnull;
 
 import de.doe300.activerecord.ReadOnlyRecordBase;
+import de.doe300.activerecord.RecordBase;
+import de.doe300.activerecord.dsl.AggregateFunction;
 import de.doe300.activerecord.dsl.AndCondition;
 import de.doe300.activerecord.dsl.Condition;
 import de.doe300.activerecord.record.ActiveRecord;
@@ -165,5 +167,11 @@ public class HasManyAssociationSet<T extends ActiveRecord> extends AbstractSet<T
 	public RecordSet<T> getForCondition( final Condition cond )
 	{
 		return new HasManyAssociationSet<T>(destBase, AndCondition.andConditions(associationCond, cond), setAssociationFunc, unsetAssociationFunc);
+	}
+
+	@Override
+	public <C, R> R aggregate( AggregateFunction<T, C, R> aggregateFunction, Condition condition )
+	{
+		return ((RecordBase<T>)destBase).aggregate( aggregateFunction, AndCondition.andConditions( associationCond, condition) );
 	}
 }

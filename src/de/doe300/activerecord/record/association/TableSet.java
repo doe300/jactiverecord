@@ -33,9 +33,11 @@ import javax.annotation.Nonnull;
 
 import de.doe300.activerecord.ReadOnlyRecordBase;
 import de.doe300.activerecord.RecordBase;
+import de.doe300.activerecord.dsl.AggregateFunction;
 import de.doe300.activerecord.dsl.Condition;
 import de.doe300.activerecord.record.ActiveRecord;
 import de.doe300.activerecord.scope.Scope;
+import javax.annotation.Nullable;
 
 /**
  * A RecordSet containing all records in a table
@@ -146,5 +148,11 @@ public class TableSet<T extends ActiveRecord> extends AbstractSet<T> implements 
 	public RecordSet<T> getForCondition( final Condition cond )
 	{
 		return new ConditionSet<T>(base, cond );
+	}
+
+	@Override
+	public <C, R> R aggregate( AggregateFunction<T, C, R> aggregateFunction, @Nullable final Condition condition )
+	{
+		return base.aggregate( aggregateFunction, condition );
 	}
 }
