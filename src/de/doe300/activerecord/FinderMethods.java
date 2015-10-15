@@ -37,6 +37,7 @@ import de.doe300.activerecord.dsl.Condition;
 import de.doe300.activerecord.dsl.SimpleCondition;
 import de.doe300.activerecord.record.ActiveRecord;
 import de.doe300.activerecord.scope.Scope;
+import javax.annotation.Nonnegative;
 
 /**
  * A collection of finder-methods for {@link ActiveRecord records}
@@ -150,4 +151,14 @@ public interface FinderMethods<T extends ActiveRecord>
 	 */
 	@Nullable
 	public T findFirstWithScope(@Nonnull final Scope scope);
+	
+	/**
+	 * @param condition
+	 * @return the number of records matching these conditions
+	 */
+	@Nonnegative
+	public default int count(@Nullable final Condition condition)
+	{
+		return ( int ) find( condition ).count();
+	}
 }

@@ -112,4 +112,11 @@ public interface QueryMethods<T extends ActiveRecord> extends FinderMethods<T>
 	{
 		return withScope( scope ).stream().findFirst().get();
 	}
+
+	@Override
+	@Nonnegative
+	public default int count( @Nullable final Condition condition )
+	{
+		return ( int ) findWithScope(new Scope(condition, null, Scope.NO_LIMIT)).count();
+	}
 }

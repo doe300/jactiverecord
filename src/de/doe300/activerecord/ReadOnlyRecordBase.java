@@ -45,7 +45,7 @@ import javax.annotation.Nonnegative;
  * @author doe300
  * @param <T>
  */
-public interface ReadOnlyRecordBase<T extends ActiveRecord> extends FinderMethods<T>
+public interface ReadOnlyRecordBase<T extends ActiveRecord> extends FinderMethods<T>, AggregateFunctions<T>
 {
 	/**
 	 * @return the data-type of the records
@@ -103,13 +103,6 @@ public interface ReadOnlyRecordBase<T extends ActiveRecord> extends FinderMethod
 	 * @return whether the attributes of the record are in sync with the underlying store
 	 */
 	public boolean isSynchronized(@Nonnull final ActiveRecord record);
-
-	/**
-	 * @param condition
-	 * @return the number of records matching these conditions
-	 */
-	@Nonnegative
-	public int count(@Nullable final Condition condition);
 
 	/**
 	 * @param condition
