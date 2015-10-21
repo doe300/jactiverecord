@@ -28,7 +28,7 @@ import java.util.Map;
 
 import javax.annotation.Nonnull;
 
-import de.doe300.activerecord.jdbc.VendorSpecific;
+import de.doe300.activerecord.jdbc.driver.JDBCDriver;
 import de.doe300.activerecord.record.ActiveRecord;
 import javax.annotation.Nullable;
 
@@ -95,9 +95,9 @@ public class InvertedCondition implements Condition
 	}
 
 	@Override
-	public String toSQL( final VendorSpecific vendorSpecifics, final String tableName )
+	public String toSQL( final JDBCDriver driver, final String tableName )
 	{
-		return "NOT("+invertedCondition.toSQL( vendorSpecifics, tableName )+")";
+		return "NOT("+invertedCondition.toSQL( driver, tableName )+")";
 	}
 
 	@Override

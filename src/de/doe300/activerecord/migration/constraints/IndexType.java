@@ -26,7 +26,7 @@ package de.doe300.activerecord.migration.constraints;
 
 import javax.annotation.Nullable;
 
-import de.doe300.activerecord.jdbc.VendorSpecific;
+import de.doe300.activerecord.jdbc.driver.JDBCDriver;
 import javax.annotation.Nonnull;
 import javax.annotation.Syntax;
 
@@ -43,7 +43,7 @@ public enum IndexType
 	NON_UNIQUE()
 	{
 		@Override
-		public String toSQL(final VendorSpecific vendorSpecifics)
+		public String toSQL(@Nonnull final JDBCDriver driver)
 		{
 			return "";
 		}
@@ -56,7 +56,7 @@ public enum IndexType
 	UNIQUE()
 	{
 		@Override
-		public String toSQL(final VendorSpecific vendorSpecifics)
+		public String toSQL(@Nonnull final JDBCDriver driver)
 		{
 			return "UNIQUE";
 		}
@@ -68,7 +68,7 @@ public enum IndexType
 	CLUSTERED()
 	{
 		@Override
-		public String toSQL(final VendorSpecific vendorSpecifics)
+		public String toSQL(@Nonnull final JDBCDriver driver)
 		{
 			return "CLUSTERED";
 		}
@@ -76,22 +76,23 @@ public enum IndexType
 	;
 
 	/**
-	 * @param vendorSpecifics
+	 * @param driver
 	 * @return the SQL keyword for the given index-type
 	 */
 	@Syntax(value = "SQL")
-	public abstract String toSQL(@Nullable final VendorSpecific vendorSpecifics);
+	public abstract String toSQL(@Nonnull final JDBCDriver driver);
 
 	/**
+	 * @param driver the driver to use
 	 * @param tableName the table-name
 	 * @param name the name of the index, may be <code>null</code>
 	 * @param columnNames the names of the columns to add the index to
 	 * @return the SQL command to create this index
 	 */
 	@Syntax(value = "SQL")
-	public String toSQL(@Nonnull final String tableName, @Nullable final String name, @Nullable final String... columnNames)
+	public String toSQL(@Nonnull final JDBCDriver driver, @Nonnull final String tableName, @Nullable final String name, @Nullable final String... columnNames)
 	{
-		return "CREATE "+toSQL(null)+" INDEX "+(name!=null? name : "")+" ON "+tableName+" ("+String.join( ", ",columnNames)+")";
+		return "CREATE "+toSQL(driver)+" INDEX "+(name!=null? name : "")+" ON "+tableName+" ("+String.join( ", ",columnNames)+")";
 	}
 
 }

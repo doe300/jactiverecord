@@ -40,7 +40,7 @@ import javax.annotation.Nonnull;
 import de.doe300.activerecord.RecordBase;
 import de.doe300.activerecord.dsl.AggregateFunction;
 import de.doe300.activerecord.dsl.Condition;
-import de.doe300.activerecord.jdbc.VendorSpecific;
+import de.doe300.activerecord.jdbc.driver.JDBCDriver;
 import de.doe300.activerecord.logging.Logging;
 import de.doe300.activerecord.scope.Scope;
 
@@ -60,17 +60,17 @@ public class CachedJDBCRecordStore extends SimpleJDBCRecordStore
 	 */
 	public CachedJDBCRecordStore(@Nonnull final Connection con)
 	{
-		this( con, VendorSpecific.guessDatabaseVendor( con ) );
+		this( con, JDBCDriver.guessDriver( con ) );
 	}
 
 	/**
 	 *
 	 * @param con
-	 * @param vendorSpecifics
+	 * @param driver
 	 */
-	public CachedJDBCRecordStore(@Nonnull final Connection con, final VendorSpecific vendorSpecifics)
+	public CachedJDBCRecordStore(@Nonnull final Connection con, final JDBCDriver driver)
 	{
-		super( con, vendorSpecifics );
+		super( con, driver );
 		this.cache=Collections.synchronizedMap( new HashMap<>(10));
 		this.columnsCache = Collections.synchronizedSortedMap( new TreeMap<>());
 		tableExistsCache = Collections.synchronizedSortedMap( new TreeMap<>());

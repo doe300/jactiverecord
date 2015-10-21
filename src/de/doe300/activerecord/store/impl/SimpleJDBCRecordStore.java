@@ -51,8 +51,7 @@ import de.doe300.activerecord.RecordBase;
 import de.doe300.activerecord.dsl.AggregateFunction;
 import de.doe300.activerecord.dsl.Condition;
 import de.doe300.activerecord.dsl.Order;
-import de.doe300.activerecord.dsl.SQLCommand;
-import de.doe300.activerecord.jdbc.VendorSpecific;
+import de.doe300.activerecord.jdbc.driver.JDBCDriver;
 import de.doe300.activerecord.logging.Logging;
 import de.doe300.activerecord.migration.AutomaticMigration;
 import de.doe300.activerecord.migration.ManualMigration;
@@ -70,7 +69,7 @@ public class SimpleJDBCRecordStore implements RecordStore
 {
 	@Nonnull
 	protected final Connection con;
-	protected final VendorSpecific vendorSpecifics;
+	protected final JDBCDriver driver;
 
 	/**
 	 * @param con
@@ -78,17 +77,17 @@ public class SimpleJDBCRecordStore implements RecordStore
 	public SimpleJDBCRecordStore(@Nonnull final Connection con)
 	{
 		this.con=con;
-		this.vendorSpecifics = VendorSpecific.guessDatabaseVendor( con );
+		this.driver = JDBCDriver.guessDriver( con );
 	}
 
 	/**
 	 * @param con
-	 * @param vendorSpecifics
+	 * @param driver
 	 */
-	public SimpleJDBCRecordStore(@Nonnull final Connection con, @Nullable final VendorSpecific vendorSpecifics)
+	public SimpleJDBCRecordStore(@Nonnull final Connection con, @Nonnull final JDBCDriver driver)
 	{
 		this.con = con;
-		this.vendorSpecifics = vendorSpecifics;
+		this.driver = driver;
 	}
 
 	protected String toWhereClause(final Condition condition, String tableName)
@@ -98,7 +97,7 @@ public class SimpleJDBCRecordStore implements RecordStore
 			return "";
 		}
 		String clause =" WHERE ";
-		clause += condition.toSQL(vendorSpecifics, tableName);
+		clause += condition.toSQL(driver, tableName);
 		return clause;
 	}
 
@@ -149,7 +148,7 @@ public class SimpleJDBCRecordStore implements RecordStore
 	 */
 	protected String convertIdentifier(final String input)
 	{
-		return VendorSpecific.convertIdentifier( input, con );
+		return JDBCDriver.convertIdentifier( input, con );
 	}
 
 	/**
@@ -175,7 +174,7 @@ public class SimpleJDBCRecordStore implements RecordStore
 				}
 				else
 				{
-					mig = new AutomaticMigration(base.getRecordType(), false, vendorSpecifics);
+					mig = new AutomaticMigration(base.getRecordType(), false, driver);
 				}
 				try
 				{
@@ -375,11 +374,11 @@ public class SimpleJDBCRecordStore implements RecordStore
 	public Map<String, Object> findFirstWithData( final RecordBase<?> base, final String[] columns, final Scope scope )
 	{
 		checkTableExists( base );
-		String tableID = SQLCommand.getNextTableIdentifier( null );
+		String tableID = JDBCDriver.getNextTableIdentifier( null );
 		final String sql = "SELECT "+toColumnsList( columns, base.getPrimaryColumn(), tableID )
 				+" FROM "+base.getTableName()+" AS " + tableID
 				+toWhereClause( scope.getCondition(), tableID )
-				+" ORDER BY "+toOrder( base, scope ).toSQL(vendorSpecifics, tableID)+" LIMIT 1";
+				+" ORDER BY "+toOrder( base, scope ).toSQL()+" " + driver.getLimitClause( 0, 1);
 		Logging.getLogger().debug( "JDBCStore", sql);
 		try(PreparedStatement stm = con.prepareStatement(sql))
 		{
@@ -415,8 +414,8 @@ public class SimpleJDBCRecordStore implements RecordStore
 	public int count( final RecordBase<?> base, final Condition condition )
 	{
 		checkTableExists( base );
-		String tableID = SQLCommand.getNextTableIdentifier( null );
-		final String sql = "SELECT COUNT(1) as size FROM "+base.getTableName()+" AS "+tableID+toWhereClause( condition, tableID );
+		String tableID = JDBCDriver.getNextTableIdentifier( null );
+		final String sql = "SELECT " + driver.getAggregateFunction( JDBCDriver.AGGREGATE_COUNT_ALL, base.getPrimaryColumn())+ " as size FROM "+base.getTableName()+" AS "+tableID+toWhereClause( condition, tableID );
 		Logging.getLogger().debug( "JDBCStore", sql);
 		//column name can't be count, because its a keyword
 		try(PreparedStatement stm = con.prepareStatement(sql))
@@ -449,8 +448,8 @@ public class SimpleJDBCRecordStore implements RecordStore
 	public Object aggregate(RecordBase<?> base, AggregateFunction<?, ?, ?> aggregateFunction, Condition condition )
 	{
 		checkTableExists( base );
-		String tableID = SQLCommand.getNextTableIdentifier( null );
-		final String sql = "SELECT " + aggregateFunction.toSQL() + " as result FROM "+base.getTableName()+" AS "+tableID+toWhereClause( condition, tableID );
+		String tableID = JDBCDriver.getNextTableIdentifier( null );
+		final String sql = "SELECT " + aggregateFunction.toSQL(driver) + " as result FROM "+base.getTableName()+" AS "+tableID+toWhereClause( condition, tableID );
 		Logging.getLogger().debug( "JDBCStore", sql);
 		try(PreparedStatement stm = con.prepareStatement(sql))
 		{
@@ -482,15 +481,12 @@ public class SimpleJDBCRecordStore implements RecordStore
 	@WillNotClose
 	public Stream<Map<String, Object>> streamAllWithData( final RecordBase<?> base, final String[] columns, final Scope scope )
 	{
-		String tableID = SQLCommand.getNextTableIdentifier( null );
+		String tableID = JDBCDriver.getNextTableIdentifier( null );
 		String sql = "SELECT "+toColumnsList( columns, base.getPrimaryColumn(), tableID )
 				+" FROM "+base.getTableName()+" AS "+tableID
 				+toWhereClause( scope.getCondition(), tableID )
-				+" ORDER BY "+toOrder( base, scope ).toSQL(vendorSpecifics, tableID);
-		if(scope.getLimit()!=Scope.NO_LIMIT)
-		{
-			sql += " LIMIT "+scope.getLimit();
-		}
+				+" ORDER BY "+toOrder( base, scope ).toSQL()
+				+" " + driver.getLimitClause( 0, scope.getLimit());
 		Logging.getLogger().debug( "JDBCStore", sql);
 		try
 		{
@@ -599,7 +595,7 @@ public class SimpleJDBCRecordStore implements RecordStore
 	@Override
 	public Set<String> getAllColumnNames( final String tableName )
 	{
-		try(ResultSet set = con.getMetaData().getColumns(con.getCatalog(), con.getSchema(), VendorSpecific.convertIdentifierWithoutQuote(tableName, con), null))
+		try(ResultSet set = con.getMetaData().getColumns(con.getCatalog(), con.getSchema(), JDBCDriver.convertIdentifierWithoutQuote(tableName, con), null))
 		{
 			final Set<String> columns = new HashSet<>(10);
 			while(set.next())
@@ -814,7 +810,7 @@ public class SimpleJDBCRecordStore implements RecordStore
 	public boolean removeRow(@Nonnull final String tableName, @Nullable final Condition cond)
 		throws IllegalArgumentException
 	{
-		String tableID = SQLCommand.getNextTableIdentifier( null);
+		String tableID = JDBCDriver.getNextTableIdentifier( null);
 		final String sql = "DELETE FROM "+tableName+ " AS "+tableID+toWhereClause( cond, tableID );
 		Logging.getLogger().debug( "JDBCStore", sql);
 		try(PreparedStatement stm = con.prepareStatement( sql ))

@@ -24,6 +24,7 @@
  */
 package de.doe300.activerecord.dsl;
 
+import de.doe300.activerecord.jdbc.driver.JDBCDriver;
 import java.util.Arrays;
 import java.util.HashSet;
 import java.util.Set;
@@ -65,13 +66,14 @@ public abstract class AggregateFunction<T extends ActiveRecord, C, R> implements
 	}
 
 	/**
+	 * @param driver the driver to be used for vendor-specific commands
 	 * @return the SQL representation of this statement
 	 */
 	@Nonnull
 	@Syntax(value = "SQL")
-	public String toSQL()
+	public String toSQL(@Nonnull final JDBCDriver driver)
 	{
-		return command + "(" + columnName + ")";
+		return driver.getAggregateFunction(command, columnName);
 	}
 	
 	@Nullable
@@ -112,7 +114,7 @@ public abstract class AggregateFunction<T extends ActiveRecord, C, R> implements
 	 */
 	public static final <T extends ActiveRecord, C extends Comparable<? super C>> AggregateFunction<T, C, C> MINIMUM(@Nonnull final String columnName, @Nonnull final Function<T, C> columnFunc)
 	{
-		return new AggregateFunction<T, C, C>("MIN", columnName, columnFunc)
+		return new AggregateFunction<T, C, C>(JDBCDriver.AGGREGATE_MINIMUM, columnName, columnFunc)
 		{
 			@Override
 			public BiConsumer<ValueHolder<C>, T> accumulator()
@@ -170,7 +172,7 @@ public abstract class AggregateFunction<T extends ActiveRecord, C, R> implements
 	 */
 	public static final <T extends ActiveRecord, C extends Comparable<? super C>> AggregateFunction<T, C, C> MAXIMUM(@Nonnull final String columnName, @Nonnull final Function<T, C> columnFunc)
 	{
-		return new AggregateFunction<T, C, C>("MAX", columnName, columnFunc)
+		return new AggregateFunction<T, C, C>(JDBCDriver.AGGREGATE_MAXIMUM, columnName, columnFunc)
 		{
 			@Override
 			public BiConsumer<ValueHolder<C>, T> accumulator()
@@ -226,7 +228,7 @@ public abstract class AggregateFunction<T extends ActiveRecord, C, R> implements
 	 */
 	public static final <T extends ActiveRecord, C> AggregateFunction<T, C, Long> COUNT(@Nonnull final String columnName, @Nonnull final Function<T, C> columnFunc)
 	{
-		return new AggregateFunction<T, C, Long>("COUNT", columnName, columnFunc)
+		return new AggregateFunction<T, C, Long>(JDBCDriver.AGGREGATE_COUNT_NOT_NULL, columnName, columnFunc)
 		{
 			@Override
 			public BiConsumer<ValueHolder<Long>, T> accumulator()
@@ -282,14 +284,8 @@ public abstract class AggregateFunction<T extends ActiveRecord, C, R> implements
 	 */
 	public static final <T extends ActiveRecord, C> AggregateFunction<T, C, Long> COUNT_DISTINCT(@Nonnull final String columnName, @Nonnull final Function<T, C> columnFunc)
 	{
-		return new AggregateFunction<T, C, Long>("COUNT", columnName, columnFunc)
+		return new AggregateFunction<T, C, Long>(JDBCDriver.AGGREGATE_COUNT_DISTINCT, columnName, columnFunc)
 		{
-			@Override
-			public String toSQL()
-			{
-				return "COUNT(DISTINCT " + columnName + ")";
-			}
-
 			@Override
 			public Supplier<ValueHolder<Long>> supplier()
 			{
@@ -359,12 +355,12 @@ public abstract class AggregateFunction<T extends ActiveRecord, C, R> implements
 	 */
 	public static final <T extends ActiveRecord, C extends Number> AggregateFunction<T, C, Long> SUM(@Nonnull final String columnName, @Nonnull final Function<T, C> columnFunc)
 	{
-		return new AggregateFunction<T, C, Long>("SUM", columnName, columnFunc)
+		return new AggregateFunction<T, C, Long>(JDBCDriver.AGGREGATE_SUM, columnName, columnFunc)
 		{
 			@Override
-			public String toSQL()
+			public String toSQL(@Nonnull final JDBCDriver driver)
 			{
-				return "CAST(SUM(" +columnName + ") AS BIGINT)";
+				return "CAST(" + super.toSQL(driver) + " AS BIGINT)";
 			}
 
 			@Override
@@ -422,7 +418,7 @@ public abstract class AggregateFunction<T extends ActiveRecord, C, R> implements
 	 */
 	public static final <T extends ActiveRecord, C extends Number> AggregateFunction<T, C, Double> SUM_FLOATING(@Nonnull final String columnName, @Nonnull final Function<T, C> columnFunc)
 	{
-		return new AggregateFunction<T, C, Double>("SUM", columnName, columnFunc)
+		return new AggregateFunction<T, C, Double>(JDBCDriver.AGGREGATE_SUM, columnName, columnFunc)
 		{
 			@Override
 			public BiConsumer<ValueHolder<Double>, T> accumulator()
@@ -479,7 +475,7 @@ public abstract class AggregateFunction<T extends ActiveRecord, C, R> implements
 	 */
 	public static final <T extends ActiveRecord, C extends Number> AggregateFunction<T, C, Double> AVERAGE(@Nonnull final String columnName, @Nonnull final Function<T, C> columnFunc)
 	{
-		return new AggregateFunction<T, C, Double>("AVG", columnName, columnFunc)
+		return new AggregateFunction<T, C, Double>(JDBCDriver.AGGREGATE_AVERAGE, columnName, columnFunc)
 		{
 
 			@Override

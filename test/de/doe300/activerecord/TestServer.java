@@ -77,7 +77,7 @@ public class TestServer extends Assert
 	/*
 	 * XXX: Need to test all test-cases for the various record-store implementations
 	 */
-	public static final Class<? extends RecordStore> testStore = MemoryRecordStore.class;
+	public static final Class<? extends RecordStore> testStore = CachedJDBCRecordStore.class;
 	
 	@Nonnull
 	public static RecordCore getTestCore() throws SQLException
@@ -120,7 +120,6 @@ public class TestServer extends Assert
 			con = DriverManager.getConnection( "jdbc:hsqldb:mem:test", "sa", "");
 			//FIXME SQLite errors:
 			/**
-			 * - Can't find column '*' -> does not interpret as all-columns
 			 * - At AutomaticMigration#revert throws "database table is locked"
 			 *		Some Query not yet closed? Perhaps some query with stream, they could stay open if not read to the end
 			 */

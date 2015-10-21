@@ -33,7 +33,7 @@ import java.util.stream.Collectors;
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 
-import de.doe300.activerecord.jdbc.VendorSpecific;
+import de.doe300.activerecord.jdbc.driver.JDBCDriver;
 import de.doe300.activerecord.record.ActiveRecord;
 
 /**
@@ -156,9 +156,9 @@ public class AndCondition implements Condition
 	}
 
 	@Override
-	public String toSQL(@Nullable final VendorSpecific vendorSpecifics, final String tableName)
+	public String toSQL(@Nonnull final JDBCDriver driver, final String tableName)
 	{
-		return "("+ Arrays.stream( conditions ).map( (final Condition c) -> c.toSQL(vendorSpecifics, tableName) ).collect( Collectors.joining( ") AND ("))+")";
+		return "("+ Arrays.stream( conditions ).map( (final Condition c) -> c.toSQL(driver, tableName) ).collect( Collectors.joining( ") AND ("))+")";
 	}
 
 	@Override

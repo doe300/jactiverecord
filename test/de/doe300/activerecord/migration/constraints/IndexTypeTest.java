@@ -39,21 +39,21 @@ public class IndexTypeTest extends Assert
 	@Test
 	public void test_NON_UNIQUE()
 	{
-		assertEquals( "CREATE  INDEX index1 ON table1 (column1, column2)", IndexType.NON_UNIQUE.toSQL( "table1", "index1",
+		assertEquals( "CREATE  INDEX index1 ON table1 (column1, column2)", IndexType.NON_UNIQUE.toSQL(null, "table1", "index1",
 				new String[]{"column1", "column2"}));
 	}
 	
 	@Test
 	public void test_UNIQUE()
 	{
-		assertEquals( "CREATE UNIQUE INDEX  ON table1 (column1, column2)", IndexType.UNIQUE.toSQL( "table1", null,
+		assertEquals( "CREATE UNIQUE INDEX  ON table1 (column1, column2)", IndexType.UNIQUE.toSQL(null, "table1", null,
 				new String[]{"column1", "column2"}));
 	}
 	
 	@Test
 	public void test_CLUSTERED()
 	{
-		assertEquals( "CREATE CLUSTERED INDEX index1 ON table1 (column1)", IndexType.CLUSTERED.toSQL( "table1", "index1",
+		assertEquals( "CREATE CLUSTERED INDEX index1 ON table1 (column1)", IndexType.CLUSTERED.toSQL(null, "table1", "index1",
 				new String[]{"column1"}));
 	}
 }

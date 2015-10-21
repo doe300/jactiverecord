@@ -22,37 +22,48 @@
  * SOFTWARE.
  *
  */
-package de.doe300.activerecord.jdbc;
-
-import de.doe300.activerecord.migration.Attribute;
-import javax.annotation.Nullable;
+package de.doe300.activerecord.jdbc.driver;
 
 /**
- * An interface to map custom types to db-types.
+ * Vendor-specific driver for MySQL Databases
+ * <br>
+ * These settings include:
+ * <ul>
+ * <li>The keyword for the auto-increment primary key is set to <code>AUTO_INCREMENT</code></li>
+ * <li>The default data-type for strings is set to <code>VARCHAR(4096)</code>.
+ * The maximum limit for a cell width is 65535 which is simultaneously the maximum width for all columns in a row.
+ * Since we don't know how much cells a row will have, I set the limit to 4096 which allows for up to 16 such string-column.
+ * </li>
+ * </ul>
  * 
- * Any implementation of this interface must have a public default-constructor.
- * 
- * This interface is supported by {@link TypeMappings}
  * @author doe300
- * @see TypeMappings
+ * @since 0.5
  */
-public interface DBMappable
+public class MySQLDriver extends JDBCDriver
 {
-	/**
-	 * Reads the data from the db-value.
-	 * 
-	 * The <code>dbValue</code> is of the JDBC-mapped java-type for the specified {@link Attribute#type() SQL-type}
-	 * 
-	 * @param dbValue 
-	 */
-	public void readFromDBValue(@Nullable final Object dbValue);
+	MySQLDriver()
+	{
+	}
 	
-	/**
-	 * The return-type must be compatible to the JDBC-mapped java-type for the {@link Attribute#type() SQL-type}
-	 * @return the db-value containing the attributes of this object
-	 */
-	@Nullable
-	public Object toDBValue();
-	
-	//TODO java-type of db-mapped value
+	@Override
+	public String getAutoIncrementKeyword()
+	{
+		return "AUTO_INCREMENT";
+	}
+
+	@Override
+	public String getStringDataType()
+	{
+		return "VARCHAR(4096)";
+	}
+
+	@Override
+	public String getLimitClause( int offset, int limit )
+	{
+		if(offset <= 0 && limit < 0)
+		{
+			return "";
+		}
+		return "LIMIT " + (offset > 0 ? offset +", " : "0, ") + (limit > 0 ? limit+"": "");
+	}
 }

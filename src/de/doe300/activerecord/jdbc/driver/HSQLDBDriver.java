@@ -22,37 +22,34 @@
  * SOFTWARE.
  *
  */
-package de.doe300.activerecord.jdbc;
-
-import de.doe300.activerecord.migration.Attribute;
-import javax.annotation.Nullable;
+package de.doe300.activerecord.jdbc.driver;
 
 /**
- * An interface to map custom types to db-types.
- * 
- * Any implementation of this interface must have a public default-constructor.
- * 
- * This interface is supported by {@link TypeMappings}
+ * Vendor-specific driver for the HSQLDB driver, including
+ * <ul>
+ * <li>The keyword for the auto-increment primary key is set to <code>IDENTITY</code></li>
+ * <li>The default data-type for strings is set to <code>LONGVARCHAR</code></li>.
+ * </ul>
+ *
  * @author doe300
- * @see TypeMappings
+ * @since 0.5
  */
-public interface DBMappable
+public class HSQLDBDriver extends JDBCDriver
 {
-	/**
-	 * Reads the data from the db-value.
-	 * 
-	 * The <code>dbValue</code> is of the JDBC-mapped java-type for the specified {@link Attribute#type() SQL-type}
-	 * 
-	 * @param dbValue 
-	 */
-	public void readFromDBValue(@Nullable final Object dbValue);
+
+	HSQLDBDriver()
+	{
+	}
 	
-	/**
-	 * The return-type must be compatible to the JDBC-mapped java-type for the {@link Attribute#type() SQL-type}
-	 * @return the db-value containing the attributes of this object
-	 */
-	@Nullable
-	public Object toDBValue();
-	
-	//TODO java-type of db-mapped value
+	@Override
+	public String getAutoIncrementKeyword()
+	{
+		return "IDENTITY";
+	}
+
+	@Override
+	public String getStringDataType()
+	{
+		return "LONGVARCHAR";
+	}
 }

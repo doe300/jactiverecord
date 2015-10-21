@@ -24,7 +24,7 @@
  */
 package de.doe300.activerecord;
 
-import de.doe300.activerecord.jdbc.VendorSpecific;
+import de.doe300.activerecord.jdbc.driver.JDBCDriver;
 import java.lang.reflect.Proxy;
 import java.sql.Connection;
 import java.sql.SQLException;
@@ -316,7 +316,7 @@ public final class RecordCore implements AutoCloseable
 		}
 		else if (SimpleJDBCRecordStore.class.isInstance( store) || store.getConnection() != null)
 		{
-			return new AutomaticMigration(recordType, false, VendorSpecific.guessDatabaseVendor( store.getConnection())).apply( store.getConnection());
+			return new AutomaticMigration(recordType, false, JDBCDriver.guessDriver( store.getConnection() )).apply( store.getConnection());
 		}
 		throw new IllegalArgumentException("No automatic migration supported for this record-store: " + store.getClass());
 	}
@@ -336,7 +336,7 @@ public final class RecordCore implements AutoCloseable
 		}
 		else if (SimpleJDBCRecordStore.class.isInstance( store) || store.getConnection() != null)
 		{
-			return new AutomaticMigration(recordType, false, VendorSpecific.guessDatabaseVendor( store.getConnection())).revert(store.getConnection());
+			return new AutomaticMigration(recordType, false, JDBCDriver.guessDriver( store.getConnection() )).revert(store.getConnection());
 		}
 		throw new IllegalArgumentException("No automatic migration supported for this record-store: " + store.getClass());
 	}

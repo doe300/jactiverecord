@@ -25,15 +25,13 @@
 package de.doe300.activerecord.migration;
 
 import de.doe300.activerecord.RecordBase;
-import de.doe300.activerecord.jdbc.VendorSpecific;
-import java.lang.reflect.Field;
+import de.doe300.activerecord.jdbc.driver.JDBCDriver;
 import java.lang.reflect.Method;
 import java.lang.reflect.Modifier;
 import java.sql.Connection;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
-import java.sql.Types;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Map;
@@ -49,7 +47,7 @@ import de.doe300.activerecord.record.association.RecordSet;
 import de.doe300.activerecord.record.attributes.AttributeGetter;
 import de.doe300.activerecord.record.attributes.AttributeSetter;
 import de.doe300.activerecord.record.attributes.Attributes;
-import java.math.BigDecimal;
+import java.sql.Timestamp;
 
 /**
  * This migration is used to automatically create a table from a given record-type.
@@ -84,7 +82,7 @@ public class AutomaticMigration implements Migration
 {
 	protected final Class<? extends ActiveRecord> recordType;
 	protected final boolean dropColumnsOnUpdate;
-	protected VendorSpecific vendorSpecifics;
+	protected JDBCDriver driver;
 
 	/**
 	 * @param recordType the type to create and drop the table for
@@ -99,14 +97,13 @@ public class AutomaticMigration implements Migration
 	/**
 	 * @param recordType the type to create and drop the table for
 	 * @param dropColumnsOnUpdate whether to drop obsolete columns on update
-	 * @param vendorSpecifics the vendor-specifics keyword for the vendor used (if known)
+	 * @param driver the vendor-specific driver for the vendor used (if known)
 	 */
-	public AutomaticMigration(
-			Class<? extends ActiveRecord> recordType, boolean dropColumnsOnUpdate, VendorSpecific vendorSpecifics )
+	public AutomaticMigration(Class<? extends ActiveRecord> recordType, boolean dropColumnsOnUpdate, JDBCDriver driver )
 	{
 		this.recordType = recordType;
 		this.dropColumnsOnUpdate = dropColumnsOnUpdate;
-		this.vendorSpecifics = vendorSpecifics;
+		this.driver = driver;
 	}
 
 	@Override
@@ -118,15 +115,15 @@ public class AutomaticMigration implements Migration
 		{
 			return false;
 		}
-		if(vendorSpecifics == null)
+		if(driver == null)
 		{
-			vendorSpecifics = VendorSpecific.guessDatabaseVendor( con );
+			driver = JDBCDriver.guessDriver( con );
 		}
 		//2. get desired columns and types
 		final Map<String,String> columns = getColumnsFromModel( recordType );
 		//3. execute statement
 		final String sql = "CREATE TABLE "+tableName+" ("
-				+columns.entrySet().stream().map( (final Map.Entry<String,String> e) -> VendorSpecific.convertIdentifier( e.getKey(), con)+" "+e.getValue())
+				+columns.entrySet().stream().map( (final Map.Entry<String,String> e) -> JDBCDriver.convertIdentifier( e.getKey(), con)+" "+e.getValue())
 						.collect( Collectors.joining(", "))
 				+" )";
 		Logging.getLogger().info( recordType.getSimpleName(), "Executing automatic table-creation...");
@@ -142,7 +139,7 @@ public class AutomaticMigration implements Migration
 			final Index[] indices = recordType.getAnnotationsByType( Index.class);
 			if(indices.length > 0)
 			{
-				final String indicesSQL = Arrays.stream( indices ).map( (final Index index)-> index.type().toSQL( tableName, index.name(), index.columns())).collect( Collectors.joining( "; "));
+				final String indicesSQL = Arrays.stream( indices ).map( (final Index index)-> index.type().toSQL(driver, tableName, index.name(), index.columns())).collect( Collectors.joining( "; "));
 				Logging.getLogger().info( recordType.getSimpleName(), "Adding indices...");
 				Logging.getLogger().info( recordType.getSimpleName(), indicesSQL);
 				if(con.createStatement().executeUpdate( indicesSQL) < 0)
@@ -179,9 +176,9 @@ public class AutomaticMigration implements Migration
 		{
 			return false;
 		}
-		if(vendorSpecifics == null)
+		if(driver == null)
 		{
-			vendorSpecifics = VendorSpecific.guessDatabaseVendor( con );
+			driver = JDBCDriver.guessDriver( con );
 		}
 		//2. get existing columns
 		final Map<String,String> hasColumns = new HashMap<>(10);
@@ -206,7 +203,7 @@ public class AutomaticMigration implements Migration
 		{
 			final String sql = "ALTER TABLE "+tableName+" ("+
 					"DROP COLUMN "+
-					removeColumns.entrySet().stream().map( (final Map.Entry<String,String> e) -> VendorSpecific.convertIdentifier( e.getKey(), con)).collect( Collectors.joining( ", "))+
+					removeColumns.entrySet().stream().map( (final Map.Entry<String,String> e) -> JDBCDriver.convertIdentifier( e.getKey(), con)).collect( Collectors.joining( ", "))+
 					")";
 			Logging.getLogger().info(recordType.getSimpleName(), "Executing automatic table-update...");
 			Logging.getLogger().info(recordType.getSimpleName(), sql);
@@ -219,7 +216,7 @@ public class AutomaticMigration implements Migration
 		{
 			final String sql = "ALTER TABLE "+tableName+" ("+
 					"ADD "+
-					addColumns.entrySet().stream().map( (final Map.Entry<String,String> e) -> VendorSpecific.convertIdentifier( e.getKey(), con)+" "+e.getValue()).collect( Collectors.joining( ", "))+
+					addColumns.entrySet().stream().map( (final Map.Entry<String,String> e) -> JDBCDriver.convertIdentifier( e.getKey(), con)+" "+e.getValue()).collect( Collectors.joining( ", "))+
 					")";
 			Logging.getLogger().info(recordType.getSimpleName(), "Executing automatic table-update...");
 			Logging.getLogger().info(recordType.getSimpleName(), sql);
@@ -250,9 +247,9 @@ public class AutomaticMigration implements Migration
 		{
 			return false;
 		}
-		if(vendorSpecifics == null)
+		if(driver == null)
 		{
-			vendorSpecifics = VendorSpecific.guessDatabaseVendor( con );
+			driver = JDBCDriver.guessDriver( con );
 		}
 		//2. drop table
 		final String sql = "DROP TABLE "+tableName;
@@ -317,7 +314,7 @@ public class AutomaticMigration implements Migration
 				}
 				else
 				{
-					columns.putIfAbsent(name, AutomaticMigration.getSQLType( att.type()));
+					columns.putIfAbsent(name, JDBCDriver.getSQLType( att.type()));
 				}
 				columns.put( name, columns.get( name)
 						+(!"".equals( att.defaultValue() )?" DEFAULT "+att.defaultValue(): "")
@@ -390,188 +387,22 @@ public class AutomaticMigration implements Migration
 			//convert type (for 2. and 3.) only if not yet registered
 			if(columnName!=null && attType!=null && !columns.containsKey( columnName))
 			{
-				columns.put(columnName, getSQLType( attType));
+				columns.put(columnName, driver.getSQLType(attType));
 			}
 		}
 		//4. add timestamps, other features
 		if(TimestampedRecord.class.isAssignableFrom( recordType))
 		{
 			//forces the timestamps to be overriden, because they need to be of type Timestamp
-			columns.put(TimestampedRecord.COLUMN_CREATED_AT, getSQLType( java.sql.Timestamp.class));
-			columns.put(TimestampedRecord.COLUMN_UPDATED_AT, getSQLType( java.sql.Timestamp.class));
+			columns.put(TimestampedRecord.COLUMN_CREATED_AT, driver.getSQLType(Timestamp.class));
+			columns.put(TimestampedRecord.COLUMN_UPDATED_AT, driver.getSQLType(Timestamp.class));
 		}
 		//5. mark or add primary key, add constraints
 		final String primaryColumn = getPrimaryColumn( recordType).toLowerCase();
-		columns.putIfAbsent( primaryColumn, getSQLType( Integer.class));
+		columns.putIfAbsent(primaryColumn, driver.getSQLType(Integer.class));
 		//FIXME somehow make sure, reserved keywords are not used as columns or rewrite them
-		columns.put( primaryColumn, columns.get( primaryColumn)+" "+vendorSpecifics.getAutoIncrementKeyword()+" PRIMARY KEY");
+		columns.put(primaryColumn, columns.get( primaryColumn)+" "+driver.getAutoIncrementKeyword()+" PRIMARY KEY");
 		return columns;
 	}
 
-	/**
-	 * Note: The result of this method may be inaccurate
-	 *
-	 * @param jdbcType
-	 * @return the mapped SQL-type
-	 * @throws IllegalArgumentException
-	 * @see java.sql.Types
-	 */
-	public static String getSQLType(final int jdbcType) throws IllegalArgumentException
-	{
-		if(jdbcType == Types.SQLXML)
-		{
-			return "XML";
-		}
-		for(final Field f: Types.class.getFields())
-		{
-			if(f.getType()==Integer.TYPE)
-			{
-				try
-				{
-					final int val = f.getInt( null);
-					if( val == jdbcType)
-					{
-						return f.getName().replaceAll( "_", " ");
-					}
-				}
-				catch (final IllegalAccessException ex)
-				{
-					throw new IllegalArgumentException(ex);
-				}
-			}
-		}
-		throw new IllegalArgumentException("Unknown Type: "+jdbcType);
-	}
-
-	/**
-	 * Note: The result of this method may be inaccurate
-	 * 
-	 * @param javaType
-	 * @return the mapped SQL-type
-	 * @throws IllegalArgumentException
-	 * @see "http://www.cis.upenn.edu/~bcpierce/courses/629/jdkdocs/guide/jdbc/getstart/mapping.doc.html"
-	 * @see java.sql.Types
-	 */
-	public String getSQLType(final Class<?> javaType) throws IllegalArgumentException
-	{
-		if(javaType.equals( String.class))
-		{
-			return vendorSpecifics.getStringDataType();
-		}
-		if(javaType.equals( java.math.BigDecimal.class))
-		{
-			return "NUMERIC";
-		}
-		if(javaType.equals( Boolean.class) || javaType.equals( Boolean.TYPE))
-		{
-			return "BIT";
-		}
-		if(javaType.equals( Byte.class) || javaType.equals( Byte.TYPE))
-		{
-			return "TINYINT";
-		}
-		if(javaType.equals( Short.class) || javaType.equals( Short.TYPE))
-		{
-			return "SHORTINT";
-		}
-		if(javaType.equals( Integer.class) || javaType.equals( Integer.TYPE))
-		{
-			return "INTEGER";
-		}
-		if(javaType.equals( Long.class) || javaType.equals( Long.TYPE))
-		{
-			return "BIGINT";
-		}
-		if(javaType.equals( Float.class) || javaType.equals( Float.TYPE))
-		{
-			return "REAL";
-		}
-		if(javaType.equals( Double.class) || javaType.equals( Double.TYPE))
-		{
-			return "DOUBLE";
-		}
-		if(javaType.equals( java.sql.Date.class))
-		{
-			return "DATE";
-		}
-		if(javaType.equals( java.sql.Time.class))
-		{
-			return "TIME";
-		}
-		if(javaType.equals( java.sql.Timestamp.class))
-		{
-			return "TIMESTAMP";
-		}
-		if(ActiveRecord.class.isAssignableFrom( javaType ))
-		{
-			//for foreign key
-			return "INTEGER";
-		}
-		if(javaType.isEnum())
-		{
-			//for enum-name
-			return "VARCHAR(255)";
-		}
-		throw new IllegalArgumentException("Type not mapped: "+javaType);
-	}
-	
-	/**
-	 * This is the inverted method of {@link #getSQLType(java.lang.Class) }
-	 * @param sqlType
-	 * @return the java class-type
-	 * @throws IllegalArgumentException 
-	 * @since 0.3
-	 */
-	public Class<?> getJavaType(final String sqlType) throws IllegalArgumentException
-	{
-		if(sqlType.startsWith( "VARCHAR") || sqlType.startsWith( "CHAR"))
-		{
-			return String.class;
-		}
-		if(sqlType.startsWith( "NUMERIC"))
-		{
-			return BigDecimal.class;
-		}
-		if(sqlType.startsWith("BIT"))
-		{
-			return Boolean.class;
-		}
-		if(sqlType.startsWith( "TINYINT"))
-		{
-			return Byte.class;
-		}
-		if(sqlType.startsWith( "SHORTINT"))
-		{
-			return Short.class;
-		}
-		if(sqlType.startsWith("INTEGER"))
-		{
-			return Integer.class;
-		}
-		if(sqlType.startsWith("BIGINT"))
-		{
-			return Long.class;
-		}
-		if(sqlType.startsWith("REAL"))
-		{
-			return Float.class;
-		}
-		if(sqlType.startsWith("DOUBLE"))
-		{
-			return Double.class;
-		}
-		if(sqlType.startsWith("DATE"))
-		{
-			return java.sql.Date.class;
-		}
-		if(sqlType.startsWith("TIMESTAMP"))
-		{
-			return java.sql.Timestamp.class;
-		}
-		if(sqlType.startsWith("TIME"))
-		{
-			return java.sql.Time.class;
-		}
-		throw new IllegalArgumentException("Type not mapped: "+sqlType);
-	}
 }

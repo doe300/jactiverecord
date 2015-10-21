@@ -30,7 +30,7 @@ import javax.annotation.Nonnull;
 
 import de.doe300.activerecord.ReadOnlyRecordBase;
 import de.doe300.activerecord.RecordBase;
-import de.doe300.activerecord.jdbc.VendorSpecific;
+import de.doe300.activerecord.jdbc.driver.JDBCDriver;
 import de.doe300.activerecord.record.ActiveRecord;
 import de.doe300.activerecord.record.association.AssociationHelper;
 
@@ -133,10 +133,10 @@ public class HasManyThroughCondition implements Condition
 	}
 
 	@Override
-	public String toSQL( final VendorSpecific vendorSpecifics, final String tableName )
+	public String toSQL( final JDBCDriver driver, final String tableName )
 	{
-		String associatedTableName = SQLCommand.getNextTableIdentifier( tableName );
-		String associationTableName = SQLCommand.getNextTableIdentifier( associatedTableName);
+		String associatedTableName = JDBCDriver.getNextTableIdentifier( tableName );
+		String associationTableName = JDBCDriver.getNextTableIdentifier( associatedTableName);
 		//EXISTS(SELECT primaryKey FROM associatedTable WHERE associatedTable.primaryKey IN
 		// (SELECT associationTableOtherForeignKey FROM associationTable WHERE associationTable.associatioNTableThisForeignKey = thisTable.primaryKey)
 		// AND cond)
@@ -145,7 +145,7 @@ public class HasManyThroughCondition implements Condition
 				+ " WHERE " + associatedTableName + "." + associatedBase.getPrimaryColumn()+" IN ("
 		+ "SELECT " + associationTableName + "." + associationTableOtherForeignKey + " FROM " + associationTable + " AS " + associationTableName
 				+ " WHERE " + associationTableName + "." + associationTableThisForeignKey + " = "+ tableName + "." + thisBaseAssociationKey
-		+ ") AND " + associatedBaseCondition.toSQL( vendorSpecifics, associatedTableName ) + ")";
+		+ ") AND " + associatedBaseCondition.toSQL( driver, associatedTableName ) + ")";
 	}
 
 }

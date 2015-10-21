@@ -32,14 +32,14 @@ import java.util.stream.Collectors;
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 
-import de.doe300.activerecord.jdbc.VendorSpecific;
+import de.doe300.activerecord.jdbc.driver.JDBCDriver;
 import de.doe300.activerecord.record.ActiveRecord;
 
 /**
  *
  * @author doe300
  */
-public class SimpleCondition implements Condition, SQLCommand
+public class SimpleCondition implements Condition
 {
 	@Nonnull
 	private final String key;
@@ -124,7 +124,7 @@ public class SimpleCondition implements Condition, SQLCommand
 	}
 
 	@Override
-	public String toSQL(final VendorSpecific vendorSpecifics, final String tableName)
+	public String toSQL(@Nonnull final JDBCDriver driver, final String tableName)
 	{
 		String columnID = tableName != null ? tableName + "." + key : key;
 		switch(comp)
@@ -152,12 +152,7 @@ public class SimpleCondition implements Condition, SQLCommand
 				return columnID+" IN ("+Arrays.stream( (Object[])compValue).map( (final Object o) -> "?").collect( Collectors.joining( ", "))+")";
 			case TRUE:
 			default:
-				if(vendorSpecifics == null)
-				{
-					//if we can't determine the vendor, we simply hope, it supports the TRUE SQL-keyword
-					return "TRUE";
-				}
-				return vendorSpecifics.convertBooleanToDB( true );
+				return driver.convertBooleanToDB( true );
 		}
 	}
 

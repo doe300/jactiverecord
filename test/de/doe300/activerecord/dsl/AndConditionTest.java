@@ -27,7 +27,7 @@ package de.doe300.activerecord.dsl;
 import de.doe300.activerecord.RecordBase;
 import de.doe300.activerecord.TestInterface;
 import de.doe300.activerecord.TestServer;
-import de.doe300.activerecord.jdbc.VendorSpecific;
+import de.doe300.activerecord.jdbc.driver.JDBCDriver;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
@@ -73,7 +73,7 @@ public class AndConditionTest extends Assert
 		Condition c1 = AndCondition.andConditions(simpleCond );
 		Condition c2 = AndCondition.andConditions(c1);
 		//unrolls inner ANDs
-		assertEquals( c1.toSQL( VendorSpecific.MYSQL, null), c2.toSQL( VendorSpecific.MYSQL, null));
+		assertEquals( c1.toSQL( JDBCDriver.guessDriver( null ), null), c2.toSQL( JDBCDriver.guessDriver( null ), null));
 		//removes non-false conditions
 		Condition simpleCond2 = new SimpleCondition("id", null, Comparison.TRUE);
 		Condition c3 = AndCondition.andConditions( simpleCond, simpleCond2);

@@ -32,7 +32,6 @@ import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 import javax.annotation.concurrent.Immutable;
 
-import de.doe300.activerecord.jdbc.VendorSpecific;
 import de.doe300.activerecord.record.ActiveRecord;
 import javax.annotation.Syntax;
 
@@ -41,7 +40,7 @@ import javax.annotation.Syntax;
  * @author doe300
  */
 @Immutable
-public class Order implements Comparator<Map<String,Object>>, SQLCommand
+public class Order implements Comparator<Map<String,Object>>
 {
 	@Nonnull
 	private final String[] columns;
@@ -143,8 +142,11 @@ public class Order implements Comparator<Map<String,Object>>, SQLCommand
 		return compare;
 	}
 
-	@Override
-	public String toSQL(final VendorSpecific vendorSpecifics, final String tableName)
+	/**
+	 * @return a SQL representation of this Order
+	 */
+	@Syntax(value = "SQL")
+	public String toSQL()
 	{
 		final StringBuilder sb = new StringBuilder(100);
 		for(int i=0;i<columns.length;i++)
@@ -159,7 +161,7 @@ public class Order implements Comparator<Map<String,Object>>, SQLCommand
 	@Override
 	public String toString()
 	{
-		return toSQL(null, SQLCommand.getNextTableIdentifier( null ));
+		return toSQL();
 	}
 
 	/**

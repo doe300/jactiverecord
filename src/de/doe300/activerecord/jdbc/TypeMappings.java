@@ -165,6 +165,7 @@ public final class TypeMappings
 	public static void writeUUID(@Nullable final UUID uuid, @Nonnull final ActiveRecord record,
 		@Nonnull final String columnName)
 	{
+		//XXX support for UUID-columns
 		record.getBase().getStore().setValue( record.getBase(), record.getPrimaryKey(), columnName, uuid == null ? null : uuid.toString());
 	}
 

@@ -30,7 +30,7 @@ import java.util.Map;
 
 import javax.annotation.Nonnull;
 
-import de.doe300.activerecord.jdbc.VendorSpecific;
+import de.doe300.activerecord.jdbc.driver.JDBCDriver;
 import de.doe300.activerecord.logging.Logging;
 import de.doe300.activerecord.migration.AutomaticMigration;
 import de.doe300.activerecord.record.ActiveRecord;
@@ -55,7 +55,7 @@ public class MemoryMigration extends AutomaticMigration
 	{
 		super(recordType, dropColumnsOnUpdate);
 		this.memoryStore = memoryStore;
-		vendorSpecifics = VendorSpecific.MYSQL;
+		driver = new JDBCDriver();
 		convertColumns();
 	}
 
@@ -67,7 +67,7 @@ public class MemoryMigration extends AutomaticMigration
 	 */
 	public MemoryMigration(@Nonnull final MemoryRecordStore memoryStore, @Nonnull final String tableName, @Nonnull final MemoryColumn[] columns, @Nonnull final String primaryColumn)
 	{
-		super( null, false, VendorSpecific.MYSQL );
+		super( null, false, new JDBCDriver() );
 		this.memoryStore = memoryStore;
 		this.tableName = tableName;
 		this.columns = columns;
@@ -83,7 +83,7 @@ public class MemoryMigration extends AutomaticMigration
 		primaryColumn = null;
 		for(final Map.Entry<String, String> column : sqlColumns.entrySet())
 		{
-			columns[index] = new MemoryColumn(column.getKey(), getJavaType( column.getValue()));
+			columns[index] = new MemoryColumn(column.getKey(), driver.getJavaType( column.getValue()));
 			index++;
 			if(column.getValue().contains( "PRIMARY"))
 			{

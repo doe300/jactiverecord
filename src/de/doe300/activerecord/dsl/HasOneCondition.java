@@ -29,7 +29,7 @@ import java.util.Map;
 import javax.annotation.Nonnull;
 
 import de.doe300.activerecord.ReadOnlyRecordBase;
-import de.doe300.activerecord.jdbc.VendorSpecific;
+import de.doe300.activerecord.jdbc.driver.JDBCDriver;
 import de.doe300.activerecord.record.ActiveRecord;
 import de.doe300.activerecord.record.association.AssociationHelper;
 
@@ -79,13 +79,13 @@ public class HasOneCondition implements Condition
 	}
 
 	@Override
-	public String toSQL(final VendorSpecific vendorSpecifics, final String tableName)
+	public String toSQL(final JDBCDriver driver, final String tableName)
 	{
 		String tableID = tableName != null ? tableName + "." : "";
-		String associatedTableName = SQLCommand.getNextTableIdentifier( tableName );
+		String associatedTableName = JDBCDriver.getNextTableIdentifier( tableName );
 		//EXISTS(SELECT associatedForeignKey FROM associatedTable WHERE thisTable.associationKey = associatedTable.associatedForeignKey AND cond)
 		return "EXISTS (SELECT "+associatedTableName+"."+associatedTableForeignKeyColumn+" FROM "+associatedTableBase.getTableName()+" AS "+associatedTableName
-		+ " WHERE "+associatedTableName+"."+associatedTableForeignKeyColumn+" = "+tableID+associationKeyColumn+" AND "+associatedTableCond.toSQL(vendorSpecifics, associatedTableName)+")";
+		+ " WHERE "+associatedTableName+"."+associatedTableForeignKeyColumn+" = "+tableID+associationKeyColumn+" AND "+associatedTableCond.toSQL(driver, associatedTableName)+")";
 	}
 
 	@Override

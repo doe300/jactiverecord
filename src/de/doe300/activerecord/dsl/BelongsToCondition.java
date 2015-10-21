@@ -31,7 +31,7 @@ import javax.annotation.Nullable;
 
 import de.doe300.activerecord.ReadOnlyRecordBase;
 import de.doe300.activerecord.RecordBase;
-import de.doe300.activerecord.jdbc.VendorSpecific;
+import de.doe300.activerecord.jdbc.driver.JDBCDriver;
 import de.doe300.activerecord.record.ActiveRecord;
 import de.doe300.activerecord.record.association.AssociationHelper;
 
@@ -94,15 +94,15 @@ public class BelongsToCondition implements Condition
 	}
 
 	@Override
-	public String toSQL(@Nullable final VendorSpecific vendorSpecifics, final String tableName)
+	public String toSQL(@Nonnull final JDBCDriver driver, final String tableName)
 	{
-		String associatedTableName = SQLCommand.getNextTableIdentifier( tableName );
+		String associatedTableName = JDBCDriver.getNextTableIdentifier( tableName );
 		//foreignKey IN(SELECT associatedKey FROM associatedTable WHERE cond)
 		//could also be written as:
 		//EXISTS(SELECT associatedKey FROM associatedTable WHERE thisTable.foreignKey = associatedKey AND cond)
 		return tableName + "." + foreignKeyColumn+" IN (SELECT " + associatedTableName + "." + associatedTableKey 
 				+ " FROM " + associatedTableBase.getTableName() + " AS " + associatedTableName 
-				+ " WHERE " + associatedTableCond.toSQL(vendorSpecifics, associatedTableName) + ")";
+				+ " WHERE " + associatedTableCond.toSQL(driver, associatedTableName) + ")";
 	}
 
 	@Override

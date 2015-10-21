@@ -24,6 +24,7 @@
  */
 package de.doe300.activerecord.dsl;
 
+import de.doe300.activerecord.jdbc.driver.JDBCDriver;
 import java.util.Map;
 import java.util.function.Predicate;
 
@@ -31,13 +32,23 @@ import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 
 import de.doe300.activerecord.record.ActiveRecord;
+import javax.annotation.Syntax;
 
 /**
  *
  * @author doe300
  */
-public interface Condition extends Predicate<ActiveRecord>, SQLCommand
+public interface Condition extends Predicate<ActiveRecord>
 {
+	/**
+	 * @param driver the vendor-specific driver
+	 * @param tableName the name to use to uniquely identify the table
+	 * @return the SQL representation of this condition
+	 */
+	@Nonnull
+	@Syntax(value = "SQL")
+	public String toSQL(@Nonnull final JDBCDriver driver, @Nullable final String tableName);
+	
 	/**
 	 * The wildcards (<code>?</code>) are replaced by the conditions {@link #getValues() values}.
 	 * @return whether this conditions uses wildcards in its SQL statement

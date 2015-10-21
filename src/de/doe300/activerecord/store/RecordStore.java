@@ -53,8 +53,9 @@ public interface RecordStore extends AutoCloseable
 	 * @return the underlying Connection or <code>null</code>
 	 */
 	@Nullable
+	@Deprecated
 	public Connection getConnection();
-
+	
 	/**
 	 * @param tableName
 	 * @return whether the data-store exists

@@ -27,7 +27,7 @@ package de.doe300.activerecord.dsl;
 import de.doe300.activerecord.RecordBase;
 import de.doe300.activerecord.TestInterface;
 import de.doe300.activerecord.TestServer;
-import de.doe300.activerecord.jdbc.VendorSpecific;
+import de.doe300.activerecord.jdbc.driver.JDBCDriver;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
@@ -84,7 +84,7 @@ public class OrConditionTest extends Assert
 	{
 		Condition c1 = OrCondition.orConditions(cond);
 		//test OR-unrolling
-		assertEquals( cond.toSQL( VendorSpecific.HSQLDB, null), c1.toSQL( VendorSpecific.HSQLDB, null ));
+		assertEquals( cond.toSQL( JDBCDriver.guessDriver( null ), null), c1.toSQL( JDBCDriver.guessDriver( null ), null ));
 		//test skip duplicates
 		Condition s1 = new SimpleCondition("test", "dummy", Comparison.IS);
 		Condition c2 = OrCondition.orConditions(s1, s1);
