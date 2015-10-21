@@ -30,17 +30,25 @@ import javax.annotation.Nullable;
 
 import de.doe300.activerecord.dsl.Condition;
 import de.doe300.activerecord.dsl.Order;
+import javax.annotation.concurrent.Immutable;
 
 /**
  * A scope is a set of predefined conditions to narrow the results
  * @author doe300
  */
+@Immutable
 public final class Scope
 {
 	/**
 	 * No specific limit was set
 	 */
 	public static final int NO_LIMIT = -1;
+	
+	/**
+	 * Scope which does not limit, filter or order the results
+	 * @since 0.5
+	 */
+	public static final Scope DEFAULT = new Scope(null, null, NO_LIMIT);
 
 	@Nullable
 	private final Condition condition;
