@@ -72,7 +72,6 @@ public interface MappableRecord extends ActiveRecord
 	public default void setAttributes(@Nonnull final Map<String, Object> map)
 	{
 		getBase().getStore().setValues( getBase(), getPrimaryKey(), map);
-		reload();
 	}
 
 	/**
@@ -82,8 +81,6 @@ public interface MappableRecord extends ActiveRecord
 	 */
 	public default void setAttribute(@Nonnull final String column, @Nullable final Object value)
 	{
-		save();
 		getBase().getStore().setValue( getBase(), getPrimaryKey(), column, value);
-		reload();
 	}
 }

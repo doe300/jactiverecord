@@ -43,6 +43,7 @@ import de.doe300.activerecord.dsl.Condition;
 import de.doe300.activerecord.jdbc.driver.JDBCDriver;
 import de.doe300.activerecord.logging.Logging;
 import de.doe300.activerecord.scope.Scope;
+import java.util.Arrays;
 
 /**
  * Uses write-back cache
@@ -84,7 +85,7 @@ public class CachedJDBCRecordStore extends SimpleJDBCRecordStore
 			tableCache = new BaseCache(base);
 			cache.put( base, tableCache );
 		}
-		//TODO currently, if a record is created and data is set before read the cache can't check if the data was modified
+		//FIXME currently, if a record is created and data is set before read the cache can't check if the data was modified
 		//because it is not yet filled with the DB-data
 		return tableCache.getOrCreateRow(primaryKey);
 	}
@@ -115,22 +116,34 @@ public class CachedJDBCRecordStore extends SimpleJDBCRecordStore
 		}
 		return super.containsRecord( base, primaryKey );
 	}
-
+	
 	@Override
 	public void setValue( final RecordBase<?> base, final int primaryKey, final String name, final Object value ) throws IllegalArgumentException
 	{
+		if(!getAllColumnNames( base.getTableName()).contains( name))
+		{
+			throw new IllegalArgumentException("No such column for the name: " + name);
+		}
 		getCache(base, primaryKey ).setData( name, value, true);
 	}
 
 	@Override
 	public void setValues( final RecordBase<?> base, final int primaryKey, final String[] names, final Object[] values ) throws IllegalArgumentException
 	{
+		if(!getAllColumnNames( base.getTableName()).containsAll( Arrays.asList( names)))
+		{
+			throw new IllegalArgumentException("No such columns for the names: " + Arrays.toString( names));
+		}
 		getCache(base, primaryKey ).setData( names, values );
 	}
 
 	@Override
 	public void setValues( final RecordBase<?> base, final int primaryKey, final Map<String, Object> values ) throws IllegalArgumentException
 	{
+		if(!getAllColumnNames( base.getTableName()).containsAll( values.keySet()))
+		{
+			throw new IllegalArgumentException("No such columns for the names: " + values.keySet());
+		}
 		getCache( base, primaryKey ).update( values, true );
 	}
 

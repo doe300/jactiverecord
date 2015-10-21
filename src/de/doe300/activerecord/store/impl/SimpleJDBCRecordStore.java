@@ -498,7 +498,11 @@ public class SimpleJDBCRecordStore implements RecordStore
 			}
 			//this result-set can't be try-with-resource because it is required to stay open for asynchronous call
 			final ResultSet res = stm.executeQuery();
-			return allWithDataStream(columns, res);
+			//we must add the primary-key to the list of columns, because it is not guaranteed to be in there
+			//and it is needed to prevent row-maps with same values to be counted as the same
+			Set<String> columnWithKey = new HashSet<>(Arrays.asList( columns ));
+			columnWithKey.add( base.getPrimaryColumn());
+			return allWithDataStream(columnWithKey, res);
 		}
 		catch ( final SQLException ex )
 		{
@@ -510,7 +514,7 @@ public class SimpleJDBCRecordStore implements RecordStore
 	}
 
 	@Nonnull
-	private Stream<Map<String, Object>> allWithDataStream(@Nonnull final String[] columns, @Nonnull final ResultSet res)
+	private Stream<Map<String, Object>> allWithDataStream(@Nonnull final Set<String> columns, @Nonnull final ResultSet res)
 	{
 		return StreamSupport.stream( new Spliterator<Map<String,Object>>()
 		{
@@ -526,8 +530,8 @@ public class SimpleJDBCRecordStore implements RecordStore
 						res.close();
 						return false;
 					}
-					final Map<String,Object> values=new HashMap<>(columns.length);
-					for(final String column:columns)
+					final Map<String,Object> values=new HashMap<>(columns.size());
+					for(final String column : columns)
 					{
 						values.put( column, res.getObject( column));
 					}

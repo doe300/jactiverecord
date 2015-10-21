@@ -85,7 +85,7 @@ public class AggregateFunctionTest extends Assert
 		assertEquals( Integer.valueOf( t1.getAge()), base.aggregate( min, null));
 		assertEquals( Integer.valueOf( t1.getAge()), base.getStore().aggregate( base, min, null));
 		assertEquals( Integer.valueOf( t1.getAge()), min.aggregate( 
-				base.getStore().findAllWithData( base, new String[]{"age"}, new Scope(null, null, Scope.NO_LIMIT)).
+				base.getStore().findAllWithData( base, new String[]{"age"}, Scope.DEFAULT).
 						values().stream()));
 	}
 
@@ -99,7 +99,7 @@ public class AggregateFunctionTest extends Assert
 		assertEquals( Integer.valueOf( t3.getAge()), base.aggregate( max, null));
 		assertEquals( Integer.valueOf( t3.getAge()), base.getStore().aggregate( base, max, null));
 		assertEquals( Integer.valueOf( t3.getAge()), max.aggregate( 
-				base.getStore().findAllWithData( base, new String[]{"age"}, new Scope(null, null, Scope.NO_LIMIT)).
+				base.getStore().findAllWithData( base, new String[]{"age"}, Scope.DEFAULT).
 						values().stream()));
 	}
 
@@ -113,7 +113,7 @@ public class AggregateFunctionTest extends Assert
 		assertEquals( Long.valueOf( 4), base.aggregate( count, null));
 		assertEquals( Long.valueOf( 4), base.getStore().aggregate( base, count, null));
 		assertEquals( Long.valueOf( 4), count.aggregate( 
-				base.getStore().findAllWithData( base, new String[]{"age"}, new Scope(null, null, Scope.NO_LIMIT)).
+				base.getStore().findAllWithData( base, new String[]{"age"}, Scope.DEFAULT).
 						values().stream()));
 	}
 
@@ -127,7 +127,7 @@ public class AggregateFunctionTest extends Assert
 		assertEquals( Long.valueOf( 3), base.aggregate( countDistinct, null));
 		assertEquals( Long.valueOf( 3), base.getStore().aggregate( base, countDistinct, null));
 		assertEquals( Long.valueOf( 3), countDistinct.aggregate( 
-				base.getStore().findAllWithData( base, new String[]{"age"}, new Scope(null, null, Scope.NO_LIMIT)).
+				base.getStore().findAllWithData( base, new String[]{"age"}, Scope.DEFAULT).
 						values().stream()));
 	}
 
@@ -142,7 +142,7 @@ public class AggregateFunctionTest extends Assert
 		assertEquals( Long.valueOf( otherSum), base.aggregate( sum, null));
 		assertEquals( Long.valueOf( otherSum), base.getStore().aggregate( base, sum, null));
 		assertEquals( Long.valueOf( otherSum), sum.aggregate( 
-				base.getStore().findAllWithData( base, new String[]{"age"}, new Scope(null, null, Scope.NO_LIMIT)).
+				base.getStore().findAllWithData( base, new String[]{"age"}, Scope.DEFAULT).
 						values().stream()));
 	}
 
@@ -157,7 +157,7 @@ public class AggregateFunctionTest extends Assert
 		assertEquals( Double.valueOf( otherSum), base.aggregate( sumFloat, null));
 		assertEquals( Double.valueOf( otherSum), base.getStore().aggregate( base, sumFloat, null));
 		assertEquals( Double.valueOf( otherSum), sumFloat.aggregate( 
-				base.getStore().findAllWithData( base, new String[]{"age"}, new Scope(null, null, Scope.NO_LIMIT)).
+				base.getStore().findAllWithData( base, new String[]{"age"}, Scope.DEFAULT).
 						values().stream()));
 	}
 
@@ -172,7 +172,7 @@ public class AggregateFunctionTest extends Assert
 		assertEquals( Double.valueOf( avgAge), base.aggregate( average, null));
 		assertEquals( Double.valueOf( avgAge), base.getStore().aggregate( base, average, null));
 		assertEquals( Double.valueOf( avgAge), average.aggregate( 
-				base.getStore().findAllWithData( base, new String[]{"age"}, new Scope(null, null, Scope.NO_LIMIT)).
+				base.getStore().findAllWithData( base, new String[]{"age"}, Scope.DEFAULT).
 						values().stream()));
 	}
 }

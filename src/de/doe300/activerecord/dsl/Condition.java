@@ -33,11 +33,13 @@ import javax.annotation.Nullable;
 
 import de.doe300.activerecord.record.ActiveRecord;
 import javax.annotation.Syntax;
+import javax.annotation.concurrent.Immutable;
 
 /**
  *
  * @author doe300
  */
+@Immutable
 public interface Condition extends Predicate<ActiveRecord>
 {
 	/**

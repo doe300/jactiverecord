@@ -77,7 +77,7 @@ public class TestServer extends Assert
 	/*
 	 * XXX: Need to test all test-cases for the various record-store implementations
 	 */
-	public static final Class<? extends RecordStore> testStore = CachedJDBCRecordStore.class;
+	public static final Class<? extends RecordStore> testStore = SimpleJDBCRecordStore.class;
 	
 	@Nonnull
 	public static RecordCore getTestCore() throws SQLException

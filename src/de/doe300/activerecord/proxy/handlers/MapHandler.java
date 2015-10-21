@@ -126,6 +126,10 @@ public class MapHandler implements ProxyHandler
 			{
 				return primaryKey;
 			}
+			if(!keySet().contains( key))
+			{
+				throw new IllegalArgumentException("Invalid key: " + key);
+			}
 			final Object old = store.getValue( base, primaryKey, key );
 			store.setValue( base, primaryKey, key, value );
 			return old;
@@ -134,6 +138,10 @@ public class MapHandler implements ProxyHandler
 		@Override
 		public void putAll(final Map<? extends String, ? extends Object> m )
 		{
+			if(!keySet().containsAll( m.keySet()))
+			{
+				throw new IllegalArgumentException("Invalid keys: " + m.keySet());
+			}
 			for(final Entry<? extends String, ? extends Object> e: m.entrySet())
 			{
 				if(e.getKey().equalsIgnoreCase(base.getPrimaryColumn()))

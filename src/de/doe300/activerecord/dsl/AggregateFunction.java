@@ -421,6 +421,12 @@ public abstract class AggregateFunction<T extends ActiveRecord, C, R> implements
 		return new AggregateFunction<T, C, Double>(JDBCDriver.AGGREGATE_SUM, columnName, columnFunc)
 		{
 			@Override
+			public String toSQL(@Nonnull final JDBCDriver driver)
+			{
+				return "CAST(" + super.toSQL(driver) + " AS DOUBLE)";
+			}
+	
+			@Override
 			public BiConsumer<ValueHolder<Double>, T> accumulator()
 			{
 				return (final ValueHolder<Double> holder, final T record) -> {
@@ -477,6 +483,11 @@ public abstract class AggregateFunction<T extends ActiveRecord, C, R> implements
 	{
 		return new AggregateFunction<T, C, Double>(JDBCDriver.AGGREGATE_AVERAGE, columnName, columnFunc)
 		{
+			@Override
+			public String toSQL(@Nonnull final JDBCDriver driver)
+			{
+				return "CAST(" + super.toSQL(driver) + " AS DOUBLE)";
+			}
 
 			@Override
 			public Supplier<ValueHolder<Double>> supplier()

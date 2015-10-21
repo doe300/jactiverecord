@@ -110,6 +110,8 @@ public class ConditionSetTest extends Assert
 	@Test
 	public void testSize()
 	{
+		set.clear();
+		set.addAll( Arrays.asList( a1,a2,a3));
 		assertEquals(3, set.size());
 	}
 
