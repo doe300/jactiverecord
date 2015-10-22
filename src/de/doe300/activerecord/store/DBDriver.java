@@ -22,30 +22,27 @@
  * SOFTWARE.
  *
  */
-package de.doe300.activerecord.performance;
+package de.doe300.activerecord.store;
 
-import de.doe300.activerecord.migration.Attribute;
-import de.doe300.activerecord.record.ActiveRecord;
-import de.doe300.activerecord.record.association.AssociationHelper;
+import de.doe300.activerecord.jdbc.driver.JDBCDriver;
+import javax.annotation.Nonnull;
+import javax.annotation.concurrent.Immutable;
 
 /**
- *
+ * Abstract super-type for all db-drivers
+ * 
  * @author doe300
+ * @since 0.5
+ * @see JDBCDriver
  */
-public interface ProxyPerformance extends ActiveRecord
+@Immutable
+public interface DBDriver
 {
-	public String getName();
-	
-	public void setName(String newName);
-	
-	@Attribute(name = "other", type = Integer.class)
-	public default ProxyPerformance getOther()
-	{
-		return AssociationHelper.getBelongsTo( this, ProxyPerformance.class, "other");
-	}
-
-	public default void setOther( ProxyPerformance other )
-	{
-		AssociationHelper.setBelongsTo( this, other, "other");
-	}
+	/**
+	 * This methods informs, whether the given java-type is supported be natively stored and read from this data-store
+	 * 
+	 * @param javaType the java-type to check
+	 * @return whether the given type is natively supported 
+	 */
+	public boolean isTypeSupported(@Nonnull final Class<?> javaType);
 }

@@ -52,4 +52,15 @@ public class HSQLDBDriver extends JDBCDriver
 	{
 		return "LONGVARCHAR";
 	}
+
+	@Override
+	public String getSQLType( int jdbcType ) throws IllegalArgumentException
+	{
+		if(jdbcType == java.sql.Types.SQLXML)
+		{
+			//see: http://hsqldb.org/doc/src/org/hsqldb/jdbc/JDBCSQLXML.html
+			return "LONGVARCHAR";
+		}
+		return super.getSQLType( jdbcType );
+	}
 }

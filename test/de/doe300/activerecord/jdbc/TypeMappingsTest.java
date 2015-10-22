@@ -38,7 +38,6 @@ import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.sql.Connection;
 import java.sql.SQLException;
-import java.sql.SQLSyntaxErrorException;
 import java.sql.Timestamp;
 import java.util.Date;
 import java.util.TreeSet;
@@ -135,10 +134,9 @@ public class TypeMappingsTest extends Assert
 		assertEquals( impl.testInteger, record.getDBMappable().testInteger);
 	}
 	
-	@Test(expected = SQLSyntaxErrorException.class)
+	@Test
 	public void testXML() throws SQLException, IOException
 	{
-		//TODO hsqldb does not support XML??
 		String xmlString = "<tag><subtag/>some text</tag>";
 		TestTypesInterface record = base.createRecord();
 		record.writeXML( xmlString);

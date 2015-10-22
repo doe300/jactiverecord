@@ -59,6 +59,7 @@ import de.doe300.activerecord.migration.Migration;
 import de.doe300.activerecord.record.RecordType;
 import de.doe300.activerecord.record.TimestampedRecord;
 import de.doe300.activerecord.scope.Scope;
+import de.doe300.activerecord.store.DBDriver;
 import de.doe300.activerecord.store.RecordStore;
 
 /**
@@ -201,6 +202,12 @@ public class SimpleJDBCRecordStore implements RecordStore
 	public Connection getConnection()
 	{
 		return con;
+	}
+
+	@Override
+	public DBDriver getDriver()
+	{
+		return driver;
 	}
 
 	@Override
@@ -599,14 +606,24 @@ public class SimpleJDBCRecordStore implements RecordStore
 	@Override
 	public Set<String> getAllColumnNames( final String tableName )
 	{
+		return getAllColumnTypes( tableName ).keySet();
+	}
+
+	@Override
+	public Map<String, Class<?>> getAllColumnTypes( String tableName ) throws IllegalArgumentException
+	{
+		if(!exists( tableName ))
+		{
+			throw new IllegalArgumentException("Table does not exist: " + tableName);
+		}
 		try(ResultSet set = con.getMetaData().getColumns(con.getCatalog(), con.getSchema(), JDBCDriver.convertIdentifierWithoutQuote(tableName, con), null))
 		{
-			final Set<String> columns = new HashSet<>(10);
+			Map<String, Class<?>> columnTypes = new HashMap<>(10);
 			while(set.next())
 			{
-				columns.add( set.getString( "COLUMN_NAME").toLowerCase());
+				columnTypes.put(set.getString( "COLUMN_NAME").toLowerCase(), driver.getJavaType( set.getString( "TYPE_NAME")));
 			}
-			return columns;
+			return columnTypes;
 		}
 		catch ( final SQLException ex )
 		{

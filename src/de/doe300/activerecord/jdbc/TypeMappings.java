@@ -48,6 +48,7 @@ import javax.xml.transform.dom.DOMResult;
 import de.doe300.activerecord.RecordException;
 import de.doe300.activerecord.migration.Attribute;
 import de.doe300.activerecord.record.ActiveRecord;
+import java.io.ByteArrayInputStream;
 
 /**
  * Utility class to provide type mappings for commonly used types
@@ -325,6 +326,10 @@ public final class TypeMappings
 		{
 			return ((SQLXML)value).getBinaryStream();
 		}
+		if(value instanceof String)
+		{
+			return new ByteArrayInputStream(((String)value).getBytes());
+		}
 		return null;
 	}
 
@@ -372,9 +377,17 @@ public final class TypeMappings
 		{
 			throw new RecordException(record, "no JDBC-Connection for this database");
 		}
-		//TODO fall back to string, if type of columnName is VARCHAR
-		final SQLXML xml = con.createSQLXML();
-		xml.setString( xmlString );
+		final Class<?> columnType = record.getBase().getStore().getAllColumnTypes( record.getBase().getTableName()).get( columnName);
+		final Object xml;
+		if(columnType.equals( String.class))
+		{
+			xml = xmlString;
+		}
+		else
+		{
+			xml = con.createSQLXML();
+			((SQLXML)xml).setString(xmlString);
+		}
 
 		record.getBase().getStore().setValue( record.getBase(), record.getPrimaryKey(), columnName, xml);
 	}

@@ -53,7 +53,7 @@ import java.util.Arrays;
 public class CachedJDBCRecordStore extends SimpleJDBCRecordStore
 {
 	private final Map<RecordBase<?>, BaseCache> cache;
-	private final Map<String,Set<String>> columnsCache;
+	private final Map<String, Map<String, Class<?>>> columnsCache;
 	private final Map<String, Boolean> tableExistsCache;
 
 	/**
@@ -307,10 +307,22 @@ public class CachedJDBCRecordStore extends SimpleJDBCRecordStore
 	@Override
 	public Set<String> getAllColumnNames( final String tableName )
 	{
-		Set<String> columns=columnsCache.get( tableName );
+		Map<String, Class<?>> columns=columnsCache.get( tableName );
 		if(columns==null)
 		{
-			columns = super.getAllColumnNames( tableName );
+			columns = super.getAllColumnTypes(tableName );
+			columnsCache.put( tableName, columns );
+		}
+		return columns.keySet();
+	}
+
+	@Override
+	public Map<String, Class<?>> getAllColumnTypes( String tableName ) throws IllegalArgumentException
+	{
+		Map<String, Class<?>> columns=columnsCache.get( tableName );
+		if(columns==null)
+		{
+			columns = super.getAllColumnTypes(tableName );
 			columnsCache.put( tableName, columns );
 		}
 		return columns;

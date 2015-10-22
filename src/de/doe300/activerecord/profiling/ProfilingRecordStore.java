@@ -33,6 +33,7 @@ import de.doe300.activerecord.RecordBase;
 import de.doe300.activerecord.dsl.AggregateFunction;
 import de.doe300.activerecord.dsl.Condition;
 import de.doe300.activerecord.scope.Scope;
+import de.doe300.activerecord.store.DBDriver;
 import de.doe300.activerecord.store.RecordStore;
 
 /**
@@ -63,6 +64,12 @@ public class ProfilingRecordStore implements RecordStore
 	}
 
 	@Override
+	public DBDriver getDriver()
+	{
+		return profiler.profile( "getDriver", () -> store.getDriver());
+	}
+
+	@Override
 	public boolean exists( final String tableName )
 	{
 		return profiler.profileBoolean("exists", () -> store.exists(tableName));
@@ -72,6 +79,12 @@ public class ProfilingRecordStore implements RecordStore
 	public Set<String> getAllColumnNames( final String tableName ) throws UnsupportedOperationException
 	{
 		return profiler.profile( "getAllColumnNames", () -> store.getAllColumnNames( tableName));
+	}
+
+	@Override
+	public Map<String, Class<?>> getAllColumnTypes( String tablename ) throws IllegalArgumentException
+	{
+		return profiler.profile( "getAllColumnTypes", () -> store.getAllColumnTypes( tablename));
 	}
 
 	@Override

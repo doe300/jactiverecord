@@ -26,6 +26,7 @@ package de.doe300.activerecord.jdbc.driver;
 
 import de.doe300.activerecord.logging.Logging;
 import de.doe300.activerecord.record.ActiveRecord;
+import de.doe300.activerecord.store.DBDriver;
 import java.lang.reflect.Field;
 import java.math.BigDecimal;
 import java.sql.Connection;
@@ -49,8 +50,9 @@ import javax.annotation.Signed;
  * @since 0.5
  * @see https://en.wikibooks.org/wiki/SQL_Dialects_Reference
  */
-public class JDBCDriver
+public class JDBCDriver implements DBDriver
 {
+	//TODO unify isTypeSupported(Class)/getSQLType(int/Class) and getJavaType(String)
 	public static final int STRING_TYPE_LENGTH = 4096;
 	
 	public static final String AGGREGATE_COUNT_ALL= "COUNT(*)";
@@ -77,6 +79,19 @@ public class JDBCDriver
 		"translation", "trim", "true", "unknown", "upper", "usage", "value", "varchar", "when", "whenever", "write",
 		"year", "zone"
 	};
+	
+	@Override
+	public boolean isTypeSupported(Class<?> javaType )
+	{
+		try
+		{
+			return getSQLType( javaType ) != null;
+		}
+		catch(final IllegalArgumentException iae)
+		{
+			return false;
+		}
+	}
 	
 	/**
 	 * @param offset the offset to start at
@@ -145,7 +160,40 @@ public class JDBCDriver
 		return ( boolean ) value;
 	}
 	
-	//TODO XML
+	/**
+	 * Note: The result of this method may be inaccurate
+	 *
+	 * @param jdbcType
+	 * @return the mapped SQL-type
+	 * @throws IllegalArgumentException
+	 * @see java.sql.Types
+	 */
+	public String getSQLType( final int jdbcType ) throws IllegalArgumentException
+	{
+		if ( jdbcType == Types.SQLXML )
+		{
+			return "XML";
+		}
+		for ( final Field f : Types.class.getFields() )
+		{
+			if ( f.getType() == Integer.TYPE )
+			{
+				try
+				{
+					final int val = f.getInt( null );
+					if ( val == jdbcType )
+					{
+						return f.getName().replaceAll( "_", " " );
+					}
+				}
+				catch ( final IllegalAccessException ex )
+				{
+					throw new IllegalArgumentException( ex );
+				}
+			}
+		}
+		throw new IllegalArgumentException( "Unknown Type: " + jdbcType );
+	}
 	
 	/**
 	 * NOTE: The result of this method may be inaccurate.
@@ -332,41 +380,6 @@ public class JDBCDriver
 			}
 		}
 		return new JDBCDriver();
-	}
-	
-	/**
-	 * Note: The result of this method may be inaccurate
-	 *
-	 * @param jdbcType
-	 * @return the mapped SQL-type
-	 * @throws IllegalArgumentException
-	 * @see java.sql.Types
-	 */
-	public static String getSQLType( final int jdbcType ) throws IllegalArgumentException
-	{
-		if ( jdbcType == Types.SQLXML )
-		{
-			return "XML";
-		}
-		for ( final Field f : Types.class.getFields() )
-		{
-			if ( f.getType() == Integer.TYPE )
-			{
-				try
-				{
-					final int val = f.getInt( null );
-					if ( val == jdbcType )
-					{
-						return f.getName().replaceAll( "_", " " );
-					}
-				}
-				catch ( final IllegalAccessException ex )
-				{
-					throw new IllegalArgumentException( ex );
-				}
-			}
-		}
-		throw new IllegalArgumentException( "Unknown Type: " + jdbcType );
 	}
 	
 	/**

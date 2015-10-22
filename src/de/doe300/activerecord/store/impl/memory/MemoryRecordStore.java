@@ -40,6 +40,7 @@ import de.doe300.activerecord.dsl.AggregateFunction;
 import de.doe300.activerecord.dsl.Condition;
 import de.doe300.activerecord.record.TimestampedRecord;
 import de.doe300.activerecord.scope.Scope;
+import de.doe300.activerecord.store.DBDriver;
 import de.doe300.activerecord.store.RecordStore;
 import javax.annotation.Nonnegative;
 
@@ -64,6 +65,12 @@ public class MemoryRecordStore implements RecordStore
 	public Connection getConnection()
 	{
 		return null;
+	}
+
+	@Override
+	public DBDriver getDriver()
+	{
+		return MemoryDBDriver.INSTANCE;
 	}
 
 	@Override
@@ -107,6 +114,13 @@ public class MemoryRecordStore implements RecordStore
 	{
 		final MemoryTable table = assertTableExists( tableName );
 		return table.getColumnNames();
+	}
+
+	@Override
+	public Map<String, Class<?>> getAllColumnTypes( String tableName ) throws IllegalArgumentException
+	{
+		final MemoryTable table = assertTableExists( tableName );
+		return table.getColumnTypes();
 	}
 
 	@Override

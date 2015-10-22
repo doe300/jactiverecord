@@ -22,30 +22,23 @@
  * SOFTWARE.
  *
  */
-package de.doe300.activerecord.performance;
+package de.doe300.activerecord.store.impl.memory;
 
-import de.doe300.activerecord.migration.Attribute;
-import de.doe300.activerecord.record.ActiveRecord;
-import de.doe300.activerecord.record.association.AssociationHelper;
+import de.doe300.activerecord.store.DBDriver;
 
 /**
  *
  * @author doe300
+ * @since 0.5
  */
-public interface ProxyPerformance extends ActiveRecord
+public enum MemoryDBDriver implements DBDriver
 {
-	public String getName();
-	
-	public void setName(String newName);
-	
-	@Attribute(name = "other", type = Integer.class)
-	public default ProxyPerformance getOther()
-	{
-		return AssociationHelper.getBelongsTo( this, ProxyPerformance.class, "other");
-	}
+	INSTANCE;
 
-	public default void setOther( ProxyPerformance other )
+	@Override
+	public boolean isTypeSupported(Class<?> javaType )
 	{
-		AssociationHelper.setBelongsTo( this, other, "other");
+		return true;
 	}
+	
 }

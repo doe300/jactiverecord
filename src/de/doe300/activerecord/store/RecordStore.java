@@ -57,6 +57,12 @@ public interface RecordStore extends AutoCloseable
 	public Connection getConnection();
 	
 	/**
+	 * @return the driver to be used for the underlying data-store
+	 */
+	@Nonnull
+	public DBDriver getDriver();
+	
+	/**
 	 * @param tableName
 	 * @return whether the data-store exists
 	 */
@@ -66,10 +72,24 @@ public interface RecordStore extends AutoCloseable
 	 * NOTE: to unify database-access, this method returns the keys in lower-case independent from the DBMS used.
 	 * @param tableName
 	 * @return all available column-names
-	 * @throws java.lang.UnsupportedOperationException if the store can't retrieve the column-names
+	 * @throws java.lang.IllegalArgumentException if the table for the given name was not found
 	 */
 	@Nonnull
-	public Set<String> getAllColumnNames(@Nonnull final String tableName) throws UnsupportedOperationException;
+	public default Set<String> getAllColumnNames(@Nonnull final String tableName) throws IllegalArgumentException
+	{
+		return getAllColumnTypes( tableName ).keySet();
+	}
+	
+	/**
+	 * NOTE: to unify database-access, this method returns the keys in lower-case independent from the DBMS used.
+	 * 
+	 * @param tableName
+	 * @return a map of all column-names and their java-types
+	 * @throws IllegalArgumentException if the table for the given name was not found
+	 * @since 0.5
+	 */
+	@Nonnull 
+	public Map<String, Class<?>> getAllColumnTypes(@Nonnull final String tableName) throws IllegalArgumentException;
 
 	/**
 	 * @param base

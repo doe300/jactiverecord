@@ -29,7 +29,6 @@ import de.doe300.activerecord.dsl.Order;
 import de.doe300.activerecord.scope.Scope;
 import java.util.Arrays;
 import java.util.HashMap;
-import java.util.HashSet;
 import java.util.Iterator;
 import java.util.Map;
 import java.util.Objects;
@@ -60,7 +59,7 @@ class MemoryTable
 	//TODO add indices (SortedMaps for specific key(s), need to be updated!!!)
 	
 	//cache values
-	private Set<String> columnNames;
+	private Map<String, Class<?>> columnTypes;
 	private int nextRowIndex = 0;
 
 	MemoryTable(@Nonnull final String primaryColumn, @Nonnull final MemoryColumn[] columns)
@@ -74,11 +73,25 @@ class MemoryTable
 	@Nonnull
 	public Set<String> getColumnNames()
 	{
-		if(columnNames == null)
+		if(columnTypes == null)
 		{
-			columnNames = new HashSet<String>(columns.keySet());
+			getColumnTypes();
 		}
-		return columnNames;
+		return columnTypes.keySet();
+	}
+	
+	@Nonnull
+	public Map<String, Class<?>> getColumnTypes()
+	{
+		if(columnTypes == null)
+		{
+			columnTypes = new HashMap<>(columns.size());
+			for(Map.Entry<String, MemoryColumn> column : columns.entrySet())
+			{
+				columnTypes.put( column.getKey(), column.getValue().getType());
+			}
+		}
+		return columnTypes;
 	}
 	
 	private Object checkColumn(@Nonnull final String columnName, @Nullable final Object value)
