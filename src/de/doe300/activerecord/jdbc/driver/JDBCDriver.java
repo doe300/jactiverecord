@@ -27,7 +27,6 @@ package de.doe300.activerecord.jdbc.driver;
 import de.doe300.activerecord.logging.Logging;
 import de.doe300.activerecord.record.ActiveRecord;
 import de.doe300.activerecord.store.DBDriver;
-import java.lang.reflect.Field;
 import java.math.BigDecimal;
 import java.sql.Connection;
 import java.sql.DatabaseMetaData;
@@ -35,7 +34,6 @@ import java.sql.Date;
 import java.sql.SQLException;
 import java.sql.Time;
 import java.sql.Timestamp;
-import java.sql.Types;
 import java.util.Arrays;
 import java.util.function.Function;
 import javax.annotation.Nonnegative;
@@ -161,41 +159,6 @@ public class JDBCDriver implements DBDriver
 	}
 	
 	/**
-	 * Note: The result of this method may be inaccurate
-	 *
-	 * @param jdbcType
-	 * @return the mapped SQL-type
-	 * @throws IllegalArgumentException
-	 * @see java.sql.Types
-	 */
-	public String getSQLType( final int jdbcType ) throws IllegalArgumentException
-	{
-		if ( jdbcType == Types.SQLXML )
-		{
-			return "XML";
-		}
-		for ( final Field f : Types.class.getFields() )
-		{
-			if ( f.getType() == Integer.TYPE )
-			{
-				try
-				{
-					final int val = f.getInt( null );
-					if ( val == jdbcType )
-					{
-						return f.getName().replaceAll( "_", " " );
-					}
-				}
-				catch ( final IllegalAccessException ex )
-				{
-					throw new IllegalArgumentException( ex );
-				}
-			}
-		}
-		throw new IllegalArgumentException( "Unknown Type: " + jdbcType );
-	}
-	
-	/**
 	 * NOTE: The result of this method may be inaccurate.
 	 *
 	 * @param javaType
@@ -206,11 +169,53 @@ public class JDBCDriver implements DBDriver
 	 */
 	public String getSQLType( final Class<?> javaType) throws IllegalArgumentException
 	{
+		//map SQL-types
+		if(java.sql.Array.class.isAssignableFrom( javaType ))
+		{
+			return "ARRAY";
+		}
+		if(java.sql.Blob.class.isAssignableFrom( javaType ))
+		{
+			return "BLOB";
+		}
+		if(java.sql.Clob.class.isAssignableFrom( javaType ))
+		{
+			return "CLOB";
+		}
+		if(java.sql.NClob.class.isAssignableFrom( javaType ))
+		{
+			return "NCLOB";
+		}
+		if(java.sql.Ref.class.isAssignableFrom( javaType ))
+		{
+			return "REF";
+		}
+		if(java.sql.RowId.class.isAssignableFrom( javaType ))
+		{
+			return "ROWID";
+		}
+		if(java.sql.SQLXML.class.isAssignableFrom( javaType ))
+		{
+			return "XML";
+		}
+		if ( java.sql.Date.class.isAssignableFrom( javaType ) )
+		{
+			return "DATE";
+		}
+		if ( java.sql.Time.class.isAssignableFrom( javaType ) )
+		{
+			return "TIME";
+		}
+		if ( java.sql.Timestamp.class.isAssignableFrom( javaType ) )
+		{
+			return "TIMESTAMP";
+		}
+		//map builting-types
 		if ( javaType.equals( String.class ) )
 		{
 			return getStringDataType();
 		}
-		if ( javaType.equals( BigDecimal.class ) )
+		if ( BigDecimal.class.isAssignableFrom( javaType ) )
 		{
 			return "NUMERIC";
 		}
@@ -242,18 +247,6 @@ public class JDBCDriver implements DBDriver
 		{
 			return "DOUBLE";
 		}
-		if ( javaType.equals( Date.class ) )
-		{
-			return "DATE";
-		}
-		if ( javaType.equals( Time.class ) )
-		{
-			return "TIME";
-		}
-		if ( javaType.equals( Timestamp.class ) )
-		{
-			return "TIMESTAMP";
-		}
 		if ( ActiveRecord.class.isAssignableFrom( javaType ) )
 		{
 			//for foreign key
@@ -277,6 +270,48 @@ public class JDBCDriver implements DBDriver
 	 */
 	public Class<?> getJavaType( final String sqlType ) throws IllegalArgumentException
 	{
+		//map SQL-types
+		if(sqlType.startsWith( "ARRAY"))
+		{
+			return java.sql.Array.class;
+		}
+		if(sqlType.startsWith( "BLOB"))
+		{
+			return java.sql.Blob.class;
+		}
+		if(sqlType.startsWith( "CLOB"))
+		{
+			return java.sql.Clob.class;
+		}
+		if(sqlType.startsWith( "NCLOB"))
+		{
+			return java.sql.NClob.class;
+		}
+		if(sqlType.startsWith( "REF"))
+		{
+			return java.sql.Ref.class;
+		}
+		if(sqlType.startsWith( "ROWID"))
+		{
+			return java.sql.RowId.class;
+		}
+		if(sqlType.startsWith( "XML"))
+		{
+			return java.sql.SQLXML.class;
+		}
+		if ( sqlType.startsWith( "DATE" ) )
+		{
+			return Date.class;
+		}
+		if ( sqlType.startsWith( "TIMESTAMP" ) )
+		{
+			return Timestamp.class;
+		}
+		if ( sqlType.startsWith( "TIME" ) )
+		{
+			return Time.class;
+		}
+		//map built-in types
 		if ( sqlType.startsWith( "VARCHAR" ) || sqlType.startsWith( "CHAR" ) )
 		{
 			return String.class;
@@ -312,18 +347,6 @@ public class JDBCDriver implements DBDriver
 		if ( sqlType.startsWith( "DOUBLE" ) )
 		{
 			return Double.class;
-		}
-		if ( sqlType.startsWith( "DATE" ) )
-		{
-			return Date.class;
-		}
-		if ( sqlType.startsWith( "TIMESTAMP" ) )
-		{
-			return Timestamp.class;
-		}
-		if ( sqlType.startsWith( "TIME" ) )
-		{
-			return Time.class;
 		}
 		throw new IllegalArgumentException( "Type not mapped: " + sqlType );
 	}
