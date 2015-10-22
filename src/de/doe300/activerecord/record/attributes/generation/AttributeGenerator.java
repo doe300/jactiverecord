@@ -176,8 +176,8 @@ public class AttributeGenerator extends AbstractProcessor
 	@Nonnull
 	private static String generateAttributeAnnotation(@Nonnull final AddAttribute source)
 	{
-		return "\t@Attribute( name = \"" + source.name() + "\", type = " + source.type().getSQLType() 
-				+ ", typeName = \"" + source.customSQLType() + "\", mayBeNull = " 
+		return "\t@Attribute( name = \"" + source.name() + "\", type = " + source.type().getType()
+				+ ".class, typeName = \"" + source.customSQLType() + "\", mayBeNull = " 
 				+ source.mayBeNull() + ", defaultValue = \"" + source.defaultValue() + "\", isUnique = " 
 				+ source.isUnique() + ", foreignKeyTable = \"" + source.foreignKeyTable() + "\", foreignKeyColumn = \"" 
 				+ source.foreignKeyColumn() + "\", onUpdate = " + ReferenceRule.class.getCanonicalName()+ '.' + source.onUpdate().name()

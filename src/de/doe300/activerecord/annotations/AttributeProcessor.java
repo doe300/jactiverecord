@@ -166,6 +166,7 @@ public class AttributeProcessor extends AbstractProcessor
 
 	private void processAttribute(final RoundEnvironment roundEnv)
 	{
+		final DeclaredType stringType = ProcessorUtils.getTypeMirror(processingEnv, () -> String.class);
 		roundEnv.getElementsAnnotatedWith( Attribute.class).forEach((final Element e)->{
 			final Attribute attributeAnnotation= e.getAnnotation( Attribute.class);
 			
@@ -180,9 +181,13 @@ public class AttributeProcessor extends AbstractProcessor
 				processingEnv.getMessager().printMessage( Diagnostic.Kind.ERROR, "Attribute-name must not contain any spaces", e);
 			}
 			//if type is VARCHAR, typeName should be set
-			if(attributeAnnotation.type() == java.sql.Types.VARCHAR && attributeAnnotation.typeName().isEmpty())
+			DeclaredType attributeType = ProcessorUtils.getTypeMirror(processingEnv, attributeAnnotation::type);
+			if(ProcessorUtils.isClassSet( processingEnv, attributeType))
 			{
-				processingEnv.getMessager().printMessage( Diagnostic.Kind.WARNING, "A custom VARCHAR type-name should be set", e);
+				if(processingEnv.getTypeUtils().isSameType(stringType, attributeType) && attributeAnnotation.typeName().isEmpty())
+				{
+					processingEnv.getMessager().printMessage( Diagnostic.Kind.WARNING, "A custom VARCHAR type-name should be set", e);
+				}
 			}
 			//an attribute should not be nullable and unique
 			if(attributeAnnotation.mayBeNull() && attributeAnnotation.isUnique())

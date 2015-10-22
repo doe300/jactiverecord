@@ -33,7 +33,7 @@ import java.net.URI;
 import java.net.URL;
 import java.nio.file.Path;
 import java.sql.SQLException;
-import java.sql.Types;
+import java.sql.SQLXML;
 import java.util.UUID;
 
 /**
@@ -43,7 +43,7 @@ import java.util.UUID;
  */
 public interface TestTypesInterface extends ActiveRecord
 {
-	@Attribute(type = Types.CHAR, typeName = TypeMappings.UUID_TYPE_NAME, name = "uuid")
+	@Attribute(type = Character.class, typeName = TypeMappings.UUID_TYPE_NAME, name = "uuid")
 	public default UUID getUUID()
 	{
 		return TypeMappings.readUUID( this, "uuid" );
@@ -54,7 +54,7 @@ public interface TestTypesInterface extends ActiveRecord
 		TypeMappings.writeUUID( id, this, "uuid");
 	}
 	
-	@Attribute(type = Types.VARCHAR, typeName = TypeMappings.URL_TYPE_NAME, name = "url")
+	@Attribute(type = String.class, typeName = TypeMappings.URL_TYPE_NAME, name = "url")
 	public default URL getURL() throws MalformedURLException
 	{
 		return TypeMappings.readURL( this, "url");
@@ -75,7 +75,7 @@ public interface TestTypesInterface extends ActiveRecord
 		TypeMappings.writeURI( uri, this, "url");
 	}	
 	
-	@Attribute(type =  Types.VARCHAR, typeName = TypeMappings.PATH_TYPE_NAME, name = "path")
+	@Attribute(type =  String.class, typeName = TypeMappings.PATH_TYPE_NAME, name = "path")
 	public default Path getPath()
 	{
 		return TypeMappings.readPath( this, "path");
@@ -86,7 +86,7 @@ public interface TestTypesInterface extends ActiveRecord
 		TypeMappings.writePath( path, this, "path");
 	}
 	
-	@Attribute(type = Types.VARCHAR, typeName = TypeMappings.ENUM_TYPE_NAME, name = "enum")
+	@Attribute(type = String.class, typeName = TypeMappings.ENUM_TYPE_NAME, name = "enum")
 	public default RoundingMode getEnum()
 	{
 		return TypeMappings.readEnumValue( RoundingMode.class, this, "enum");
@@ -97,7 +97,7 @@ public interface TestTypesInterface extends ActiveRecord
 		TypeMappings.writeEnumValue( mode, this, "enum");
 	}
 	
-	@Attribute(type = Types.INTEGER, name = "enum_ordinal")
+	@Attribute(type = Integer.class, name = "enum_ordinal")
 	public  default RoundingMode getEnumOrdinal()
 	{
 		return TypeMappings.readEnumValue( RoundingMode.class, this, "enum_ordinal");
@@ -108,7 +108,7 @@ public interface TestTypesInterface extends ActiveRecord
 		getBase().getStore().setValue( getBase(), getPrimaryKey(), "enum_ordinal", mode.ordinal());
 	}
 	
-	@Attribute(type = Types.VARCHAR, typeName = "VARCHAR(100)", name = "db_mappable")
+	@Attribute(type = String.class, typeName = "VARCHAR(100)", name = "db_mappable")
 	public default TestDBMappableImpl getDBMappable()
 	{
 		return TypeMappings.readDBMappable( TestDBMappableImpl.class, this, "db_mappable");
@@ -119,7 +119,7 @@ public interface TestTypesInterface extends ActiveRecord
 		TypeMappings.writeDBMappable( obj, this, "db_mappable");
 	}
 	
-	@Attribute(name = "xml", type = Types.SQLXML)
+	@Attribute(name = "xml", type = SQLXML.class)
 	public default InputStream readXML() throws SQLException
 	{
 		return TypeMappings.readXML( this, "xml");

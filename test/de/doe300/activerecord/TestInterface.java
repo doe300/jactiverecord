@@ -39,7 +39,6 @@ import de.doe300.activerecord.record.validation.ValidatedRecord;
 import de.doe300.activerecord.record.validation.Validates;
 import de.doe300.activerecord.record.validation.ValidationFailed;
 import de.doe300.activerecord.record.validation.ValidationType;
-import java.sql.Types;
 import java.util.stream.Stream;
 
 /**
@@ -65,7 +64,7 @@ public interface TestInterface extends TimestampedRecord, ValidatedRecord, Recor
 	
 	public void setAge(int age);
 
-	@Attribute(name = "fk_test_id", type = Types.INTEGER, foreignKeyTable = "testtable", foreignKeyColumn = "id")
+	@Attribute(name = "fk_test_id", type = Integer.class, foreignKeyTable = "testtable", foreignKeyColumn = "id")
 	public default TestInterface getDirectionOne()
 	{
 		return AssociationHelper.getBelongsTo(this, TestInterface.class, "fk_test_id" );

@@ -224,7 +224,7 @@ public class AssociationGenerator extends AbstractProcessor
 	{
 		if(source.associationForeignKey().isEmpty())
 		{
-			return "\t@Attribute( name = \"" + source.name() + "\", type = java.sql.Types.INTEGER)\n";
+			return "\t@Attribute( name = \"" + source.name() + "\", type = Integer.class)\n";
 		}
 		//can't generate attribute-annotation without knowing the type of the foreign key
 		return "";

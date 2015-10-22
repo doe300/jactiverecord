@@ -157,7 +157,7 @@ public class TestSingleInheritancePOJO implements ActiveRecord, TestInterface
 		return TypeMappings.readEnumValue( ValidationType.class, this, "test_enum");
 	}
 	
-	@Attribute(name = "type", type = java.sql.Types.VARCHAR, typeName = "VARCHAR(100)")
+	@Attribute(name = "type", type = String.class, typeName = "VARCHAR(100)")
 	public String getType()
 	{
 		return base.getProperty( primaryKey, "type", String.class);

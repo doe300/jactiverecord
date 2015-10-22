@@ -28,7 +28,6 @@ import de.doe300.activerecord.migration.Attribute;
 import de.doe300.activerecord.record.ActiveRecord;
 import de.doe300.activerecord.record.RecordType;
 import de.doe300.activerecord.record.TimestampedRecord;
-import java.sql.Types;
 
 /**
  * Model for the version-table
@@ -37,9 +36,9 @@ import java.sql.Types;
 @RecordType(primaryKey = "id", typeName = "updates", defaultColumns = {"id", "version"}, autoCreate = true)
 public interface Version extends ActiveRecord, TimestampedRecord
 {
-	@Attribute(name = "version", typeName = "VARCHAR(20)", type = Types.VARCHAR)
+	@Attribute(name = "version", typeName = "VARCHAR(20)", type = String.class)
 	public String getVersion();
 	
-	@Attribute(name = "changelog", typeName = "TEXT", type = Types.VARCHAR)
+	@Attribute(name = "changelog", typeName = "TEXT", type = String.class)
 	public String getChangelog();
 }

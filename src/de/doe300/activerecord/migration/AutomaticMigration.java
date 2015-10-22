@@ -314,7 +314,7 @@ public class AutomaticMigration implements Migration
 				}
 				else
 				{
-					columns.putIfAbsent(name, JDBCDriver.getSQLType( att.type()));
+					columns.putIfAbsent(name, driver.getSQLType( att.type()));
 				}
 				columns.put( name, columns.get( name)
 						+(!"".equals( att.defaultValue() )?" DEFAULT "+att.defaultValue(): "")

@@ -65,14 +65,14 @@ public @interface Attribute
 	
 	/**
 	 * This type is the second priority to generate the mapped column.
-	 * The specified {@link java.sql.Types type} is mapped to the default SQL-type.
+	 * The specified {@link Class type} is mapped to the default SQL-type.
 	 * If some more precise constraints on the type are required, {@link #typeName() } should be used
 	 * 
-	 * @return the SQL-Type
-	 * @see java.sql.Types
+	 * @return the java-Type
 	 * @see #typeName() 
 	 */
-	public int type();
+	public Class<?> type();
+	//TODO step 3: imply java-type from return/parameter-type of method
 	
 	/**
 	 * This type is used in first priority to generate the mapped column.
