@@ -27,6 +27,7 @@ package de.doe300.activerecord.annotations;
 import de.doe300.activerecord.migration.Attribute;
 import de.doe300.activerecord.migration.ExcludeAttribute;
 import de.doe300.activerecord.record.ActiveRecord;
+import de.doe300.activerecord.record.RecordType;
 import de.doe300.activerecord.record.TimestampedRecord;
 import de.doe300.activerecord.record.attributes.AttributeGetter;
 import de.doe300.activerecord.record.attributes.AttributeSetter;
@@ -166,6 +167,8 @@ public class AttributeProcessor extends AbstractProcessor
 
 	private void processAttribute(final RoundEnvironment roundEnv)
 	{
+		final DeclaredType recordTypeType = ProcessorUtils.getTypeMirror( processingEnv, () -> RecordType.class);
+		final DeclaredType activeRecordType = ProcessorUtils.getTypeMirror( processingEnv, () -> ActiveRecord.class);
 		final DeclaredType stringType = ProcessorUtils.getTypeMirror(processingEnv, () -> String.class);
 		roundEnv.getElementsAnnotatedWith( Attribute.class).forEach((final Element e)->{
 			final Attribute attributeAnnotation= e.getAnnotation( Attribute.class);
@@ -181,12 +184,32 @@ public class AttributeProcessor extends AbstractProcessor
 				processingEnv.getMessager().printMessage( Diagnostic.Kind.ERROR, "Attribute-name must not contain any spaces", e);
 			}
 			//if type is VARCHAR, typeName should be set
-			DeclaredType attributeType = ProcessorUtils.getTypeMirror(processingEnv, attributeAnnotation::type);
+			TypeMirror attributeType = ProcessorUtils.getTypeMirrorOrDefault(processingEnv, attributeAnnotation::type, null);
 			if(ProcessorUtils.isClassSet( processingEnv, attributeType))
 			{
 				if(processingEnv.getTypeUtils().isSameType(stringType, attributeType) && attributeAnnotation.typeName().isEmpty())
 				{
 					processingEnv.getMessager().printMessage( Diagnostic.Kind.WARNING, "A custom VARCHAR type-name should be set", e);
+				}
+			}
+			else //#type is not set explicitely
+			{
+				final ExecutableElement methodElement = ( ExecutableElement ) e;
+				if(methodElement.getReturnType().getKind() != TypeKind.VOID) //check return-type
+				{
+					if(processingEnv.getTypeUtils().isSameType(stringType, methodElement.getReturnType()) && attributeAnnotation.typeName().isEmpty())
+					{
+						processingEnv.getMessager().printMessage( Diagnostic.Kind.WARNING, "A custom VARCHAR type-name should be set", e);
+					}
+					attributeType = methodElement.getReturnType();
+				}
+				else if(methodElement.getParameters().size() == 1) //check parameter-type
+				{
+					if(processingEnv.getTypeUtils().isSameType(stringType, methodElement.getParameters().get( 0).asType()) && attributeAnnotation.typeName().isEmpty())
+					{
+						processingEnv.getMessager().printMessage( Diagnostic.Kind.WARNING, "A custom VARCHAR type-name should be set", e);
+					}
+					attributeType = methodElement.getParameters().get( 0).asType();
 				}
 			}
 			//an attribute should not be nullable and unique
@@ -198,6 +221,35 @@ public class AttributeProcessor extends AbstractProcessor
 			if(attributeAnnotation.foreignKeyTable().isEmpty() != attributeAnnotation.foreignKeyColumn().isEmpty())
 			{
 				processingEnv.getMessager().printMessage( Diagnostic.Kind.ERROR, "A foreign key must specify both foreign-table and foreign-key", e);
+			}
+			//if foreign-table is set, referenced type must extend ActiveRecord
+			if(!attributeAnnotation.foreignKeyTable().isEmpty() && attributeType != null)
+			{
+				if(!processingEnv.getTypeUtils().isSubtype( attributeType, activeRecordType))
+				{
+					processingEnv.getMessager().printMessage( Diagnostic.Kind.ERROR, "Attribute with foreign-table set must reference a subtype of ActiveRecord", e);
+				}
+			}
+			//if associated with ActiveRecord and without foreignTable, associated type should have recordType-annotation
+			if(attributeType != null && processingEnv.getTypeUtils().isSubtype( attributeType, activeRecordType ) && attributeAnnotation.foreignKeyTable().isEmpty())
+			{
+				boolean recordTypeFound = false;
+				List<? extends AnnotationMirror> mirrors = processingEnv.getElementUtils().getAllAnnotationMirrors( processingEnv.getTypeUtils().asElement( attributeType));
+				for(AnnotationMirror mirror : mirrors)
+				{
+					if(processingEnv.getTypeUtils().isSameType( mirror.getAnnotationType(), recordTypeType))
+					{
+						recordTypeFound = true;
+						//there is only one RecordType-annotation
+						break;
+					}
+				}
+				if(!recordTypeFound)
+				{
+					processingEnv.getMessager().printMessage( Diagnostic.Kind.WARNING, "Associated type '" + 
+							processingEnv.getTypeUtils().asElement( attributeType ).getSimpleName() + 
+							"' should have RecordType-annotation.", e);
+				}
 			}
 		});
 	}

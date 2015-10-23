@@ -159,6 +159,7 @@ public final class ProcessorUtils
 	 * @since 0.4
 	 * @see http://blog.retep.org/2009/02/13/getting-class-values-from-annotations-in-an-annotationprocessor/
 	 */
+	@Nullable
 	public static DeclaredType getTypeMirror(@Nullable final ProcessingEnvironment processingEnv, @Nonnull final Supplier<Class<?>> type)
 	{
 		try{
@@ -177,13 +178,40 @@ public final class ProcessorUtils
 	}
 	
 	/**
+	 * Returns the type-mirror for the given <code>type</code> or the given <code>default-type</code> if the <code>type</code> is {@link Void}
+	 * or <code>null</code>
+	 * 
+	 * @param processingEnv
+	 * @param type the type to check
+	 * @param defaultType the default-type
+	 * @return the type-mirror or the given default-type
+	 * @see #getTypeMirror(javax.annotation.processing.ProcessingEnvironment, java.util.function.Supplier) 
+	 * @see #isClassSet(javax.annotation.processing.ProcessingEnvironment, javax.lang.model.type.TypeMirror) 
+	 * @since 0.5
+	 */
+	@Nullable
+	public static DeclaredType getTypeMirrorOrDefault(@Nonnull final ProcessingEnvironment processingEnv, @Nonnull final Supplier<Class<?>> type, @Nullable final DeclaredType defaultType)
+	{
+		DeclaredType typeMirror = getTypeMirror( processingEnv, type );
+		if(isClassSet( processingEnv, typeMirror ))
+		{
+			return typeMirror;
+		}
+		return defaultType;
+	}
+	
+	/**
 	 * @param processingEnv
 	 * @param type
 	 * @return whether the type in the type-mirror is not {@link Void}
 	 * @since 0.4
 	 */
-	public static boolean isClassSet(@Nonnull final ProcessingEnvironment processingEnv, @Nonnull final TypeMirror type)
+	public static boolean isClassSet(@Nonnull final ProcessingEnvironment processingEnv, @Nullable final TypeMirror type)
 	{
+		if(type == null)
+		{
+			return false;
+		}
 		final TypeMirror voidClass = processingEnv.getElementUtils().getTypeElement( Void.class.getCanonicalName()).asType();
 		return !processingEnv.getTypeUtils().isSameType( voidClass, type);
 	}

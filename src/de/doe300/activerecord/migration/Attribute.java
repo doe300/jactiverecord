@@ -68,11 +68,15 @@ public @interface Attribute
 	 * The specified {@link Class type} is mapped to the default SQL-type.
 	 * If some more precise constraints on the type are required, {@link #typeName() } should be used
 	 * 
+	 * By default, this type is set to {@link Void}. If neither {@link #typeName()} nor {@link #type()} are set,
+	 * the attribute deduces its type from the annotated method.
+	 * If the method is a getter (non-void return-type), the return-type is used.
+	 * If the method is a setter (single argument, void return-type), the argument-type is used.
+	 * 
 	 * @return the java-Type
 	 * @see #typeName() 
 	 */
-	public Class<?> type();
-	//TODO step 3: imply java-type from return/parameter-type of method
+	public Class<?> type() default Void.class;
 	
 	/**
 	 * This type is used in first priority to generate the mapped column.

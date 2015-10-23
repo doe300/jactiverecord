@@ -64,7 +64,7 @@ public interface TestInterface extends TimestampedRecord, ValidatedRecord, Recor
 	
 	public void setAge(int age);
 
-	@Attribute(name = "fk_test_id", type = Integer.class, foreignKeyTable = "testtable", foreignKeyColumn = "id")
+	@Attribute(name = "fk_test_id")
 	public default TestInterface getDirectionOne()
 	{
 		return AssociationHelper.getBelongsTo(this, TestInterface.class, "fk_test_id" );
