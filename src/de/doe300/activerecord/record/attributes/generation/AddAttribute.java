@@ -51,10 +51,11 @@ public @interface AddAttribute
 	public String name();
 	
 	/**
-	 * The <code>type</code> determines the java and SQL data-type for this attribute
+	 * The <code>type</code> determines the java and default SQL data-type for this attribute
 	 * @return the type of the attribute
+	 * @see Attribute#type() 
 	 */
-	public AttributeType type();
+	public Class<?> type();
 	
 	/**
 	 * @return whether to generate a setter for this attribute

@@ -44,6 +44,7 @@ import javax.annotation.processing.SupportedSourceVersion;
 import javax.lang.model.SourceVersion;
 import javax.lang.model.element.Element;
 import javax.lang.model.element.TypeElement;
+import javax.lang.model.type.DeclaredType;
 import javax.lang.model.type.TypeMirror;
 import javax.tools.Diagnostic;
 import javax.tools.JavaFileObject;
@@ -86,6 +87,7 @@ public class AttributeGenerator extends AbstractProcessor
 	
 	private void processAddAttributes(final TypeElement recordTypeElement, final AddAttribute[] addAttributes)
 	{
+		final DeclaredType booleanType = ProcessorUtils.getTypeMirror( processingEnv, () -> Boolean.class);
 		if(processedElements.contains( recordTypeElement.getQualifiedName().toString()))
 		{
 			return;
@@ -128,14 +130,15 @@ public class AttributeGenerator extends AbstractProcessor
 						processingEnv.getMessager().printMessage( Diagnostic.Kind.NOTE, "Attribute-name '" + addAttribute.name()+ "' already in use, skipping", recordTypeElement);
 						continue;
 					}
+					final TypeElement classElement = (TypeElement)ProcessorUtils.getTypeMirror( processingEnv, addAttribute::type).asElement();
 					//generate @Attribute-annotations
-					final String attributeAnnotation = generateAttributeAnnotation( addAttribute );
+					final String attributeAnnotation = generateAttributeAnnotation( addAttribute, classElement.getQualifiedName().toString() );
 
 					//generate getter/setter (is for boolean)
 					if(addAttribute.hasSetter())
 					{
 						writer.append( attributeAnnotation);
-						writer.append( generateSetter( addAttribute, addNullableAnnotation()));
+						writer.append( generateSetter( addAttribute, addNullableAnnotation(), classElement.getQualifiedName().toString()));
 					}
 					if(addAttribute.hasGetter())
 					{
@@ -144,7 +147,8 @@ public class AttributeGenerator extends AbstractProcessor
 							writer.append( "\t@Nullable\n");
 						}
 						writer.append( attributeAnnotation);
-						writer.append( generateGetter( addAttribute));
+						final boolean isBoolean = processingEnv.getTypeUtils().isSameType( booleanType, classElement.asType());
+						writer.append( generateGetter( addAttribute, classElement.getQualifiedName().toString(), isBoolean));
 					}
 				}
 
@@ -174,9 +178,9 @@ public class AttributeGenerator extends AbstractProcessor
 	}
 
 	@Nonnull
-	private static String generateAttributeAnnotation(@Nonnull final AddAttribute source)
+	private static String generateAttributeAnnotation(@Nonnull final AddAttribute source, @Nonnull final String classType)
 	{
-		return "\t@Attribute( name = \"" + source.name() + "\", type = " + source.type().getType()
+		return "\t@Attribute( name = \"" + source.name() + "\", type = " + classType
 				+ ".class, typeName = \"" + source.customSQLType() + "\", mayBeNull = " 
 				+ source.mayBeNull() + ", defaultValue = \"" + source.defaultValue() + "\", isUnique = " 
 				+ source.isUnique() + ", foreignKeyTable = \"" + source.foreignKeyTable() + "\", foreignKeyColumn = \"" 
@@ -186,24 +190,24 @@ public class AttributeGenerator extends AbstractProcessor
 	}
 	
 	@Nonnull
-	private static String generateSetter(@Nonnull final AddAttribute source, boolean withNullable)
+	private static String generateSetter(@Nonnull final AddAttribute source, boolean withNullable, @Nonnull final String classType)
 	{
 		//public default void setAttributeName(final Type value) {
 		return "\tpublic default void set" + Attributes.toCamelCase( source.name()) + "("+(withNullable ? "@Nullable" : "")+" final "
-				+ source.type().getType() + " value) {\n"
+				+ classType + " value) {\n"
 				//getBase.getStore.setValue(getBase(), getPrimaryKey(), "attributeName", value);
 				+ "\t\tgetBase().getStore().setValue(getBase(), getPrimaryKey(), \"" + source.name() + "\", value);\n"
 				//}
 				+ "\t}\n\n";
 	}
 	
-	private static String generateGetter(@Nonnull final AddAttribute source)
+	private static String generateGetter(@Nonnull final AddAttribute source, @Nonnull final String classType, final boolean isBoolean)
 	{
 		//public default Type get(is)AttributeName() {
-		return "\tpublic default " + source.type().getType() + (source.type() == AttributeType.BOOLEAN ? " is" : " get") 
+		return "\tpublic default " + classType + (isBoolean ? " is" : " get") 
 				+ Attributes.toCamelCase( source.name()) + "() {\n"
 				//return Type.cast(getBase.getStore.getValue(getBase(), getPrimaryKey(), "attributeName"));
-				+ "\t\treturn " + source.type().getType() + ".class.cast(getBase().getStore().getValue(getBase(), getPrimaryKey(), \"" + source.name() + "\"));\n"
+				+ "\t\treturn " + classType + ".class.cast(getBase().getStore().getValue(getBase(), getPrimaryKey(), \"" + source.name() + "\"));\n"
 				//}
 				+ "\t}\n\n";
 	}
