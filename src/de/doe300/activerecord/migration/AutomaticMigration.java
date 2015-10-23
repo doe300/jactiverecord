@@ -308,20 +308,60 @@ public class AutomaticMigration implements Migration
 			{
 				final Attribute att = method.getAnnotation( Attribute.class);
 				final String name = att.name().toLowerCase();
+				Class<?> attributeType = null;
 				if(!"".equals( att.typeName() ))
 				{
+					attributeType = !Void.class.equals( att.type()) ? att.type() :
+							Attributes.isGetter( method, false) ? method.getReturnType() : Attributes.isSetter( 
+											method, null, false) ? method.getParameterTypes()[0] : null;
 					columns.put(name, att.typeName());
+				}
+				//Attribute#type is optional
+				else if(!Void.class.equals( att.type() ))
+				{
+					attributeType = att.type();
+					columns.putIfAbsent(name, driver.getSQLType( attributeType));
+				}
+				//fall back to check getter-type
+				else if(Attributes.isGetter( method, false ))
+				{
+					attributeType = method.getReturnType();
+					columns.putIfAbsent( name, driver.getSQLType( attributeType));
+				}
+				//... or setter-type
+				else if(Attributes.isSetter( method, null, false))
+				{
+					attributeType = method.getParameterTypes()[0];
+					columns.putIfAbsent( name, driver.getSQLType( attributeType));
+				}
+				if(attributeType == null)
+				{
+					throw new IllegalArgumentException("Could not deduce type for attribute: " + name);
+				}
+				//deduce references (with standard primary key) from class of associated record-type
+				final String foreignKeyTable, foreignKeyColumn;
+				if(!att.foreignKeyTable().isEmpty())
+				{
+					foreignKeyTable = att.foreignKeyTable();
+					foreignKeyColumn = att.foreignKeyColumn();
+				}
+				else if(ActiveRecord.class.isAssignableFrom( attributeType )) //try to deduce foreign key table from attribute-type
+				{
+					final RecordType associatedType = attributeType.getAnnotation( RecordType.class);
+					foreignKeyTable = associatedType != null ? associatedType.typeName() : attributeType.getSimpleName();
+					foreignKeyColumn = !att.foreignKeyColumn().isEmpty() ? att.foreignKeyColumn() : associatedType != null ? associatedType.primaryKey() : null;
 				}
 				else
 				{
-					columns.putIfAbsent(name, driver.getSQLType( att.type()));
+					foreignKeyTable = null;
+					foreignKeyColumn = null;
 				}
 				columns.put( name, columns.get( name)
 						+(!"".equals( att.defaultValue() )?" DEFAULT "+att.defaultValue(): "")
 						+(att.mayBeNull()?" NULL": " NOT NULL")
 						+(att.isUnique()?" UNIQUE": "")
-						+(att.foreignKeyTable().isEmpty() ? "" : " REFERENCES "+att.foreignKeyTable()
-							+(att.foreignKeyColumn().isEmpty() ? "" : " ("+att.foreignKeyColumn()+")")
+						+(foreignKeyTable == null ? "" : " REFERENCES "+foreignKeyTable
+							+(foreignKeyColumn == null || foreignKeyColumn.isEmpty() ? "" : " ("+foreignKeyColumn+")")
 							+att.onUpdate().toSQL( ReferenceRule.ACTION_UPDATE)
 							+att.onDelete().toSQL( ReferenceRule.ACTION_DELETE)
 						)
