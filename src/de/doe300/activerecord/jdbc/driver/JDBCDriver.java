@@ -50,7 +50,6 @@ import javax.annotation.Signed;
  */
 public class JDBCDriver implements DBDriver
 {
-	//TODO unify isTypeSupported(Class)/getSQLType(int/Class) and getJavaType(String)
 	public static final int STRING_TYPE_LENGTH = 4096;
 	
 	public static final String AGGREGATE_COUNT_ALL= "COUNT(*)";

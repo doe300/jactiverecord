@@ -831,8 +831,7 @@ public class SimpleJDBCRecordStore implements RecordStore
 	public boolean removeRow(@Nonnull final String tableName, @Nullable final Condition cond)
 		throws IllegalArgumentException
 	{
-		String tableID = JDBCDriver.getNextTableIdentifier( null);
-		final String sql = "DELETE FROM "+tableName+ " AS "+tableID+toWhereClause( cond, tableID );
+		final String sql = "DELETE FROM "+tableName + toWhereClause( cond, tableName );
 		Logging.getLogger().debug( "JDBCStore", sql);
 		try(PreparedStatement stm = con.prepareStatement( sql ))
 		{

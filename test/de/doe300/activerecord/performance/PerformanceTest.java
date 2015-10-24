@@ -26,12 +26,10 @@ package de.doe300.activerecord.performance;
 
 import de.doe300.activerecord.RecordBase;
 import de.doe300.activerecord.TestServer;
-import de.doe300.activerecord.migration.AutomaticMigration;
-import de.doe300.activerecord.migration.Migration;
+import de.doe300.activerecord.record.ActiveRecord;
 import de.doe300.activerecord.store.RecordStore;
 import de.doe300.activerecord.store.impl.CachedJDBCRecordStore;
 import de.doe300.activerecord.store.impl.SimpleJDBCRecordStore;
-import de.doe300.activerecord.store.impl.memory.MemoryMigration;
 import de.doe300.activerecord.store.impl.memory.MemoryRecordStore;
 import java.sql.SQLException;
 import java.util.Arrays;
@@ -78,16 +76,9 @@ public class PerformanceTest<T extends ProxyPerformance> extends Assert
 	@Test
 	public void testPerformance() throws SQLException, Exception
 	{
-		Migration mig;
-		if(base.getStore().getConnection() != null)
-		{
-			mig = new AutomaticMigration(base.getRecordType(), false);
-		}
-		else
-		{
-			mig = new MemoryMigration(( MemoryRecordStore ) base.getStore(), base.getRecordType(), false);
-		}
-		mig.apply( base.getStore().getConnection());
+		base.getCore().createTable( base.getRecordType());
+		//clear table
+		base.findAll().forEach( ActiveRecord::destroy);
 		long[] times = new long[10];
 		
 		for(int i = 0; i < 500; i++)
@@ -152,7 +143,7 @@ public class PerformanceTest<T extends ProxyPerformance> extends Assert
 				times[0], times[1], times[2], times[3], times[4], times[5] );
 		
 		//clean up
-		mig.revert( base.getStore().getConnection());
+		base.getCore().dropTable( base.getRecordType());
 		base.getCore().close();
 	}
 }

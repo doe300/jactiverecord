@@ -88,10 +88,10 @@ public final class AssociationHelper
 	 * @param otherRecord
 	 * @param foreignKeyColumn the column (of this model), the foreign key of <code>otherRecord</code> is stored
 	 */
-	public static void setBelongsTo(@Nonnull final ActiveRecord record, @Nonnull final ActiveRecord otherRecord,
+	public static void setBelongsTo(@Nonnull final ActiveRecord record, @Nullable final ActiveRecord otherRecord,
 		@Nonnull final String foreignKeyColumn)
 	{
-		record.getBase().getStore().setValue( record.getBase(), record.getPrimaryKey(), foreignKeyColumn, otherRecord.getPrimaryKey());
+		record.getBase().getStore().setValue( record.getBase(), record.getPrimaryKey(), foreignKeyColumn, otherRecord == null ? null : otherRecord.getPrimaryKey());
 	}
 
 	/**
