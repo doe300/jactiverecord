@@ -17,7 +17,7 @@ This library is based upon Java 8 due to its use of *java.util.stream.Stream* fo
 Testing
 ------
 The test cases use **junit 4.10** and are executed with **hsqldb** *(version 2.3.1)*, **sqlite-jdbc** *(version 3.8.7)*,
-**mysql-connector-java** *(version 5.1.23)* and soon with **postgresql** *(version 9.2-1002)* which are all available over [Maven](http://search.maven.org/).
+**mysql-connector-java** *(version 5.1.23)* and with **postgresql** *(version 9.4-1204)* which are all available over [Maven](http://search.maven.org/).
 
 The tests are run at regular intervals and also with **JaCoCoverage** to make sure, all essential code is being tested.
 

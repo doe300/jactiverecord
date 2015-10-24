@@ -646,7 +646,7 @@ public class SimpleJDBCRecordStore implements RecordStore
 				rowData.putAll( columns );
 			}
 			//make sure, primary key is not set
-			rowData.put( base.getPrimaryColumn(), null);
+			rowData.remove( base.getPrimaryColumn() );
 			//add timestamp
 			if(base.isTimestamped())
 			{
@@ -655,9 +655,18 @@ public class SimpleJDBCRecordStore implements RecordStore
 				rowData.putIfAbsent(TimestampedRecord.COLUMN_UPDATED_AT, new Timestamp(timestamp ));
 			}
 
-			final String sql = "INSERT INTO "+base.getTableName()+
+			final String sql;
+			if(rowData.isEmpty())
+			{
+				sql = "INSERT INTO " + base.getTableName() + " " + driver.getInsertDataForEmptyRow(convertIdentifier( base.getPrimaryColumn()));
+			}
+			else
+			{
+				sql = "INSERT INTO "+base.getTableName()+
 				" ("+rowData.entrySet().stream().map((final Map.Entry<String,Object> e) -> e.getKey()).map( this::convertIdentifier).collect( Collectors.joining( ", "))+
 				") VALUES ("+rowData.entrySet().stream().map((final Map.Entry<String,Object> e) -> "?").collect( Collectors.joining( ", "))+")";
+			}
+			
 			Logging.getLogger().debug( "JDBCStore", sql);
 			try (PreparedStatement stmt = con.prepareStatement(sql, Statement.RETURN_GENERATED_KEYS))
 			{

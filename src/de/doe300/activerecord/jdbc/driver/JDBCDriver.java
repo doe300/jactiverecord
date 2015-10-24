@@ -116,12 +116,13 @@ public class JDBCDriver implements DBDriver
 	/**
 	 * For the default-implementation, see: https://en.wikibooks.org/wiki/SQL_Dialects_Reference/Data_structure_definition/Auto-increment_column
 	 * 
-	 * @return the keyword for an auto-incremental column
+	 * @param primaryKeyKeywords the previously set keywords
+	 * @return the keywords for an auto-incremental primary-key column
 	 */
 	@Nonnull
-	public String getAutoIncrementKeyword()
+	public String getPrimaryKeyKeywords(@Nonnull final String primaryKeyKeywords)
 	{
-		return "GENERATED ALWAYS AS IDENTITY";
+		return primaryKeyKeywords + " GENERATED ALWAYS AS IDENTITY PRIMARY KEY";
 	}
 
 	/**
@@ -133,6 +134,18 @@ public class JDBCDriver implements DBDriver
 	public String getStringDataType()
 	{
 		return "VARCHAR("+STRING_TYPE_LENGTH+")";
+	}
+	
+	/**
+	 * The default implementation inserts a <code>NULL</code>-value for the <code>primaryColumn</code>
+	 * 
+	 * @param primaryColumn the primaryColumn
+	 * @return the columns-and-values string for an empty row
+	 */
+	@Nonnull
+	public String getInsertDataForEmptyRow(@Nonnull final String primaryColumn)
+	{
+		return "(" + primaryColumn + ") VALUES (NULL)";
 	}
 
 	/**
@@ -270,86 +283,87 @@ public class JDBCDriver implements DBDriver
 	 */
 	public Class<?> getJavaType( final String sqlType ) throws IllegalArgumentException
 	{
+		final String sqlTypeUpper = sqlType.toUpperCase();
 		//map SQL-types
-		if(sqlType.startsWith( "ARRAY"))
+		if(sqlTypeUpper.startsWith( "ARRAY"))
 		{
 			return java.sql.Array.class;
 		}
-		if(sqlType.startsWith( "BLOB"))
+		if(sqlTypeUpper.startsWith( "BLOB"))
 		{
 			return java.sql.Blob.class;
 		}
-		if(sqlType.startsWith( "CLOB"))
+		if(sqlTypeUpper.startsWith( "CLOB"))
 		{
 			return java.sql.Clob.class;
 		}
-		if(sqlType.startsWith( "NCLOB"))
+		if(sqlTypeUpper.startsWith( "NCLOB"))
 		{
 			return java.sql.NClob.class;
 		}
-		if(sqlType.startsWith( "REF"))
+		if(sqlTypeUpper.startsWith( "REF"))
 		{
 			return java.sql.Ref.class;
 		}
-		if(sqlType.startsWith( "ROWID"))
+		if(sqlTypeUpper.startsWith( "ROWID"))
 		{
 			return java.sql.RowId.class;
 		}
-		if(sqlType.startsWith( "XML"))
+		if(sqlTypeUpper.startsWith( "XML"))
 		{
 			return java.sql.SQLXML.class;
 		}
-		if ( sqlType.startsWith( "DATE" ) )
+		if ( sqlTypeUpper.startsWith( "DATE" ) )
 		{
 			return Date.class;
 		}
-		if ( sqlType.startsWith( "TIMESTAMP" ) )
+		if ( sqlTypeUpper.startsWith( "TIMESTAMP" ) )
 		{
 			return Timestamp.class;
 		}
-		if ( sqlType.startsWith( "TIME" ) )
+		if ( sqlTypeUpper.startsWith( "TIME" ) )
 		{
 			return Time.class;
 		}
 		//map built-in types
-		if ( sqlType.startsWith( "VARCHAR" ) || sqlType.startsWith( "CHAR" ) )
+		if ( sqlTypeUpper.startsWith( "VARCHAR" ) || sqlTypeUpper.startsWith( "CHAR" ) )
 		{
 			return String.class;
 		}
-		if ( sqlType.startsWith( "NUMERIC" ) )
+		if ( sqlTypeUpper.startsWith( "NUMERIC" ) )
 		{
 			return BigDecimal.class;
 		}
-		if ( sqlType.startsWith( "BIT" ) )
+		if ( sqlTypeUpper.startsWith( "BIT" ) )
 		{
 			return Boolean.class;
 		}
-		if ( sqlType.startsWith( "TINYINT" ) )
+		if ( sqlTypeUpper.startsWith( "TINYINT" ) )
 		{
 			return Byte.class;
 		}
-		if ( sqlType.startsWith( "SHORTINT" ) )
+		if ( sqlTypeUpper.startsWith( "SHORTINT" ) )
 		{
 			return Short.class;
 		}
 		//MySQL has data-type INT
-		if ( sqlType.startsWith( "INT" ) )
+		if ( sqlTypeUpper.startsWith( "INT" ) )
 		{
 			return Integer.class;
 		}
-		if ( sqlType.startsWith( "BIGINT" ) )
+		if ( sqlTypeUpper.startsWith( "BIGINT" ) )
 		{
 			return Long.class;
 		}
-		if ( sqlType.startsWith( "REAL" ) )
+		if ( sqlTypeUpper.startsWith( "REAL" ) )
 		{
 			return Float.class;
 		}
-		if ( sqlType.startsWith( "DOUBLE" ) )
+		if ( sqlTypeUpper.startsWith( "DOUBLE" ) )
 		{
 			return Double.class;
 		}
-		throw new IllegalArgumentException( "Type not mapped: " + sqlType );
+		throw new IllegalArgumentException( "Type not mapped: " + sqlTypeUpper );
 	}
 	
 	/**
@@ -395,7 +409,10 @@ public class JDBCDriver implements DBDriver
 				{
 					return new SQLiteDriver();
 				}
-				//TODO postgres
+				if(productName.contains( "PostgreSQL"))
+				{
+					return new PostgreSQLDriver();
+				}
 				Logging.getLogger().info( "JDBCDriver", "No vendor-specific driver found for: " + productName);
 			}
 			catch(final SQLException e)

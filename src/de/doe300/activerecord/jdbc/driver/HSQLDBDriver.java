@@ -24,6 +24,8 @@
  */
 package de.doe300.activerecord.jdbc.driver;
 
+import javax.annotation.Nonnull;
+
 /**
  * Vendor-specific driver for the HSQLDB driver, including
  * <ul>
@@ -42,9 +44,9 @@ public class HSQLDBDriver extends JDBCDriver
 	}
 	
 	@Override
-	public String getAutoIncrementKeyword()
+	public String getPrimaryKeyKeywords(@Nonnull final String primaryKeyKeywords)
 	{
-		return "IDENTITY";
+		return primaryKeyKeywords + " IDENTITY PRIMARY KEY";
 	}
 
 	@Override

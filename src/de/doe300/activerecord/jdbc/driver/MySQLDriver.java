@@ -25,6 +25,7 @@
 package de.doe300.activerecord.jdbc.driver;
 
 import java.sql.SQLXML;
+import javax.annotation.Nonnull;
 
 /**
  * Vendor-specific driver for MySQL Databases
@@ -61,9 +62,9 @@ public class MySQLDriver extends JDBCDriver
 	}
 	
 	@Override
-	public String getAutoIncrementKeyword()
+	public String getPrimaryKeyKeywords(@Nonnull final String primaryKeyKeywords)
 	{
-		return "AUTO_INCREMENT";
+		return primaryKeyKeywords + " AUTO_INCREMENT PRIMARY KEY";
 	}
 
 	@Override

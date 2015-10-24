@@ -441,7 +441,7 @@ public class AutomaticMigration implements Migration
 		final String primaryColumn = getPrimaryColumn( recordType).toLowerCase();
 		columns.putIfAbsent(primaryColumn, driver.getSQLType(Integer.class));
 		//FIXME somehow make sure, reserved keywords are not used as columns or rewrite them
-		columns.put(primaryColumn, columns.get( primaryColumn)+" "+driver.getAutoIncrementKeyword()+" PRIMARY KEY");
+		columns.put(primaryColumn, driver.getPrimaryKeyKeywords( columns.get( primaryColumn)));
 		return columns;
 	}
 
