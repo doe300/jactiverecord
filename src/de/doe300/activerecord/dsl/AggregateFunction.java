@@ -112,6 +112,7 @@ public abstract class AggregateFunction<T extends ActiveRecord, C, R> implements
 	 *            the function returning the column-value to aggregate
 	 * @return the minimum of all the available <code>non-null</code> values
 	 */
+	@Nonnull
 	public static final <T extends ActiveRecord, C extends Comparable<? super C>> AggregateFunction<T, C, C> MINIMUM(@Nonnull final String columnName, @Nonnull final Function<T, C> columnFunc)
 	{
 		return new AggregateFunction<T, C, C>(JDBCDriver.AGGREGATE_MINIMUM, columnName, columnFunc)
@@ -170,6 +171,7 @@ public abstract class AggregateFunction<T extends ActiveRecord, C, R> implements
 	 *            the function returning the column-value to aggregate
 	 * @return the maximum of all the available <code>non-null</code> values
 	 */
+	@Nonnull
 	public static final <T extends ActiveRecord, C extends Comparable<? super C>> AggregateFunction<T, C, C> MAXIMUM(@Nonnull final String columnName, @Nonnull final Function<T, C> columnFunc)
 	{
 		return new AggregateFunction<T, C, C>(JDBCDriver.AGGREGATE_MAXIMUM, columnName, columnFunc)
@@ -226,14 +228,15 @@ public abstract class AggregateFunction<T extends ActiveRecord, C, R> implements
 	 *            the function returning the column-value to aggregate
 	 * @return the number of all <code>non-null</code> column-values
 	 */
-	public static final <T extends ActiveRecord, C> AggregateFunction<T, C, Long> COUNT(@Nonnull final String columnName, @Nonnull final Function<T, C> columnFunc)
+	@Nonnull
+	public static final <T extends ActiveRecord, C> AggregateFunction<T, C, Number> COUNT(@Nonnull final String columnName, @Nonnull final Function<T, C> columnFunc)
 	{
-		return new AggregateFunction<T, C, Long>(JDBCDriver.AGGREGATE_COUNT_NOT_NULL, columnName, columnFunc)
+		return new AggregateFunction<T, C, Number>(JDBCDriver.AGGREGATE_COUNT_NOT_NULL, columnName, columnFunc)
 		{
 			@Override
-			public BiConsumer<ValueHolder<Long>, T> accumulator()
+			public BiConsumer<ValueHolder<Number>, T> accumulator()
 			{
-				return (final ValueHolder<Long> holder, final T record) ->
+				return (final ValueHolder<Number> holder, final T record) ->
 				{
 					final C colVal = columnFunc.apply( record );
 					if(holder.value == null)
@@ -242,15 +245,15 @@ public abstract class AggregateFunction<T extends ActiveRecord, C, R> implements
 					}
 					else
 					{
-						holder.value += colVal != null ? 1l : 0l;
+						holder.value = holder.value.longValue() + (colVal != null ? 1l : 0l);
 					}
 				};
 			}
 
 			@Override
-			public BinaryOperator<ValueHolder<Long>> combiner()
+			public BinaryOperator<ValueHolder<Number>> combiner()
 			{
-				return (final ValueHolder<Long> h1, final ValueHolder<Long> h2) ->
+				return (final ValueHolder<Number> h1, final ValueHolder<Number> h2) ->
 				{
 					if(h1.value == null)
 					{
@@ -260,7 +263,7 @@ public abstract class AggregateFunction<T extends ActiveRecord, C, R> implements
 					{
 						return h1;
 					}
-					h1.value += h2.value;
+					h1.value = h1.value.longValue() + h2.value.longValue();
 					return h1;
 				};
 			}
@@ -282,20 +285,21 @@ public abstract class AggregateFunction<T extends ActiveRecord, C, R> implements
 	 *            the function returning the column-value to aggregate
 	 * @return the number of all distinct <code>non-null</code> column-values
 	 */
-	public static final <T extends ActiveRecord, C> AggregateFunction<T, C, Long> COUNT_DISTINCT(@Nonnull final String columnName, @Nonnull final Function<T, C> columnFunc)
+	@Nonnull
+	public static final <T extends ActiveRecord, C> AggregateFunction<T, C, Number> COUNT_DISTINCT(@Nonnull final String columnName, @Nonnull final Function<T, C> columnFunc)
 	{
-		return new AggregateFunction<T, C, Long>(JDBCDriver.AGGREGATE_COUNT_DISTINCT, columnName, columnFunc)
+		return new AggregateFunction<T, C, Number>(JDBCDriver.AGGREGATE_COUNT_DISTINCT, columnName, columnFunc)
 		{
 			@Override
-			public Supplier<ValueHolder<Long>> supplier()
+			public Supplier<ValueHolder<Number>> supplier()
 			{
-				return () -> new BiValueHolder<Long, Set<C>>(null, null);
+				return () -> new BiValueHolder<Number, Set<C>>(null, null);
 			}
 			
 			@Override
-			public BiConsumer<ValueHolder<Long>, T> accumulator()
+			public BiConsumer<ValueHolder<Number>, T> accumulator()
 			{
-				return (ValueHolder<Long> holder, T record) -> 
+				return (ValueHolder<Number> holder, T record) -> 
 				{
 					C colVal = columnFunc.apply( record );
 					if(colVal != null)
@@ -303,23 +307,23 @@ public abstract class AggregateFunction<T extends ActiveRecord, C, R> implements
 						if(holder.value == null)
 						{
 							holder.value = 1L;
-							((BiValueHolder<Long, Set<C>>)holder).secondValue = new HashSet<>();
-							((BiValueHolder<Long, Set<C>>)holder).secondValue.add( colVal );
+							((BiValueHolder<Number, Set<C>>)holder).secondValue = new HashSet<>();
+							((BiValueHolder<Number, Set<C>>)holder).secondValue.add( colVal );
 						}
 						else
 						{
-							((BiValueHolder<Long, Set<C>>)holder).secondValue.add( colVal );
-							holder.value = (long)((BiValueHolder<Long, Set<C>>)holder).secondValue.size();
-							((BiValueHolder<Long, Set<C>>)holder).secondValue.add( colVal );
+							((BiValueHolder<Number, Set<C>>)holder).secondValue.add( colVal );
+							holder.value = (long)((BiValueHolder<Number, Set<C>>)holder).secondValue.size();
+							((BiValueHolder<Number, Set<C>>)holder).secondValue.add( colVal );
 						}
 					}
 				};
 			}
 			
 			@Override
-			public BinaryOperator<ValueHolder<Long>> combiner()
+			public BinaryOperator<ValueHolder<Number>> combiner()
 			{
-				return (ValueHolder<Long> h1, ValueHolder<Long> h2) -> 
+				return (ValueHolder<Number> h1, ValueHolder<Number> h2) -> 
 				{
 					if(h1.value == null)
 					{
@@ -329,8 +333,8 @@ public abstract class AggregateFunction<T extends ActiveRecord, C, R> implements
 					{
 						return h1;
 					}
-					((BiValueHolder<Long, Set<C>>)h1).secondValue.addAll(((BiValueHolder<Long, Set<C>>)h2).secondValue);
-					h1.value = (long)((BiValueHolder<Long, Set<C>>)h1).secondValue.size();
+					((BiValueHolder<Number, Set<C>>)h1).secondValue.addAll(((BiValueHolder<Number, Set<C>>)h2).secondValue);
+					h1.value = (long)((BiValueHolder<Number, Set<C>>)h1).secondValue.size();
 					return h1;
 				};
 			}
@@ -353,26 +357,21 @@ public abstract class AggregateFunction<T extends ActiveRecord, C, R> implements
 	 *            the function returning the column-value to aggregate
 	 * @return the sum of all the <code>non-null</code> values
 	 */
-	public static final <T extends ActiveRecord, C extends Number> AggregateFunction<T, C, Long> SUM(@Nonnull final String columnName, @Nonnull final Function<T, C> columnFunc)
+	@Nonnull
+	public static final <T extends ActiveRecord, C extends Number> AggregateFunction<T, C, Number> SUM(@Nonnull final String columnName, @Nonnull final Function<T, C> columnFunc)
 	{
-		return new AggregateFunction<T, C, Long>(JDBCDriver.AGGREGATE_SUM, columnName, columnFunc)
+		return new AggregateFunction<T, C, Number>(JDBCDriver.AGGREGATE_SUM, columnName, columnFunc)
 		{
 			@Override
-			public String toSQL(@Nonnull final JDBCDriver driver)
+			public BiConsumer<ValueHolder<Number>, T> accumulator()
 			{
-				return "CAST(" + super.toSQL(driver) + " AS BIGINT)";
-			}
-
-			@Override
-			public BiConsumer<ValueHolder<Long>, T> accumulator()
-			{
-				return (final ValueHolder<Long> holder, final T record) -> {
+				return (final ValueHolder<Number> holder, final T record) -> {
 					final C colVal = columnFunc.apply(record);
 					if (colVal != null)
 					{
 						if (holder.value != null)
 						{
-							holder.value += colVal.longValue();
+							holder.value = holder.value.longValue() + colVal.longValue();
 						}
 						else
 						{
@@ -383,9 +382,9 @@ public abstract class AggregateFunction<T extends ActiveRecord, C, R> implements
 			}
 
 			@Override
-			public BinaryOperator<ValueHolder<Long>> combiner()
+			public BinaryOperator<ValueHolder<Number>> combiner()
 			{
-				return (final ValueHolder<Long> h1, final ValueHolder<Long> h2) -> {
+				return (final ValueHolder<Number> h1, final ValueHolder<Number> h2) -> {
 					if (h1.value == null)
 					{
 						return h2;
@@ -394,7 +393,7 @@ public abstract class AggregateFunction<T extends ActiveRecord, C, R> implements
 					{
 						return h1;
 					}
-					h1.value += h2.value;
+					h1.value = h1.value.longValue() + h2.value.longValue();
 					return h1;
 				};
 			}
@@ -416,26 +415,21 @@ public abstract class AggregateFunction<T extends ActiveRecord, C, R> implements
 	 *            the function returning the column-value to aggregate
 	 * @return the sum of all the <code>non-null</code> values
 	 */
-	public static final <T extends ActiveRecord, C extends Number> AggregateFunction<T, C, Double> SUM_FLOATING(@Nonnull final String columnName, @Nonnull final Function<T, C> columnFunc)
+	//XXX combine sums? need to compute result in some all-matching data-type (BigDecimal?)
+	public static final <T extends ActiveRecord, C extends Number> AggregateFunction<T, C, Number> SUM_FLOATING(@Nonnull final String columnName, @Nonnull final Function<T, C> columnFunc)
 	{
-		return new AggregateFunction<T, C, Double>(JDBCDriver.AGGREGATE_SUM, columnName, columnFunc)
+		return new AggregateFunction<T, C, Number>(JDBCDriver.AGGREGATE_SUM_DOUBLE, columnName, columnFunc)
 		{
 			@Override
-			public String toSQL(@Nonnull final JDBCDriver driver)
+			public BiConsumer<ValueHolder<Number>, T> accumulator()
 			{
-				return "CAST(" + super.toSQL(driver) + " AS DOUBLE)";
-			}
-	
-			@Override
-			public BiConsumer<ValueHolder<Double>, T> accumulator()
-			{
-				return (final ValueHolder<Double> holder, final T record) -> {
+				return (final ValueHolder<Number> holder, final T record) -> {
 					final C colVal = columnFunc.apply(record);
 					if (colVal != null)
 					{
 						if (holder.value != null)
 						{
-							holder.value += colVal.doubleValue();
+							holder.value = holder.value.doubleValue() + colVal.doubleValue();
 						}
 						else
 						{
@@ -446,9 +440,9 @@ public abstract class AggregateFunction<T extends ActiveRecord, C, R> implements
 			}
 
 			@Override
-			public BinaryOperator<ValueHolder<Double>> combiner()
+			public BinaryOperator<ValueHolder<Number>> combiner()
 			{
-				return (final ValueHolder<Double> h1, final ValueHolder<Double> h2) -> {
+				return (final ValueHolder<Number> h1, final ValueHolder<Number> h2) -> {
 					if (h1.value == null)
 					{
 						return h2;
@@ -457,7 +451,7 @@ public abstract class AggregateFunction<T extends ActiveRecord, C, R> implements
 					{
 						return h1;
 					}
-					h1.value += h2.value;
+					h1.value = h1.value.doubleValue() + h2.value.doubleValue();
 					return h1;
 				};
 			}
@@ -479,47 +473,41 @@ public abstract class AggregateFunction<T extends ActiveRecord, C, R> implements
 	 *            the function returning the column-value to aggregate
 	 * @return the average of all the <code>non-null</code> values
 	 */
-	public static final <T extends ActiveRecord, C extends Number> AggregateFunction<T, C, Double> AVERAGE(@Nonnull final String columnName, @Nonnull final Function<T, C> columnFunc)
+	public static final <T extends ActiveRecord, C extends Number> AggregateFunction<T, C, Number> AVERAGE(@Nonnull final String columnName, @Nonnull final Function<T, C> columnFunc)
 	{
-		return new AggregateFunction<T, C, Double>(JDBCDriver.AGGREGATE_AVERAGE, columnName, columnFunc)
+		return new AggregateFunction<T, C, Number>(JDBCDriver.AGGREGATE_AVERAGE, columnName, columnFunc)
 		{
 			@Override
-			public String toSQL(@Nonnull final JDBCDriver driver)
+			public Supplier<ValueHolder<Number>> supplier()
 			{
-				return "CAST(" + super.toSQL(driver) + " AS DOUBLE)";
+				return () -> new BiValueHolder<Number, Long>(null, null);
 			}
 
 			@Override
-			public Supplier<ValueHolder<Double>> supplier()
+			public BiConsumer<ValueHolder<Number>, T> accumulator()
 			{
-				return () -> new BiValueHolder<Double, Long>(null, null);
-			}
-
-			@Override
-			public BiConsumer<ValueHolder<Double>, T> accumulator()
-			{
-				return (final ValueHolder<Double> holder, final T record) -> {
+				return (final ValueHolder<Number> holder, final T record) -> {
 					final C colVal = columnFunc.apply(record);
 					if (colVal != null)
 					{
 						if (holder.value != null)
 						{
-							holder.value += colVal.doubleValue();
-							((BiValueHolder<Double, Long>) holder).secondValue += 1L;
+							holder.value = holder.value.longValue() + colVal.doubleValue();
+							((BiValueHolder<Number, Long>) holder).secondValue += 1L;
 						}
 						else
 						{
 							holder.value = colVal.doubleValue();
-							((BiValueHolder<Double, Long>) holder).secondValue = 1L;
+							((BiValueHolder<Number, Long>) holder).secondValue = 1L;
 						}
 					}
 				};
 			}
 
 			@Override
-			public BinaryOperator<ValueHolder<Double>> combiner()
+			public BinaryOperator<ValueHolder<Number>> combiner()
 			{
-				return (final ValueHolder<Double> h1, final ValueHolder<Double> h2) -> {
+				return (final ValueHolder<Number> h1, final ValueHolder<Number> h2) -> {
 					if (h1.value == null)
 					{
 						return h2;
@@ -528,16 +516,16 @@ public abstract class AggregateFunction<T extends ActiveRecord, C, R> implements
 					{
 						return h1;
 					}
-					h1.value += h2.value;
-					((BiValueHolder<Double, Long>) h1).secondValue += ((BiValueHolder<Double, Long>) h2).secondValue;
+					h1.value = h1.value.doubleValue() + h2.value.doubleValue();
+					((BiValueHolder<Number, Long>) h1).secondValue += ((BiValueHolder<Number, Long>) h2).secondValue;
 					return h1;
 				};
 			}
 
 			@Override
-			public Function<ValueHolder<Double>, Double> finisher()
+			public Function<ValueHolder<Number>, Number> finisher()
 			{
-				return (final ValueHolder<Double> holder) -> holder.value / ((BiValueHolder<Double, Long>) holder).secondValue;
+				return (final ValueHolder<Number> holder) -> holder.value.doubleValue() / ((BiValueHolder<Number, Long>) holder).secondValue;
 			}
 
 			@Override

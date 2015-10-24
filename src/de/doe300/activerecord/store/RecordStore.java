@@ -339,5 +339,5 @@ public interface RecordStore extends AutoCloseable
 		return ( int ) streamAll( base, new Scope(condition, null, Scope.NO_LIMIT) ).count();
 	}
 	
-	public Object aggregate(@Nonnull final RecordBase<?> base, @Nonnull final AggregateFunction<?, ?, ?> aggregateFunction, @Nullable final Condition condition);
+	public <R> R aggregate(@Nonnull final RecordBase<?> base, @Nonnull final AggregateFunction<?, ?, R> aggregateFunction, @Nullable final Condition condition);
 }

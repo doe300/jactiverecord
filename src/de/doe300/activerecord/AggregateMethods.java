@@ -91,7 +91,7 @@ public interface AggregateMethods<T extends ActiveRecord> extends FinderMethods<
 	@Nonnegative
 	public default <C> long count(@Nonnull final String columnName, @Nonnull final Function<T, C> columnFunc)
 	{
-		return aggregate( AggregateFunction.COUNT(columnName, columnFunc), null);
+		return aggregate( AggregateFunction.COUNT(columnName, columnFunc), null).longValue();
 	}
 	
 	/**
@@ -105,7 +105,7 @@ public interface AggregateMethods<T extends ActiveRecord> extends FinderMethods<
 	@Nonnegative
 	public default <C> long countDistinct(@Nonnull final String columnName, @Nonnull final Function<T, C> columnFunc)
 	{
-		return aggregate( AggregateFunction.COUNT_DISTINCT(columnName, columnFunc), null);
+		return aggregate( AggregateFunction.COUNT_DISTINCT(columnName, columnFunc), null).longValue();
 	}
 	
 	/**
@@ -119,7 +119,7 @@ public interface AggregateMethods<T extends ActiveRecord> extends FinderMethods<
 	@Signed
 	public default <C extends Number> long sum(@Nonnull final String columnName, @Nonnull final Function<T, C> columnFunc)
 	{
-		return aggregate( AggregateFunction.SUM(columnName, columnFunc), null);
+		return aggregate( AggregateFunction.SUM(columnName, columnFunc), null).longValue();
 	}
 	
 	/**
@@ -133,7 +133,7 @@ public interface AggregateMethods<T extends ActiveRecord> extends FinderMethods<
 	@Signed
 	public default <C extends Number> double sumFloating(@Nonnull final String columnName, @Nonnull final Function<T, C> columnFunc)
 	{
-		return aggregate( AggregateFunction.SUM_FLOATING(columnName, columnFunc), null);
+		return aggregate( AggregateFunction.SUM_FLOATING(columnName, columnFunc), null).doubleValue();
 	}
 	
 	/**
@@ -146,6 +146,6 @@ public interface AggregateMethods<T extends ActiveRecord> extends FinderMethods<
 	@Signed
 	public default <C extends Number> double average(@Nonnull final String columnName, @Nonnull final Function<T, C> columnFunc)
 	{
-		return aggregate( AggregateFunction.AVERAGE(columnName, columnFunc), null);
+		return aggregate( AggregateFunction.AVERAGE(columnName, columnFunc), null).doubleValue();
 	}
 }

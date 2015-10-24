@@ -452,7 +452,7 @@ public class SimpleJDBCRecordStore implements RecordStore
 	}
 
 	@Override
-	public Object aggregate(RecordBase<?> base, AggregateFunction<?, ?, ?> aggregateFunction, Condition condition )
+	public <R> R aggregate(RecordBase<?> base, AggregateFunction<?, ?, R> aggregateFunction, Condition condition )
 	{
 		checkTableExists( base );
 		String tableID = JDBCDriver.getNextTableIdentifier( null );
@@ -468,10 +468,10 @@ public class SimpleJDBCRecordStore implements RecordStore
 			{
 				if (res.next())
 				{
-					return res.getObject("result");
+					return (R)res.getObject("result");
 				}
 				Logging.getLogger().debug("JDBCStore", "No matching rows found");
-				return 0;
+				return null;
 			}
 
 		}

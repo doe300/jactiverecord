@@ -56,7 +56,8 @@ public class JDBCDriver implements DBDriver
 	public static final String AGGREGATE_COUNT_ALL= "COUNT(*)";
 	public static final String AGGREGATE_COUNT_NOT_NULL="COUNT(%column%)";
 	public static final String AGGREGATE_COUNT_DISTINCT="COUNT(DISTINCT %column%)";
-	public static final String AGGREGATE_SUM="SUM(%column%)";
+	public static final String AGGREGATE_SUM="CAST(SUM(%column%) AS BIGINT)";
+	public static final String AGGREGATE_SUM_DOUBLE="CAST(SUM(%column%) AS DOUBLE)";
 	public static final String AGGREGATE_AVERAGE="AVG(%column%)";
 	public static final String AGGREGATE_MINIMUM="MIN(%column%)";
 	public static final String AGGREGATE_MAXIMUM="MAX(%column%)";
@@ -332,7 +333,8 @@ public class JDBCDriver implements DBDriver
 		{
 			return Short.class;
 		}
-		if ( sqlType.startsWith( "INTEGER" ) )
+		//MySQL has data-type INT
+		if ( sqlType.startsWith( "INT" ) )
 		{
 			return Integer.class;
 		}

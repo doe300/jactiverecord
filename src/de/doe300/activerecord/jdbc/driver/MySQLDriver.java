@@ -24,6 +24,8 @@
  */
 package de.doe300.activerecord.jdbc.driver;
 
+import java.sql.SQLXML;
+
 /**
  * Vendor-specific driver for MySQL Databases
  * <br>
@@ -43,6 +45,19 @@ public class MySQLDriver extends JDBCDriver
 {
 	MySQLDriver()
 	{
+	}
+
+	@Override
+	public String getAggregateFunction( String aggregateFunction, String column )
+	{
+		switch(aggregateFunction)
+		{
+			case AGGREGATE_SUM:
+				return "CAST(SUM(" + column + ") AS SIGNED INTEGER)";
+			case AGGREGATE_SUM_DOUBLE:
+				return "SUM(" + column + ") + 0.0";
+		}
+		return super.getAggregateFunction( aggregateFunction, column );
 	}
 	
 	@Override
@@ -66,4 +81,16 @@ public class MySQLDriver extends JDBCDriver
 		}
 		return "LIMIT " + (offset > 0 ? offset +", " : "0, ") + (limit > 0 ? limit+"": "");
 	}
+
+	@Override
+	public String getSQLType(Class<?> javaType ) throws IllegalArgumentException
+	{
+		if(SQLXML.class.isAssignableFrom( javaType ))
+		{
+			return getStringDataType();
+		}
+		return super.getSQLType( javaType );
+	}
+	
+	
 }

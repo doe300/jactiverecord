@@ -241,7 +241,7 @@ public class ProfilingRecordStore implements RecordStore
 	}
 
 	@Override
-	public Object aggregate(RecordBase<?> base, AggregateFunction<?, ?, ?> aggregateFunction, Condition condition )
+	public <R> R aggregate(RecordBase<?> base, AggregateFunction<?, ?, R> aggregateFunction, Condition condition )
 	{
 		return profiler.profile( "aggregate", () -> store.aggregate( base, aggregateFunction, condition));
 	}

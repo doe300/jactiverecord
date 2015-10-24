@@ -106,73 +106,73 @@ public class AggregateFunctionTest extends Assert
 	@Test
 	public void testCOUNT()
 	{
-		AggregateFunction<TestInterface, Integer, Long> count = AggregateFunction.COUNT("age", TestInterface::getAge);
-		Long number = Stream.of( t1, t2, t3, t4).collect( count);
+		AggregateFunction<TestInterface, Integer, Number> count = AggregateFunction.COUNT("age", TestInterface::getAge);
+		Number number = Stream.of( t1, t2, t3, t4).collect( count);
 		
-		assertEquals( Long.valueOf( 4), number);
-		assertEquals( Long.valueOf( 4), base.aggregate( count, null));
-		assertEquals( Long.valueOf( 4), base.getStore().aggregate( base, count, null));
-		assertEquals( Long.valueOf( 4), count.aggregate( 
+		assertEquals( 4L, number.longValue());
+		assertEquals( 4L, base.aggregate( count, null).longValue());
+		assertEquals( 4L, base.getStore().aggregate( base, count, null).longValue());
+		assertEquals( 4L, count.aggregate( 
 				base.getStore().findAllWithData( base, new String[]{"age"}, Scope.DEFAULT).
-						values().stream()));
+						values().stream()).longValue());
 	}
 
 	@Test
 	public void testCOUNT_DISTINCT()
 	{
-		AggregateFunction<TestInterface, Integer, Long> countDistinct = AggregateFunction.COUNT_DISTINCT("age", TestInterface::getAge);
-		Long distinctCount = Stream.of( t1, t2, t3, t4).collect( countDistinct);
+		AggregateFunction<TestInterface, Integer, Number> countDistinct = AggregateFunction.COUNT_DISTINCT("age", TestInterface::getAge);
+		Number distinctCount = Stream.of( t1, t2, t3, t4).collect( countDistinct);
 		
-		assertEquals( Long.valueOf( 3), distinctCount);
-		assertEquals( Long.valueOf( 3), base.aggregate( countDistinct, null));
-		assertEquals( Long.valueOf( 3), base.getStore().aggregate( base, countDistinct, null));
-		assertEquals( Long.valueOf( 3), countDistinct.aggregate( 
+		assertEquals( 3L, distinctCount.longValue());
+		assertEquals( 3L, base.aggregate( countDistinct, null).longValue());
+		assertEquals( 3L, base.getStore().aggregate( base, countDistinct, null).longValue());
+		assertEquals( 3L, countDistinct.aggregate( 
 				base.getStore().findAllWithData( base, new String[]{"age"}, Scope.DEFAULT).
-						values().stream()));
+						values().stream()).longValue());
 	}
 
 	@Test
 	public void testSUM()
 	{
-		AggregateFunction<TestInterface, Integer, Long> sum = AggregateFunction.SUM("age", TestInterface::getAge);
-		Long sumAge = Stream.of( t1, t2, t3, t4).collect( sum);
+		AggregateFunction<TestInterface, Integer, Number> sum = AggregateFunction.SUM("age", TestInterface::getAge);
+		Number sumAge = Stream.of( t1, t2, t3, t4).collect( sum);
 		long otherSum = t1.getAge() + t2.getAge() + t3.getAge() + t4.getAge();
 		
-		assertEquals( Long.valueOf( otherSum), sumAge);
-		assertEquals( Long.valueOf( otherSum), base.aggregate( sum, null));
-		assertEquals( Long.valueOf( otherSum), base.getStore().aggregate( base, sum, null));
-		assertEquals( Long.valueOf( otherSum), sum.aggregate( 
+		assertEquals( otherSum, sumAge.longValue());
+		assertEquals( otherSum, base.aggregate( sum, null).longValue());
+		assertEquals( otherSum, base.getStore().aggregate( base, sum, null).longValue());
+		assertEquals( otherSum, sum.aggregate( 
 				base.getStore().findAllWithData( base, new String[]{"age"}, Scope.DEFAULT).
-						values().stream()));
+						values().stream()).longValue());
 	}
 
 	@Test
 	public void testSUM_FLOATING()
 	{
-		AggregateFunction<TestInterface, Integer, Double> sumFloat = AggregateFunction.SUM_FLOATING("age", TestInterface::getAge);
-		Double sumAge = Stream.of( t1, t2, t3, t4).collect( sumFloat);
+		AggregateFunction<TestInterface, Integer, Number> sumFloat = AggregateFunction.SUM_FLOATING("age", TestInterface::getAge);
+		Number sumAge = Stream.of( t1, t2, t3, t4).collect( sumFloat);
 		double otherSum = t1.getAge() + t2.getAge() + t3.getAge() + t4.getAge();
 		
-		assertEquals( Double.valueOf( otherSum), sumAge);
-		assertEquals( Double.valueOf( otherSum), base.aggregate( sumFloat, null));
-		assertEquals( Double.valueOf( otherSum), base.getStore().aggregate( base, sumFloat, null));
-		assertEquals( Double.valueOf( otherSum), sumFloat.aggregate( 
+		assertEquals( otherSum, sumAge.doubleValue(), 0.0);
+		assertEquals( otherSum, base.aggregate( sumFloat, null).doubleValue(), 0.0);
+		assertEquals( otherSum, base.getStore().aggregate( base, sumFloat, null).doubleValue(), 0.0);
+		assertEquals( otherSum, sumFloat.aggregate( 
 				base.getStore().findAllWithData( base, new String[]{"age"}, Scope.DEFAULT).
-						values().stream()));
+						values().stream()).doubleValue(), 0.0);
 	}
 
 	@Test
 	public void testAVERAGE()
 	{
-		AggregateFunction<TestInterface, Integer, Double> average = AggregateFunction.AVERAGE("age", TestInterface::getAge);
-		Double averageAge = Stream.of( t1, t2, t3, t4).collect( average);
+		AggregateFunction<TestInterface, Integer, Number> average = AggregateFunction.AVERAGE("age", TestInterface::getAge);
+		Number averageAge = Stream.of( t1, t2, t3, t4).collect( average);
 		double avgAge = (t1.getAge() + t2.getAge() + t3.getAge() + t4.getAge()) / 4.0;
 		
-		assertEquals( Double.valueOf( avgAge), averageAge);
-		assertEquals( Double.valueOf( avgAge), base.aggregate( average, null));
-		assertEquals( Double.valueOf( avgAge), base.getStore().aggregate( base, average, null));
-		assertEquals( Double.valueOf( avgAge), average.aggregate( 
+		assertEquals( avgAge, averageAge.doubleValue(), 0.0);
+		assertEquals( avgAge, base.aggregate( average, null).doubleValue(), 0.0);
+		assertEquals( avgAge, base.getStore().aggregate( base, average, null).doubleValue(), 0.0);
+		assertEquals( avgAge, average.aggregate( 
 				base.getStore().findAllWithData( base, new String[]{"age"}, Scope.DEFAULT).
-						values().stream()));
+						values().stream()).doubleValue(), 0.0);
 	}
 }
