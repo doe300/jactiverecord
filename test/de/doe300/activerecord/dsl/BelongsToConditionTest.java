@@ -28,6 +28,7 @@ import de.doe300.activerecord.RecordBase;
 import de.doe300.activerecord.TestInterface;
 import de.doe300.activerecord.TestServer;
 import java.util.HashMap;
+import org.junit.AfterClass;
 import org.junit.Assert;
 import org.junit.BeforeClass;
 import org.junit.Test;
@@ -67,6 +68,12 @@ public class BelongsToConditionTest extends Assert
 		cond2 = new BelongsToCondition("fk_test_id", base, new SimpleCondition("age", -913, Comparison.IS));
 		//matches t2 and t3
 		cond3 = new BelongsToCondition("fk_test_id", base, new SimpleCondition("id", t3.getPrimaryKey(), Comparison.IS));
+	}
+	
+	@AfterClass
+	public static void destroyTables() throws Exception
+	{
+		TestServer.destroyTestTables();
 	}
 
 	public BelongsToConditionTest()

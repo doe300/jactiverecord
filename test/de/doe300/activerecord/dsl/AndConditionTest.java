@@ -31,6 +31,7 @@ import de.doe300.activerecord.jdbc.driver.JDBCDriver;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
+import org.junit.AfterClass;
 import org.junit.Assert;
 import org.junit.BeforeClass;
 import org.junit.Test;
@@ -58,6 +59,12 @@ public class AndConditionTest extends Assert
 		t3 = base.createRecord();
 		t3.setName( "123Name4");
 		t3.setAge( 914);
+	}
+	
+	@AfterClass
+	public static void destroyTables() throws Exception
+	{
+		TestServer.destroyTestTables();
 	}
 	
 	@Test(expected = IllegalArgumentException.class)

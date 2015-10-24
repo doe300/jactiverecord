@@ -24,6 +24,8 @@
  */
 package de.doe300.activerecord.jdbc.driver;
 
+import java.sql.ResultSet;
+import java.sql.SQLException;
 import java.util.UUID;
 import javax.annotation.Nonnull;
 
@@ -38,6 +40,16 @@ public class PostgreSQLDriver extends JDBCDriver
 		
 	}
 
+	@Override
+	public String getAggregateFunction( String aggregateFunction, String column )
+	{
+		if(AGGREGATE_SUM_DOUBLE.equals( aggregateFunction))
+		{
+			return "CAST(SUM(" + column + ") AS DOUBLE PRECISION)";
+		}
+		return super.getAggregateFunction( aggregateFunction, column );
+	}
+
 	//TODO check all the postgre-speicalities
 	@Override
 	public String getPrimaryKeyKeywords(@Nonnull final String primaryKeyKeywords)
@@ -50,6 +62,13 @@ public class PostgreSQLDriver extends JDBCDriver
 	{
 		//TODO doesn't work if, can't fetch RETURNING
 		return "DEFAULT VALUES";
+	}
+
+	@Override
+	public int getCreatedRowID( ResultSet resultSet, String primaryColumn ) throws SQLException
+	{
+		//postgre returns the complete created row with all set and default values
+		return resultSet.getInt( primaryColumn);
 	}
 
 	@Override
@@ -76,6 +95,10 @@ public class PostgreSQLDriver extends JDBCDriver
 		if(UUID.class.equals( javaType))
 		{
 			return "UUID";
+		}
+		if(Double.class.equals( javaType))
+		{
+			return "DOUBLE PRECISION";
 		}
 		return super.getSQLType( javaType );
 	}

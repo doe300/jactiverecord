@@ -28,6 +28,7 @@ import de.doe300.activerecord.RecordBase;
 import de.doe300.activerecord.TestInterface;
 import de.doe300.activerecord.TestServer;
 import java.util.HashMap;
+import org.junit.AfterClass;
 import org.junit.Assert;
 import org.junit.BeforeClass;
 import org.junit.Test;
@@ -74,6 +75,12 @@ public class HasManyThroughConditionTest extends Assert
 		cond2 = new HasManyThroughCondition(base, "mappingTable", "fk_test1", "fk_test2", "id", base, new SimpleCondition("name", null, Comparison.IS_NOT_NULL));
 		//matches t2 and t3
 		cond3 = new HasManyThroughCondition(base, "mappingTable", "fk_test1", "fk_test2", "id", base, new SimpleCondition("name", "123Name4", Comparison.IS));
+	}
+	
+	@AfterClass
+	public static void destroyTables() throws Exception
+	{
+		TestServer.destroyTestTables();
 	}
 
 	@Test

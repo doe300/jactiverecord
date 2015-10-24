@@ -682,8 +682,7 @@ public class SimpleJDBCRecordStore implements RecordStore
 				{
 					if (rs.next())
 					{
-						//the name of the returned column varies from vendor to vendor, so just return the first column
-						return rs.getInt(1);
+						return driver.getCreatedRowID( rs, base.getPrimaryColumn() );
 					}
 					Logging.getLogger().error("JDBCStore", "Failed to insert new row!");
 					return -1;

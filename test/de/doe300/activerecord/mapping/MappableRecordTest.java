@@ -26,10 +26,6 @@ package de.doe300.activerecord.mapping;
 
 import de.doe300.activerecord.RecordBase;
 import de.doe300.activerecord.TestServer;
-import de.doe300.activerecord.migration.AutomaticMigration;
-import de.doe300.activerecord.migration.Migration;
-import de.doe300.activerecord.store.impl.memory.MemoryMigration;
-import de.doe300.activerecord.store.impl.memory.MemoryRecordStore;
 import java.util.HashMap;
 import java.util.Map;
 import org.junit.AfterClass;
@@ -43,7 +39,6 @@ import org.junit.Test;
  */
 public class MappableRecordTest extends Assert
 {
-	private static Migration migration;
 	private static RecordBase<TestMappableRecord> base;
 	private static TestMappableRecord record;
 	
@@ -51,22 +46,14 @@ public class MappableRecordTest extends Assert
 	public static void createTables() throws Exception
 	{
 		base = TestServer.getTestCore().getBase( TestMappableRecord.class);
-		if(base.getStore() instanceof MemoryRecordStore)
-		{
-			migration = new MemoryMigration(( MemoryRecordStore ) base.getStore(), TestMappableRecord.class, false);
-		}
-		else
-		{
-			migration = new AutomaticMigration(TestMappableRecord.class, false);
-		}
-		migration.apply( base.getStore().getConnection() );
+		base.getCore().createTable( TestMappableRecord.class);
 		record = base.createRecord();
 	}
 	
 	@AfterClass
 	public static void destroyTables() throws Exception
 	{
-		migration.revert( base.getStore().getConnection());
+		base.getCore().dropTable( TestMappableRecord.class);
 	}
 	
 	public static interface TestMappableRecord extends MappableRecord

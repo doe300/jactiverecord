@@ -31,6 +31,7 @@ import java.math.BigDecimal;
 import java.sql.Connection;
 import java.sql.DatabaseMetaData;
 import java.sql.Date;
+import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Time;
 import java.sql.Timestamp;
@@ -146,6 +147,19 @@ public class JDBCDriver implements DBDriver
 	public String getInsertDataForEmptyRow(@Nonnull final String primaryColumn)
 	{
 		return "(" + primaryColumn + ") VALUES (NULL)";
+	}
+	
+	/**
+	 * By default, only the ID-column is returned from the INSERT-statement, so we just return the first value as int
+	 * 
+	 * @param resultSet the ResultSet of the INSERT-statement
+	 * @param primaryColumn the primary-column to extract
+	 * @return the ID of the newly created row
+	 */
+	public int getCreatedRowID(@Nonnull final ResultSet resultSet, @Nonnull final String primaryColumn) throws SQLException
+	{
+		//the name of the returned column varies from vendor to vendor, so just return the first column
+		return resultSet.getInt( 1);
 	}
 
 	/**

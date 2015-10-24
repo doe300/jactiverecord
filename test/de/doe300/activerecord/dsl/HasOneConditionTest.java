@@ -28,6 +28,7 @@ import de.doe300.activerecord.RecordBase;
 import de.doe300.activerecord.TestInterface;
 import de.doe300.activerecord.TestServer;
 import java.util.HashMap;
+import org.junit.AfterClass;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
@@ -74,6 +75,12 @@ public class HasOneConditionTest
 		cond2 = new HasOneCondition("id", base, "fk_test_id", new SimpleCondition("age", -913, Comparison.IS));
 		//matches t3
 		cond3 = new HasOneCondition("id", base, "fk_test_id", new SimpleCondition("id", t3.getPrimaryKey(), Comparison.IS));
+	}
+	
+	@AfterClass
+	public static void destroyTables() throws Exception
+	{
+		TestServer.destroyTestTables();
 	}
 	
 	public HasOneConditionTest()
