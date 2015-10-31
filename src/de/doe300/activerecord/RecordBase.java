@@ -495,7 +495,7 @@ public abstract class RecordBase<T extends ActiveRecord> implements ReadOnlyReco
 	@Override
 	public <C, R> R aggregate( AggregateFunction<T, C, R> aggregateFunction, @Nullable final Condition condition )
 	{
-		return (R) getStore().aggregate( this, aggregateFunction, condition);
+		return getStore().aggregate( this, aggregateFunction, condition);
 	}
 
 	////

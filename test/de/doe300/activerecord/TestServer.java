@@ -126,15 +126,16 @@ public class TestServer extends Assert
 //			con = DriverManager.getConnection("jdbc:sqlite::memory:");
 			//FIXME MySQL errors:
 			/**
-			 * - Table-names are case-sensitive, so all access must use same case
-			 *		Fails at creation of testTable and trying to write/read TESTTABLE
-			 *		But method calls are exactly the same for different test, which do no fail?!?
+			 * - ???
 			 */
 			//start server with "systemctl start mysqld.service"
 //			con = DriverManager.getConnection( "jdbc:mysql://localhost:3306/mysql", "root", "");
 			
-			//FIXME need testing:
-//			con = DriverManager.getConnection( "jdbc:postgresql:database");
+			//FIXME PostgreSQL errors:
+			/**
+			 * none currently...
+			 */
+//			con = DriverManager.getConnection( "jdbc:postgresql:postgres", "postgres", "");
 			
 			//TODO run all tests with MemoryRecordStore
 			
@@ -198,8 +199,8 @@ public class TestServer extends Assert
 		System.out.println( "- Name: "+data.getDriverName());
 		System.out.println( "- Version: "+data.getDriverVersion() );
 		
-		System.out.println( "Datenbank: " );
+		System.out.println( "Database: " );
 		System.out.println( "- Name: " +data.getDatabaseProductName() );
-		System.out.println( "- version: "+data.getDatabaseProductVersion() );
+		System.out.println( "- Version: "+data.getDatabaseProductVersion() );
 	}	
 }

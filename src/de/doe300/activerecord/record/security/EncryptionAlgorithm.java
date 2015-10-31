@@ -34,9 +34,24 @@ import javax.annotation.Nullable;
  */
 public interface EncryptionAlgorithm
 {
-	@Nullable
-	public String encryptValue(@Nullable final String rawValue) throws GeneralSecurityException;
+	//FIXME need to accept arbitrary sizes, but how to add pading??
 	
+	/**
+	 * NOTE: the parameter for this method may need to be padded!
+	 * 
+	 * @param rawValue the bytes to encrypt
+	 * @return the resulting bytes
+	 * @throws GeneralSecurityException 
+	 */
 	@Nullable
-	public String decryptValue(@Nullable final String encryptedValue) throws GeneralSecurityException;
+	public byte[] encryptValue(@Nullable final byte[] rawValue) throws GeneralSecurityException;
+	
+	/**
+	 * 
+	 * @param encryptedValue the encrypted bytes
+	 * @return the decrypted bytes
+	 * @throws GeneralSecurityException 
+	 */
+	@Nullable
+	public byte[] decryptValue(@Nullable final byte[] encryptedValue) throws GeneralSecurityException;
 }

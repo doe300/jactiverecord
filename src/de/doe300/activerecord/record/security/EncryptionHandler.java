@@ -65,22 +65,23 @@ public class EncryptionHandler implements ProxyHandler
 			}
 			if(method.equals( EncryptedRecord.class.getMethod( "encryptValue", String.class)))
 			{
-				return algorithm.encryptValue( (String)args[0]);
+				return new String(algorithm.encryptValue( ((String)args[0]).getBytes()));
 			}
 			if(method.equals( EncryptedRecord.class.getMethod( "decryptValue", String.class)))
 			{
-				return algorithm.decryptValue((String)args[0]);
+				return new String(algorithm.decryptValue(((String)args[0]).getBytes()));
 			}
 			if(method.isAnnotationPresent( EncryptedAttribute.class))
 			{
+				//FIXME fails, because it contains non-printable characters
 				String attributeName = method.getAnnotation( EncryptedAttribute.class).attribute();
 				if(Attributes.isGetter( method, true ))
 				{
-					return algorithm.decryptValue( (String)record.getBase().getStore().getValue( record.getBase(), record.getPrimaryKey(), attributeName));
+					return new String(algorithm.decryptValue( ((String)record.getBase().getStore().getValue( record.getBase(), record.getPrimaryKey(), attributeName)).getBytes()));
 				}
 				if(Attributes.isSetter( method, args[0].getClass(), true ))
 				{
-					record.getBase().getStore().setValue( record.getBase(), record.getPrimaryKey(), attributeName, algorithm.encryptValue( (String)args[0]));
+					record.getBase().getStore().setValue( record.getBase(), record.getPrimaryKey(), attributeName, new String(algorithm.encryptValue( ((String)args[0]).getBytes())));
 					return null;
 				}
 			}
