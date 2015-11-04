@@ -24,6 +24,7 @@
  */
 package de.doe300.activerecord.jdbc.driver;
 
+import de.doe300.activerecord.migration.constraints.IndexType;
 import javax.annotation.Nonnull;
 
 /**
@@ -49,6 +50,17 @@ public class SQLiteDriver extends JDBCDriver
 	{
 	}
 
+	@Override
+	public String getIndexKeyword( IndexType indexType )
+	{
+		if(IndexType.CLUSTERED == indexType)
+		{
+			//clustered index not supported
+			return "";
+		}
+		return super.getIndexKeyword( indexType );
+	}
+	
 	@Override
 	public String getPrimaryKeyKeywords(@Nonnull final String primaryKeyKeywords)
 	{

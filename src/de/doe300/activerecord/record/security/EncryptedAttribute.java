@@ -34,7 +34,7 @@ import java.lang.annotation.Target;
 /**
  * Annotation for an attribute which will be saved in an encrypted state.
  * 
- * NOTE: This annotation can only be applied to {@link String} or <code>byte[]</code>-attributes.
+ * NOTE: This annotation can only be applied to {@link String}-attributes.
  * 
  * @author doe300
  * @see Attribute

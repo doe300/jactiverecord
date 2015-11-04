@@ -25,6 +25,7 @@
 package de.doe300.activerecord.jdbc.driver;
 
 import de.doe300.activerecord.logging.Logging;
+import de.doe300.activerecord.migration.constraints.IndexType;
 import de.doe300.activerecord.record.ActiveRecord;
 import de.doe300.activerecord.store.DBDriver;
 import java.math.BigDecimal;
@@ -41,6 +42,7 @@ import javax.annotation.Nonnegative;
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 import javax.annotation.Signed;
+import javax.annotation.Syntax;
 
 /**
  * The abstract driver for JDBC-based storages
@@ -93,11 +95,37 @@ public class JDBCDriver implements DBDriver
 	}
 	
 	/**
+	 * NOTE: If the specified {@link IndexType} is not supported by the driver, 
+	 * fallback to the {@link IndexType#DEFAULT default} index-type is allowed
+	 * 
+	 * @param indexType the index-type to translate to driver-specific keyword
+	 * @return the keyword for the given index-type
+	 * @since 0.6
+	 */
+	@Nonnull
+	@Syntax(value = "SQL")
+	public String getIndexKeyword(@Nonnull final IndexType indexType)
+	{
+		switch(indexType)
+		{
+			case DEFAULT:
+				return "";
+			case UNIQUE:
+				return "UNIQUE";
+			case CLUSTERED:
+				return "CLUSTERED";
+			default:
+				throw new AssertionError( indexType.name() );
+		}
+	}
+	
+	/**
 	 * @param offset the offset to start at
 	 * @param limit the maximum number of results
 	 * @return the SQL-clause to limit the amount of retrieved results
 	 */
 	@Nonnull
+	@Syntax(value = "SQL")
 	public String getLimitClause(@Nonnegative final int offset, @Signed final int limit)
 	{
 		return (offset > 0 ? "OFFSET " + offset + " " : "") + (limit > 0 ? "FETCH FIRST " + limit + " ROWS ONLY" : "");
@@ -109,6 +137,7 @@ public class JDBCDriver implements DBDriver
 	 * @return the SQL aggregate-function for the given column
 	 */
 	@Nonnull
+	@Syntax(value = "SQL")
 	public String getAggregateFunction(@Nonnull final String aggregateFunction, @Nonnull final String column)
 	{
 		return aggregateFunction.replaceAll( "%column%", column);
@@ -121,6 +150,7 @@ public class JDBCDriver implements DBDriver
 	 * @return the keywords for an auto-incremental primary-key column
 	 */
 	@Nonnull
+	@Syntax(value = "SQL")
 	public String getPrimaryKeyKeywords(@Nonnull final String primaryKeyKeywords)
 	{
 		return primaryKeyKeywords + " GENERATED ALWAYS AS IDENTITY PRIMARY KEY";
@@ -132,6 +162,7 @@ public class JDBCDriver implements DBDriver
 	 * @return the default data-type for strings
 	 */
 	@Nonnull
+	@Syntax(value = "SQL")
 	public String getStringDataType()
 	{
 		return "VARCHAR("+STRING_TYPE_LENGTH+")";
@@ -144,6 +175,7 @@ public class JDBCDriver implements DBDriver
 	 * @return the columns-and-values string for an empty row
 	 */
 	@Nonnull
+	@Syntax(value = "SQL")
 	public String getInsertDataForEmptyRow(@Nonnull final String primaryColumn)
 	{
 		return "(" + primaryColumn + ") VALUES (NULL)";
@@ -194,6 +226,7 @@ public class JDBCDriver implements DBDriver
 	 * @see "http://www.cis.upenn.edu/~bcpierce/courses/629/jdkdocs/guide/jdbc/getstart/mapping.doc.html"
 	 * @see java.sql.Types
 	 */
+	@Syntax(value = "SQL")
 	public String getSQLType( final Class<?> javaType) throws IllegalArgumentException
 	{
 		//map SQL-types

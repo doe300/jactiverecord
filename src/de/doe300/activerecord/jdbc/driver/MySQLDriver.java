@@ -24,6 +24,7 @@
  */
 package de.doe300.activerecord.jdbc.driver;
 
+import de.doe300.activerecord.migration.constraints.IndexType;
 import java.sql.SQLXML;
 import javax.annotation.Nonnull;
 
@@ -46,6 +47,18 @@ public class MySQLDriver extends JDBCDriver
 {
 	MySQLDriver()
 	{
+	}
+
+	@Override
+	public String getIndexKeyword( IndexType indexType )
+	{
+		if(IndexType.CLUSTERED == indexType)
+		{
+			//clustered index not supported
+			return "";
+		}
+		//TODO MySQL seems not to support UNIQUE index on multiple columns
+		return super.getIndexKeyword( indexType );
 	}
 
 	@Override

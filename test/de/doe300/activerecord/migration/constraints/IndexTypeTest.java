@@ -24,13 +24,33 @@
  */
 package de.doe300.activerecord.migration.constraints;
 
+import de.doe300.activerecord.RecordBase;
+import de.doe300.activerecord.TestServer;
+import de.doe300.activerecord.jdbc.driver.JDBCDriver;
+import de.doe300.activerecord.record.ActiveRecord;
+import org.junit.AfterClass;
 import org.junit.Assert;
+import org.junit.BeforeClass;
 import org.junit.Test;
 
 
 
 public class IndexTypeTest extends Assert
 {
+	private static RecordBase<TestIndexedRecord> base;
+	
+	@BeforeClass
+	public static void createTables() throws Exception
+	{
+		base = TestServer.getTestCore().getBase( TestIndexedRecord.class);
+		base.getCore().createTable( TestIndexedRecord.class);
+	}
+	
+	@AfterClass
+	public static void destroyTables() throws Exception
+	{
+		base.getCore().dropTable( TestIndexedRecord.class);
+	}
 	
 	public IndexTypeTest()
 	{
@@ -39,21 +59,33 @@ public class IndexTypeTest extends Assert
 	@Test
 	public void test_NON_UNIQUE()
 	{
-		assertEquals( "CREATE  INDEX index1 ON table1 (column1, column2)", IndexType.NON_UNIQUE.toSQL(null, "table1", "index1",
+		assertEquals( "CREATE  INDEX index1 ON table1 (column1, column2)", IndexType.DEFAULT.toSQL(new JDBCDriver(), "table1", "index1",
 				new String[]{"column1", "column2"}));
 	}
 	
 	@Test
 	public void test_UNIQUE()
 	{
-		assertEquals( "CREATE UNIQUE INDEX  ON table1 (column1, column2)", IndexType.UNIQUE.toSQL(null, "table1", null,
+		assertEquals( "CREATE UNIQUE INDEX  ON table1 (column1, column2)", IndexType.UNIQUE.toSQL(new JDBCDriver(), "table1", null,
 				new String[]{"column1", "column2"}));
 	}
 	
 	@Test
 	public void test_CLUSTERED()
 	{
-		assertEquals( "CREATE CLUSTERED INDEX index1 ON table1 (column1)", IndexType.CLUSTERED.toSQL(null, "table1", "index1",
+		assertEquals( "CREATE CLUSTERED INDEX index1 ON table1 (column1)", IndexType.CLUSTERED.toSQL(new JDBCDriver(), "table1", "index1",
 				new String[]{"column1"}));
+	}
+	
+	@Indices({
+		@Index(name = "name_index", columns = {"name"}, type = IndexType.DEFAULT),
+		@Index(name = "age_index", columns = {"age"}, type = IndexType.CLUSTERED),
+		@Index(name = "both_index", columns = {"name", "age"}, type = IndexType.UNIQUE)
+	})
+	public static interface TestIndexedRecord extends ActiveRecord
+	{
+		public String getName();
+		
+		public int getAge();
 	}
 }

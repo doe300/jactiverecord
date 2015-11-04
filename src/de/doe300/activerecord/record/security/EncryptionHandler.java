@@ -74,6 +74,7 @@ public class EncryptionHandler implements ProxyHandler
 			if(method.isAnnotationPresent( EncryptedAttribute.class))
 			{
 				//FIXME fails, because it contains non-printable characters
+				//data would need to be saved in BINARY or VARBINARY format, BLOB, etc.
 				String attributeName = method.getAnnotation( EncryptedAttribute.class).attribute();
 				if(Attributes.isGetter( method, true ))
 				{

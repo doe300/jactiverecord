@@ -52,7 +52,7 @@ import java.util.stream.Stream;
 	@Validate(attribute = "name", type = ValidationType.NOT_NULL),
 	@Validate(attribute = "name", type = ValidationType.NOT_EMPTY)
 })
-@Index(type = IndexType.NON_UNIQUE, name = "fk_other", columns = {"other"})
+@Index(type = IndexType.DEFAULT, name = "fk_other", columns = {"other"})
 public interface TestInterface extends TimestampedRecord, ValidatedRecord, RecordCallbacks
 {
 	public String getName();

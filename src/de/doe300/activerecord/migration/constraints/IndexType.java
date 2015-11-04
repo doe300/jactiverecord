@@ -40,47 +40,18 @@ public enum IndexType
 	/**
 	 * Standard Type for a non-unique index
 	 */
-	NON_UNIQUE()
-	{
-		@Override
-		public String toSQL(@Nonnull final JDBCDriver driver)
-		{
-			return "";
-		}
-	},
-
+	DEFAULT(),
 	/**
 	 * IndexType with unique keys.
 	 * Every combination in the index-columns is unique
 	 */
-	UNIQUE()
-	{
-		@Override
-		public String toSQL(@Nonnull final JDBCDriver driver)
-		{
-			return "UNIQUE";
-		}
-	},
+	UNIQUE(),
 	/**
 	 * Clustered index.
 	 * The DBMS will store the rows in the order of the index, so no additional step is required
 	 */
 	CLUSTERED()
-	{
-		@Override
-		public String toSQL(@Nonnull final JDBCDriver driver)
-		{
-			return "CLUSTERED";
-		}
-	}
 	;
-
-	/**
-	 * @param driver
-	 * @return the SQL keyword for the given index-type
-	 */
-	@Syntax(value = "SQL")
-	public abstract String toSQL(@Nonnull final JDBCDriver driver);
 
 	/**
 	 * @param driver the driver to use
@@ -92,7 +63,7 @@ public enum IndexType
 	@Syntax(value = "SQL")
 	public String toSQL(@Nonnull final JDBCDriver driver, @Nonnull final String tableName, @Nullable final String name, @Nullable final String... columnNames)
 	{
-		return "CREATE "+toSQL(driver)+" INDEX "+(name!=null? name : "")+" ON "+tableName+" ("+String.join( ", ",columnNames)+")";
+		return "CREATE "+driver.getIndexKeyword(this)+" INDEX "+(name!=null? name : "")+" ON "+tableName+" ("+String.join( ", ",columnNames)+")";
 	}
 
 }

@@ -24,6 +24,7 @@
  */
 package de.doe300.activerecord.jdbc.driver;
 
+import de.doe300.activerecord.migration.constraints.IndexType;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.UUID;
@@ -38,6 +39,17 @@ public class PostgreSQLDriver extends JDBCDriver
 	PostgreSQLDriver()
 	{
 		
+	}
+
+	@Override
+	public String getIndexKeyword( IndexType indexType )
+	{
+		if(IndexType.CLUSTERED == indexType)
+		{
+			//PostgreSQL doesn't support clustered indices
+			return "";
+		}
+		return super.getIndexKeyword( indexType );
 	}
 
 	@Override

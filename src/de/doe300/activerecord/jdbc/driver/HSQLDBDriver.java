@@ -24,6 +24,7 @@
  */
 package de.doe300.activerecord.jdbc.driver;
 
+import de.doe300.activerecord.migration.constraints.IndexType;
 import javax.annotation.Nonnull;
 
 /**
@@ -41,6 +42,13 @@ public class HSQLDBDriver extends JDBCDriver
 
 	HSQLDBDriver()
 	{
+	}
+
+	@Override
+	public String getIndexKeyword( IndexType indexType )
+	{
+		//does not support any special index-types
+		return "";
 	}
 	
 	@Override
