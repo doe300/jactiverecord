@@ -25,9 +25,7 @@
 package de.doe300.activerecord.jdbc;
 
 import de.doe300.activerecord.RecordBase;
-import de.doe300.activerecord.RecordCore;
 import de.doe300.activerecord.TestServer;
-import de.doe300.activerecord.migration.AutomaticMigration;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
@@ -36,10 +34,10 @@ import java.net.URI;
 import java.net.URL;
 import java.nio.file.Path;
 import java.nio.file.Paths;
-import java.sql.Connection;
 import java.sql.SQLException;
 import java.sql.Timestamp;
 import java.util.Date;
+import java.util.Map;
 import java.util.TreeSet;
 import java.util.UUID;
 import org.junit.Test;
@@ -60,15 +58,18 @@ public class TypeMappingsTest extends Assert
 	@BeforeClass
 	public static void setUpClass() throws SQLException
 	{
-		Connection con = TestServer.getTestConnection();
-		new AutomaticMigration(TestTypesInterface.class, false).apply( con);
-		base = RecordCore.fromDatabase( con, false).getBase( TestTypesInterface.class);
+		base = TestServer.getTestCore().getBase( TestTypesInterface.class);
+		base.getCore().createTable( TestTypesInterface.class);
+		for(Map.Entry<String, Class<?>> type: base.getStore().getAllColumnTypes( base.getTableName() ).entrySet())
+		{
+			System.out.println( type.getKey()+": " + type.getValue() );
+		}
 	}
 	
 	@AfterClass
 	public static void tearDownClass() throws SQLException
 	{
-		new AutomaticMigration(TestTypesInterface.class, false).revert( base.getStore().getConnection());
+		base.getCore().dropTable(TestTypesInterface.class);
 	}
 
 	@Test

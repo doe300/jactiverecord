@@ -317,6 +317,15 @@ public class JDBCDriver implements DBDriver
 			//for enum-name
 			return "VARCHAR(255)";
 		}
+		//map some common types which could be supported natively by the DBMS
+		if ( java.util.UUID.class.equals( javaType))
+		{
+			return getSQLType( String.class );
+		}
+		if ( java.net.URL.class.equals( javaType) || java.net.URI.class.equals( javaType) || java.nio.file.Path.class.equals( javaType))
+		{
+			return getSQLType( String.class);
+		}
 		throw new IllegalArgumentException( "Type not mapped: " + javaType );
 	}
 

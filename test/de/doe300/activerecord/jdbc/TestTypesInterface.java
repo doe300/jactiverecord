@@ -43,7 +43,7 @@ import java.util.UUID;
  */
 public interface TestTypesInterface extends ActiveRecord
 {
-	@Attribute(type = Character.class, typeName = TypeMappings.UUID_TYPE_NAME, name = "uuid")
+	@Attribute(name = "uuid")
 	public default UUID getUUID()
 	{
 		return TypeMappings.readUUID( this, "uuid" );
@@ -54,7 +54,7 @@ public interface TestTypesInterface extends ActiveRecord
 		TypeMappings.writeUUID( id, this, "uuid");
 	}
 	
-	@Attribute(type = String.class, typeName = TypeMappings.URL_TYPE_NAME, name = "url")
+	@Attribute(name = "url")
 	public default URL getURL() throws MalformedURLException
 	{
 		return TypeMappings.readURL( this, "url");
@@ -75,7 +75,7 @@ public interface TestTypesInterface extends ActiveRecord
 		TypeMappings.writeURI( uri, this, "url");
 	}	
 	
-	@Attribute(type =  String.class, typeName = TypeMappings.PATH_TYPE_NAME, name = "path")
+	@Attribute(name = "path")
 	public default Path getPath()
 	{
 		return TypeMappings.readPath( this, "path");
@@ -86,7 +86,7 @@ public interface TestTypesInterface extends ActiveRecord
 		TypeMappings.writePath( path, this, "path");
 	}
 	
-	@Attribute(type = String.class, typeName = TypeMappings.ENUM_TYPE_NAME, name = "enum")
+	@Attribute(name = "enum")
 	public default RoundingMode getEnum()
 	{
 		return TypeMappings.readEnumValue( RoundingMode.class, this, "enum");

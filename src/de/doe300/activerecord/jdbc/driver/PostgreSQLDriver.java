@@ -62,7 +62,6 @@ public class PostgreSQLDriver extends JDBCDriver
 		return super.getAggregateFunction( aggregateFunction, column );
 	}
 
-	//TODO check all the postgre-speicalities
 	@Override
 	public String getPrimaryKeyKeywords(@Nonnull final String primaryKeyKeywords)
 	{

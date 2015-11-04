@@ -166,38 +166,21 @@ public final class TypeMappings
 	public static void writeUUID(@Nullable final UUID uuid, @Nonnull final ActiveRecord record,
 		@Nonnull final String columnName)
 	{
-		//XXX support for UUID-columns
-		record.getBase().getStore().setValue( record.getBase(), record.getPrimaryKey(), columnName, uuid == null ? null : uuid.toString());
+		final Object value;
+		if(record.getBase().getStore().getAllColumnTypes( record.getBase().getTableName()).get( columnName).isAssignableFrom( UUID.class))
+		{
+			value = uuid;
+		}
+		else
+		{
+			value = uuid == null ? null : uuid.toString();
+		}
+		record.getBase().getStore().setValue( record.getBase(), record.getPrimaryKey(), columnName, value);
 	}
 
 	////
 	// URL / URI
 	////
-
-	/**
-	 * Type-name for a {@link URL}, limited to 255 characters
-	 * @see Attribute#typeName()
-	 */
-	public static final String URL_TYPE_NAME = "VARCHAR(255)";
-
-	/**
-	 * Type-name for a {@link URI}, limited to 255 characters
-	 * @see Attribute#typeName()
-	 */
-	public static final String URI_TYPE_NAME = "VARCHAR(255)";
-
-	/**
-	 * Type-name for a {@link Path}, limited to 255 characters
-	 * @see Attribute#typeName()
-	 */
-	public static final String PATH_TYPE_NAME = "VARCHAR(255)";
-
-	/**
-	 * Type-name for a {@link Enum}, limited to 255 characters
-	 * @see Attribute#typeName()
-	 * @see Enum#name()
-	 */
-	public static final String ENUM_TYPE_NAME = "VARCHAR(255)";
 
 	/**
 	 * To be used in attribute-getters for URLs
@@ -254,7 +237,16 @@ public final class TypeMappings
 	public static void writeURL(@Nullable final URL url, @Nonnull final ActiveRecord record,
 		@Nonnull final String columnName)
 	{
-		record.getBase().getStore().setValue( record.getBase(), record.getPrimaryKey(), columnName, url == null ? null : url.toExternalForm());
+		final Object value;
+		if(record.getBase().getStore().getAllColumnTypes( record.getBase().getTableName()).get( columnName).isAssignableFrom( URL.class))
+		{
+			value = url;
+		}
+		else
+		{
+			value = url == null ? null : url.toExternalForm();
+		}
+		record.getBase().getStore().setValue( record.getBase(), record.getPrimaryKey(), columnName, value);
 	}
 
 	/**
@@ -266,7 +258,16 @@ public final class TypeMappings
 	public static void writeURI(@Nullable final URI uri, @Nonnull final ActiveRecord record,
 		@Nonnull final String columnName)
 	{
-		record.getBase().getStore().setValue( record.getBase(), record.getPrimaryKey(), columnName, uri == null ? null : uri.toString());
+		final Object value;
+		if(record.getBase().getStore().getAllColumnTypes( record.getBase().getTableName()).get( columnName).isAssignableFrom( URI.class))
+		{
+			value = uri;
+		}
+		else
+		{
+			value = uri == null ? null : uri.toString();
+		}
+		record.getBase().getStore().setValue( record.getBase(), record.getPrimaryKey(), columnName, value);
 	}
 
 	////
@@ -298,6 +299,10 @@ public final class TypeMappings
 		if(value == null)
 		{
 			return null;
+		}
+		if(sourceType.isInstance( value))
+		{
+			return sourceType.cast( value );
 		}
 		if(value instanceof SQLXML)
 		{
@@ -343,23 +348,31 @@ public final class TypeMappings
 	public static void writeXML(@Nullable final DOMResult result, @Nonnull final ActiveRecord record,
 		@Nonnull final String columnName) throws SQLException
 	{
-		final Connection con = record.getBase().getStore().getConnection();
-		if(con == null || con.isClosed())
+		final Object value;
+		if(record.getBase().getStore().getAllColumnTypes( record.getBase().getTableName()).get( columnName).isAssignableFrom( DOMResult.class))
 		{
-			throw new RecordException(record, "no JDBC-Connection for this database");
+			value = result;
 		}
-		if (result == null)
+		else
 		{
-			record.getBase().getStore().setValue(record.getBase(), record.getPrimaryKey(), columnName, null);
-			return;
+			final Connection con = record.getBase().getStore().getConnection();
+			if(con == null || con.isClosed())
+			{
+				throw new RecordException(record, "no JDBC-Connection for this database");
+			}
+			if (result == null)
+			{
+				record.getBase().getStore().setValue(record.getBase(), record.getPrimaryKey(), columnName, null);
+				return;
+			}
+			final SQLXML xml = con.createSQLXML();
+			final DOMResult writeResult = xml.setResult( DOMResult.class);
+			writeResult.setNextSibling( result.getNextSibling());
+			writeResult.setNode( result.getNode());
+			writeResult.setSystemId( result.getSystemId());
+			value = xml;
 		}
-		final SQLXML xml = con.createSQLXML();
-		final DOMResult writeResult = xml.setResult( DOMResult.class);
-		writeResult.setNextSibling( result.getNextSibling());
-		writeResult.setNode( result.getNode());
-		writeResult.setSystemId( result.getSystemId());
-
-		record.getBase().getStore().setValue( record.getBase(), record.getPrimaryKey(), columnName, xml);
+		record.getBase().getStore().setValue( record.getBase(), record.getPrimaryKey(), columnName, value);
 	}
 
 	/**
@@ -372,6 +385,7 @@ public final class TypeMappings
 	public static void writeXML(@Nullable final String xmlString, @Nonnull final ActiveRecord record,
 		@Nonnull final String columnName) throws SQLException
 	{
+		//TODO doesn't support MemoryRecordStore
 		final Connection con = record.getBase().getStore().getConnection();
 		if(con == null || con.isClosed())
 		{
@@ -425,10 +439,23 @@ public final class TypeMappings
 	 * @param record
 	 * @param columnName
 	 */
-	public static void writePath(@Nullable final Path path, @Nonnull final ActiveRecord record,
-		@Nonnull final String columnName)
+	public static void writePath(@Nullable final Path path, @Nonnull final ActiveRecord record, @Nonnull final String columnName)
 	{
-		record.getBase().getStore().setValue( record.getBase(), record.getPrimaryKey(), columnName, path == null ? null : path.toString());
+		final Object value;
+		final Class<?> columnType = record.getBase().getStore().getAllColumnTypes( record.getBase().getTableName()).get( columnName);
+		if(columnType.isAssignableFrom( Path.class))
+		{
+			value = path;
+		}
+		else if(columnType.isAssignableFrom( URI.class))
+		{
+			value = path == null ? null : path.toUri();
+		}
+		else
+		{
+			value = path == null ? null : path.toString();
+		}
+		record.getBase().getStore().setValue( record.getBase(), record.getPrimaryKey(), columnName, value);
 	}
 
 	/**
@@ -448,6 +475,10 @@ public final class TypeMappings
 		{
 			return null;
 		}
+		if(enumType.isInstance( value))
+		{
+			return enumType.cast( value );
+		}
 		if(value instanceof String)
 		{
 			return Enum.valueOf( enumType, value.toString());
@@ -462,14 +493,23 @@ public final class TypeMappings
 	/**
 	 * Writes the enum-value by storing its {@link Enum#name() }
 	 * @param <T>
-	 * @param value
+	 * @param enumValue
 	 * @param record
 	 * @param columnName
 	 */
-	public static <T extends Enum<T>> void writeEnumValue(@Nullable final T value, @Nonnull final ActiveRecord record,
+	public static <T extends Enum<T>> void writeEnumValue(@Nullable final T enumValue, @Nonnull final ActiveRecord record,
 		@Nonnull final String columnName)
 	{
-		record.getBase().getStore().setValue( record.getBase(), record.getPrimaryKey(), columnName, value == null ? null : value.name());
+		final Object value;
+		if(Enum.class.isAssignableFrom( record.getBase().getStore().getAllColumnTypes( record.getBase().getTableName()).get( columnName)))
+		{
+			value = enumValue;
+		}
+		else
+		{
+			value = enumValue == null ? null : enumValue.name();
+		}
+		record.getBase().getStore().setValue( record.getBase(), record.getPrimaryKey(), columnName, value);
 	}
 
 	/**
