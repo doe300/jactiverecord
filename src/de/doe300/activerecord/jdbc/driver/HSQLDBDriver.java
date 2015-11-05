@@ -39,8 +39,9 @@ import javax.annotation.Nonnull;
  */
 public class HSQLDBDriver extends JDBCDriver
 {
+	static final HSQLDBDriver INSTANCE = new HSQLDBDriver();
 
-	HSQLDBDriver()
+	private HSQLDBDriver()
 	{
 	}
 

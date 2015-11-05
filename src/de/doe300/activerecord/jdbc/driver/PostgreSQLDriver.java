@@ -36,7 +36,9 @@ import javax.annotation.Nonnull;
  */
 public class PostgreSQLDriver extends JDBCDriver
 {
-	PostgreSQLDriver()
+	static final PostgreSQLDriver INSTANCE = new PostgreSQLDriver();
+	
+	private PostgreSQLDriver()
 	{
 		
 	}

@@ -45,7 +45,9 @@ import javax.annotation.Nonnull;
  */
 public class MySQLDriver extends JDBCDriver
 {
-	MySQLDriver()
+	static final MySQLDriver INSTANCE = new MySQLDriver();
+	
+	private MySQLDriver()
 	{
 	}
 

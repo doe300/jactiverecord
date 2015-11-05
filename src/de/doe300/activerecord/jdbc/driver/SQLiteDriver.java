@@ -46,7 +46,9 @@ import javax.annotation.Nonnull;
  */
 public class SQLiteDriver extends JDBCDriver
 {
-	SQLiteDriver()
+	static final SQLiteDriver INSTANCE = new SQLiteDriver();
+	
+	private SQLiteDriver()
 	{
 	}
 

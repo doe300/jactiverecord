@@ -451,23 +451,22 @@ public class JDBCDriver implements DBDriver
 		{
 			try
 			{
-				//TODO make singletons of drivers??
 				final String productName = con.getMetaData().getDatabaseProductName();
 				if(productName.contains( "HSQL"))
 				{
-					return new HSQLDBDriver();
+					return HSQLDBDriver.INSTANCE;
 				}
 				if(productName.contains( "MySQL"))
 				{
-					return new MySQLDriver();
+					return MySQLDriver.INSTANCE;
 				}
 				if(productName.contains( "SQLite"))
 				{
-					return new SQLiteDriver();
+					return SQLiteDriver.INSTANCE;
 				}
 				if(productName.contains( "PostgreSQL"))
 				{
-					return new PostgreSQLDriver();
+					return PostgreSQLDriver.INSTANCE;
 				}
 				Logging.getLogger().info( "JDBCDriver", "No vendor-specific driver found for: " + productName);
 			}
