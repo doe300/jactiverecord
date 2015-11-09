@@ -41,7 +41,7 @@ import de.doe300.activerecord.scope.Scope;
  * @param <T>
  * @see QueryMethods
  */
-public class QueryResult<T extends ActiveRecord> implements QueryMethods<T>
+public class QueryResult<T extends ActiveRecord> implements QueryMethods<T>, AutoCloseable
 {
 	@Nonnull
 	private final Stream<T> baseStream;
@@ -125,5 +125,11 @@ public class QueryResult<T extends ActiveRecord> implements QueryMethods<T>
 	public Order getOrder()
 	{
 		return order;
+	}
+
+	@Override
+	public void close() throws Exception
+	{
+		baseStream.close();
 	}
 }

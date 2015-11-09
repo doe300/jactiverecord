@@ -109,6 +109,7 @@ public class GroupResultTest extends Assert
 	{
 		GroupResult<String,TestInterface> res = new GroupResult<String,TestInterface>("Adam5", base.find( new SimpleCondition("name", "Adam5", Comparison.IS)), GroupResult.SIZE_UNKNOWN, base.getDefaultOrder());
 		assertEquals( "Adam5", res.getKey());
+		//XXX does not close stream
 	}
 
 	@Test
@@ -116,5 +117,6 @@ public class GroupResultTest extends Assert
 	{
 		GroupResult<String,TestInterface> res = new GroupResult<String,TestInterface>("Adam5", base.find( new SimpleCondition("name", "Adam5", Comparison.IS)), GroupResult.SIZE_UNKNOWN, base.getDefaultOrder());
 		assertTrue( res.size() == GroupResult.SIZE_UNKNOWN);
+		//XXX does not close stream
 	}
 }

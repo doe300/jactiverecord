@@ -107,6 +107,7 @@ public class QueryResultTest extends Assert
 	public void testGetOrder()
 	{
 		assertSame( base.getDefaultOrder(), base.where( new SimpleCondition("name", null, Comparison.IS_NOT_NULL)).getOrder());
+		//XXX does not close stream
 	}
 	
 	@Test

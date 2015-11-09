@@ -38,7 +38,7 @@ import de.doe300.activerecord.scope.Scope;
  * @param <R> the grouped key
  * @param <T> the type of results
  */
-public class GroupResult<R, T extends ActiveRecord> implements QueryMethods<T>
+public class GroupResult<R, T extends ActiveRecord> implements QueryMethods<T>, AutoCloseable
 {
 	@Nonnull
 	private final R key;
@@ -109,5 +109,11 @@ public class GroupResult<R, T extends ActiveRecord> implements QueryMethods<T>
 	public Order getOrder()
 	{
 		return order;
+	}
+
+	@Override
+	public void close() throws Exception
+	{
+		baseStream.close();
 	}
 }
