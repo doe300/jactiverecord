@@ -24,10 +24,6 @@
  */
 package de.doe300.activerecord.jdbc.driver;
 
-import de.doe300.activerecord.logging.Logging;
-import de.doe300.activerecord.migration.constraints.IndexType;
-import de.doe300.activerecord.record.ActiveRecord;
-import de.doe300.activerecord.store.DBDriver;
 import java.math.BigDecimal;
 import java.sql.Connection;
 import java.sql.DatabaseMetaData;
@@ -38,23 +34,33 @@ import java.sql.Time;
 import java.sql.Timestamp;
 import java.util.Arrays;
 import java.util.function.Function;
+
 import javax.annotation.Nonnegative;
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 import javax.annotation.Signed;
 import javax.annotation.Syntax;
 
+import de.doe300.activerecord.logging.Logging;
+import de.doe300.activerecord.migration.AutomaticMigration;
+import de.doe300.activerecord.migration.Migration;
+import de.doe300.activerecord.migration.constraints.IndexType;
+import de.doe300.activerecord.record.ActiveRecord;
+import de.doe300.activerecord.store.DBDriver;
+import de.doe300.activerecord.store.RecordStore;
+
 /**
  * The abstract driver for JDBC-based storages
- * 
+ *
  * @author doe300
  * @since 0.5
- * @see https://en.wikibooks.org/wiki/SQL_Dialects_Reference
+ * @see "https://en.wikibooks.org/wiki/SQL_Dialects_Reference"
  */
 public class JDBCDriver implements DBDriver
 {
 	public static final int STRING_TYPE_LENGTH = 4096;
-	
+
+	// TODO move functions out of here
 	public static final String AGGREGATE_COUNT_ALL= "COUNT(*)";
 	public static final String AGGREGATE_COUNT_NOT_NULL="COUNT(%column%)";
 	public static final String AGGREGATE_COUNT_DISTINCT="COUNT(DISTINCT %column%)";
@@ -63,7 +69,17 @@ public class JDBCDriver implements DBDriver
 	public static final String AGGREGATE_AVERAGE="AVG(%column%)";
 	public static final String AGGREGATE_MINIMUM="MIN(%column%)";
 	public static final String AGGREGATE_MAXIMUM="MAX(%column%)";
-	
+
+	public static final String SCALAR_ABS = "CAST(ABS(%column%) AS BIGINT)";
+	public static final String SCALAR_ABS_DOUBLE = "CAST(ABS(%column%) AS DOUBLE)";
+	public static final String SCALAR_SIGN = "CAST(SIGN(%column%) AS BIGINT)";
+	public static final String SCALAR_FLOOR = "FLOOR(%column%)";
+	public static final String SCALAR_CEILING = "CEIL(%column%)";
+	public static final String SCALAR_ROUND = "CAST(ROUND(%column%) AS BIGINT)";
+	public static final String SCALAR_SQRT = "SQRT(%column%)";
+	public static final String SCALAR_UPPER = "UPPER(%column%)";
+	public static final String SCALAR_LOWER = "LOWER(%column%)";
+
 	private static final String[] sql92Keywords = {
 		"absolute", "action", "allocate", "are", "assertion",
 		"bit", "bit_length", "both", "cascaded", "case", "cast", "catalog", "char", "char_length", "character",
@@ -80,9 +96,9 @@ public class JDBCDriver implements DBDriver
 		"translation", "trim", "true", "unknown", "upper", "usage", "value", "varchar", "when", "whenever", "write",
 		"year", "zone"
 	};
-	
+
 	@Override
-	public boolean isTypeSupported(Class<?> javaType )
+	public boolean isTypeSupported(final Class<?> javaType )
 	{
 		try
 		{
@@ -93,11 +109,11 @@ public class JDBCDriver implements DBDriver
 			return false;
 		}
 	}
-	
+
 	/**
-	 * NOTE: If the specified {@link IndexType} is not supported by the driver, 
+	 * NOTE: If the specified {@link IndexType} is not supported by the driver,
 	 * fallback to the {@link IndexType#DEFAULT default} index-type is allowed
-	 * 
+	 *
 	 * @param indexType the index-type to translate to driver-specific keyword
 	 * @return the keyword for the given index-type
 	 * @since 0.6
@@ -118,7 +134,7 @@ public class JDBCDriver implements DBDriver
 				throw new AssertionError( indexType.name() );
 		}
 	}
-	
+
 	/**
 	 * @param offset the offset to start at
 	 * @param limit the maximum number of results
@@ -130,22 +146,22 @@ public class JDBCDriver implements DBDriver
 	{
 		return (offset > 0 ? "OFFSET " + offset + " " : "") + (limit > 0 ? "FETCH FIRST " + limit + " ROWS ONLY" : "");
 	}
-	
+
 	/**
-	 * @param aggregateFunction the aggregate-function to apply
+	 * @param sqlFunction the SQL-function to apply
 	 * @param column the column to aggregate
-	 * @return the SQL aggregate-function for the given column
+	 * @return the SQL function for the given column
 	 */
 	@Nonnull
 	@Syntax(value = "SQL")
-	public String getAggregateFunction(@Nonnull final String aggregateFunction, @Nonnull final String column)
+	public String getSQLFunction(@Nonnull final String sqlFunction, @Nonnull final String column)
 	{
-		return aggregateFunction.replaceAll( "%column%", column);
+		return sqlFunction.replaceAll( "%column%", column);
 	}
 
 	/**
 	 * For the default-implementation, see: https://en.wikibooks.org/wiki/SQL_Dialects_Reference/Data_structure_definition/Auto-increment_column
-	 * 
+	 *
 	 * @param primaryKeyKeywords the previously set keywords
 	 * @return the keywords for an auto-incremental primary-key column
 	 */
@@ -158,19 +174,19 @@ public class JDBCDriver implements DBDriver
 
 	/**
 	 * The default implementation provides a 4kB string-column
-	 * 
+	 *
 	 * @return the default data-type for strings
 	 */
 	@Nonnull
 	@Syntax(value = "SQL")
 	public String getStringDataType()
 	{
-		return "VARCHAR("+STRING_TYPE_LENGTH+")";
+		return "VARCHAR("+JDBCDriver.STRING_TYPE_LENGTH+")";
 	}
-	
+
 	/**
 	 * The default implementation inserts a <code>NULL</code>-value for the <code>primaryColumn</code>
-	 * 
+	 *
 	 * @param primaryColumn the primaryColumn
 	 * @return the columns-and-values string for an empty row
 	 */
@@ -180,10 +196,10 @@ public class JDBCDriver implements DBDriver
 	{
 		return "(" + primaryColumn + ") VALUES (NULL)";
 	}
-	
+
 	/**
 	 * By default, only the ID-column is returned from the INSERT-statement, so we just return the first value as int
-	 * 
+	 *
 	 * @param resultSet the ResultSet of the INSERT-statement
 	 * @param primaryColumn the primary-column to extract
 	 * @return the ID of the newly created row
@@ -196,7 +212,7 @@ public class JDBCDriver implements DBDriver
 
 	/**
 	 * By default, this method acts as the DB supports boolean as data-type
-	 * 
+	 *
 	 * @param value
 	 * @return the value to write into the DB
 	 */
@@ -208,7 +224,7 @@ public class JDBCDriver implements DBDriver
 
 	/**
 	 * By default, this method acts as the DB supports boolean as data-type
-	 * 
+	 *
 	 * @param value
 	 * @return the boolean-value from the DB
 	 */
@@ -216,7 +232,7 @@ public class JDBCDriver implements DBDriver
 	{
 		return ( boolean ) value;
 	}
-	
+
 	/**
 	 * NOTE: The result of this method may be inaccurate.
 	 *
@@ -421,7 +437,7 @@ public class JDBCDriver implements DBDriver
 		}
 		throw new IllegalArgumentException( "Type not mapped: " + sqlTypeUpper );
 	}
-	
+
 	/**
 	 * @param con
 	 * @param term
@@ -430,14 +446,20 @@ public class JDBCDriver implements DBDriver
 	 */
 	public boolean isReservedKeyword(@Nonnull final Connection con, @Nonnull final String term) throws SQLException
 	{
-		if(Arrays.stream( sql92Keywords ).anyMatch( (final String s) -> s.equalsIgnoreCase( term)))
+		if(Arrays.stream( JDBCDriver.sql92Keywords ).anyMatch( (final String s) -> s.equalsIgnoreCase( term)))
 		{
 			return true;
 		}
 		final String[] keyWords = con.getMetaData().getSQLKeywords().split( "\\s*,\\s*");
 		return Arrays.stream( keyWords ).anyMatch( (final String s) -> s.equalsIgnoreCase( term));
 	}
-	
+
+	@Override
+	public Migration createMigration(final Class<? extends ActiveRecord> recordType, final RecordStore store)
+	{
+		return new AutomaticMigration(recordType, store.getConnection());
+	}
+
 	/**
 	 * This method tries to guess the vendor-specific driver from reading the
 	 * {@link DatabaseMetaData#getDatabaseProductName() database product-name}.
@@ -477,7 +499,7 @@ public class JDBCDriver implements DBDriver
 		}
 		return new JDBCDriver();
 	}
-	
+
 	/**
 	 * Converts the input identifier to the case used in the DB
 	 * Also adds quotes, if the database-vendor supports them
@@ -510,11 +532,11 @@ public class JDBCDriver implements DBDriver
 			}
 			if(meta.storesUpperCaseIdentifiers())
 			{
-				return quoteFunc.apply( convertIdentifierWithoutQuote(input, con ));
+				return quoteFunc.apply( JDBCDriver.convertIdentifierWithoutQuote(input, con ));
 			}
 			if(meta.storesLowerCaseIdentifiers())
 			{
-				return quoteFunc.apply( convertIdentifierWithoutQuote( input, con ));
+				return quoteFunc.apply( JDBCDriver.convertIdentifierWithoutQuote( input, con ));
 			}
 
 		}
@@ -553,7 +575,7 @@ public class JDBCDriver implements DBDriver
 		}
 		return input;
 	}
-	
+
 	/**
 	 * This method is used to make sure, every table in a condition is uniquely identified
 	 * @param currentIdentifier
@@ -572,17 +594,17 @@ public class JDBCDriver implements DBDriver
 		}
 		if(currentIdentifier.startsWith( "associatedTable"))
 		{
-			String numString = currentIdentifier.substring( "associatedTable".length() );
+			final String numString = currentIdentifier.substring( "associatedTable".length() );
 			if(numString.isEmpty())
 			{
 				return "associatedTable1";
 			}
 			try
 			{
-				Integer num = Integer.parseInt( numString);
+				final Integer num = Integer.parseInt( numString);
 				return "associatedTable"+num;
 			}
-			catch(NumberFormatException nfe)
+			catch(final NumberFormatException nfe)
 			{
 				return "otherAssociatedTable";
 			}

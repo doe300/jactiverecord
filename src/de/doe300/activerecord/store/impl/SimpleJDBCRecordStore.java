@@ -171,15 +171,15 @@ public class SimpleJDBCRecordStore implements RecordStore
 				Migration mig;
 				if(!createSQL.isEmpty())
 				{
-					mig = new ManualMigration(createSQL, null, null);
+					mig = new ManualMigration(createSQL, null, null, con);
 				}
 				else
 				{
-					mig = new AutomaticMigration(base.getRecordType(), false, driver);
+					mig = new AutomaticMigration(base.getRecordType(), con, driver);
 				}
 				try
 				{
-					if(!mig.apply( con ))
+					if(!mig.apply( ))
 					{
 						throw new RuntimeException("Migration failed");
 					}
@@ -422,7 +422,7 @@ public class SimpleJDBCRecordStore implements RecordStore
 	{
 		checkTableExists( base );
 		String tableID = JDBCDriver.getNextTableIdentifier( null );
-		final String sql = "SELECT " + driver.getAggregateFunction( JDBCDriver.AGGREGATE_COUNT_ALL, base.getPrimaryColumn())+ " as size FROM "+base.getTableName()+" AS "+tableID+toWhereClause( condition, tableID );
+		final String sql = "SELECT " + driver.getSQLFunction( JDBCDriver.AGGREGATE_COUNT_ALL, base.getPrimaryColumn())+ " as size FROM "+base.getTableName()+" AS "+tableID+toWhereClause( condition, tableID );
 		Logging.getLogger().debug( "JDBCStore", sql);
 		//column name can't be count, because its a keyword
 		try(PreparedStatement stm = con.prepareStatement(sql))

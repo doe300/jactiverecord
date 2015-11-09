@@ -24,13 +24,16 @@
  */
 package de.doe300.activerecord.store;
 
-import de.doe300.activerecord.jdbc.driver.JDBCDriver;
 import javax.annotation.Nonnull;
 import javax.annotation.concurrent.Immutable;
 
+import de.doe300.activerecord.jdbc.driver.JDBCDriver;
+import de.doe300.activerecord.migration.Migration;
+import de.doe300.activerecord.record.ActiveRecord;
+
 /**
  * Abstract super-type for all db-drivers
- * 
+ *
  * @author doe300
  * @since 0.5
  * @see JDBCDriver
@@ -40,9 +43,21 @@ public interface DBDriver
 {
 	/**
 	 * This methods informs, whether the given java-type is supported be natively stored and read from this data-store
-	 * 
+	 *
 	 * @param javaType the java-type to check
-	 * @return whether the given type is natively supported 
+	 * @return whether the given type is natively supported
 	 */
 	public boolean isTypeSupported(@Nonnull final Class<?> javaType);
+
+	/**
+	 * This method is used to create and return a implementation-specific
+	 * migration to create/update/drop a data-store for the given record-type
+	 *
+	 * @param recordType
+	 * @param store 
+	 * @return a new automatic-migration for the given record-type
+	 * @since 0.6
+	 */
+	@Nonnull
+	public Migration createMigration(@Nonnull final Class<? extends ActiveRecord> recordType, @Nonnull final RecordStore store);
 }

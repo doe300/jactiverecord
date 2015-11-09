@@ -39,6 +39,8 @@ import de.doe300.activerecord.logging.Logging;
 public class ManualMigration implements Migration
 {
 	@Nonnull
+	final Connection con;
+	@Nonnull
 	private final String command;
 	@Nullable
 	private final String revertedCommand, updateCommand;
@@ -48,17 +50,19 @@ public class ManualMigration implements Migration
 	 * @param command the command for {@link #apply(java.sql.Connection) }
 	 * @param updateCommand the command for {@link #update(java.sql.Connection) }
 	 * @param revertCommand the command for {@link #revert(java.sql.Connection) }
+	 * @param con the underlying connection
 	 */
 	public ManualMigration(@Nonnull final String command, @Nullable final String updateCommand,
-		@Nullable final String revertCommand)
+		@Nullable final String revertCommand, @Nonnull final Connection con)
 	{
 		this.command = command;
 		this.updateCommand = updateCommand;
 		this.revertedCommand = revertCommand;
+		this.con = con;
 	}
 
 	@Override
-	public boolean apply( final Connection con ) throws Exception
+	public boolean apply() throws Exception
 	{
 		Logging.getLogger().info("ManualMigration", "Executing manual migration...");
 		Logging.getLogger().info("ManualMigration", command);
@@ -66,7 +70,7 @@ public class ManualMigration implements Migration
 	}
 
 	@Override
-	public boolean revert( final Connection con ) throws Exception
+	public boolean revert() throws Exception
 	{
 		if(revertedCommand == null)
 		{
@@ -78,7 +82,7 @@ public class ManualMigration implements Migration
 	}
 
 	@Override
-	public boolean update( final Connection con ) throws Exception
+	public boolean update(final boolean dropColumns) throws Exception
 	{
 		if(updateCommand == null)
 		{

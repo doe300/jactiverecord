@@ -32,6 +32,7 @@ import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 import javax.annotation.CheckReturnValue;
+import javax.annotation.Nonnegative;
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 
@@ -40,7 +41,6 @@ import de.doe300.activerecord.dsl.AggregateFunction;
 import de.doe300.activerecord.dsl.Condition;
 import de.doe300.activerecord.record.TimestampedRecord;
 import de.doe300.activerecord.scope.Scope;
-import javax.annotation.Nonnegative;
 
 /**
  * Base interface for all kinds of record storing data-base.
@@ -55,13 +55,13 @@ public interface RecordStore extends AutoCloseable
 	@Nullable
 	@Deprecated
 	public Connection getConnection();
-	
+
 	/**
 	 * @return the driver to be used for the underlying data-store
 	 */
 	@Nonnull
 	public DBDriver getDriver();
-	
+
 	/**
 	 * @param tableName
 	 * @return whether the data-store exists
@@ -79,16 +79,16 @@ public interface RecordStore extends AutoCloseable
 	{
 		return getAllColumnTypes( tableName ).keySet();
 	}
-	
+
 	/**
 	 * NOTE: to unify database-access, this method returns the keys in lower-case independent from the DBMS used.
-	 * 
+	 *
 	 * @param tableName
 	 * @return a map of all column-names and their java-types
 	 * @throws IllegalArgumentException if the table for the given name was not found
 	 * @since 0.5
 	 */
-	@Nonnull 
+	@Nonnull
 	public Map<String, Class<?>> getAllColumnTypes(@Nonnull final String tableName) throws IllegalArgumentException;
 
 	/**
@@ -338,6 +338,16 @@ public interface RecordStore extends AutoCloseable
 	{
 		return ( int ) streamAll( base, new Scope(condition, null, Scope.NO_LIMIT) ).count();
 	}
-	
+
+	/**
+	 * NOTE: If this RecordStore is based on a SQL-implementation, the aggregation should be 
+	 * performed within the SQL-implementation for performance reasons
+	 * 
+	 * @param base the {@link RecordBase} to aggregate over
+	 * @param aggregateFunction the {@link AggregateFunction aggregation-function}
+	 * @param condition the condition to filter the aggregated values
+	 * @return the aggregated value
+	 */
+	@Nullable
 	public <R> R aggregate(@Nonnull final RecordBase<?> base, @Nonnull final AggregateFunction<?, ?, R> aggregateFunction, @Nullable final Condition condition);
 }

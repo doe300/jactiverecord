@@ -24,7 +24,10 @@
  */
 package de.doe300.activerecord.store.impl.memory;
 
+import de.doe300.activerecord.migration.Migration;
+import de.doe300.activerecord.record.ActiveRecord;
 import de.doe300.activerecord.store.DBDriver;
+import de.doe300.activerecord.store.RecordStore;
 
 /**
  *
@@ -33,12 +36,20 @@ import de.doe300.activerecord.store.DBDriver;
  */
 public enum MemoryDBDriver implements DBDriver
 {
+	/**
+	 * The singleton instance
+	 */
 	INSTANCE;
 
 	@Override
-	public boolean isTypeSupported(Class<?> javaType )
+	public boolean isTypeSupported(final Class<?> javaType )
 	{
 		return true;
 	}
-	
+
+	@Override
+	public Migration createMigration(final Class<? extends ActiveRecord> recordType, final RecordStore store)
+	{
+		return new MemoryMigration((MemoryRecordStore) store, recordType);
+	}
 }

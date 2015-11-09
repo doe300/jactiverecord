@@ -24,7 +24,6 @@
  */
 package de.doe300.activerecord.store.impl.memory;
 
-import java.sql.Connection;
 import java.util.Arrays;
 import java.util.Map;
 
@@ -49,13 +48,12 @@ public class MemoryMigration extends AutomaticMigration
 	/**
 	 * @param memoryStore
 	 * @param recordType
-	 * @param dropColumnsOnUpdate
 	 */
-	public MemoryMigration(@Nonnull final MemoryRecordStore memoryStore, @Nonnull final Class<? extends ActiveRecord> recordType, final boolean dropColumnsOnUpdate )
+	public MemoryMigration(@Nonnull final MemoryRecordStore memoryStore,
+		@Nonnull final Class<? extends ActiveRecord> recordType)
 	{
-		super(recordType, dropColumnsOnUpdate);
+		super(recordType, null, new JDBCDriver());
 		this.memoryStore = memoryStore;
-		driver = new JDBCDriver();
 		convertColumns();
 	}
 
@@ -67,7 +65,7 @@ public class MemoryMigration extends AutomaticMigration
 	 */
 	public MemoryMigration(@Nonnull final MemoryRecordStore memoryStore, @Nonnull final String tableName, @Nonnull final MemoryColumn[] columns, @Nonnull final String primaryColumn)
 	{
-		super( null, false, new JDBCDriver() );
+		super(null, null, new JDBCDriver());
 		this.memoryStore = memoryStore;
 		this.tableName = tableName;
 		this.columns = columns;
@@ -97,7 +95,7 @@ public class MemoryMigration extends AutomaticMigration
 	}
 
 	@Override
-	public boolean apply( final Connection con )
+	public boolean apply()
 	{
 		Logging.getLogger().info( recordType != null ? recordType.getSimpleName() : tableName, "Creating memory-table...");
 		Logging.getLogger().info( recordType != null ? recordType.getSimpleName() : tableName, Arrays.toString( columns));
@@ -105,14 +103,14 @@ public class MemoryMigration extends AutomaticMigration
 	}
 
 	@Override
-	public boolean revert( final Connection con )
+	public boolean revert()
 	{
 		Logging.getLogger().info( recordType != null ? recordType.getSimpleName() : tableName, "Dropping memory-table...");
 		return memoryStore.removeTable( tableName );
 	}
 
 	@Override
-	public boolean update( final Connection con )
+	public boolean update(final boolean dropColumns)
 	{
 		throw new UnsupportedOperationException( "Updating memory-tables is not supported." );
 	}

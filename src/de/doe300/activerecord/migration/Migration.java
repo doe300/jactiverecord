@@ -27,7 +27,10 @@ package de.doe300.activerecord.migration;
 import java.sql.Connection;
 import java.sql.ResultSet;
 import java.sql.SQLException;
+
 import javax.annotation.Nonnull;
+
+import de.doe300.activerecord.store.RecordStore;
 
 /**
  *
@@ -36,34 +39,35 @@ import javax.annotation.Nonnull;
 public interface Migration
 {
 	/**
-	 * Applies this migration to the given connection
-	 * @param con
+	 * Applies this migration
+	 * 
 	 * @return whether the migration was applied
 	 * @throws Exception
 	 */
-	public boolean apply(@Nonnull final Connection con) throws Exception;
+	public boolean apply() throws Exception;
 
 	/**
 	 * Reverts the changes from this migration
-	 * @param con
 	 * @return whether the migration was reverted
 	 * @throws Exception
 	 */
-	public boolean revert(@Nonnull final Connection con) throws Exception;
+	public boolean revert() throws Exception;
 
 	/**
 	 * Update the data-structure or executes the <code>update</code>statement, depending on the type of migration
-	 * @param con
+	 * @param dropColumns whether to drop columns, which are no longer present in the record-type
 	 * @return whether the update was successful
 	 * @throws Exception
 	 */
-	public boolean update(@Nonnull final Connection con) throws Exception;
+	public boolean update(final boolean dropColumns) throws Exception;
 
 	/**
 	 * @param con
 	 * @param name
 	 * @return whether the structure already exists
+	 * @deprecated Use {@link RecordStore#exists(String)}
 	 */
+	@Deprecated
 	public default boolean structureExists(@Nonnull final Connection con, @Nonnull final String name)
 	{
 		try (ResultSet set = con.getMetaData().getTables(con.getCatalog(), con.getSchema(), null, null))

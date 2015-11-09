@@ -24,12 +24,12 @@
  */
 package de.doe300.activerecord;
 
-import de.doe300.activerecord.jdbc.driver.JDBCDriver;
 import java.lang.reflect.Proxy;
 import java.sql.Connection;
 import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collection;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -41,7 +41,6 @@ import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 
 import de.doe300.activerecord.logging.Logging;
-import de.doe300.activerecord.migration.AutomaticMigration;
 import de.doe300.activerecord.pojo.POJOBase;
 import de.doe300.activerecord.pojo.SingleInheritanceBase;
 import de.doe300.activerecord.proxy.ProxyBase;
@@ -50,16 +49,14 @@ import de.doe300.activerecord.proxy.handlers.MapHandler;
 import de.doe300.activerecord.proxy.handlers.ProxyHandler;
 import de.doe300.activerecord.record.ActiveRecord;
 import de.doe300.activerecord.record.SingleTableInheritance;
-import de.doe300.activerecord.store.RecordStore;
-import de.doe300.activerecord.store.impl.CachedJDBCRecordStore;
-import de.doe300.activerecord.store.impl.SimpleJDBCRecordStore;
-import de.doe300.activerecord.store.impl.memory.MemoryMigration;
-import de.doe300.activerecord.store.impl.memory.MemoryRecordStore;
 import de.doe300.activerecord.record.validation.Validate;
 import de.doe300.activerecord.record.validation.ValidatedRecord;
 import de.doe300.activerecord.record.validation.Validates;
 import de.doe300.activerecord.record.validation.ValidationHandler;
-import java.util.Collection;
+import de.doe300.activerecord.store.RecordStore;
+import de.doe300.activerecord.store.impl.CachedJDBCRecordStore;
+import de.doe300.activerecord.store.impl.SimpleJDBCRecordStore;
+import de.doe300.activerecord.store.impl.memory.MemoryRecordStore;
 
 /**
  * Core class for the active record API
@@ -188,15 +185,15 @@ public final class RecordCore implements AutoCloseable
 	 * @return the base for this type
 	 */
 	@Nonnull
-	public <T extends ActiveRecord> RecordBase<T> getBase(@Nonnull final Class<T> type, 
-			@Nullable final ProxyHandler... additionalHandlers)
+	public <T extends ActiveRecord> RecordBase<T> getBase(@Nonnull final Class<T> type,
+		@Nullable final ProxyHandler... additionalHandlers)
 	{
 		RecordBase<T> base = ( RecordBase<T> ) bases.get( type );
 		if(base==null)
 		{
 			if(type.isInterface())
 			{
-				base = new ProxyBase<T>(Proxy.getProxyClass( type.getClassLoader(), type).asSubclass( type ), type, mergeHandlers( type, additionalHandlers ), store, this);
+				base = new ProxyBase<T>(Proxy.getProxyClass( type.getClassLoader(), type).asSubclass( type ), type, RecordCore.mergeHandlers( type, additionalHandlers ), store, this);
 			}
 			else if(type.isAnnotationPresent( SingleTableInheritance.class))
 			{
@@ -214,34 +211,34 @@ public final class RecordCore implements AutoCloseable
 
 	private static ProxyHandler[] mergeHandlers(@Nonnull final Class<? extends ActiveRecord> type, @Nullable final ProxyHandler[] custom)
 	{
-		
+
 		final List<ProxyHandler> proxies = new ArrayList<>(custom != null ? custom.length : 5);
 		proxies.addAll( Arrays.asList( custom));
 		//add handlers by default, e.g. ValidatedHandler if recordType is ValidatedRecord and annotated with Validate
 		if(ValidatedRecord.class.isAssignableFrom( type ) && (type.isAnnotationPresent( Validate.class) || type.isAnnotationPresent( Validates.class)))
 		{
-			if(!proxies.stream().anyMatch( (ProxyHandler h) -> ValidationHandler.class.isAssignableFrom( h.getClass()) ))
+			if(!proxies.stream().anyMatch( (final ProxyHandler h) -> ValidationHandler.class.isAssignableFrom( h.getClass()) ))
 			{
 				proxies.add( new ValidationHandler());
 			}
 		}
 		if(Collection.class.isAssignableFrom( type ))
 		{
-			if(!proxies.stream().anyMatch( (ProxyHandler h) -> CollectionHandler.class.isAssignableFrom( h.getClass()) ))
+			if(!proxies.stream().anyMatch( (final ProxyHandler h) -> CollectionHandler.class.isAssignableFrom( h.getClass()) ))
 			{
 				proxies.add( new CollectionHandler());
 			}
 		}
 		if(Map.class.isAssignableFrom( type ))
 		{
-			if(!proxies.stream().anyMatch( (ProxyHandler h) -> MapHandler.class.isAssignableFrom( h.getClass()) ))
+			if(!proxies.stream().anyMatch( (final ProxyHandler h) -> MapHandler.class.isAssignableFrom( h.getClass()) ))
 			{
 				proxies.add( new MapHandler());
 			}
 		}
 		return proxies.toArray( new ProxyHandler[proxies.size()]);
 	}
-	
+
 	/**
 	 * Adds a new RecordListener for this record-type
 	 * @param recordType
@@ -300,44 +297,43 @@ public final class RecordCore implements AutoCloseable
 			}
 		}
 	}
-	
+
 	/**
 	 * Creates the data-store for the given record-type
+	 *
 	 * @param recordType
 	 * @return whether the data-store was created
-	 * @throws java.sql.SQLException
-	 * @sicne 0.4
-	 */
-	public boolean createTable(@Nonnull final Class<? extends ActiveRecord> recordType) throws SQLException
-	{
-		if(MemoryRecordStore.class.isInstance( store))
-		{
-			return new MemoryMigration((MemoryRecordStore)store, recordType, false).apply( null );
-		}
-		else if (SimpleJDBCRecordStore.class.isInstance( store) || store.getConnection() != null)
-		{
-			return new AutomaticMigration(recordType, false, JDBCDriver.guessDriver( store.getConnection() )).apply( store.getConnection());
-		}
-		throw new IllegalArgumentException("No automatic migration supported for this record-store: " + store.getClass());
-	}
-	
-	/**
-	 * Deletes the data-store for the given record-type
-	 * @param recordType
-	 * @return whether the data-store was deleted
-	 * @throws java.sql.SQLException
+	 * @throws Exception
 	 * @since 0.4
 	 */
-	public boolean dropTable(@Nonnull final Class<? extends ActiveRecord> recordType) throws SQLException
+	public boolean createTable(@Nonnull final Class<? extends ActiveRecord> recordType) throws Exception
 	{
-		if(MemoryRecordStore.class.isInstance( store))
-		{
-			return new MemoryMigration((MemoryRecordStore)store, recordType, false).revert(null );
-		}
-		else if (SimpleJDBCRecordStore.class.isInstance( store) || store.getConnection() != null)
-		{
-			return new AutomaticMigration(recordType, false, JDBCDriver.guessDriver( store.getConnection() )).revert(store.getConnection());
-		}
-		throw new IllegalArgumentException("No automatic migration supported for this record-store: " + store.getClass());
+		return getStore().getDriver().createMigration(recordType, getStore()).apply();
+	}
+
+	/**
+	 * Deletes the data-store for the given record-type
+	 * 
+	 * @param recordType
+	 * @return whether the data-store was deleted
+	 * @throws Exception
+	 * @since 0.4
+	 */
+	public boolean dropTable(@Nonnull final Class<? extends ActiveRecord> recordType) throws Exception
+	{
+		return getStore().getDriver().createMigration(recordType, getStore()).revert();
+	}
+
+	/**
+	 * Updates the data-store for the given record-type
+	 * @param recordType
+	 * @param dropColumns whether to drop columns, which are no longer represented in the record-type
+	 * @return whether the data-store was updated
+	 * @throws Exception
+	 * @since 0.6
+	 */
+	public boolean updateTable(@Nonnull final Class<? extends ActiveRecord> recordType, final boolean dropColumns) throws Exception
+	{
+		return getStore().getDriver().createMigration(recordType, getStore()).update(dropColumns);
 	}
 }

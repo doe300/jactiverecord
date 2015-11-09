@@ -98,7 +98,7 @@ public class MemoryRecordStore implements RecordStore
 		{
 			if(recordBase.isAutoCreate())
 			{
-				if(new MemoryMigration(this, recordBase.getRecordType(), false).apply( null ))
+				if(new MemoryMigration(this, recordBase.getRecordType()).apply())
 				{
 					return assertTableExists( recordBase.getTableName());
 				}

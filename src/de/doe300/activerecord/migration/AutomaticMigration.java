@@ -24,19 +24,22 @@
  */
 package de.doe300.activerecord.migration;
 
-import de.doe300.activerecord.RecordBase;
-import de.doe300.activerecord.jdbc.driver.JDBCDriver;
 import java.lang.reflect.Method;
 import java.lang.reflect.Modifier;
 import java.sql.Connection;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
+import java.sql.Timestamp;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.stream.Collectors;
 
+import javax.annotation.Nullable;
+
+import de.doe300.activerecord.RecordBase;
+import de.doe300.activerecord.jdbc.driver.JDBCDriver;
 import de.doe300.activerecord.logging.Logging;
 import de.doe300.activerecord.migration.constraints.Index;
 import de.doe300.activerecord.migration.constraints.ReferenceRule;
@@ -47,7 +50,6 @@ import de.doe300.activerecord.record.association.RecordSet;
 import de.doe300.activerecord.record.attributes.AttributeGetter;
 import de.doe300.activerecord.record.attributes.AttributeSetter;
 import de.doe300.activerecord.record.attributes.Attributes;
-import java.sql.Timestamp;
 
 /**
  * This migration is used to automatically create a table from a given record-type.
@@ -81,33 +83,34 @@ import java.sql.Timestamp;
 public class AutomaticMigration implements Migration
 {
 	protected final Class<? extends ActiveRecord> recordType;
-	protected final boolean dropColumnsOnUpdate;
-	protected JDBCDriver driver;
+	protected final Connection con;
+	protected final JDBCDriver driver;
 
 	/**
 	 * @param recordType the type to create and drop the table for
-	 * @param dropColumnsOnUpdate  whether to drop obsolete columns on update
+	 * @param con the Connection
 	 */
-	public AutomaticMigration(final Class<? extends ActiveRecord> recordType, final boolean dropColumnsOnUpdate )
+	public AutomaticMigration(final Class<? extends ActiveRecord> recordType, @Nullable final Connection con )
 	{
 		this.recordType = recordType;
-		this.dropColumnsOnUpdate = dropColumnsOnUpdate;
+		this.con = con;
+		this.driver = JDBCDriver.guessDriver(con);
 	}
 
 	/**
 	 * @param recordType the type to create and drop the table for
-	 * @param dropColumnsOnUpdate whether to drop obsolete columns on update
+	 * @param con the SQL-Connection
 	 * @param driver the vendor-specific driver for the vendor used (if known)
 	 */
-	public AutomaticMigration(Class<? extends ActiveRecord> recordType, boolean dropColumnsOnUpdate, JDBCDriver driver )
+	public AutomaticMigration(final Class<? extends ActiveRecord> recordType, @Nullable final Connection con, final JDBCDriver driver )
 	{
 		this.recordType = recordType;
-		this.dropColumnsOnUpdate = dropColumnsOnUpdate;
+		this.con = con;
 		this.driver = driver;
 	}
 
 	@Override
-	public boolean apply( final Connection con ) throws SQLException
+	public boolean apply() throws SQLException
 	{
 		final String tableName = getTableName( recordType );
 		//1. check if table exists
@@ -115,17 +118,13 @@ public class AutomaticMigration implements Migration
 		{
 			return false;
 		}
-		if(driver == null)
-		{
-			driver = JDBCDriver.guessDriver( con );
-		}
 		//2. get desired columns and types
 		final Map<String,String> columns = getColumnsFromModel( recordType );
 		//3. execute statement
 		final String sql = "CREATE TABLE "+tableName+" ("
-				+columns.entrySet().stream().map( (final Map.Entry<String,String> e) -> JDBCDriver.convertIdentifier( e.getKey(), con)+" "+e.getValue())
-						.collect( Collectors.joining(", "))
-				+" )";
+			+columns.entrySet().stream().map( (final Map.Entry<String,String> e) -> JDBCDriver.convertIdentifier( e.getKey(), con)+" "+e.getValue())
+			.collect( Collectors.joining(", "))
+			+" )";
 		Logging.getLogger().info( recordType.getSimpleName(), "Executing automatic table-creation...");
 		Logging.getLogger().info( recordType.getSimpleName(), sql);
 		try(Statement stm = con.createStatement())
@@ -162,23 +161,19 @@ public class AutomaticMigration implements Migration
 	 * More precisely, adds and removes columns to fit the current methods of the record-type.
 	 * For more information on how columns are generated from the type's methods, see the documentation of this class.
 	 *
-	 * NOTE: If <code>dropColumnsOnUpdate</code> is set to <code>true</code>, this method will drop all columns it deems not used anymore!
-	 * @param con
+	 * NOTE: If <code>dropColumns</code> is set to <code>true</code>, this method will drop all columns it deems not used anymore!
+	 * @param dropColumns whether to drop unused columns
 	 * @return whether the table was updated
 	 * @throws java.sql.SQLException
 	 */
 	@Override
-	public boolean update( final Connection con) throws SQLException
+	public boolean update(final boolean dropColumns) throws SQLException
 	{
 		final String tableName = getTableName( recordType );
 		//1. check if table exists
 		if(structureExists( con, tableName))
 		{
 			return false;
-		}
-		if(driver == null)
-		{
-			driver = JDBCDriver.guessDriver( con );
 		}
 		//2. get existing columns
 		final Map<String,String> hasColumns = new HashMap<>(10);
@@ -193,18 +188,18 @@ public class AutomaticMigration implements Migration
 		final Map<String,String> desiredColumns = getColumnsFromModel( recordType );
 		//4. calculate difference
 		final Map<String,String> removeColumns = hasColumns.entrySet().stream().
-				filter( (final Map.Entry<String,String> e) -> desiredColumns.containsKey( e.getKey())).collect( Collectors.toMap( Map.Entry::getKey, Map.Entry::getValue));
+			filter( (final Map.Entry<String,String> e) -> desiredColumns.containsKey( e.getKey())).collect( Collectors.toMap( Map.Entry::getKey, Map.Entry::getValue));
 		final Map<String,String> addColumns = desiredColumns.entrySet().stream().
-				filter( (final Map.Entry<String,String> e) -> hasColumns.containsKey( e.getKey())).collect( Collectors.toMap( Map.Entry::getKey, Map.Entry::getValue));
+			filter( (final Map.Entry<String,String> e) -> hasColumns.containsKey( e.getKey())).collect( Collectors.toMap( Map.Entry::getKey, Map.Entry::getValue));
 		//5. execute updates
 		boolean changed = false;
 		//SQL needs extra statements for add and drop columns
-		if(dropColumnsOnUpdate && !removeColumns.isEmpty())
+		if (dropColumns && !removeColumns.isEmpty())
 		{
 			final String sql = "ALTER TABLE "+tableName+" ("+
-					"DROP COLUMN "+
-					removeColumns.entrySet().stream().map( (final Map.Entry<String,String> e) -> JDBCDriver.convertIdentifier( e.getKey(), con)).collect( Collectors.joining( ", "))+
-					")";
+				"DROP COLUMN "+
+				removeColumns.entrySet().stream().map( (final Map.Entry<String,String> e) -> JDBCDriver.convertIdentifier( e.getKey(), con)).collect( Collectors.joining( ", "))+
+				")";
 			Logging.getLogger().info(recordType.getSimpleName(), "Executing automatic table-update...");
 			Logging.getLogger().info(recordType.getSimpleName(), sql);
 			try(Statement stm = con.createStatement())
@@ -215,9 +210,9 @@ public class AutomaticMigration implements Migration
 		if(!addColumns.isEmpty())
 		{
 			final String sql = "ALTER TABLE "+tableName+" ("+
-					"ADD "+
-					addColumns.entrySet().stream().map( (final Map.Entry<String,String> e) -> JDBCDriver.convertIdentifier( e.getKey(), con)+" "+e.getValue()).collect( Collectors.joining( ", "))+
-					")";
+				"ADD "+
+				addColumns.entrySet().stream().map( (final Map.Entry<String,String> e) -> JDBCDriver.convertIdentifier( e.getKey(), con)+" "+e.getValue()).collect( Collectors.joining( ", "))+
+				")";
 			Logging.getLogger().info(recordType.getSimpleName(), "Executing automatic table-update...");
 			Logging.getLogger().info(recordType.getSimpleName(), sql);
 			try(Statement stm = con.createStatement())
@@ -234,22 +229,17 @@ public class AutomaticMigration implements Migration
 
 	/**
 	 * This method drops the created table, if it exists
-	 * @param con
 	 * @return whether the table existed and was dropped
 	 * @throws SQLException
 	 */
 	@Override
-	public boolean revert( final Connection con ) throws SQLException
+	public boolean revert() throws SQLException
 	{
 		final String tableName = getTableName( recordType );
 		//1. check if table exists
 		if(!structureExists( con, tableName))
 		{
 			return false;
-		}
-		if(driver == null)
-		{
-			driver = JDBCDriver.guessDriver( con );
 		}
 		//2. drop table
 		final String sql = "DROP TABLE "+tableName;
@@ -312,9 +302,9 @@ public class AutomaticMigration implements Migration
 				if(!"".equals( att.typeName() ))
 				{
 					attributeType = !Void.class.equals( att.type()) ? att.type() :
-							Attributes.isGetter( method, false) ? method.getReturnType() : Attributes.isSetter( 
-											method, null, false) ? method.getParameterTypes()[0] : null;
-					columns.put(name, att.typeName());
+						Attributes.isGetter( method, false) ? method.getReturnType() : Attributes.isSetter(
+							method, null, false) ? method.getParameterTypes()[0] : null;
+							columns.put(name, att.typeName());
 				}
 				//Attribute#type is optional
 				else if(!Void.class.equals( att.type() ))
@@ -357,15 +347,15 @@ public class AutomaticMigration implements Migration
 					foreignKeyColumn = null;
 				}
 				columns.put( name, columns.get( name)
-						+(!"".equals( att.defaultValue() )?" DEFAULT "+att.defaultValue(): "")
-						+(att.mayBeNull()?" NULL": " NOT NULL")
-						+(att.isUnique()?" UNIQUE": "")
-						+(foreignKeyTable == null ? "" : " REFERENCES "+foreignKeyTable
-							+(foreignKeyColumn == null || foreignKeyColumn.isEmpty() ? "" : " ("+foreignKeyColumn+")")
-							+att.onUpdate().toSQL( ReferenceRule.ACTION_UPDATE)
-							+att.onDelete().toSQL( ReferenceRule.ACTION_DELETE)
+					+(!"".equals( att.defaultValue() )?" DEFAULT "+att.defaultValue(): "")
+					+(att.mayBeNull()?" NULL": " NOT NULL")
+					+(att.isUnique()?" UNIQUE": "")
+					+(foreignKeyTable == null ? "" : " REFERENCES "+foreignKeyTable
+						+(foreignKeyColumn == null || foreignKeyColumn.isEmpty() ? "" : " ("+foreignKeyColumn+")")
+						+att.onUpdate().toSQL( ReferenceRule.ACTION_UPDATE)
+						+att.onDelete().toSQL( ReferenceRule.ACTION_DELETE)
 						)
-						+(att.checkConstraint().isEmpty() ? "" : " CHECK("+att.checkConstraint()+")"));
+					+(att.checkConstraint().isEmpty() ? "" : " CHECK("+att.checkConstraint()+")"));
 				continue;
 			}
 			//skip getClass() - for POJO records
