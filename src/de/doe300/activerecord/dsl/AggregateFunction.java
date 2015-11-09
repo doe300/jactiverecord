@@ -24,24 +24,23 @@
  */
 package de.doe300.activerecord.dsl;
 
-import de.doe300.activerecord.jdbc.driver.JDBCDriver;
 import java.util.Arrays;
+import java.util.Comparator;
 import java.util.HashSet;
+import java.util.Map;
 import java.util.Set;
 import java.util.function.BiConsumer;
 import java.util.function.BinaryOperator;
 import java.util.function.Function;
 import java.util.function.Supplier;
 import java.util.stream.Collector;
+import java.util.stream.Stream;
 
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
-import javax.annotation.Syntax;
 
+import de.doe300.activerecord.jdbc.driver.JDBCDriver;
 import de.doe300.activerecord.record.ActiveRecord;
-import java.util.Comparator;
-import java.util.Map;
-import java.util.stream.Stream;
 
 /**
  * An aggregate-function to be applied to a list of record
@@ -51,10 +50,10 @@ import java.util.stream.Stream;
  * @param <R>
  * @since 0.4
  */
-public abstract class AggregateFunction<T extends ActiveRecord, C, R> implements Collector<T, AggregateFunction.ValueHolder<R>, R>
+public abstract class AggregateFunction<T extends ActiveRecord, C, R> implements Collector<T, AggregateFunction.ValueHolder<R>, R>, SQLFunction<T, R>
 {
-	protected final String command;
-	protected final Function<T, C> columnFunction;
+	private final String command;
+	private final Function<T, C> columnFunction;
 	private final String columnName;
 
 	protected AggregateFunction(@Nonnull final String command, @Nonnull final String columnName,
@@ -65,23 +64,23 @@ public abstract class AggregateFunction<T extends ActiveRecord, C, R> implements
 		this.columnFunction = columnFunction;
 	}
 
-	/**
-	 * @param driver the driver to be used for vendor-specific commands
-	 * @return the SQL representation of this statement
-	 */
 	@Nonnull
-	@Syntax(value = "SQL")
+	@Override
 	public String toSQL(@Nonnull final JDBCDriver driver)
 	{
-		return driver.getAggregateFunction(command, columnName);
+		return driver.getSQLFunction(command, columnName);
 	}
-	
+
+	/**
+	 * @param dataMaps
+	 * @return the aggregated result
+	 */
 	@Nullable
-	public R aggregate(Stream<Map<String, Object>> dataMaps)
+	public R aggregate(final Stream<Map<String, Object>> dataMaps)
 	{
-		return aggregateValues( dataMaps.map( (Map<String, Object> map) -> (C)map.get( columnName)));
+		return aggregateValues( dataMaps.map( (final Map<String, Object> map) -> (C)map.get( columnName)));
 	}
-	
+
 	@Nullable
 	protected abstract R aggregateValues(Stream<C> valueStream);
 
@@ -101,6 +100,18 @@ public abstract class AggregateFunction<T extends ActiveRecord, C, R> implements
 	public Set<Characteristics> characteristics()
 	{
 		return new HashSet<>(Arrays.asList( Characteristics.CONCURRENT, Characteristics.UNORDERED));
+	}
+
+	@Override
+	public R apply( final Map<String, Object> map )
+	{
+		return aggregate( Stream.of( map));
+	}
+
+	@Override
+	public R apply( final T t )
+	{
+		return aggregateValues( Stream.of( columnFunction.apply( t)));
 	}
 
 	/**
@@ -155,7 +166,7 @@ public abstract class AggregateFunction<T extends ActiveRecord, C, R> implements
 			}
 
 			@Override
-			protected C aggregateValues( Stream<C> valueStream )
+			protected C aggregateValues( final Stream<C> valueStream )
 			{
 				return valueStream.min( new NullSkippingComparator<C>(true ) ).orElse( null);
 			}
@@ -212,7 +223,7 @@ public abstract class AggregateFunction<T extends ActiveRecord, C, R> implements
 			}
 
 			@Override
-			protected C aggregateValues( Stream<C> valueStream )
+			protected C aggregateValues( final Stream<C> valueStream )
 			{
 				return valueStream.max( new NullSkippingComparator<C>(false)).orElse( null);
 			}
@@ -269,7 +280,7 @@ public abstract class AggregateFunction<T extends ActiveRecord, C, R> implements
 			}
 
 			@Override
-			protected Long aggregateValues( Stream<C> valueStream )
+			protected Long aggregateValues( final Stream<C> valueStream )
 			{
 				return valueStream.count();
 			}
@@ -295,13 +306,13 @@ public abstract class AggregateFunction<T extends ActiveRecord, C, R> implements
 			{
 				return () -> new BiValueHolder<Number, Set<C>>(null, null);
 			}
-			
+
 			@Override
 			public BiConsumer<ValueHolder<Number>, T> accumulator()
 			{
-				return (ValueHolder<Number> holder, T record) -> 
+				return (final ValueHolder<Number> holder, final T record) ->
 				{
-					C colVal = columnFunc.apply( record );
+					final C colVal = columnFunc.apply( record );
 					if(colVal != null)
 					{
 						if(holder.value == null)
@@ -319,11 +330,11 @@ public abstract class AggregateFunction<T extends ActiveRecord, C, R> implements
 					}
 				};
 			}
-			
+
 			@Override
 			public BinaryOperator<ValueHolder<Number>> combiner()
 			{
-				return (ValueHolder<Number> h1, ValueHolder<Number> h2) -> 
+				return (final ValueHolder<Number> h1, final ValueHolder<Number> h2) ->
 				{
 					if(h1.value == null)
 					{
@@ -340,13 +351,13 @@ public abstract class AggregateFunction<T extends ActiveRecord, C, R> implements
 			}
 
 			@Override
-			protected Long aggregateValues( Stream<C> valueStream )
+			protected Long aggregateValues( final Stream<C> valueStream )
 			{
 				return valueStream.distinct().count();
 			}
 		};
 	}
-	
+
 
 	/**
 	 * @param <T> the record-type
@@ -399,9 +410,9 @@ public abstract class AggregateFunction<T extends ActiveRecord, C, R> implements
 			}
 
 			@Override
-			protected Long aggregateValues( Stream<C> valueStream )
+			protected Long aggregateValues( final Stream<C> valueStream )
 			{
-				return valueStream.reduce( 0L, (Long c1, C c2) -> c1.longValue() + c2.longValue(), (Long l1, Long l2) -> l1 + l2);
+				return valueStream.reduce( 0L, (final Long c1, final C c2) -> c1.longValue() + c2.longValue(), (final Long l1, final Long l2) -> l1 + l2);
 			}
 		};
 	}
@@ -415,7 +426,7 @@ public abstract class AggregateFunction<T extends ActiveRecord, C, R> implements
 	 *            the function returning the column-value to aggregate
 	 * @return the sum of all the <code>non-null</code> values
 	 */
-	//XXX combine sums? need to compute result in some all-matching data-type (BigDecimal?)
+	//XXX combine sums? need to compute result in some all-matching data-type (BigDecimal, Double?)
 	public static final <T extends ActiveRecord, C extends Number> AggregateFunction<T, C, Number> SUM_FLOATING(@Nonnull final String columnName, @Nonnull final Function<T, C> columnFunc)
 	{
 		return new AggregateFunction<T, C, Number>(JDBCDriver.AGGREGATE_SUM_DOUBLE, columnName, columnFunc)
@@ -457,9 +468,9 @@ public abstract class AggregateFunction<T extends ActiveRecord, C, R> implements
 			}
 
 			@Override
-			protected Double aggregateValues( Stream<C> valueStream )
+			protected Double aggregateValues( final Stream<C> valueStream )
 			{
-				return valueStream.reduce( 0d, (Double d, C c) -> d + c.doubleValue(), (Double d1, Double d2) -> d1 + d2);
+				return valueStream.reduce( 0d, (final Double d, final C c) -> d + c.doubleValue(), (final Double d1, final Double d2) -> d1 + d2);
 			}
 		};
 	}
@@ -529,13 +540,13 @@ public abstract class AggregateFunction<T extends ActiveRecord, C, R> implements
 			}
 
 			@Override
-			protected Double aggregateValues( Stream<C> valueStream )
+			protected Double aggregateValues( final Stream<C> valueStream )
 			{
-				return valueStream.map( (C c) -> new BiValueHolder<Double, Long>(c.doubleValue(), 1L)).
-						reduce( (BiValueHolder<Double, Long> b1, BiValueHolder<Double, Long> b2) -> 
-						{
-							return new BiValueHolder<>(b1.value+b2.value, b1.secondValue + b2.secondValue);
-						}).map( (BiValueHolder<Double, Long> b) -> b.value / b.secondValue).orElse( null);
+				return valueStream.map( (final C c) -> new BiValueHolder<Double, Long>(c.doubleValue(), 1L)).
+					reduce( (final BiValueHolder<Double, Long> b1, final BiValueHolder<Double, Long> b2) ->
+					{
+						return new BiValueHolder<>(b1.value+b2.value, b1.secondValue + b2.secondValue);
+					}).map( (final BiValueHolder<Double, Long> b) -> b.value / b.secondValue).orElse( null);
 			}
 		};
 
@@ -563,18 +574,18 @@ public abstract class AggregateFunction<T extends ActiveRecord, C, R> implements
 			this.secondValue = secondValue;
 		}
 	}
-	
+
 	static class NullSkippingComparator<T extends Comparable<? super T>> implements Comparator<T>
 	{
 		private final boolean isNullHigher;
 
-		NullSkippingComparator( boolean isNullHigher )
+		NullSkippingComparator( final boolean isNullHigher )
 		{
 			this.isNullHigher = isNullHigher;
 		}
-		
+
 		@Override
-		public int compare( T o1, T o2 )
+		public int compare( final T o1, final T o2 )
 		{
 			if(o1 == null)
 			{
@@ -584,8 +595,8 @@ public abstract class AggregateFunction<T extends ActiveRecord, C, R> implements
 			{
 				return isNullHigher ? -1 : 1;
 			}
-			return  ((Comparable<T>)o1).compareTo( o2 );
+			return Comparable.class.cast(o1).compareTo(o2);
 		}
-		
+
 	}
 }

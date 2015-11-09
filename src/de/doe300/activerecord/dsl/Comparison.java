@@ -113,7 +113,7 @@ public enum Comparison implements BiPredicate<Object, Object>
 		@Override
 		public boolean test( final Object value, final Object compareValue )
 		{
-			return ((Comparable)value).compareTo( compareValue) > 0;
+			return Comparable.class.cast(value).compareTo(compareValue) > 0;
 		}
 	},
 	/**
@@ -125,7 +125,7 @@ public enum Comparison implements BiPredicate<Object, Object>
 		@Override
 		public boolean test( final Object value, final Object compareValue )
 		{
-			return ((Comparable)value).compareTo( compareValue) >= 0;
+			return Comparable.class.cast(value).compareTo(compareValue) >= 0;
 		}
 	},
 	/**
@@ -137,7 +137,7 @@ public enum Comparison implements BiPredicate<Object, Object>
 		@Override
 		public boolean test( final Object value, final Object compareValue )
 		{
-			return ((Comparable)value).compareTo( compareValue) < 0;
+			return Comparable.class.cast(value).compareTo(compareValue) < 0;
 		}
 	},
 	/**
@@ -149,7 +149,7 @@ public enum Comparison implements BiPredicate<Object, Object>
 		@Override
 		public boolean test( final Object value, final Object compareValue )
 		{
-			return ((Comparable)value).compareTo( compareValue) <= 0;
+			return Comparable.class.cast(value).compareTo(compareValue) <= 0;
 		}
 	},
 	/**
@@ -180,7 +180,7 @@ public enum Comparison implements BiPredicate<Object, Object>
 			{
 				return false;
 			}
-			Collection col;
+			Collection<?> col;
 			if(compareValue instanceof Collection)
 			{
 				col = Collection.class.cast(compareValue);

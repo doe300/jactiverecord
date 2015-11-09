@@ -64,7 +64,7 @@ public class MySQLDriver extends JDBCDriver
 	}
 
 	@Override
-	public String getAggregateFunction( String aggregateFunction, String column )
+	public String getSQLFunction( String aggregateFunction, String column )
 	{
 		switch(aggregateFunction)
 		{
@@ -73,7 +73,7 @@ public class MySQLDriver extends JDBCDriver
 			case AGGREGATE_SUM_DOUBLE:
 				return "SUM(" + column + ") + 0.0";
 		}
-		return super.getAggregateFunction( aggregateFunction, column );
+		return super.getSQLFunction( aggregateFunction, column );
 	}
 	
 	@Override

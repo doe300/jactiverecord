@@ -60,7 +60,7 @@ public interface AggregateMethods<T extends ActiveRecord> extends FinderMethods<
 	 * @param columnName the name of the column to aggregate
 	 * @param columnFunc the function mapping the record to its column-value
 	 * @return the minimum value
-	 * @see #aggregate(de.doe300.activerecord.dsl.AggregateFunction) 
+	 * @see #aggregate(AggregateFunction, Condition)
 	 */
 	@Nullable
 	public default <C extends Comparable<? super C>> C minimum(@Nonnull final String columnName, @Nonnull final Function<T, C> columnFunc)

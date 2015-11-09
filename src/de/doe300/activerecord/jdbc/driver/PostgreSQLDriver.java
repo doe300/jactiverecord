@@ -55,13 +55,13 @@ public class PostgreSQLDriver extends JDBCDriver
 	}
 
 	@Override
-	public String getAggregateFunction( String aggregateFunction, String column )
+	public String getSQLFunction( String aggregateFunction, String column )
 	{
 		if(AGGREGATE_SUM_DOUBLE.equals( aggregateFunction))
 		{
 			return "CAST(SUM(" + column + ") AS DOUBLE PRECISION)";
 		}
-		return super.getAggregateFunction( aggregateFunction, column );
+		return super.getSQLFunction( aggregateFunction, column );
 	}
 
 	@Override

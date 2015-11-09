@@ -30,10 +30,10 @@ import java.util.Map;
 
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
+import javax.annotation.Syntax;
 import javax.annotation.concurrent.Immutable;
 
 import de.doe300.activerecord.record.ActiveRecord;
-import javax.annotation.Syntax;
 
 /**
  * An object representing the SQL ORDER BY-Clause
@@ -131,7 +131,7 @@ public class Order implements Comparator<Map<String,Object>>
 			val1 = o1.get( columns[index]);
 			if(val1 instanceof Comparable)
 			{
-				compare = ((Comparable)val1).compareTo( o2.get( columns[index]));
+				compare = Comparable.class.cast(val1).compareTo(o2.get(columns[index]));
 				if(types[index] == OrderType.DESCENDING)
 				{
 					compare = -compare;
@@ -205,6 +205,9 @@ public class Order implements Comparator<Map<String,Object>>
 			}
 		};
 
+		/**
+		 * @return the SQL-representation of this order
+		 */
 		@Syntax(value = "SQL")
 		public abstract String toSQL();
 	}
