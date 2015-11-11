@@ -118,5 +118,14 @@ public class SQLiteDriver extends JDBCDriver
 	{
 		return (limit > 0 ? "LIMIT " + limit : "") + (offset > 0 ? " OFFSET " + offset : "");
 	}
-	
+
+	@Override
+	public String getSQLFunction( String sqlFunction, String column )
+	{
+		if(SCALAR_SQRT.equals( sqlFunction))
+		{
+			throw new IllegalArgumentException("SQRT not supported by SQLite");
+		}
+		return super.getSQLFunction( sqlFunction, column );
+	}
 }

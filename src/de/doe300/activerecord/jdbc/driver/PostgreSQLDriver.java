@@ -61,6 +61,10 @@ public class PostgreSQLDriver extends JDBCDriver
 		{
 			return "CAST(SUM(" + column + ") AS DOUBLE PRECISION)";
 		}
+		if(SCALAR_ABS_DOUBLE.equals( aggregateFunction))
+		{
+			return "CAST(ABS(" + column + ") AS DOUBLE PRECISION)";
+		}
 		return super.getSQLFunction( aggregateFunction, column );
 	}
 

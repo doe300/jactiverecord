@@ -170,7 +170,7 @@ public class HasManyAssociationSet<T extends ActiveRecord> extends AbstractSet<T
 	}
 
 	@Override
-	public <C, R> R aggregate( AggregateFunction<T, C, R> aggregateFunction, Condition condition )
+	public <C, R> R aggregate( AggregateFunction<T, C, ?, R> aggregateFunction, Condition condition )
 	{
 		return ((RecordBase<T>)destBase).aggregate( aggregateFunction, AndCondition.andConditions( associationCond, condition) );
 	}

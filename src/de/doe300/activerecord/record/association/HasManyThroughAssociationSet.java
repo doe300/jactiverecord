@@ -192,7 +192,7 @@ public class HasManyThroughAssociationSet<T extends ActiveRecord> extends Abstra
 	}
 
 	@Override
-	public <C, R> R aggregate( AggregateFunction<T, C, R> aggregateFunction, @Nullable final Condition condition )
+	public <C, R> R aggregate( AggregateFunction<T, C, ?, R> aggregateFunction, @Nullable final Condition condition )
 	{
 		return stream().filter((T record) -> condition == null || condition.test( record )).collect( aggregateFunction );
 	}
@@ -301,7 +301,7 @@ public class HasManyThroughAssociationSet<T extends ActiveRecord> extends Abstra
 		}
 
 		@Override
-		public <C, R> R aggregate( AggregateFunction<T, C, R> aggregateFunction, @Nullable final Condition condition )
+		public <C, R> R aggregate( AggregateFunction<T, C, ?, R> aggregateFunction, @Nullable final Condition condition )
 		{
 			return stream().filter((T record) -> condition == null || condition.test( record )).collect( aggregateFunction );
 		}

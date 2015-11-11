@@ -197,7 +197,7 @@ public class ConditionSet<T extends ActiveRecord> extends AbstractSet<T> impleme
 	}
 
 	@Override
-	public <C, R> R aggregate( AggregateFunction<T, C, R> aggregateFunction, @Nullable final Condition condition )
+	public <C, R> R aggregate( AggregateFunction<T, C, ?, R> aggregateFunction, @Nullable final Condition condition )
 	{
 		return ((RecordBase<T>) base).aggregate( aggregateFunction, AndCondition.andConditions( this.condition, condition));
 	}

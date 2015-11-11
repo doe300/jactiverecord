@@ -122,7 +122,7 @@ public interface QueryMethods<T extends ActiveRecord> extends FinderMethods<T>, 
 	}
 
 	@Override
-	public default <C, R> R aggregate( AggregateFunction<T, C, R> aggregateFunction, Condition condition )
+	public default <C, R> R aggregate( AggregateFunction<T, C, ?, R> aggregateFunction, Condition condition )
 	{
 		return stream().filter( (T record) -> condition == null || condition.test( record)).collect( aggregateFunction );
 	}

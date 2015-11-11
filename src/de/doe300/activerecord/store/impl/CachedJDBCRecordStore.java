@@ -352,7 +352,7 @@ public class CachedJDBCRecordStore extends SimpleJDBCRecordStore
 	}
 
 	@Override
-	public <R> R aggregate(RecordBase<?> base, AggregateFunction<?, ?, R> aggregateFunction, Condition condition )
+	public <R> R aggregate(RecordBase<?> base, AggregateFunction<?, ?, ?, R> aggregateFunction, Condition condition )
 	{
 		//see #streamAllWithData for why there need to be a save
 		saveAll( base );

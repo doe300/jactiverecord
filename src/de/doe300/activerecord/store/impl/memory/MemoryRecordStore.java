@@ -276,7 +276,7 @@ public class MemoryRecordStore implements RecordStore
 	}
 
 	@Override
-	public <R> R aggregate(RecordBase<?> base, AggregateFunction<?, ?, R> aggregateFunction, Condition condition )
+	public <R> R aggregate(RecordBase<?> base, AggregateFunction<?, ?, ?, R> aggregateFunction, Condition condition )
 	{
 		final MemoryTable table = assertTableExists( base.getTableName() );
 		return aggregateFunction.aggregate( table.findAllRows( new Scope(condition, null, Scope.NO_LIMIT)).

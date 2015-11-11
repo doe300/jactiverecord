@@ -349,5 +349,5 @@ public interface RecordStore extends AutoCloseable
 	 * @return the aggregated value
 	 */
 	@Nullable
-	public <R> R aggregate(@Nonnull final RecordBase<?> base, @Nonnull final AggregateFunction<?, ?, R> aggregateFunction, @Nullable final Condition condition);
+	public <R> R aggregate(@Nonnull final RecordBase<?> base, @Nonnull final AggregateFunction<?, ?, ?, R> aggregateFunction, @Nullable final Condition condition);
 }

@@ -197,7 +197,7 @@ public class CachedRecordSet<T extends ActiveRecord> extends AbstractSet<T> impl
 	}
 
 	@Override
-	public <C, R> R aggregate( AggregateFunction<T, C, R> aggregateFunction, @Nullable final Condition condition )
+	public <C, R> R aggregate( AggregateFunction<T, C, ?, R> aggregateFunction, @Nullable final Condition condition )
 	{
 		return stream().filter( (T record) -> condition == null || condition.test( record)).collect( aggregateFunction );
 	}

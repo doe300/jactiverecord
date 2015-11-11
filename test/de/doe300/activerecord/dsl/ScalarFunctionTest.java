@@ -165,6 +165,7 @@ public class ScalarFunctionTest extends Assert
 		ScalarFunction<TestInterface, Integer, Double> sqrt = ScalarFunction.SQUARE_ROOT("age", TestInterface::getAge);
 		//test direct #apply
 		assertEquals( Math.sqrt( t2.getAge()), sqrt.apply( t2), 0.00001);
+		//XXX fix test with SQRT of negative number
 		Condition cond = new SimpleCondition(sqrt, -1, Comparison.IS_NOT);
 		assertTrue(cond.test( t1 ));
 		assertEquals(4, base.count( cond));

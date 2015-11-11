@@ -46,21 +46,29 @@ public abstract class ScalarFunction<T extends ActiveRecord, C, R> implements SQ
 {
 	private final String command;
 	private final Function<T, C> columnFunction;
-	private final String columnName;
+	private final Object column;
 
 	protected ScalarFunction(@Nonnull final String command, @Nonnull final String columnName,
 		@Nonnull final Function<T, C> columnFunction)
 	{
 		this.command = command;
-		this.columnName = columnName;
+		this.column = columnName;
 		this.columnFunction = columnFunction;
+	}
+	
+	protected ScalarFunction(@Nonnull final String command, @Nonnull final SQLFunction<T, C> sqlFunction)
+	{
+		this.command = command;
+		this.column = sqlFunction;
+		this.columnFunction = sqlFunction;
 	}
 
 
 	@Override
 	public String toSQL(final JDBCDriver driver, @Nullable final String tableName)
 	{
-		return driver.getSQLFunction(command, tableName != null ? tableName + "." + columnName : columnName);
+		final String arg = column instanceof SQLFunction? ((SQLFunction)column).toSQL(driver, tableName) : (String)column;
+		return driver.getSQLFunction(command, tableName != null ? tableName + "." + column : arg);
 	}
 
 	@Override
@@ -72,7 +80,7 @@ public abstract class ScalarFunction<T extends ActiveRecord, C, R> implements SQ
 	@Override
 	public R apply(final Map<String, Object> map)
 	{
-		return applySQLFunction((C) map.get(columnName));
+		return applySQLFunction((C) map.get(column));
 	}
 
 	protected abstract R applySQLFunction(@Nullable final C columnValue);

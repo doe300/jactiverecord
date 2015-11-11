@@ -26,6 +26,13 @@ package de.doe300.activerecord;
 
 import de.doe300.activerecord.dsl.AggregateFunction;
 import de.doe300.activerecord.dsl.Condition;
+import de.doe300.activerecord.dsl.functions.Average;
+import de.doe300.activerecord.dsl.functions.CountDistinct;
+import de.doe300.activerecord.dsl.functions.CountNotNull;
+import de.doe300.activerecord.dsl.functions.Maximum;
+import de.doe300.activerecord.dsl.functions.Minimum;
+import de.doe300.activerecord.dsl.functions.Sum;
+import de.doe300.activerecord.dsl.functions.SumDouble;
 import de.doe300.activerecord.record.ActiveRecord;
 import java.util.function.Function;
 import javax.annotation.Nonnegative;
@@ -53,7 +60,7 @@ public interface AggregateMethods<T extends ActiveRecord> extends FinderMethods<
 	 * @return the result
 	 */
 	@Nullable
-	public <C, R> R aggregate(@Nonnull final AggregateFunction<T, C, R> aggregateFunction, @Nullable final Condition condition);
+	public <C, R> R aggregate(@Nonnull final AggregateFunction<T, C, ?, R> aggregateFunction, @Nullable final Condition condition);
 	
 	/**
 	 * @param <C> the column-type
@@ -65,7 +72,7 @@ public interface AggregateMethods<T extends ActiveRecord> extends FinderMethods<
 	@Nullable
 	public default <C extends Comparable<? super C>> C minimum(@Nonnull final String columnName, @Nonnull final Function<T, C> columnFunc)
 	{
-		return aggregate( AggregateFunction.MINIMUM(columnName, columnFunc), null);
+		return aggregate( new Minimum<>(columnName, columnFunc), null);
 	}
 	
 	/**
@@ -78,7 +85,7 @@ public interface AggregateMethods<T extends ActiveRecord> extends FinderMethods<
 	@Nullable
 	public default <C extends Comparable<? super C>> C maximum(@Nonnull final String columnName, @Nonnull final Function<T, C> columnFunc)
 	{
-		return aggregate( AggregateFunction.MAXIMUM(columnName, columnFunc), null);
+		return aggregate( new Maximum<>(columnName, columnFunc), null);
 	}
 	
 	/**
@@ -91,7 +98,7 @@ public interface AggregateMethods<T extends ActiveRecord> extends FinderMethods<
 	@Nonnegative
 	public default <C> long count(@Nonnull final String columnName, @Nonnull final Function<T, C> columnFunc)
 	{
-		return aggregate( AggregateFunction.COUNT(columnName, columnFunc), null).longValue();
+		return aggregate( new CountNotNull<>(columnName, columnFunc), null).longValue();
 	}
 	
 	/**
@@ -105,7 +112,7 @@ public interface AggregateMethods<T extends ActiveRecord> extends FinderMethods<
 	@Nonnegative
 	public default <C> long countDistinct(@Nonnull final String columnName, @Nonnull final Function<T, C> columnFunc)
 	{
-		return aggregate( AggregateFunction.COUNT_DISTINCT(columnName, columnFunc), null).longValue();
+		return aggregate( new CountDistinct<>(columnName, columnFunc), null).longValue();
 	}
 	
 	/**
@@ -119,7 +126,7 @@ public interface AggregateMethods<T extends ActiveRecord> extends FinderMethods<
 	@Signed
 	public default <C extends Number> long sum(@Nonnull final String columnName, @Nonnull final Function<T, C> columnFunc)
 	{
-		return aggregate( AggregateFunction.SUM(columnName, columnFunc), null).longValue();
+		return aggregate( new Sum<>(columnName, columnFunc), null).longValue();
 	}
 	
 	/**
@@ -133,7 +140,7 @@ public interface AggregateMethods<T extends ActiveRecord> extends FinderMethods<
 	@Signed
 	public default <C extends Number> double sumFloating(@Nonnull final String columnName, @Nonnull final Function<T, C> columnFunc)
 	{
-		return aggregate( AggregateFunction.SUM_FLOATING(columnName, columnFunc), null).doubleValue();
+		return aggregate( new SumDouble<>(columnName, columnFunc), null).doubleValue();
 	}
 	
 	/**
@@ -146,6 +153,6 @@ public interface AggregateMethods<T extends ActiveRecord> extends FinderMethods<
 	@Signed
 	public default <C extends Number> double average(@Nonnull final String columnName, @Nonnull final Function<T, C> columnFunc)
 	{
-		return aggregate( AggregateFunction.AVERAGE(columnName, columnFunc), null).doubleValue();
+		return aggregate( new Average<>(columnName, columnFunc), null).doubleValue();
 	}
 }

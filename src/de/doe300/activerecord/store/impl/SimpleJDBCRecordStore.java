@@ -452,7 +452,7 @@ public class SimpleJDBCRecordStore implements RecordStore
 	}
 
 	@Override
-	public <R> R aggregate(RecordBase<?> base, AggregateFunction<?, ?, R> aggregateFunction, Condition condition )
+	public <R> R aggregate(RecordBase<?> base, AggregateFunction<?, ?, ?, R> aggregateFunction, Condition condition )
 	{
 		checkTableExists( base );
 		String tableID = JDBCDriver.getNextTableIdentifier( null );

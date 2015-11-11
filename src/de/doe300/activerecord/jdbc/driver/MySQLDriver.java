@@ -64,16 +64,21 @@ public class MySQLDriver extends JDBCDriver
 	}
 
 	@Override
-	public String getSQLFunction( String aggregateFunction, String column )
+	public String getSQLFunction( String sqlFunction, String column )
 	{
-		switch(aggregateFunction)
+		if(AGGREGATE_SUM_DOUBLE.equals( sqlFunction))
 		{
-			case AGGREGATE_SUM:
-				return "CAST(SUM(" + column + ") AS SIGNED INTEGER)";
-			case AGGREGATE_SUM_DOUBLE:
-				return "SUM(" + column + ") + 0.0";
+			return "SUM(" + column + ") + 0.0";
 		}
-		return super.getSQLFunction( aggregateFunction, column );
+		if(SCALAR_ABS_DOUBLE.equals( sqlFunction))
+		{
+			return "ABS(" + column + ") + 0.0";
+		}
+		if(sqlFunction.contains( "BIGINT"))
+		{
+			return super.getSQLFunction( sqlFunction.replaceAll( "BIGINT", "SIGNED INTEGER"), column );
+		}
+		return super.getSQLFunction( sqlFunction, column );
 	}
 	
 	@Override

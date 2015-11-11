@@ -77,12 +77,12 @@ public class Updates
 				try
 				{
 					Class<? extends ActiveRecord> recordType = ( Class<? extends ActiveRecord> ) Class.forName( className);
-					AutomaticMigration mig = new AutomaticMigration(recordType, true );
+					AutomaticMigration mig = new AutomaticMigration(recordType, null );
 					//Tries to create the table
-					if(!mig.apply( con ))
+					if(!mig.apply(  ))
 					{
 						//Updates it instead, if it exists
-						mig.update( con );
+						mig.update( true );
 					}
 				}
 				catch ( ClassNotFoundException ex )
