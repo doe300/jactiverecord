@@ -51,8 +51,8 @@ public class MemoryRecordStoreTest extends Assert
 	{
 		store = new MemoryRecordStore();
 		base = RecordCore.fromStore( "memory", store).getBase( TestInterface.class);
-		MemoryMigration mm = new MemoryMigration(store, TestInterface.class, true);
-		mm.apply( null );
+		MemoryMigration mm = new MemoryMigration(store, TestInterface.class);
+		mm.apply( );
 		primaryKey = base.createRecord().getPrimaryKey();
 		base.createRecord().setName( "Adam");
 	}

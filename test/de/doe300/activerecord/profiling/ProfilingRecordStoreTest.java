@@ -56,19 +56,19 @@ public class ProfilingRecordStoreTest extends Assert
 	
 	//TODO output is not correct, doesn't print anything for cached/memory
 	
-	public ProfilingRecordStoreTest(String name, RecordStore store)
+	public ProfilingRecordStoreTest(String name, RecordStore store) throws Exception
 	{
 		this.name = name;
 		this.recordStore = new ProfilingRecordStore(store );
 		base = new ProfilingRecordBase<>(RecordCore.fromStore( name, recordStore ).getBase( TestInterface.class));
 		if(store instanceof MemoryRecordStore)
 		{
-			new MemoryMigration(( MemoryRecordStore ) store, TestInterface.class, true).apply(null);
+			new MemoryMigration(( MemoryRecordStore ) store, TestInterface.class).apply();
 			new MemoryMigration(( MemoryRecordStore ) store, "mappingTable", new MemoryColumn[]{
 				new MemoryColumn("id", Integer.class),
 				new MemoryColumn("fk_test1", Integer.class),
 				new MemoryColumn("fk_test2", Integer.class)
-			}, "id").apply(null);
+			}, "id").apply();
 		}
 	}
 	

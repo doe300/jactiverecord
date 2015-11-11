@@ -50,25 +50,26 @@ public class ManualMigrationTest
 		String build = "CREATE TABLE mappingTable (fk_test1 INTEGER, fk_test2 INTEGER)";
 		String update = "ALTER TABLE mappingTable ADD info varchar(255)";
 		String crash = "DROP TABLE mappingTable";
-		mig = new ManualMigration(build, update, crash);
 		con = TestServer.getTestConnection();
+		mig = new ManualMigration(build, update, crash, con);
+		
 	}
 
 	@Test
 	public void testApply() throws Exception
 	{
-		Assert.assertTrue(mig.apply( con ));
+		Assert.assertTrue(mig.apply(  ));
 	}
 	
 	@Test
 	public void testUpdate() throws Exception
 	{
-		Assert.assertTrue(mig.update(con ));
+		Assert.assertTrue(mig.update(true ));
 	}
 
 	@Test
 	public void testRevert() throws Exception
 	{
-		Assert.assertTrue(mig.revert( con ));
+		Assert.assertTrue(mig.revert(  ));
 	}
 }

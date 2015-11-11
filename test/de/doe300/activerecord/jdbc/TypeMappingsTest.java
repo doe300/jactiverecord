@@ -56,7 +56,7 @@ public class TypeMappingsTest extends Assert
 	}
 	
 	@BeforeClass
-	public static void setUpClass() throws SQLException
+	public static void setUpClass() throws Exception
 	{
 		base = TestServer.getTestCore().getBase( TestTypesInterface.class);
 		base.getCore().createTable( TestTypesInterface.class);
@@ -67,7 +67,7 @@ public class TypeMappingsTest extends Assert
 	}
 	
 	@AfterClass
-	public static void tearDownClass() throws SQLException
+	public static void tearDownClass() throws Exception
 	{
 		base.getCore().dropTable(TestTypesInterface.class);
 	}

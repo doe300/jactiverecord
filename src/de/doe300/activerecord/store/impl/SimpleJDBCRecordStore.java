@@ -456,7 +456,7 @@ public class SimpleJDBCRecordStore implements RecordStore
 	{
 		checkTableExists( base );
 		String tableID = JDBCDriver.getNextTableIdentifier( null );
-		final String sql = "SELECT " + aggregateFunction.toSQL(driver) + " as result FROM "+base.getTableName()+" AS "+tableID+toWhereClause( condition, tableID );
+		final String sql = "SELECT " + aggregateFunction.toSQL(driver, tableID) + " as result FROM "+base.getTableName()+" AS "+tableID+toWhereClause( condition, tableID );
 		Logging.getLogger().debug( "JDBCStore", sql);
 		try(PreparedStatement stm = con.prepareStatement(sql))
 		{

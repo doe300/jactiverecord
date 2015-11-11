@@ -43,7 +43,7 @@ public class MemoryMigrationTest extends Assert
 	
 	public MemoryMigrationTest() throws SQLException
 	{
-		testAutomaticMemoryMigration = new MemoryMigration(( MemoryRecordStore ) TestServer.getTestCore(MemoryRecordStore.class).getStore(), TestInterface.class, false);
+		testAutomaticMemoryMigration = new MemoryMigration(( MemoryRecordStore ) TestServer.getTestCore(MemoryRecordStore.class).getStore(), TestInterface.class);
 		testManualMemoryMigration = new MemoryMigration(( MemoryRecordStore ) TestServer.getTestCore(MemoryRecordStore.class).getStore(), "mappingTable", new MemoryColumn[]
 		{
 			new MemoryColumn("fk_test1", Integer.class),
@@ -55,15 +55,15 @@ public class MemoryMigrationTest extends Assert
 	@Test
 	public void testApply()
 	{
-		assertTrue( testAutomaticMemoryMigration.apply( null ));
-		assertTrue( testManualMemoryMigration.apply( null));
+		assertTrue( testAutomaticMemoryMigration.apply( ));
+		assertTrue( testManualMemoryMigration.apply());
 	}
 
 	@Test
 	public void testRevert()
 	{
-		assertTrue( testAutomaticMemoryMigration.revert( null));
-		assertTrue( testManualMemoryMigration.revert( null));
+		assertTrue( testAutomaticMemoryMigration.revert());
+		assertTrue( testManualMemoryMigration.revert());
 	}
 
 }

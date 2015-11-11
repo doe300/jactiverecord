@@ -65,31 +65,31 @@ public class AutomaticMigrationTest
 	public static Collection<Object[]> getParameters() throws SQLException
 	{
 		return Arrays.asList(
-			new Object[]{new AutomaticMigration(TestInterface.class, true)},
-			new Object[]{new AutomaticMigration(TestPOJO.class, true)}
+			new Object[]{new AutomaticMigration(TestInterface.class, con)},
+			new Object[]{new AutomaticMigration(TestPOJO.class, con)}
 		);
 	}
 	
 	//is used by other tests to build/drop test table
 	public static final AutomaticMigrationTest testDataMigration = 
-			new AutomaticMigrationTest(new AutomaticMigration(TestInterface.class, true));
+			new AutomaticMigrationTest(new AutomaticMigration(TestInterface.class, con));
 
 	@Test
 	public void testApply() throws SQLException
 	{
-		Assert.assertTrue(mig.apply( con ));
+		Assert.assertTrue(mig.apply( ));
 	}
 	
 	@Test
 	public void testUpdate() throws SQLException
 	{
-		Assert.assertFalse(mig.update(con ));
+		Assert.assertFalse(mig.update(false ));
 	}
 
 	@Test
 	public void testRevert() throws SQLException
 	{
-		Assert.assertTrue(mig.revert( con ));
+		Assert.assertTrue(mig.revert(  ));
 	}
 
 	@Test
