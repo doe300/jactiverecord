@@ -100,6 +100,9 @@ public class SimpleConditionTest extends Assert
 		assertEquals( (Integer)t3.getPrimaryKey(), base.getStore().findFirst( base, toScope( new SimpleCondition("name", "123Name4", Comparison.IS))));
 		//test "a = null" optimization
 		assertSame( Comparison.IS_NULL, new SimpleCondition("id", null, Comparison.IS).getComparison());
+		//test SQLFunction
+		assertTrue( new SimpleCondition(ScalarFunction.ABS( "age", TestInterface::getAge), 912, Comparison.IS).test( t1));
+		assertSame( t1, base.findFirst( new SimpleCondition(ScalarFunction.ABS( "age", TestInterface::getAge), 912, Comparison.IS)));
 	}
 	
 	@Test
@@ -111,6 +114,9 @@ public class SimpleConditionTest extends Assert
 		assertEquals( (Integer)t1.getPrimaryKey(), base.getStore().findFirst( base, toScope( new SimpleCondition("other", null,Comparison.IS_NULL))));
 		//test "a != null" optimization
 		assertSame( Comparison.IS_NOT_NULL, new SimpleCondition("id", null, Comparison.IS_NOT).getComparison());
+		//test SQLFunction
+		assertTrue( new SimpleCondition(ScalarFunction.ABS( "age", TestInterface::getAge), 912, Comparison.IS_NOT).test( t2));
+		assertSame(t2, base.findFirst( new SimpleCondition(ScalarFunction.ABS( "age", TestInterface::getAge), 912, Comparison.IS_NOT)));
 	}
 	
 	@Test

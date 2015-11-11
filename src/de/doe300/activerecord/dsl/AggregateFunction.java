@@ -66,9 +66,9 @@ public abstract class AggregateFunction<T extends ActiveRecord, C, R> implements
 
 	@Nonnull
 	@Override
-	public String toSQL(@Nonnull final JDBCDriver driver)
+	public String toSQL(final JDBCDriver driver, @Nullable final String tableName)
 	{
-		return driver.getSQLFunction(command, columnName);
+		return driver.getSQLFunction(command, tableName != null ? tableName + "." + columnName : columnName);
 	}
 
 	/**

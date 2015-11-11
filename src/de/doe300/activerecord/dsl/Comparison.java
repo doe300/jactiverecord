@@ -46,6 +46,10 @@ public enum Comparison implements BiPredicate<Object, Object>
 		@Override
 		public boolean test( final Object value, final Object compareValue )
 		{
+			if(value instanceof Number && compareValue instanceof Number )
+			{
+				return ((Number)value).doubleValue() == ((Number)compareValue).doubleValue();
+			}
 			return Objects.equals( value, compareValue);
 		}
 	},
@@ -58,6 +62,10 @@ public enum Comparison implements BiPredicate<Object, Object>
 		@Override
 		public boolean test( final Object value, final Object compareValue )
 		{
+			if(value instanceof Number && compareValue instanceof Number )
+			{
+				return ((Number)value).doubleValue() != ((Number)compareValue).doubleValue();
+			}
 			return !Objects.equals( value, compareValue);
 		}
 	},

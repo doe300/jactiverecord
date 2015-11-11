@@ -29,6 +29,7 @@ import de.doe300.activerecord.record.ActiveRecord;
 import java.util.Map;
 import java.util.function.Function;
 import javax.annotation.Nonnull;
+import javax.annotation.Nullable;
 import javax.annotation.Syntax;
 
 /**
@@ -43,11 +44,12 @@ public interface SQLFunction<T extends ActiveRecord, R> extends Function<T, R>
 {
 	/**
 	 * @param driver the driver to be used for vendor-specific commands
+	 * @param tableName the name of the table to apply this function to
 	 * @return the SQL representation of this function
 	 */
 	@Nonnull
 	@Syntax(value = "SQL")
-	public String toSQL(@Nonnull final JDBCDriver driver);
+	public String toSQL(@Nonnull final JDBCDriver driver, @Nullable final String tableName);
 	
 	/**
 	 * NOTE: This method is not required to be supported

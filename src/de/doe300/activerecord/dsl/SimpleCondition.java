@@ -42,7 +42,7 @@ import de.doe300.activerecord.record.ActiveRecord;
 public class SimpleCondition implements Condition
 {
 	@Nonnull
-	private final String key;
+	private final Object key;
 	@Nullable
 	private final Object compValue;
 	@Nonnull
@@ -59,6 +59,19 @@ public class SimpleCondition implements Condition
 		this.compValue = SimpleCondition.checkValue( compValue, comp );
 		this.comp = SimpleCondition.checkComparison( this.compValue, comp);
 	}
+	
+	/**
+	 * @param key
+	 * @param compValue
+	 * @param comp
+	 * @since 0.6
+	 */
+	public SimpleCondition(@Nonnull final SQLFunction<?,?> key, @Nullable final Object compValue, @Nonnull final Comparison comp)
+	{
+		this.key = key;
+		this.compValue = SimpleCondition.checkValue( compValue, comp );
+		this.comp = SimpleCondition.checkComparison( this.compValue, comp);
+	}
 
 	private static Object checkValue(final Object val, final Comparison comp)
 	{
@@ -67,7 +80,7 @@ public class SimpleCondition implements Condition
 		{
 			if(val instanceof Collection)
 			{
-				return ((Collection)val).toArray();
+				return Collection.class.cast(val).toArray();
 			}
 			if(val.getClass().isArray())
 			{
@@ -97,20 +110,17 @@ public class SimpleCondition implements Condition
 		return comp;
 	}
 
-	/**
-	 * @return the key (attribute or column) this condition checks for
-	 */
-	public String getKey()
-	{
-		return key;
-	}
-
 	@Override
 	public Object[] getValues()
 	{
 		if(comp == Comparison.IN)
 		{
 			return ( Object[] ) compValue;
+		}
+		if(compValue instanceof SQLFunction)
+		{
+			//SQLFunctions are handled via #toSQL()
+			return null;
 		}
 		return new Object[]{compValue};
 	}
@@ -126,27 +136,36 @@ public class SimpleCondition implements Condition
 	@Override
 	public String toSQL(@Nonnull final JDBCDriver driver, final String tableName)
 	{
-		String columnID = tableName != null ? tableName + "." + key : key;
+		final String columnID;
+		if(key instanceof SQLFunction)
+		{
+			columnID = ((SQLFunction)key).toSQL( driver, tableName);
+		}
+		else
+		{
+			columnID = tableName != null ? tableName + "." + (String)key : (String)key;
+		}
+		final String condValue = compValue instanceof SQLFunction ? ((SQLFunction)compValue).toSQL( driver, tableName ) : "?";
 		switch(comp)
 		{
 			case IS:
-				return columnID+" = ?";
+				return columnID+" = " + condValue;
 			case IS_NOT:
-				return columnID+" != ?";
+				return columnID+" != " + condValue;
 			case LIKE:
-				return columnID+" LIKE ?";
+				return columnID+" LIKE " + condValue;
 			case IS_NULL:
 				return columnID+" IS NULL";
 			case IS_NOT_NULL:
 				return columnID+" IS NOT NULL";
 			case LARGER:
-				return columnID+" > ?";
+				return columnID+" > " + condValue;
 			case LARGER_EQUALS:
-				return columnID+" >= ?";
+				return columnID+" >= " + condValue;
 			case SMALLER:
-				return columnID+" < ?";
+				return columnID+" < " + condValue;
 			case SMALLER_EQUALS:
-				return columnID+" <= ?";
+				return columnID+" <= " + condValue;
 			case IN:
 				//see: https://stackoverflow.com/questions/178479/preparedstatement-in-clause-alternatives
 				return columnID+" IN ("+Arrays.stream( (Object[])compValue).map( (final Object o) -> "?").collect( Collectors.joining( ", "))+")";
@@ -159,6 +178,10 @@ public class SimpleCondition implements Condition
 	@Override
 	public boolean hasWildcards()
 	{
+		if(compValue instanceof SQLFunction)
+		{
+			return false;
+		}
 		switch(comp)
 		{
 			case IS:
@@ -181,13 +204,23 @@ public class SimpleCondition implements Condition
 	@Override
 	public boolean test( final Map<String, Object> t )
 	{
-		return comp.test( t.get( key), compValue);
+		final Object compValue0 = key instanceof SQLFunction ? ((SQLFunction)key).apply( t) : t.get( key );
+		if (compValue instanceof SQLFunction)
+		{
+			return comp.test(compValue0, SQLFunction.class.cast( compValue).apply(t));
+		}
+		return comp.test( compValue0, compValue);
 	}
 
 	@Override
 	public boolean test( final ActiveRecord t )
 	{
-		return comp.test(t.getBase().getStore().getValue( t.getBase(), t.getPrimaryKey(), key), compValue);
+		final Object compValue0 = key instanceof SQLFunction ? ((SQLFunction)key).apply( t) : t.getBase().getStore().getValue( t.getBase(), t.getPrimaryKey(), (String)key);
+		if (compValue instanceof SQLFunction)
+		{
+			return comp.test(compValue0, SQLFunction.class.cast( compValue).apply(t));
+		}
+		return comp.test(compValue0, compValue);
 	}
 
 	@Override
