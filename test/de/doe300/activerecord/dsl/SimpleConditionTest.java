@@ -28,6 +28,7 @@ import de.doe300.activerecord.RecordBase;
 import de.doe300.activerecord.TestInterface;
 import de.doe300.activerecord.TestServer;
 import de.doe300.activerecord.scope.Scope;
+import de.doe300.activerecord.dsl.functions.Absolute;
 import org.junit.AfterClass;
 import org.junit.Assert;
 import org.junit.BeforeClass;
@@ -101,8 +102,8 @@ public class SimpleConditionTest extends Assert
 		//test "a = null" optimization
 		assertSame( Comparison.IS_NULL, new SimpleCondition("id", null, Comparison.IS).getComparison());
 		//test SQLFunction
-		assertTrue( new SimpleCondition(ScalarFunction.ABS( "age", TestInterface::getAge), 912, Comparison.IS).test( t1));
-		assertSame( t1, base.findFirst( new SimpleCondition(ScalarFunction.ABS( "age", TestInterface::getAge), 912, Comparison.IS)));
+		assertTrue( new SimpleCondition(new Absolute<>( "age", TestInterface::getAge), 912, Comparison.IS).test( t1));
+		assertSame( t1, base.findFirst( new SimpleCondition(new Absolute<>( "age", TestInterface::getAge), 912, Comparison.IS)));
 	}
 	
 	@Test
@@ -115,8 +116,8 @@ public class SimpleConditionTest extends Assert
 		//test "a != null" optimization
 		assertSame( Comparison.IS_NOT_NULL, new SimpleCondition("id", null, Comparison.IS_NOT).getComparison());
 		//test SQLFunction
-		assertTrue( new SimpleCondition(ScalarFunction.ABS( "age", TestInterface::getAge), 912, Comparison.IS_NOT).test( t2));
-		assertSame(t2, base.findFirst( new SimpleCondition(ScalarFunction.ABS( "age", TestInterface::getAge), 912, Comparison.IS_NOT)));
+		assertTrue( new SimpleCondition(new Absolute<>( "age", TestInterface::getAge), 912, Comparison.IS_NOT).test( t2));
+		assertSame(t2, base.findFirst( new SimpleCondition(new Absolute<>( "age", TestInterface::getAge), 912, Comparison.IS_NOT)));
 	}
 	
 	@Test

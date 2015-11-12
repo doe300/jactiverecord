@@ -27,6 +27,15 @@ package de.doe300.activerecord.dsl;
 import de.doe300.activerecord.RecordBase;
 import de.doe300.activerecord.TestInterface;
 import de.doe300.activerecord.TestServer;
+import de.doe300.activerecord.dsl.functions.Absolute;
+import de.doe300.activerecord.dsl.functions.AbsoluteDouble;
+import de.doe300.activerecord.dsl.functions.Ceiling;
+import de.doe300.activerecord.dsl.functions.Floor;
+import de.doe300.activerecord.dsl.functions.LowerCase;
+import de.doe300.activerecord.dsl.functions.Round;
+import de.doe300.activerecord.dsl.functions.Signum;
+import de.doe300.activerecord.dsl.functions.SquareRoot;
+import de.doe300.activerecord.dsl.functions.UpperCase;
 import org.junit.AfterClass;
 import org.junit.Assert;
 import org.junit.BeforeClass;
@@ -74,7 +83,7 @@ public class ScalarFunctionTest extends Assert
 	@Test
 	public void testLOWER()
 	{
-		ScalarFunction<TestInterface, String, String> lower = ScalarFunction.LOWER( "name", TestInterface::getName);
+		ScalarFunction<TestInterface, String, String> lower = new LowerCase<TestInterface>( "name", TestInterface::getName);
 		//test direct #apply
 		assertEquals( "123name1", lower.apply( t1));
 		Condition cond = new SimpleCondition(lower, "123name1", Comparison.IS);
@@ -85,7 +94,7 @@ public class ScalarFunctionTest extends Assert
 	@Test
 	public void testUPPER()
 	{
-		ScalarFunction<TestInterface, String, String> upper = ScalarFunction.UPPER("name", TestInterface::getName);
+		ScalarFunction<TestInterface, String, String> upper = new UpperCase<>("name", TestInterface::getName);
 		//test direct #apply
 		assertEquals( "123NAME1", upper.apply( t1));
 		Condition cond = new SimpleCondition(upper, "123NAME1", Comparison.IS);
@@ -96,7 +105,7 @@ public class ScalarFunctionTest extends Assert
 	@Test
 	public void testABS()
 	{
-		ScalarFunction<TestInterface, Integer, Long> abs = ScalarFunction.ABS( "age", TestInterface::getAge);
+		ScalarFunction<TestInterface, Integer, Long> abs = new Absolute<>( "age", TestInterface::getAge);
 		//test direct #apply
 		assertEquals( Long.valueOf( 913), abs.apply( t2));
 		Condition cond = new SimpleCondition(abs, 913, Comparison.IS_NOT);
@@ -107,7 +116,7 @@ public class ScalarFunctionTest extends Assert
 	@Test
 	public void testABS_FLOATING()
 	{
-		ScalarFunction<TestInterface, Integer, Double> abs = ScalarFunction.ABS_FLOATING("age", TestInterface::getAge);
+		ScalarFunction<TestInterface, Integer, Double> abs = new AbsoluteDouble<>("age", TestInterface::getAge);
 		//test direct #apply
 		assertEquals( Double.valueOf( 913), abs.apply( t2));
 		Condition cond = new SimpleCondition(abs, 913, Comparison.IS_NOT);
@@ -118,7 +127,7 @@ public class ScalarFunctionTest extends Assert
 	@Test
 	public void testSIGN()
 	{
-		ScalarFunction<TestInterface, Integer, Integer> sign = ScalarFunction.SIGN("age", TestInterface::getAge);
+		ScalarFunction<TestInterface, Integer, Integer> sign = new Signum<>("age", TestInterface::getAge);
 		//test direct #apply
 		assertEquals( Integer.valueOf( -1), sign.apply( t2));
 		Condition cond = new SimpleCondition(sign, -1, Comparison.IS_NOT);
@@ -129,7 +138,7 @@ public class ScalarFunctionTest extends Assert
 	@Test
 	public void testFLOOR()
 	{
-		ScalarFunction<TestInterface, Integer, Long> floor = ScalarFunction.FLOOR("age", TestInterface::getAge);
+		ScalarFunction<TestInterface, Integer, Long> floor = new Floor<>("age", TestInterface::getAge);
 		//test direct #apply
 		assertEquals( Long.valueOf( t2.getAge()), floor.apply( t2));
 		Condition cond = new SimpleCondition(floor, -1, Comparison.IS_NOT);
@@ -140,7 +149,7 @@ public class ScalarFunctionTest extends Assert
 	@Test
 	public void testCEILING()
 	{
-		ScalarFunction<TestInterface, Integer, Long> ceil = ScalarFunction.CEILING("age", TestInterface::getAge);
+		ScalarFunction<TestInterface, Integer, Long> ceil = new Ceiling<>("age", TestInterface::getAge);
 		//test direct #apply
 		assertEquals( Long.valueOf( t2.getAge()), ceil.apply( t2));
 		Condition cond = new SimpleCondition(ceil, -1, Comparison.IS_NOT);
@@ -151,7 +160,7 @@ public class ScalarFunctionTest extends Assert
 	@Test
 	public void testROUND()
 	{
-		ScalarFunction<TestInterface, Integer, Long> round = ScalarFunction.ROUND("age", TestInterface::getAge);
+		ScalarFunction<TestInterface, Integer, Long> round = new Round<>("age", TestInterface::getAge);
 		//test direct #apply
 		assertEquals( Long.valueOf( t2.getAge()), round.apply( t2));
 		Condition cond = new SimpleCondition(round, -1, Comparison.IS_NOT);
@@ -162,7 +171,7 @@ public class ScalarFunctionTest extends Assert
 	@Test
 	public void testSQUARE_ROOT()
 	{
-		ScalarFunction<TestInterface, Integer, Double> sqrt = ScalarFunction.SQUARE_ROOT("age", TestInterface::getAge);
+		ScalarFunction<TestInterface, Integer, Double> sqrt = new SquareRoot<>("age", TestInterface::getAge);
 		//test direct #apply
 		assertEquals( Math.sqrt( t2.getAge()), sqrt.apply( t2), 0.00001);
 		//XXX fix test with SQRT of negative number
