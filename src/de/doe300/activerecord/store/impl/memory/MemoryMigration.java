@@ -39,18 +39,18 @@ import de.doe300.activerecord.record.ActiveRecord;
  * @author doe300
  * @since 0.3
  */
-public class MemoryMigration extends AutomaticMigration
+class MemoryMigration extends AutomaticMigration
 {
 	private final MemoryRecordStore memoryStore;
 	private MemoryColumn[] columns;
 	private String tableName, primaryColumn;
 
 	/**
+	 * To be called only from {@link MemoryDBDriver#createMigration(java.lang.Class, de.doe300.activerecord.store.RecordStore) }
 	 * @param memoryStore
 	 * @param recordType
 	 */
-	public MemoryMigration(@Nonnull final MemoryRecordStore memoryStore,
-		@Nonnull final Class<? extends ActiveRecord> recordType)
+	MemoryMigration(@Nonnull final MemoryRecordStore memoryStore, @Nonnull final Class<? extends ActiveRecord> recordType)
 	{
 		super(recordType, null, new JDBCDriver());
 		this.memoryStore = memoryStore;
@@ -63,7 +63,7 @@ public class MemoryMigration extends AutomaticMigration
 	 * @param columns
 	 * @param primaryColumn
 	 */
-	public MemoryMigration(@Nonnull final MemoryRecordStore memoryStore, @Nonnull final String tableName, @Nonnull final MemoryColumn[] columns, @Nonnull final String primaryColumn)
+	MemoryMigration(@Nonnull final MemoryRecordStore memoryStore, @Nonnull final String tableName, @Nonnull final MemoryColumn[] columns, @Nonnull final String primaryColumn)
 	{
 		super(null, null, new JDBCDriver());
 		this.memoryStore = memoryStore;
@@ -112,7 +112,8 @@ public class MemoryMigration extends AutomaticMigration
 	@Override
 	public boolean update(final boolean dropColumns)
 	{
-		throw new UnsupportedOperationException( "Updating memory-tables is not supported." );
+		Logging.getLogger().error( "MemoryMigration", "Updating memory-tables is not supported." );
+		return false;
 	}
 
 }

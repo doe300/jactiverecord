@@ -33,13 +33,13 @@ import de.doe300.activerecord.record.association.AssociationHelper;
 import de.doe300.activerecord.store.RecordStore;
 import de.doe300.activerecord.store.impl.CachedJDBCRecordStore;
 import de.doe300.activerecord.store.impl.SimpleJDBCRecordStore;
-import de.doe300.activerecord.store.impl.memory.MemoryColumn;
-import de.doe300.activerecord.store.impl.memory.MemoryMigration;
 import de.doe300.activerecord.store.impl.memory.MemoryRecordStore;
 import java.sql.SQLException;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
+import java.util.HashMap;
+import java.util.Map;
 import org.junit.After;
 import org.junit.Assert;
 import org.junit.Before;
@@ -63,12 +63,12 @@ public class ProfilingRecordStoreTest extends Assert
 		base = new ProfilingRecordBase<>(RecordCore.fromStore( name, recordStore ).getBase( TestInterface.class));
 		if(store instanceof MemoryRecordStore)
 		{
-			new MemoryMigration(( MemoryRecordStore ) store, TestInterface.class).apply();
-			new MemoryMigration(( MemoryRecordStore ) store, "mappingTable", new MemoryColumn[]{
-				new MemoryColumn("id", Integer.class),
-				new MemoryColumn("fk_test1", Integer.class),
-				new MemoryColumn("fk_test2", Integer.class)
-			}, "id").apply();
+			base.getCore().createTable( TestInterface.class);
+			Map<String, Class<?>> columns = new HashMap<>(5);
+			columns.put("id", Integer.class);
+			columns.put("fk_test1", Integer.class);
+			columns.put("fk_test2", Integer.class);
+			base.getStore().getDriver().createMigration( "MappingTable", columns, store).apply();
 		}
 	}
 	

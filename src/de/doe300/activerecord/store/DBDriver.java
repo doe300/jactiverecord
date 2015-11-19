@@ -29,7 +29,11 @@ import javax.annotation.concurrent.Immutable;
 
 import de.doe300.activerecord.jdbc.driver.JDBCDriver;
 import de.doe300.activerecord.migration.Migration;
+import de.doe300.activerecord.migration.constraints.IndexType;
 import de.doe300.activerecord.record.ActiveRecord;
+import java.util.Map;
+import java.util.Set;
+import javax.annotation.Nullable;
 
 /**
  * Abstract super-type for all db-drivers
@@ -60,4 +64,22 @@ public interface DBDriver
 	 */
 	@Nonnull
 	public Migration createMigration(@Nonnull final Class<? extends ActiveRecord> recordType, @Nonnull final RecordStore store);
+	
+	@Nonnull
+	public Migration createMigration(@Nonnull final String storeName, @Nonnull final Map<String, Class<?>> columns,
+			 @Nonnull final RecordStore store);
+	
+	@Nonnull
+	public default Migration createMigration(@Nonnull final String storeName, @Nonnull final Map<String, Class<?>> columns, 
+			@Nullable final Map<Set<String>, IndexType> indices,  @Nonnull final RecordStore store) throws UnsupportedOperationException
+	{
+		throw new UnsupportedOperationException("Operation not supported by default implementation");
+	}
+	
+	@Nonnull
+	public default Migration createMigration(@Nullable final String applyCommand, @Nullable final String updateCommand, 
+			@Nullable final String revertCommand,  @Nonnull final RecordStore store) throws UnsupportedOperationException
+	{
+		throw new UnsupportedOperationException("Operation not supported by default implementation");
+	}
 }

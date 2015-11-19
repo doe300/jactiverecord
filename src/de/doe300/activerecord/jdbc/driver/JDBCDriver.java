@@ -43,11 +43,15 @@ import javax.annotation.Syntax;
 
 import de.doe300.activerecord.logging.Logging;
 import de.doe300.activerecord.migration.AutomaticMigration;
+import de.doe300.activerecord.migration.ManualMigration;
 import de.doe300.activerecord.migration.Migration;
 import de.doe300.activerecord.migration.constraints.IndexType;
 import de.doe300.activerecord.record.ActiveRecord;
 import de.doe300.activerecord.store.DBDriver;
 import de.doe300.activerecord.store.RecordStore;
+import java.util.Map;
+import java.util.Set;
+import java.util.stream.Collectors;
 
 /**
  * The abstract driver for JDBC-based storages
@@ -458,6 +462,39 @@ public class JDBCDriver implements DBDriver
 	public Migration createMigration(final Class<? extends ActiveRecord> recordType, final RecordStore store)
 	{
 		return new AutomaticMigration(recordType, store.getConnection());
+	}
+
+	@Override
+	public Migration createMigration( String storeName, Map<String, Class<?>> columns,  final RecordStore store )
+	{
+		return createMigration( storeName, columns, null, store );
+	}
+
+	@Override
+	public Migration createMigration( String storeName, Map<String, Class<?>> columns, Map<Set<String>, IndexType> indices,  
+			final RecordStore store ) throws UnsupportedOperationException
+	{
+		String applyCommand = "CREATE TABLE " + storeName + " ("  + 
+				columns.entrySet().stream().map( (Map.Entry<String, Class<?>> column ) -> 
+				{
+					return column.getKey() + " " + getSQLType( column.getValue());
+				}).collect( Collectors.joining( ",\n"))+ ");";
+		if(indices != null)
+		{
+			applyCommand += indices.entrySet().stream().map( (Map.Entry<Set<String>, IndexType> index) -> 
+			{
+				return "CREATE INDEX ON " + storeName + " (" + index.getKey().stream().collect( Collectors.joining(", ")) + ")";
+			}).collect( Collectors.joining(";\n"));
+		}
+		final String revertCommand = "DROP TABLE " + storeName;
+		//does not support update, too complicated
+		return createMigration( applyCommand, null, revertCommand, store );
+	}
+
+	@Override
+	public Migration createMigration( String applyCommand, String updateCommand, String revertCommand,  final RecordStore store ) throws UnsupportedOperationException
+	{
+		return new ManualMigration(applyCommand, updateCommand, revertCommand, store.getConnection());
 	}
 
 	/**

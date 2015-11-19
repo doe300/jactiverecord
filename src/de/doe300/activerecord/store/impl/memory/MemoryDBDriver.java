@@ -25,9 +25,13 @@
 package de.doe300.activerecord.store.impl.memory;
 
 import de.doe300.activerecord.migration.Migration;
+import de.doe300.activerecord.migration.constraints.IndexType;
 import de.doe300.activerecord.record.ActiveRecord;
 import de.doe300.activerecord.store.DBDriver;
 import de.doe300.activerecord.store.RecordStore;
+import java.util.Map;
+import java.util.Set;
+import java.util.stream.Collectors;
 
 /**
  *
@@ -52,4 +56,21 @@ public enum MemoryDBDriver implements DBDriver
 	{
 		return new MemoryMigration((MemoryRecordStore) store, recordType);
 	}
+
+	@Override
+	public Migration createMigration( String storeName, Map<String, Class<?>> columns, RecordStore store )
+	{
+		return new MemoryMigration((MemoryRecordStore)store, storeName, columns.entrySet().stream().map(
+				(Map.Entry<String, Class<?>> e) -> 
+						new MemoryColumn(e.getKey(), e.getValue())).collect( Collectors.toList()).toArray( new MemoryColumn[columns.size()]) ,
+				ActiveRecord.DEFAULT_PRIMARY_COLUMN);
+	}
+
+	@Override
+	public Migration createMigration( String storeName, Map<String, Class<?>> columns, Map<Set<String>, IndexType> indices, RecordStore store ) 
+			throws UnsupportedOperationException
+	{
+		return createMigration( storeName, columns, store );
+	}
+
 }

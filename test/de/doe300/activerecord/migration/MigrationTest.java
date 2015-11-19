@@ -22,48 +22,61 @@
  * SOFTWARE.
  *
  */
-package de.doe300.activerecord.store.impl.memory;
+package de.doe300.activerecord.migration;
 
 import de.doe300.activerecord.TestInterface;
 import de.doe300.activerecord.TestServer;
+import de.doe300.activerecord.store.RecordStore;
 import java.sql.SQLException;
+import java.util.HashMap;
+import java.util.Map;
 import org.junit.Assert;
+import org.junit.BeforeClass;
 import org.junit.Test;
 
 /**
  *
- * @author doe300
+ * @author daniel
  */
-
-
-public class MemoryMigrationTest extends Assert
+public class MigrationTest extends Assert
 {
-	private final MemoryMigration testAutomaticMemoryMigration;
-	private final MemoryMigration testManualMemoryMigration;
+	private static Migration automaticMigration;
+	private static Migration manualMigration;
 	
-	public MemoryMigrationTest() throws SQLException
+	public MigrationTest()
 	{
-		testAutomaticMemoryMigration = new MemoryMigration(( MemoryRecordStore ) TestServer.getTestCore(MemoryRecordStore.class).getStore(), TestInterface.class);
-		testManualMemoryMigration = new MemoryMigration(( MemoryRecordStore ) TestServer.getTestCore(MemoryRecordStore.class).getStore(), "mappingTable", new MemoryColumn[]
-		{
-			new MemoryColumn("fk_test1", Integer.class),
-			new MemoryColumn("fk_test2", Integer.class),
-			new MemoryColumn("info", String.class)
-		}, "id");
+	}
+	
+	@BeforeClass
+	public static void init() throws SQLException
+	{
+		final RecordStore store = TestServer.getTestCore().getStore();
+		Map<String, Class<?>> columns = new HashMap<>(2);
+		columns.put( "fk_test1", Integer.class);
+		columns.put( "fk_test2", Integer.class);
+		automaticMigration = store.getDriver().createMigration( TestInterface.class, store);
+		manualMigration = store.getDriver().createMigration( "mappingTable", columns, store);
+		
 	}
 
 	@Test
-	public void testApply()
+	public void testApply() throws Exception
 	{
-		assertTrue( testAutomaticMemoryMigration.apply( ));
-		assertTrue( testManualMemoryMigration.apply());
+		assertTrue( automaticMigration.apply());
+		assertTrue(manualMigration.apply(  ));
+	}
+	
+	@Test
+	public void testUpdate() throws Exception
+	{
+		assertFalse( automaticMigration.update( true ));
+		assertFalse(manualMigration.update(true ));
 	}
 
 	@Test
-	public void testRevert()
+	public void testRevert() throws Exception
 	{
-		assertTrue( testAutomaticMemoryMigration.revert());
-		assertTrue( testManualMemoryMigration.revert());
+		assertTrue(automaticMigration.revert());
+		assertTrue(manualMigration.revert());
 	}
-
 }

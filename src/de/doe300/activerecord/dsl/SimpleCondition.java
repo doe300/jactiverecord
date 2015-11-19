@@ -204,7 +204,7 @@ public class SimpleCondition implements Condition
 	@Override
 	public boolean test( final Map<String, Object> t )
 	{
-		final Object compValue0 = key instanceof SQLFunction ? ((SQLFunction)key).apply( t) : t.get( key );
+		final Object compValue0 = key instanceof SQLFunction ? ((SQLFunction)key).apply( t) : t.get( (String)key );
 		if (compValue instanceof SQLFunction)
 		{
 			return comp.test(compValue0, SQLFunction.class.cast( compValue).apply(t));

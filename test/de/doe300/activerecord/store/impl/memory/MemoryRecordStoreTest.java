@@ -47,12 +47,11 @@ public class MemoryRecordStoreTest extends Assert
 	private static int primaryKey;
 	
 	@BeforeClass
-	public static void init()
+	public static void init() throws Exception
 	{
 		store = new MemoryRecordStore();
 		base = RecordCore.fromStore( "memory", store).getBase( TestInterface.class);
-		MemoryMigration mm = new MemoryMigration(store, TestInterface.class);
-		mm.apply( );
+		base.getCore().createTable( TestInterface.class);
 		primaryKey = base.createRecord().getPrimaryKey();
 		base.createRecord().setName( "Adam");
 	}

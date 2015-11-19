@@ -26,7 +26,6 @@ package de.doe300.activerecord.examples.versioning;
 
 import de.doe300.activerecord.RecordBase;
 import de.doe300.activerecord.RecordCore;
-import de.doe300.activerecord.migration.AutomaticMigration;
 import de.doe300.activerecord.record.ActiveRecord;
 import java.sql.Connection;
 import java.sql.SQLException;
@@ -77,15 +76,14 @@ public class Updates
 				try
 				{
 					Class<? extends ActiveRecord> recordType = ( Class<? extends ActiveRecord> ) Class.forName( className);
-					AutomaticMigration mig = new AutomaticMigration(recordType, null );
 					//Tries to create the table
-					if(!mig.apply(  ))
+					if(!core.createTable( recordType ))
 					{
 						//Updates it instead, if it exists
-						mig.update( true );
+						core.updateTable( recordType, true );
 					}
 				}
-				catch ( ClassNotFoundException ex )
+				catch ( Exception ex )
 				{
 					//either part of the library was not found or the record-type was removed
 				}

@@ -385,24 +385,22 @@ public final class TypeMappings
 	public static void writeXML(@Nullable final String xmlString, @Nonnull final ActiveRecord record,
 		@Nonnull final String columnName) throws SQLException
 	{
-		//TODO doesn't support MemoryRecordStore
-		final Connection con = record.getBase().getStore().getConnection();
-		if(con == null || con.isClosed())
-		{
-			throw new RecordException(record, "no JDBC-Connection for this database");
-		}
-		final Class<?> columnType = record.getBase().getStore().getAllColumnTypes( record.getBase().getTableName()).get( columnName);
+		//TODO doesn't support MemoryRecordStore, if column-type is SQLXML, but how to solve??
 		final Object xml;
-		if(columnType.equals( String.class))
+		if(record.getBase().getStore().getAllColumnTypes( record.getBase().getTableName()).get( columnName).isAssignableFrom( String.class))
 		{
 			xml = xmlString;
 		}
 		else
 		{
+			final Connection con = record.getBase().getStore().getConnection();
+			if(con == null || con.isClosed())
+			{
+				throw new RecordException(record, "no JDBC-Connection for this database");
+			}
 			xml = con.createSQLXML();
 			((SQLXML)xml).setString(xmlString);
 		}
-
 		record.getBase().getStore().setValue( record.getBase(), record.getPrimaryKey(), columnName, xml);
 	}
 

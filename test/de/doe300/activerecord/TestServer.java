@@ -24,25 +24,19 @@
  */
 package de.doe300.activerecord;
 
-import de.doe300.activerecord.migration.AutomaticMigrationTest;
-import de.doe300.activerecord.migration.ManualMigrationTest;
+import de.doe300.activerecord.migration.MigrationTest;
 import de.doe300.activerecord.store.RecordStore;
 import de.doe300.activerecord.store.impl.CachedJDBCRecordStore;
 import de.doe300.activerecord.store.impl.SimpleJDBCRecordStore;
-import de.doe300.activerecord.store.impl.memory.MemoryMigrationTest;
 import de.doe300.activerecord.store.impl.memory.MemoryRecordStore;
-import java.io.PrintWriter;
 import java.sql.Connection;
 import java.sql.DatabaseMetaData;
 import java.sql.Driver;
 import java.sql.DriverManager;
-import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.Enumeration;
 import javax.annotation.Nonnull;
-import org.hsqldb.Server;
 import org.junit.Assert;
-import org.junit.Test;
 
 /**
  * Starts the HSQLDB server for testing
@@ -58,20 +52,6 @@ public class TestServer extends Assert
 		{
 			System.out.println( drivers.nextElement().getClass() );
 		}
-	}
-	
-	public static void main(String[] args)
-	{
-		Server hsqlServer = new Server();
-		hsqlServer.setLogWriter(new PrintWriter(System.out));
-		hsqlServer.setErrWriter( new PrintWriter(System.err));
-        hsqlServer.setSilent(false);
-        hsqlServer.setDatabaseName(0, "test");
-        hsqlServer.setDatabasePath(0, "file:test/test");
-		hsqlServer.setNoSystemExit( true);
-		hsqlServer.setPort( 9999);
-		
-		hsqlServer.start();
 	}
 	
 	/*
@@ -135,23 +115,14 @@ public class TestServer extends Assert
 			/**
 			 * none currently...
 			 */
+			//start server with "systemctl start postgresql.service"
 //			con = DriverManager.getConnection( "jdbc:postgresql:postgres", "postgres", "");
 			
 			//TODO run all tests with MemoryRecordStore
 			
 		}
+		printMetaData( con );
 		return con;
-	}
-	
-	public static void printTestTable() throws SQLException
-	{
-		try(ResultSet set = getTestConnection().prepareCall( "SELECT * FROM TESTTABLE").executeQuery())
-		{
-			while(set.next())
-			{
-				System.out.println( set.getInt( 1)+", "+set.getString( 2)+", "+set.getInt( 3)+", "+set.getTimestamp( "created_at")+", "+set.getTimestamp( "updated_at") );
-			}
-		}
 	}
 	
 	public static void buildTestTables() throws SQLException, Exception
@@ -161,16 +132,8 @@ public class TestServer extends Assert
 	
 	public static void buildTestTables(@Nonnull final Class<? extends RecordStore> testStore) throws SQLException, Exception
 	{
-		if(testStore == MemoryRecordStore.class )
-		{
-			new MemoryMigrationTest().testApply();
-		}
-		else
-		{
-			AutomaticMigrationTest.testDataMigration.testApply();
-			ManualMigrationTest.init();
-			new ManualMigrationTest().testApply();
-		}
+		MigrationTest.init();
+		new MigrationTest().testApply();
 	}
 	
 	public static void destroyTestTables() throws SQLException, Exception
@@ -180,21 +143,12 @@ public class TestServer extends Assert
 	
 	public static void destroyTestTables(@Nonnull final Class<? extends RecordStore> testStore) throws SQLException, Exception
 	{
-		if(testStore == MemoryRecordStore.class)
-		{
-			new MemoryMigrationTest().testRevert();
-		}
-		else
-		{
-			AutomaticMigrationTest.testDataMigration.testRevert();
-			new ManualMigrationTest().testRevert();
-		}
+		new MigrationTest().testRevert();
 	}
 	
-	@Test
-	public void printMetaData() throws SQLException
+	static void printMetaData(Connection con) throws SQLException
 	{
-		DatabaseMetaData data = getTestConnection().getMetaData();
+		DatabaseMetaData data = con.getMetaData();
 		System.out.println( "Driver:" );
 		System.out.println( "- Name: "+data.getDriverName());
 		System.out.println( "- Version: "+data.getDriverVersion() );
