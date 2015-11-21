@@ -30,9 +30,11 @@ import de.doe300.activerecord.TestInterface;
 import de.doe300.activerecord.TestServer;
 import de.doe300.activerecord.dsl.Comparison;
 import de.doe300.activerecord.dsl.SimpleCondition;
+import de.doe300.activerecord.dsl.functions.Sum;
 import de.doe300.activerecord.scope.Scope;
 import java.util.Arrays;
 import java.util.Collections;
+import java.util.HashMap;
 import java.util.Map;
 import org.junit.AfterClass;
 import org.junit.Assert;
@@ -94,6 +96,10 @@ public class SimpleJDBCRecordStoreTest extends Assert
 		assertEquals( 13, store.getValue( base, primaryKey, "age"));
 		//set empty values
 		store.setValues( base, primaryKey, Collections.emptyMap());
+		//set only primary key, should be a no-op
+		store.setValues( base, primaryKey, Collections.singletonMap( base.getPrimaryColumn(), 112112));
+		assertNull( store.getValue( base, 112112, "age"));
+		assertEquals( 13, store.getValue( base, primaryKey, "age"));
 		//negative test - throws exception
 		store.setValues( base, primaryKey, Collections.singletonMap( "no_column", base) );
 	}
@@ -259,5 +265,29 @@ public class SimpleJDBCRecordStoreTest extends Assert
 		assertFalse( store.removeRow( "mappingTable", new SimpleCondition("fk_test1", primaryKey, Comparison.IS)));
 		//negative test - throws exception
 		store.removeRow( "noSuchTable", new SimpleCondition("fk_test1", primaryKey, Comparison.IS));
+	}
+
+	@Test(expected = IllegalArgumentException.class)
+	public void testAggregate()
+	{
+		store.insertNewRecord( base, Collections.singletonMap( "age", 21));
+		Map<String, Object> values = new HashMap<>(2);
+		values.put( "name", "Adam");
+		values.put( "age", 112);
+		store.insertNewRecord( base, values );
+		int total = store.aggregate( base, new Sum<TestInterface, Integer>("age", TestInterface::getAge), null ).intValue();
+		assertTrue(21 <= total);
+		int conditional = store.aggregate( base, new Sum<TestInterface, Integer>("age", TestInterface::getAge), new SimpleCondition("name", null, Comparison.IS_NOT_NULL) ).intValue();
+		assertTrue(conditional < total);
+		store.aggregate( base, new Sum<TestInterface, Integer>("no_such_row", TestInterface::getAge), null ) ;
+	}
+
+	@Test(expected = IllegalArgumentException.class)
+	public void testGetAllColumnTypes()
+	{
+		assertEquals( store.getAllColumnNames( base.getTableName()).size(), store.getAllColumnTypes( base.getTableName()).size());
+		assertTrue( store.getAllColumnTypes( base.getTableName()).get( "name").equals( String.class));
+		//fails
+		store.getAllColumnTypes( "no_such_table");
 	}
 }

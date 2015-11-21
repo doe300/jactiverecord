@@ -240,7 +240,7 @@ public class SimpleJDBCRecordStore implements RecordStore
 			tmp.put( TimestampedRecord.COLUMN_UPDATED_AT, new Timestamp(System.currentTimeMillis()));
 		}
 		//Don't update ID
-		tmp.remove( base.getPrimaryColumn());
+		tmp.remove( convertIdentifier( base.getPrimaryColumn()));
 		if(tmp.isEmpty())
 		{
 			//cancel, if only ID was to be updated

@@ -78,7 +78,7 @@ public final class Validations
 		if(obj instanceof Number)
 		{
 			final double d = ((Number)obj).doubleValue();
-			return d == 0.0;
+			return d != 0.0;
 		}
 		throw new IllegalArgumentException("Invalid data-type, can't check empty for: "+ obj.getClass());
 	}

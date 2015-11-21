@@ -29,12 +29,12 @@ import de.doe300.activerecord.annotations.ProcessorUtils;
 import de.doe300.activerecord.dsl.Comparison;
 import de.doe300.activerecord.dsl.SimpleCondition;
 import de.doe300.activerecord.migration.Attribute;
+import de.doe300.activerecord.record.ActiveRecord;
 import de.doe300.activerecord.record.association.AssociationHelper;
 import de.doe300.activerecord.record.association.HasManyAssociationSet;
 import de.doe300.activerecord.record.association.HasManyThroughAssociationSet;
 import de.doe300.activerecord.record.association.RecordSet;
 import de.doe300.activerecord.record.attributes.Attributes;
-import de.doe300.activerecord.record.validation.ValidatedRecord;
 import java.io.IOException;
 import java.io.Writer;
 import java.util.ArrayList;
@@ -157,8 +157,7 @@ public class AssociationGenerator extends AbstractProcessor
 
 				//TODO write @Generated annotation (somehow netbeans can't find it)
 
-				writer.append( "interface ").append( generatedFileName ).append(" extends ").
-						append( ValidatedRecord.class.getCanonicalName());
+				writer.append( "interface ").append( generatedFileName ).append(" extends ").append( ActiveRecord.class.getCanonicalName());
 
 				writer.append(" {\n\n");
 

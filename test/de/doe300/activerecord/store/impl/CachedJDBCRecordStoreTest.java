@@ -31,6 +31,7 @@ import de.doe300.activerecord.TestServer;
 import de.doe300.activerecord.dsl.Comparison;
 import de.doe300.activerecord.dsl.Order;
 import de.doe300.activerecord.dsl.SimpleCondition;
+import de.doe300.activerecord.dsl.functions.Sum;
 import de.doe300.activerecord.scope.Scope;
 import java.sql.Timestamp;
 import java.util.Arrays;
@@ -106,6 +107,7 @@ public class CachedJDBCRecordStoreTest extends Assert
 	public void testGetValue()
 	{
 		assertEquals( primaryKey, store.getValue( base, primaryKey, base.getPrimaryColumn()));
+		assertNull(store.getValue( base, 100000, "name"));
 	}
 
 	@Test
@@ -233,6 +235,19 @@ public class CachedJDBCRecordStoreTest extends Assert
 		store.touch( base, primaryKey );
 		Timestamp end = base.getRecord( primaryKey ).getUpdatedAt();
 		assertTrue( end.compareTo( start) > 0);
+	}
+
+	@Test
+	public void testGetAllColumnTypes()
+	{
+		assertEquals( store.getAllColumnNames( base.getTableName()).size(), store.getAllColumnTypes( base.getTableName()).size());
+		assertTrue( store.getAllColumnTypes( base.getTableName()).get( "name").equals( String.class));
+	}
+
+	@Test
+	public void testAggregate()
+	{
+		assertTrue(0 <= store.aggregate( base, new Sum<TestInterface, Integer>("age", TestInterface::getAge), null ).intValue());
 	}
 	
 }

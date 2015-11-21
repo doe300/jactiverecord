@@ -24,9 +24,8 @@
  */
 package de.doe300.activerecord.record.validation;
 
-import de.doe300.activerecord.record.validation.Validations;
-import de.doe300.activerecord.record.validation.ValidationFailed;
 import java.util.Collections;
+import java.util.UUID;
 import org.junit.Assert;
 import org.junit.Test;
 
@@ -41,11 +40,22 @@ public class ValidationsTest extends Assert
 	{
 	}
 
-	@Test
+	@Test(expected = IllegalArgumentException.class)
 	public void testNotEmpty()
 	{
 		assertTrue( Validations.notEmpty("aa"));
 		assertFalse( Validations.notEmpty(""));
+		assertFalse( Validations.notEmpty( null));
+		assertTrue( Validations.notEmpty( Collections.singleton( "")));
+		assertTrue( Validations.notEmpty( new String[]{""}));
+		assertFalse( Validations.notEmpty( Collections.emptyList()));
+		assertFalse( Validations.notEmpty( new Object[]{}));
+		assertTrue( Validations.notEmpty( Collections.singletonMap( "a", null)));
+		assertFalse( Validations.notEmpty(0));
+		assertTrue( Validations.notEmpty(5L));
+		
+		//throws error
+		Validations.notEmpty( new UUID(2, 2));
 	}
 
 	@Test(expected = ValidationFailed.class)
@@ -71,6 +81,7 @@ public class ValidationsTest extends Assert
 	{
 		assertTrue( Validations.positiveNumber( 3));
 		assertFalse( Validations.positiveNumber( -5));
+		assertFalse( Validations.positiveNumber( null));
 		Validations.positiveNumber( "23");
 	}
 
@@ -79,6 +90,7 @@ public class ValidationsTest extends Assert
 	{
 		assertTrue( Validations.negativeNumber( -4346.4));
 		assertFalse( Validations.negativeNumber( 345));
+		assertFalse( Validations.negativeNumber( null));
 		Validations.negativeNumber( 'c' );
 	}
 
