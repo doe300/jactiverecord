@@ -27,6 +27,8 @@ package de.doe300.activerecord.proxy.handlers;
 import de.doe300.activerecord.proxy.RecordHandler;
 import de.doe300.activerecord.record.ActiveRecord;
 import java.lang.reflect.Method;
+import javax.annotation.Nonnull;
+import javax.annotation.Nullable;
 
 /**
  * On {@link RecordHandler#invoke(java.lang.Object, java.lang.reflect.Method, java.lang.Object[]) }, ProxyHandlers are checked very early (after {@link ActiveRecord}-methods).
@@ -43,7 +45,7 @@ public interface ProxyHandler
 	 * @return whether this handler handles the given method
 	 * @throws IllegalArgumentException 
 	 */
-	public boolean handlesMethod(ActiveRecord record, Method method, Object[] args) throws IllegalArgumentException;
+	public boolean handlesMethod(@Nonnull final ActiveRecord record, @Nonnull final Method method, Object[] args) throws IllegalArgumentException;
 	
 	/**
 	 * @param <T>
@@ -54,5 +56,31 @@ public interface ProxyHandler
 	 * @return the return value of the invocation
 	 * @throws IllegalArgumentException 
 	 */
-	public <T extends ActiveRecord> Object invoke(ActiveRecord record, RecordHandler<T> handler, Method method, Object[] args) throws IllegalArgumentException;
+	public <T extends ActiveRecord> Object invoke(@Nonnull final ActiveRecord record, @Nonnull final RecordHandler<T> handler, @Nonnull final Method method, Object[] args) throws IllegalArgumentException;
+	
+	/**
+	 * A hook to manipulate/analyze the <code>value</code> for an attribute-getter
+	 * @param record the record to get the attribute for
+	 * @param attributeName the attribute-name
+	 * @param value the attribute value
+	 * @return the new attribute-value to return
+	 * @since 0.7
+	 */
+	public default Object getAttributeHook(@Nonnull final ActiveRecord record, @Nonnull final String attributeName, @Nullable final Object value)
+	{
+		return value;
+	}
+	
+	/**
+	 * A hook to manipulate/analyze the <code>value</code> for an attribute-setter
+	 * @param record the record to set the attribute for
+	 * @param attributeName the attribute-name
+	 * @param value the attribute value
+	 * @return the new attribute-value to return
+	 * @since 0.7
+	 */
+	public default Object setAttributeHook(@Nonnull final ActiveRecord record, @Nonnull final String attributeName, @Nullable final Object value)
+	{
+		return value;
+	}
 }

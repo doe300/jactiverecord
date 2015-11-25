@@ -40,6 +40,7 @@ import java.lang.reflect.InvocationHandler;
 import java.lang.reflect.Method;
 
 import javax.annotation.Nonnull;
+import javax.annotation.Nullable;
 
 /**
  * The handler-class for proxy-based ActiveRecord. Mainly handles standard ActiveRecord-methods and delegates to any given {@link ProxyHandler}
@@ -191,11 +192,11 @@ public final class RecordHandler<T extends ActiveRecord> implements InvocationHa
 			}
 			if(converterMethod==null)
 			{
-				store.setValue(base, primaryKey, column, args[0]);
+				setAttribute( record, column, args[0]);
 			}
 			else
 			{
-				store.setValue(base, primaryKey, column, converterMethod.invoke( proxy, args[0] ));
+				setAttribute( record, column, converterMethod.invoke( proxy, args[0] ) );
 			}
 			//setters are void-methods
 			return null;
@@ -206,13 +207,13 @@ public final class RecordHandler<T extends ActiveRecord> implements InvocationHa
 		{
 			if(args!=null&&args.length==1&&Attributes.isSetter( method, args[0] == null ? null : args[0].getClass(), false))
 			{
-				store.setValue(base, primaryKey, property,args[0] );
+				setAttribute( record, property, args[0]);
 				//setters are void-methods
 				return null;
 			}
 			if(args==null||args.length==0&&Attributes.isGetter( method, false ))
 			{
-				return TypeMappings.coerceToType( store.getValue(base, primaryKey, property ), method.getReturnType());
+				return TypeMappings.coerceToType( getAttribute( record, property ), method.getReturnType());
 			}
 		}
 		//method not handled
@@ -227,5 +228,25 @@ public final class RecordHandler<T extends ActiveRecord> implements InvocationHa
 	public Class<T> getRecordType()
 	{
 		return base.getRecordType();
+	}
+	
+	private Object getAttribute(@Nonnull final ActiveRecord proxy, @Nonnull final String attributeName)
+	{
+		Object value = store.getValue( base, primaryKey, attributeName );
+		for(ProxyHandler h : proxyHandlers)
+		{
+			value = h.getAttributeHook( proxy, attributeName, value );
+		}
+		return value;
+	}
+	
+	private void setAttribute(@Nonnull final ActiveRecord proxy, @Nonnull final String attributeName, @Nullable final Object value)
+	{
+		Object storeValue = value;
+		for(ProxyHandler h : proxyHandlers)
+		{
+			storeValue = h.setAttributeHook( proxy, attributeName, storeValue );
+		}
+		store.setValue( base, primaryKey, attributeName, storeValue );
 	}
 }

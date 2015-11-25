@@ -79,18 +79,6 @@ public class POJOBase<T extends ActiveRecord> extends RecordBase<T>
 	}
 
 	/**
-	 * @param primaryKey
-	 * @param name
-	 * @return the value for the given property from the underlying store
-	 * @deprecated use {@link #getProperty(int, java.lang.String, java.lang.Class) } instead
-	 */
-	@Deprecated
-	public Object getProperty(final int primaryKey, @Nonnull final String name)
-	{
-		return store.getValue( this, primaryKey, name );
-	}
-
-	/**
 	 * @param <U>
 	 *            the type of the return-value
 	 * @param primaryKey

@@ -28,6 +28,7 @@ import javax.annotation.Nonnull;
 
 import de.doe300.activerecord.RecordBase;
 import de.doe300.activerecord.record.ActiveRecord;
+import javax.annotation.Nullable;
 
 /**
  *
@@ -37,7 +38,7 @@ public abstract class AbstractActiveRecord implements ActiveRecord
 {
 	protected final int primaryKey;
 	@Nonnull
-	protected final POJOBase<?> base;
+	private final POJOBase<?> base;
 
 	/**
 	 * @param primaryKey
@@ -59,5 +60,19 @@ public abstract class AbstractActiveRecord implements ActiveRecord
 	public RecordBase<?> getBase()
 	{
 		return base;
+	}
+	
+	/**
+	 * @param name the property-name
+	 * @param value the property-value
+	 */
+	protected void setProperty(@Nonnull final String name, @Nullable final Object value)
+	{
+		base.setProperty( primaryKey, name, value );
+	}
+	
+	protected <U> U getProperty(@Nonnull final String name, @Nonnull final Class<U> type) throws ClassCastException
+	{
+		return base.getProperty( primaryKey, name, type );
 	}
 }

@@ -45,3 +45,7 @@ This will run an *AnnotationProcessor* generating an interface in the same packa
 
 For an example on how to use it, see the test-cases, especially *TestActiveRecordSyntax* and the *TestInterface* and *TestPOJO*
 or [Wiki: RecordType](https://github.com/doe300/jactiverecord/wiki/RecordTypes).
+
+Extensions
+---------
+For a list of additional features and extensions, see [doe300/jactiverecord-extensions](https://github.com/doe300/jactiverecord-extensions).
