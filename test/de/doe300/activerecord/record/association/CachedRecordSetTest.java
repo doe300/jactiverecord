@@ -50,7 +50,7 @@ public class CachedRecordSetTest extends Assert
 	{
 		TestServer.buildTestTables();
 		base = TestServer.getTestCore().getBase( TestInterface.class );
-		set = new CachedRecordSet<>(new TableSet<TestInterface>(base ));
+		set = new CachedRecordSet<>(new TableSet<TestInterface>(base, null ));
 		
 		//fill set
 		a1 = base.createRecord();
@@ -139,26 +139,26 @@ public class CachedRecordSetTest extends Assert
 	@Test
 	public void testContainsAll()
 	{
-		assertTrue( set.containsAll( new TableSet<TestInterface>(base)));
-		assertTrue( new TableSet<TestInterface>(base).containsAll(set ));
+		assertTrue( set.containsAll( new TableSet<TestInterface>(base, null)));
+		assertTrue( new TableSet<TestInterface>(base, null).containsAll(set ));
 	}
 
 	@Test(expected = UnsupportedOperationException.class)
 	public void testAddAll()
 	{
-		set.addAll( new TableSet<TestInterface>(base ));
+		set.addAll( new TableSet<TestInterface>(base, null ));
 	}
 
 	@Test(expected = UnsupportedOperationException.class)
 	public void testRetainAll()
 	{
-		set.retainAll(new TableSet<TestInterface>(base ));
+		set.retainAll(new TableSet<TestInterface>(base, null ));
 	}
 
 	@Test(expected = UnsupportedOperationException.class)
 	public void testRemoveAll()
 	{
-		set.removeAll(new TableSet<TestInterface>(base ));
+		set.removeAll(new TableSet<TestInterface>(base, null ));
 	}
 
 	@Test(expected = UnsupportedOperationException.class)

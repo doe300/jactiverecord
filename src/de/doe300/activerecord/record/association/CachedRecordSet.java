@@ -36,6 +36,7 @@ import javax.annotation.Nonnull;
 import de.doe300.activerecord.ReadOnlyRecordBase;
 import de.doe300.activerecord.dsl.AggregateFunction;
 import de.doe300.activerecord.dsl.Condition;
+import de.doe300.activerecord.dsl.Order;
 import de.doe300.activerecord.record.ActiveRecord;
 import de.doe300.activerecord.scope.Scope;
 import javax.annotation.Nullable;
@@ -81,9 +82,15 @@ public class CachedRecordSet<T extends ActiveRecord> extends AbstractSet<T> impl
 	}
 
 	@Override
-	public RecordSet<T> getForCondition( final Condition cond )
+	public RecordSet<T> getForCondition( final Condition cond, @Nullable final Order order )
 	{
-		return new CachedRecordSet<T>(source.getForCondition( cond) );
+		return new CachedRecordSet<T>(source.getForCondition( cond, order));
+	}
+
+	@Override
+	public Order getOrder()
+	{
+		return source.getOrder();
 	}
 
 	@Override
@@ -200,5 +207,11 @@ public class CachedRecordSet<T extends ActiveRecord> extends AbstractSet<T> impl
 	public <C, R> R aggregate( AggregateFunction<T, C, ?, R> aggregateFunction, @Nullable final Condition condition )
 	{
 		return stream().filter( (T record) -> condition == null || condition.test( record)).collect( aggregateFunction );
+	}
+
+	@Override
+	public RecordSet<T> cached()
+	{
+		return this;
 	}
 }

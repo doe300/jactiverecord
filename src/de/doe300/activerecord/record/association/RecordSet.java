@@ -37,6 +37,7 @@ import de.doe300.activerecord.ReadOnlyRecordBase;
 import de.doe300.activerecord.dsl.AndCondition;
 import de.doe300.activerecord.dsl.Comparison;
 import de.doe300.activerecord.dsl.Condition;
+import de.doe300.activerecord.dsl.Order;
 import de.doe300.activerecord.dsl.SimpleCondition;
 import de.doe300.activerecord.record.ActiveRecord;
 
@@ -63,6 +64,13 @@ public interface RecordSet<T extends ActiveRecord> extends SortedSet<T>, FinderM
 	 */
 	@Nonnull
 	public ReadOnlyRecordBase<T> getRecordBase();
+	
+	/**
+	 * @return the order of this set
+	 * @since 0.7
+	 */
+	@Nonnull
+	public Order getOrder();
 
 	/**
 	 * Returns result-set backed by this set for the given Condition
@@ -74,7 +82,23 @@ public interface RecordSet<T extends ActiveRecord> extends SortedSet<T>, FinderM
 	 * @see #subSet(java.lang.Object, java.lang.Object)
 	 */
 	@Nonnull
-	public RecordSet<T> getForCondition(@Nullable final Condition cond);
+	public default RecordSet<T> getForCondition(@Nullable final Condition cond)
+	{
+		return getForCondition( cond, getOrder());
+	}
+	
+	/**
+	 * Returns result-set backed by this set for the given Condition and Order
+	 *
+	 * NOTE: the returned set may be immutable
+	 *
+	 * @param cond
+	 * @param order
+	 * @return a sub-set for the given condition
+	 * @since 0.7
+	 */
+	@Nonnull
+	public RecordSet<T> getForCondition(@Nullable final Condition cond, @Nullable final Order order);
 
 	@Override
 	@Nullable
@@ -88,14 +112,14 @@ public interface RecordSet<T extends ActiveRecord> extends SortedSet<T>, FinderM
 	@Nonnull
 	public default RecordSet<T> headSet(final T toElement)
 	{
-		return getForCondition( new SimpleCondition(getRecordBase().getPrimaryColumn(), toElement.getPrimaryKey(), Comparison.SMALLER) );
+		return getForCondition( new SimpleCondition(getRecordBase().getPrimaryColumn(), toElement.getPrimaryKey(), Comparison.SMALLER), getOrder() );
 	}
 
 	@Override
 	@Nonnull
 	public default RecordSet<T> tailSet(final T fromElement)
 	{
-		return getForCondition( new SimpleCondition(getRecordBase().getPrimaryColumn(), fromElement.getPrimaryKey(), Comparison.LARGER));
+		return getForCondition( new SimpleCondition(getRecordBase().getPrimaryColumn(), fromElement.getPrimaryKey(), Comparison.LARGER), getOrder());
 	}
 
 	@Override
@@ -105,20 +129,32 @@ public interface RecordSet<T extends ActiveRecord> extends SortedSet<T>, FinderM
 		return getForCondition( AndCondition.andConditions(
 			new SimpleCondition(getRecordBase().getPrimaryColumn(), fromElement.getPrimaryKey(), Comparison.LARGER_EQUALS),
 			new SimpleCondition(getRecordBase().getPrimaryColumn(), toElement.getPrimaryKey(), Comparison.SMALLER)
-			));
+			), getOrder());
 	}
 
 	@Override
 	@Nonnull
 	public default T first()
 	{
-		return stream().sorted( getRecordBase().getDefaultOrder().toRecordComparator()).findFirst().get();
+		return stream().sorted( getOrder().toRecordComparator()).findFirst().get();
 	}
 
 	@Override
 	@Nonnull
 	public default T last()
 	{
-		return stream().sorted( getRecordBase().getDefaultOrder().toRecordComparator().reversed()).findFirst().get();
+		return stream().sorted( getOrder().toRecordComparator().reversed()).findFirst().get();
+	}
+	
+	/**
+	 * NOTE: the cached-version is read-only
+	 * 
+	 * @return a cached version of this record-set
+	 * @since 0.7
+	 */
+	@Nonnull
+	public default RecordSet<T> cached()
+	{
+		return new CachedRecordSet<T>(this );
 	}
 }

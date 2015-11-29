@@ -31,12 +31,14 @@ import java.util.function.Consumer;
 import java.util.stream.Stream;
 
 import javax.annotation.Nonnull;
+import javax.annotation.Nullable;
 
 import de.doe300.activerecord.ReadOnlyRecordBase;
 import de.doe300.activerecord.RecordBase;
 import de.doe300.activerecord.dsl.AggregateFunction;
 import de.doe300.activerecord.dsl.AndCondition;
 import de.doe300.activerecord.dsl.Condition;
+import de.doe300.activerecord.dsl.Order;
 import de.doe300.activerecord.record.ActiveRecord;
 import de.doe300.activerecord.scope.Scope;
 
@@ -49,20 +51,26 @@ public class HasManyAssociationSet<T extends ActiveRecord> extends AbstractSet<T
 {
 	@Nonnull
 	private final ReadOnlyRecordBase<T> destBase;
+	@Nonnull
 	private final Condition associationCond;
+	@Nonnull
+	private final Order order;
+	@Nonnull
 	private final Consumer<T> setAssociationFunc, unsetAssociationFunc;
 
 	/**
 	 * @param destBase the RecordBase for the containing records
 	 * @param associationCondition the condition for the association
+	 * @param order the order of the associated records
 	 * @param setAssociationFunction the function to set the association
 	 * @param unsetAssociationFunction the function to unset the association
 	 */
-	public HasManyAssociationSet(@Nonnull final ReadOnlyRecordBase<T> destBase, final Condition associationCondition,
-		final Consumer<T> setAssociationFunction, final Consumer<T> unsetAssociationFunction)
+	public HasManyAssociationSet(@Nonnull final ReadOnlyRecordBase<T> destBase, @Nonnull final Condition associationCondition,
+		@Nullable final Order order, @Nonnull final Consumer<T> setAssociationFunction, @Nonnull final Consumer<T> unsetAssociationFunction)
 	{
 		this.destBase = destBase;
 		this.associationCond = associationCondition;
+		this.order = order != null ? order : destBase.getDefaultOrder();
 		this.setAssociationFunc = setAssociationFunction;
 		this.unsetAssociationFunc = unsetAssociationFunction;
 	}
@@ -74,6 +82,12 @@ public class HasManyAssociationSet<T extends ActiveRecord> extends AbstractSet<T
 	}
 
 	@Override
+	public Order getOrder()
+	{
+		return order;
+	}
+
+	@Override
 	public boolean contains( final Object o )
 	{
 		if(o == null || !destBase.getRecordType().isInstance( o))
@@ -81,7 +95,7 @@ public class HasManyAssociationSet<T extends ActiveRecord> extends AbstractSet<T
 			return false;
 		}
 		final T otherRecord = destBase.getRecordType().cast( o );
-		return associationCond.test( otherRecord);
+		return associationCond.test(otherRecord);
 	}
 
 	@Override
@@ -117,8 +131,8 @@ public class HasManyAssociationSet<T extends ActiveRecord> extends AbstractSet<T
 	{
 		//select all associated objects not in the other collection and remove association
 		return stream().filter( (final T t )-> !c.contains( t)).peek( unsetAssociationFunc).
-				//if there are any, the associations were changed
-				count() > 0;
+			//if there are any, the associations were changed
+			count() > 0;
 	}
 
 	@Override
@@ -127,8 +141,8 @@ public class HasManyAssociationSet<T extends ActiveRecord> extends AbstractSet<T
 		// select all associations, which are in the other collection and remove
 		// the association
 		return stream().filter( c::contains).peek( unsetAssociationFunc).
-				//if there are any, associated set has changed
-				count() > 0;
+			//if there are any, associated set has changed
+			count() > 0;
 	}
 
 	@Override
@@ -140,20 +154,20 @@ public class HasManyAssociationSet<T extends ActiveRecord> extends AbstractSet<T
 	@Override
 	public Stream<T> stream()
 	{
-		return destBase.find( associationCond );
+		return destBase.findWithScope( new Scope(associationCond, order, Scope.NO_LIMIT));
 	}
 
 	@Override
 	public Stream<T> findWithScope(final Scope scope)
 	{
-		final Scope newScope = new Scope(AndCondition.andConditions(associationCond, scope.getCondition()), scope.getOrder(), scope.getLimit());
+		final Scope newScope = new Scope(AndCondition.andConditions(associationCond, scope.getCondition()), scope.getOrder()!= null ? scope.getOrder() : order, scope.getLimit());
 		return destBase.findWithScope(newScope );
 	}
 
 	@Override
 	public T findFirstWithScope( final Scope scope )
 	{
-		final Scope newScope = new Scope(AndCondition.andConditions(associationCond, scope.getCondition()), scope.getOrder(), scope.getLimit());
+		final Scope newScope = new Scope(AndCondition.andConditions(associationCond, scope.getCondition()), scope.getOrder()!= null ? scope.getOrder() : order, scope.getLimit());
 		return destBase.findFirstWithScope( newScope );
 	}
 
@@ -164,13 +178,13 @@ public class HasManyAssociationSet<T extends ActiveRecord> extends AbstractSet<T
 	}
 
 	@Override
-	public RecordSet<T> getForCondition( final Condition cond )
+	public RecordSet<T> getForCondition( final Condition cond, final Order order )
 	{
-		return new HasManyAssociationSet<T>(destBase, AndCondition.andConditions(associationCond, cond), setAssociationFunc, unsetAssociationFunc);
+		return new HasManyAssociationSet<T>(destBase, AndCondition.andConditions(associationCond, cond), order != null ? order : this.order, setAssociationFunc, unsetAssociationFunc);
 	}
 
 	@Override
-	public <C, R> R aggregate( AggregateFunction<T, C, ?, R> aggregateFunction, Condition condition )
+	public <C, R> R aggregate( final AggregateFunction<T, C, ?, R> aggregateFunction, final Condition condition )
 	{
 		return ((RecordBase<T>)destBase).aggregate( aggregateFunction, AndCondition.andConditions( associationCond, condition) );
 	}

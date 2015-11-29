@@ -171,8 +171,9 @@ public interface ReadOnlyRecordBase<T extends ActiveRecord> extends FinderMethod
 	/**
 	 * NOTE: this result-set will be immutable
 	 * @param cond
-	 * @return a ResultSet for the given condition
+	 * @param order
+	 * @return a ResultSet for the given condition and order
 	 */
 	@Nonnull
-	public RecordSet<T> getForCondition(@Nullable final Condition cond);
+	public RecordSet<T> getForCondition(@Nullable final Condition cond, @Nullable final Order order);
 }

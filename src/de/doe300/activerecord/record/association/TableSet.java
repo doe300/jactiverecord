@@ -35,6 +35,7 @@ import de.doe300.activerecord.ReadOnlyRecordBase;
 import de.doe300.activerecord.RecordBase;
 import de.doe300.activerecord.dsl.AggregateFunction;
 import de.doe300.activerecord.dsl.Condition;
+import de.doe300.activerecord.dsl.Order;
 import de.doe300.activerecord.record.ActiveRecord;
 import de.doe300.activerecord.scope.Scope;
 import javax.annotation.Nullable;
@@ -50,20 +51,30 @@ public class TableSet<T extends ActiveRecord> extends AbstractSet<T> implements 
 {
 	@Nonnull
 	private final RecordBase<T> base;
+	@Nonnull
+	private final Order order;
 
 	/**
 	 * Standard constructor for creating a set containing all records in the {@link RecordBase}
 	 * @param base
+	 * @param order
 	 */
-	public TableSet(@Nonnull final RecordBase<T> base)
+	public TableSet(@Nonnull final RecordBase<T> base, @Nullable final Order order)
 	{
 		this.base = base;
+		this.order = order != null ? order : base.getDefaultOrder();
 	}
 
 	@Override
 	public ReadOnlyRecordBase<T> getRecordBase()
 	{
 		return base;
+	}
+
+	@Override
+	public Order getOrder()
+	{
+		return order;
 	}
 
 	@Override
@@ -135,19 +146,19 @@ public class TableSet<T extends ActiveRecord> extends AbstractSet<T> implements 
 	@Override
 	public Stream<T> findWithScope( final Scope scope )
 	{
-		return base.findWithScope( new Scope(scope.getCondition(), scope.getOrder(), scope.getLimit()) );
+		return base.findWithScope( new Scope(scope.getCondition(), scope.getOrder() != null ? scope.getOrder() : order, scope.getLimit()) );
 	}
 
 	@Override
 	public T findFirstWithScope( final Scope scope )
 	{
-		return base.findFirstWithScope( new Scope(scope.getCondition(), scope.getOrder(), scope.getLimit()) );
+		return base.findFirstWithScope( new Scope(scope.getCondition(), scope.getOrder() != null ? scope.getOrder() : order, scope.getLimit()) );
 	}
 
 	@Override
-	public RecordSet<T> getForCondition( final Condition cond )
+	public RecordSet<T> getForCondition( final Condition cond, @Nullable final Order order)
 	{
-		return new ConditionSet<T>(base, cond );
+		return new ConditionSet<T>(base, cond, order != null ? order : this.order );
 	}
 
 	@Override

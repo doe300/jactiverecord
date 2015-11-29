@@ -39,6 +39,7 @@ import de.doe300.activerecord.dsl.AggregateFunction;
 import de.doe300.activerecord.dsl.AndCondition;
 import de.doe300.activerecord.dsl.Comparison;
 import de.doe300.activerecord.dsl.Condition;
+import de.doe300.activerecord.dsl.Order;
 import de.doe300.activerecord.dsl.SimpleCondition;
 import de.doe300.activerecord.record.ActiveRecord;
 import de.doe300.activerecord.scope.Scope;
@@ -54,6 +55,8 @@ public class HasManyThroughAssociationSet<T extends ActiveRecord> extends Abstra
 	@Nonnull
 	final RecordBase<T> destBase;
 	@Nonnull
+	private final Order order;
+	@Nonnull
 	private final String mappingTableName, thisMappingKey, foreignMappingKey;
 	private final int thisPrimaryKey;
 
@@ -61,15 +64,17 @@ public class HasManyThroughAssociationSet<T extends ActiveRecord> extends Abstra
 	 *
 	 * @param destBase the RecordBase for the associated record
 	 * @param thisPrimaryKey the primary-key to list the associations for
+	 * @param order the order of the records
 	 * @param mappingTableName the name of the mapping-table
 	 * @param thisMappingKey the column of the mapping-table the primary key for the source object is stored
 	 * @param foreignMappingKey the column of the mapping-table the primary key for the associated objects are stored
 	 */
 	public HasManyThroughAssociationSet(@Nonnull final RecordBase<T> destBase, final int thisPrimaryKey,
-		@Nonnull final String mappingTableName, @Nonnull final String thisMappingKey,
+			final Order order, @Nonnull final String mappingTableName, @Nonnull final String thisMappingKey,
 		@Nonnull final String foreignMappingKey)
 	{
 		this.destBase = destBase;
+		this.order = order != null ? order : destBase.getDefaultOrder();
 		this.thisPrimaryKey = thisPrimaryKey;
 		this.mappingTableName = mappingTableName;
 		this.thisMappingKey = thisMappingKey;
@@ -88,6 +93,12 @@ public class HasManyThroughAssociationSet<T extends ActiveRecord> extends Abstra
 	}
 
 	@Override
+	public Order getOrder()
+	{
+		return order;
+	}
+	
+	@Override
 	public boolean contains( final Object o )
 	{
 		if(o == null || !destBase.getRecordType().isInstance( o))
@@ -101,7 +112,7 @@ public class HasManyThroughAssociationSet<T extends ActiveRecord> extends Abstra
 	@Override
 	public Iterator<T> iterator()
 	{
-		return getAssocationKeys().map( (final Integer key ) -> destBase.getRecord( key)).iterator();
+		return getAssocationKeys().map( (final Integer key ) -> destBase.getRecord( key)).sorted( order.toRecordComparator()).iterator();
 	}
 
 	@Override
@@ -160,14 +171,14 @@ public class HasManyThroughAssociationSet<T extends ActiveRecord> extends Abstra
 	@Override
 	public Stream<T> stream()
 	{
-		return getAssocationKeys().map( destBase::getRecord );
+		return getAssocationKeys().map( destBase::getRecord ).sorted( order.toRecordComparator());
 	}
 
 	@Override
 	public Stream<T> findWithScope( final Scope scope)
 	{
 		final Set<Integer> keys = getAssocationKeys().collect( Collectors.toSet());
-		final Scope newScope = new Scope(AndCondition.andConditions(new SimpleCondition(destBase.getPrimaryColumn(), keys, Comparison.IN), scope.getCondition()), scope.getOrder(), scope.getLimit());
+		final Scope newScope = new Scope(AndCondition.andConditions(new SimpleCondition(destBase.getPrimaryColumn(), keys, Comparison.IN), scope.getCondition()), scope.getOrder() != null ? scope.getOrder() : order, scope.getLimit());
 		return destBase.findWithScope( newScope );
 	}
 
@@ -175,7 +186,7 @@ public class HasManyThroughAssociationSet<T extends ActiveRecord> extends Abstra
 	public T findFirstWithScope( final Scope scope)
 	{
 		final Set<Integer> keys = getAssocationKeys().collect( Collectors.toSet());
-		final Scope newScope = new Scope(AndCondition.andConditions(new SimpleCondition(destBase.getPrimaryColumn(), keys, Comparison.IN), scope.getCondition()), scope.getOrder(), scope.getLimit());
+		final Scope newScope = new Scope(AndCondition.andConditions(new SimpleCondition(destBase.getPrimaryColumn(), keys, Comparison.IN), scope.getCondition()), scope.getOrder() != null ? scope.getOrder() : order, scope.getLimit());
 		return destBase.findFirstWithScope( newScope);
 	}
 
@@ -186,9 +197,9 @@ public class HasManyThroughAssociationSet<T extends ActiveRecord> extends Abstra
 	}
 
 	@Override
-	public RecordSet<T> getForCondition( final Condition cond )
+	public RecordSet<T> getForCondition( final Condition cond, final Order order)
 	{
-		return new HasManyThroughSubSet(cond);
+		return new HasManyThroughSubSet(cond, order != null ? order : this.order);
 	}
 
 	@Override
@@ -200,16 +211,18 @@ public class HasManyThroughAssociationSet<T extends ActiveRecord> extends Abstra
 	private class HasManyThroughSubSet extends AbstractSet<T> implements RecordSet<T>
 	{
 		private final Condition subCondition;
+		private final Order order;
 
-		HasManyThroughSubSet(final Condition subCondition)
+		HasManyThroughSubSet(final Condition subCondition, final Order order)
 		{
 			this.subCondition = subCondition;
+			this.order = order;
 		}
 
 		@Override
 		public Stream<T> stream()
 		{
-			return getAssocationKeys().map( destBase::getRecord).filter( subCondition);
+			return getAssocationKeys().map( destBase::getRecord).filter( subCondition).sorted( order.toRecordComparator());
 		}
 
 		@Override
@@ -218,6 +231,12 @@ public class HasManyThroughAssociationSet<T extends ActiveRecord> extends Abstra
 			return ( int ) stream().count();
 		}
 
+		@Override
+		public Order getOrder()
+		{
+			return order;
+		}
+		
 		@Override
 		public boolean contains( final Object o )
 		{
@@ -281,7 +300,7 @@ public class HasManyThroughAssociationSet<T extends ActiveRecord> extends Abstra
 		{
 			final Scope newScope = new Scope(
 				AndCondition.andConditions(subCondition, scope.getCondition()),
-				scope.getOrder(), scope.getLimit());
+				scope.getOrder() != null ? scope.getOrder() : order, scope.getLimit());
 			return destBase.findWithScope( newScope );
 		}
 
@@ -290,14 +309,14 @@ public class HasManyThroughAssociationSet<T extends ActiveRecord> extends Abstra
 		{
 			final Scope newScope = new Scope(
 				AndCondition.andConditions(subCondition,scope.getCondition()),
-				scope.getOrder(), scope.getLimit());
+				scope.getOrder() != null ? scope.getOrder() : order, scope.getLimit());
 			return destBase.findFirstWithScope( newScope);
 		}
 
 		@Override
-		public RecordSet<T> getForCondition( final Condition cond )
+		public RecordSet<T> getForCondition( final Condition cond, final Order order )
 		{
-			return new HasManyThroughSubSet(AndCondition.andConditions(subCondition,cond));
+			return new HasManyThroughSubSet(AndCondition.andConditions(subCondition,cond), order != null ? order : this.order);
 		}
 
 		@Override

@@ -64,7 +64,7 @@ public class TableSetTest extends Assert
 	{
 		TestServer.buildTestTables();
 		base = TestServer.getTestCore().getBase( TestInterface.class );
-		set = new TableSet<TestInterface>(base );
+		set = new TableSet<TestInterface>(base, null );
 		
 		//fill set
 		a1 = base.createRecord();

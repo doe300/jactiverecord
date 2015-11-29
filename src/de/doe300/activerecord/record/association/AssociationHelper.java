@@ -185,7 +185,7 @@ public final class AssociationHelper
 		final Condition cond = new SimpleCondition(foreignKeyColumn, record.getPrimaryKey(), Comparison.IS);
 		final Consumer<T> setAssoc = (final T t) -> base.getStore().setValue( base, t.getPrimaryKey(), foreignKeyColumn, record.getPrimaryKey() );
 		final Consumer<T> unsetAssoc = (final T t) -> base.getStore().setValue( base, t.getPrimaryKey(), foreignKeyColumn, null );
-		return new HasManyAssociationSet<T>(base, cond, setAssoc, unsetAssoc );
+		return new HasManyAssociationSet<T>(base, cond, null, setAssoc, unsetAssoc );
 	}
 
 	/**
@@ -281,7 +281,7 @@ public final class AssociationHelper
 		@Nonnull final String thisForeignKeyColumn, @Nonnull final String otherForeignKeyColumn)
 	{
 		final RecordBase<T> otherBase = record.getBase().getCore().getBase( type );
-		return new HasManyThroughAssociationSet<T>(otherBase, record.getPrimaryKey(), associationTable, thisForeignKeyColumn,otherForeignKeyColumn);
+		return new HasManyThroughAssociationSet<T>(otherBase, record.getPrimaryKey(), otherBase.getDefaultOrder(), associationTable, thisForeignKeyColumn,otherForeignKeyColumn);
 	}
 
 	/**
@@ -340,7 +340,7 @@ public final class AssociationHelper
 			base.getStore().setValue( base, t.getPrimaryKey(), conditionColumn, resetValue);
 		};
 		final Condition cond = new SimpleCondition(conditionColumn, conditionValue, Comparison.IS);
-		return new ConditionSet<T>(base, cond, setCondFunc, unsetCondFunc);
+		return new ConditionSet<T>(base, cond, base.getDefaultOrder(), setCondFunc, unsetCondFunc);
 	}
 
 	private AssociationHelper()

@@ -102,7 +102,7 @@ public class ConditionSetTest extends Assert
 	@Test(expected = UnsupportedOperationException.class)
 	public void testUnmodifiableSet()
 	{
-		RecordSet<TestInterface> set1 = new ConditionSet<TestInterface>(base, new SimpleCondition("age", 23,Comparison.IS));
+		RecordSet<TestInterface> set1 = new ConditionSet<TestInterface>(base, new SimpleCondition("age", 23,Comparison.IS), null);
 		assertTrue( set1.containsAll( Arrays.asList( a1,a2,a3)) );
 		set1.remove( a1 );
 	}

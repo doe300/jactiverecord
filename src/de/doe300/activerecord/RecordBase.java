@@ -626,13 +626,13 @@ public abstract class RecordBase<T extends ActiveRecord> implements ReadOnlyReco
 	@Nonnull
 	public RecordSet<T> getAll()
 	{
-		return new TableSet<T>(this );
+		return new TableSet<T>(this, getDefaultOrder() );
 	}
 
 	@Override
 	@Nonnull
-	public RecordSet<T> getForCondition(@Nullable final Condition cond)
+	public RecordSet<T> getForCondition(@Nullable final Condition cond, @Nullable final Order order)
 	{
-		return new ConditionSet<T>(this, cond, null, null );
+		return new ConditionSet<T>(this, cond, order, null, null );
 	}
 }
