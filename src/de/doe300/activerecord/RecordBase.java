@@ -42,6 +42,8 @@ import de.doe300.activerecord.dsl.OrCondition;
 import de.doe300.activerecord.dsl.Order;
 import de.doe300.activerecord.dsl.QueryResult;
 import de.doe300.activerecord.dsl.SimpleCondition;
+import de.doe300.activerecord.dsl.SimpleOrder;
+import de.doe300.activerecord.jdbc.driver.JDBCDriver;
 import de.doe300.activerecord.logging.Logging;
 import de.doe300.activerecord.record.ActiveRecord;
 import de.doe300.activerecord.record.RecordCallbacks;
@@ -185,13 +187,13 @@ public abstract class RecordBase<T extends ActiveRecord> implements ReadOnlyReco
 		{
 			if(recordType.isAnnotationPresent(RecordType.class))
 			{
-				defaultOrder = Order.fromSQLString(recordType.getAnnotation(RecordType.class).defaultOrder());
+				defaultOrder = SimpleOrder.fromSQLString(recordType.getAnnotation(RecordType.class).defaultOrder());
 			}
 			if(defaultOrder == null)
 			{
-				defaultOrder = new Order(getPrimaryColumn(), Order.OrderType.ASCENDING);
+				defaultOrder = new SimpleOrder(getPrimaryColumn(), SimpleOrder.OrderType.ASCENDING);
 			}
-			Logging.getLogger().debug( recordType.getSimpleName(), "Using default order: "+defaultOrder.toSQL());
+			Logging.getLogger().debug( recordType.getSimpleName(), "Using default order: "+defaultOrder.toSQL(new JDBCDriver()));
 		}
 		return defaultOrder;
 	}

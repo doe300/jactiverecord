@@ -95,8 +95,8 @@ public class GroupResultTest extends Assert
 	@Test
 	public void testOrder()
 	{
-		assertEquals(122, getGroup().order( Order.fromSQLString( "age ASC")).findFirst( null ).getAge() );
-		assertEquals(145, getGroup().order( Order.fromSQLString( "age DESC")).findFirst( null ).getAge() );
+		assertEquals(122, getGroup().order( SimpleOrder.fromSQLString( "age ASC")).findFirst( null ).getAge() );
+		assertEquals(145, getGroup().order( SimpleOrder.fromSQLString( "age DESC")).findFirst( null ).getAge() );
 	}
 	
 	private GroupResult<Object, TestInterface> getGroup()

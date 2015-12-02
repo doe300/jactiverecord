@@ -112,7 +112,7 @@ public class HasManyThroughAssociationSet<T extends ActiveRecord> extends Abstra
 	@Override
 	public Iterator<T> iterator()
 	{
-		return getAssocationKeys().map( (final Integer key ) -> destBase.getRecord( key)).sorted( order.toRecordComparator()).iterator();
+		return getAssocationKeys().map( (final Integer key ) -> destBase.getRecord( key)).sorted( order).iterator();
 	}
 
 	@Override
@@ -171,7 +171,7 @@ public class HasManyThroughAssociationSet<T extends ActiveRecord> extends Abstra
 	@Override
 	public Stream<T> stream()
 	{
-		return getAssocationKeys().map( destBase::getRecord ).sorted( order.toRecordComparator());
+		return getAssocationKeys().map( destBase::getRecord ).sorted( order);
 	}
 
 	@Override
@@ -222,7 +222,7 @@ public class HasManyThroughAssociationSet<T extends ActiveRecord> extends Abstra
 		@Override
 		public Stream<T> stream()
 		{
-			return getAssocationKeys().map( destBase::getRecord).filter( subCondition).sorted( order.toRecordComparator());
+			return getAssocationKeys().map( destBase::getRecord).filter( subCondition).sorted( order);
 		}
 
 		@Override

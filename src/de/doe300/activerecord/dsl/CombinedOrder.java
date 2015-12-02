@@ -26,33 +26,70 @@ package de.doe300.activerecord.dsl;
 
 import de.doe300.activerecord.jdbc.driver.JDBCDriver;
 import de.doe300.activerecord.record.ActiveRecord;
-import java.util.Comparator;
+import java.util.Arrays;
 import java.util.Map;
+import java.util.stream.Collectors;
 import javax.annotation.Nonnull;
-import javax.annotation.Syntax;
-import javax.annotation.concurrent.Immutable;
 
 /**
- * An object representing the SQL ORDER BY-Clause
+ * An {@link Order} consisting of a set of orders
  * @author doe300
+ * @since 0.7
  */
-@Immutable
-public interface Order extends Comparator<ActiveRecord>
+public class CombinedOrder implements Order
 {
-	//TODO add support for more complex orders per includes
-	
+	private final Order[] orders;
+
+
 	/**
-	 * @param driver the driver for the underlying RDBMS
-	 * @return a SQL representation of this Order
+	 * @param orders the list of orders
 	 */
-	@Syntax(value = "SQL")
-	public String toSQL(@Nonnull final JDBCDriver driver);
-	
+	public CombinedOrder( @Nonnull final Order... orders )
+	{
+		this.orders = orders;
+	}
+
 	@Override
-	public int compare(ActiveRecord o1, ActiveRecord o2);
-	
-	public int compare(Map<String, Object> o1, Map<String, Object> o2);
-	
+	public String toSQL( JDBCDriver driver )
+	{
+		return Arrays.stream( orders ).map( (Order o) -> o.toSQL( driver)).collect( Collectors.joining(", "));
+	}
+
 	@Override
-	public Order reversed();
+	public Order reversed()
+	{
+		final Order[] reversedOrders = new Order[orders.length];
+		for(int i = 0; i < reversedOrders.length; i++)
+		{
+			reversedOrders[i] = orders[i].reversed();
+		}
+		return new CombinedOrder(reversedOrders);
+	}
+
+	@Override
+	public int compare( Map<String, Object> o1, Map<String, Object> o2 )
+	{
+		int index = 0;
+		int compare = 0;
+		while(compare== 0 && index < orders.length)
+		{
+			compare = orders[index].compare( o1, o2 );
+			index++;
+		}
+		return compare;
+	}
+
+	@Override
+	public int compare( ActiveRecord o1, ActiveRecord o2 )
+	{
+		int index = 0;
+		int compare = 0;
+		while(compare== 0 && index < orders.length)
+		{
+			compare = orders[index].compare( o1, o2 );
+			index++;
+		}
+		return compare;
+	}
+	
 }

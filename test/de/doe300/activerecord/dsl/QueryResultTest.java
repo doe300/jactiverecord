@@ -113,8 +113,8 @@ public class QueryResultTest extends Assert
 	@Test
 	public void testOrder()
 	{
-		assertEquals( -123, base.where( new SimpleCondition("name", null, Comparison.IS_NOT_NULL)).order( Order.
+		assertEquals( -123, base.where( new SimpleCondition("name", null, Comparison.IS_NOT_NULL)).order( SimpleOrder.
 				fromSQLString( "age ASC")).findFirst( null ).getAge());
-		assertEquals( 23, base.where( new SimpleCondition("name", null, Comparison.IS_NOT_NULL)).order( new Order("age", Order.OrderType.DESCENDING)).findFirst( null ).getAge());
+		assertEquals( 23, base.where( new SimpleCondition("name", null, Comparison.IS_NOT_NULL)).order( new SimpleOrder("age", SimpleOrder.OrderType.DESCENDING)).findFirst( null ).getAge());
 	}
 }	

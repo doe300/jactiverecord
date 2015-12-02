@@ -56,7 +56,7 @@ public class QueryResult<T extends ActiveRecord> implements QueryMethods<T>, Aut
 	 */
 	public QueryResult(@Nonnull final Stream<T> baseStream, final int size, final Order order)
 	{
-		this.baseStream = order!=null ? baseStream.sorted( order.toRecordComparator()) : baseStream;
+		this.baseStream = order!=null ? baseStream.sorted( order) : baseStream;
 		this.size = size;
 		this.order = order;
 	}
@@ -84,7 +84,7 @@ public class QueryResult<T extends ActiveRecord> implements QueryMethods<T>, Aut
 		}
 		if(scope.getOrder() != null)
 		{
-			stream = stream.sorted( scope.getOrder().toRecordComparator());
+			stream = stream.sorted( scope.getOrder());
 			sorting = scope.getOrder();
 		}
 		return new QueryResult<T>(stream, limit, sorting );

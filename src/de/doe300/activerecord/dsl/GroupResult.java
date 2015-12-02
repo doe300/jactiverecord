@@ -57,7 +57,7 @@ public class GroupResult<R, T extends ActiveRecord> implements QueryMethods<T>, 
 		@Nullable final Order order)
 	{
 		this.key = key;
-		this.baseStream = order!=null? baseStream.sorted( order.toRecordComparator()) : baseStream;
+		this.baseStream = order!=null? baseStream.sorted( order) : baseStream;
 		this.size = size;
 		this.order = order;
 	}
@@ -93,7 +93,7 @@ public class GroupResult<R, T extends ActiveRecord> implements QueryMethods<T>, 
 		}
 		if(scope.getOrder() != null)
 		{
-			stream = stream.sorted( scope.getOrder().toRecordComparator());
+			stream = stream.sorted( scope.getOrder());
 			sorting = scope.getOrder();
 		}
 		return new QueryResult<T>(stream, limit, sorting );

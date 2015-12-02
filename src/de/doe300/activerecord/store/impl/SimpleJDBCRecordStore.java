@@ -385,7 +385,7 @@ public class SimpleJDBCRecordStore implements RecordStore
 		final String sql = "SELECT "+toColumnsList( columns, base.getPrimaryColumn(), tableID )
 				+" FROM "+base.getTableName()+" AS " + tableID
 				+toWhereClause( scope.getCondition(), tableID )
-				+" ORDER BY "+toOrder( base, scope ).toSQL()+" " + driver.getLimitClause( 0, 1);
+				+" ORDER BY "+toOrder( base, scope ).toSQL(driver)+" " + driver.getLimitClause( 0, 1);
 		Logging.getLogger().debug( "JDBCStore", sql);
 		try(PreparedStatement stm = con.prepareStatement(sql))
 		{
@@ -492,7 +492,7 @@ public class SimpleJDBCRecordStore implements RecordStore
 		String sql = "SELECT "+toColumnsList( columns, base.getPrimaryColumn(), tableID )
 				+" FROM "+base.getTableName()+" AS "+tableID
 				+toWhereClause( scope.getCondition(), tableID )
-				+" ORDER BY "+toOrder( base, scope ).toSQL()
+				+" ORDER BY "+toOrder( base, scope ).toSQL(driver)
 				+" " + driver.getLimitClause( 0, scope.getLimit());
 		Logging.getLogger().debug( "JDBCStore", sql);
 		try
