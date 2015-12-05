@@ -35,7 +35,7 @@ import javax.annotation.Nullable;
  * @author doe300
  * @since 0.7
  */
-public class ExtendedOrder extends SimpleOrder
+public class ScalarOrder extends SimpleOrder
 {
 	@Nonnull
 	private final ScalarFunction<?, ?, ?>[] mappings;
@@ -48,7 +48,7 @@ public class ExtendedOrder extends SimpleOrder
 	 * @param mappings the scalar functions to apply to the columns for value-mapping
 	 * @param types the order-types, may be <code>null</code>
 	 */
-	public ExtendedOrder(@Nonnull final String[] columns, @Nullable final ScalarFunction<?, ?, ?>[] mappings, @Nullable final OrderType[] types)
+	public ScalarOrder(@Nonnull final String[] columns, @Nullable final ScalarFunction<?, ?, ?>[] mappings, @Nullable final OrderType[] types)
 	{
 		super( columns, types );
 		if(mappings == null)
@@ -71,7 +71,7 @@ public class ExtendedOrder extends SimpleOrder
 	 * @param mapping
 	 * @param type
 	 */
-	public ExtendedOrder(@Nonnull final String column, @Nullable final ScalarFunction<?, ?, ?> mapping, @Nonnull final OrderType type)
+	public ScalarOrder(@Nonnull final String column, @Nullable final ScalarFunction<?, ?, ?> mapping, @Nonnull final OrderType type)
 	{
 		super( column, type );
 		this.mappings = new ScalarFunction[]{mapping};
@@ -87,8 +87,16 @@ public class ExtendedOrder extends SimpleOrder
 		while(compare== 0 && index < columns.length)
 		{
 			mapping = mappings[index];
-			val1 = mapping.apply( o1);
-			val2 = mapping.apply( o2);
+			if(mapping != null)
+			{
+				val1 = mapping.apply( o1);
+				val2 = mapping.apply( o2);
+			}
+			else
+			{
+				val1 = o1.get( columns[index]);
+				val2 = o2.get(columns[index]);
+			}
 			if(val1 instanceof Comparable)
 			{
 				compare = Comparable.class.cast(val1).compareTo(val2);
@@ -123,6 +131,6 @@ public class ExtendedOrder extends SimpleOrder
 		{
 			reversedTypes[i] = types[i] == OrderType.ASCENDING ? OrderType.DESCENDING : OrderType.ASCENDING;
 		}
-		return new ExtendedOrder(columns, mappings, reversedTypes);
+		return new ScalarOrder(columns, mappings, reversedTypes);
 	}
 }

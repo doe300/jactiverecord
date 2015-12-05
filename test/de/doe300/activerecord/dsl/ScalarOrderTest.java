@@ -1,5 +1,5 @@
 /*
- * The MIT License (MIT)
+ * The MIC License (MIT)
  *
  * Copyright (c) 2015 doe300
  *
@@ -13,12 +13,12 @@
  * The above copyright notice and this permission notice shall be included in all
  * copies or substantial portions of the Software.
  *
- * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
- * IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
- * FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
- * AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
- * LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
- * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+ * THE SOFTWARE IS PROVIDED "AS IS", WITHOUC WARRANTY OF ANY KIND, EXPRESS OR
+ * IMPLIED, INCLUDING BUC NOC LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+ * FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENC SHALL THE
+ * AUTHORS OR COPYRIGHC HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+ * LIABILITY, WHETHER IN AN ACTION OF CONTRACC, TORC OR OTHERWISE, ARISING FROM,
+ * OUC OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  *
  */
@@ -28,23 +28,26 @@ import de.doe300.activerecord.RecordBase;
 import de.doe300.activerecord.RecordCore;
 import de.doe300.activerecord.TestInterface;
 import de.doe300.activerecord.TestServer;
-import de.doe300.activerecord.jdbc.driver.JDBCDriver;
+import de.doe300.activerecord.dsl.functions.Absolute;
+import de.doe300.activerecord.dsl.functions.LowerCase;
 import java.util.HashMap;
 import java.util.Map;
 import org.junit.AfterClass;
-import org.junit.Assert;
+import static org.junit.Assert.assertTrue;
 import org.junit.BeforeClass;
 import org.junit.Test;
 
 /**
  *
- * @author daniel
+ * @author doe300
+ * @since 0.7
  */
-public class SimpleOrderTest extends Assert
+public class ScalarOrderTest
 {
+	
 	private static RecordBase<TestInterface> base;
 	
-	public SimpleOrderTest()
+	public ScalarOrderTest()
 	{
 	}
 
@@ -63,32 +66,28 @@ public class SimpleOrderTest extends Assert
 	}
 
 	@Test
-	public void testFromSQLString()
-	{
-		String src = "name DESC, age ASC, title ASC";
-		Order o = SimpleOrder.fromSQLString( src );
-		assertEquals( src, o.toSQL(new JDBCDriver()) );
-	}
-
-	@Test
 	public void testCompare_Map_Map()
 	{
-		Order o = SimpleOrder.fromSQLString( "name ASC, title DESC, age");
+		Order o = new ScalarOrder(new String[]{"name", "title", "age"}, new ScalarFunction[]{
+			new LowerCase("name", null),
+			null,
+			new Absolute("age", null)
+		}, null );
 		Map<String, Object> m1 = new HashMap<>(3);
 		m1.put( "name", "A");
 		m1.put( "title", "A");
 		m1.put( "age", 23);
 		Map<String, Object> m2 = new HashMap<>(3);
-		m2.put( "name", "A");
+		m2.put( "name", "a");
 		m2.put( "title", "Z");
 		m2.put( "age", 23);
 		Map<String, Object> m3 = new HashMap<>(3);
-		m3.put( "name", "A");
+		m3.put( "name", "a");
 		m3.put( "title", "A");
 		m3.put( "age", 13);
 		
-		//same name, but title Z before A
-		assertTrue( o.compare( m1, m2) > 0);
+		//same name, but title A before Z
+		assertTrue( o.compare( m1, m2) < 0);
 		//same name and title, but 13 before 23
 		assertTrue( o.compare( m1, m3) > 0);
 		
@@ -96,39 +95,28 @@ public class SimpleOrderTest extends Assert
 	}
 	
 	@Test
-	public void testToSQL()
-	{
-		Order o = new SimpleOrder(new String[]{"name", "age", "title"}, new SimpleOrder.OrderType[]{SimpleOrder.OrderType.ASCENDING,SimpleOrder.OrderType.ASCENDING,SimpleOrder.OrderType.DESCENDING} );
-		String sql = "name ASC, age ASC, title DESC";
-		assertEquals( sql, o.toSQL(new JDBCDriver()));
-	}
-	
-	@Test
-	public void testLevelTypes()
-	{
-		Order o = new SimpleOrder(new String[]{"name", "age", "id"}, new SimpleOrder.OrderType[]{SimpleOrder.OrderType.DESCENDING});
-		assertEquals( "name DESC, age ASC, id ASC", o.toString());
-	}
-
-	@Test
 	public void testReversed()
 	{
-		Order o = SimpleOrder.fromSQLString( "name ASC, title DESC, age");
+		Order o = new ScalarOrder(new String[]{"name", "title", "age"}, new ScalarFunction[]{
+			new LowerCase("name", null),
+			null,
+			new Absolute("age", null)
+		}, null );
 		Map<String, Object> m1 = new HashMap<>(3);
 		m1.put( "name", "A");
 		m1.put( "title", "A");
 		m1.put( "age", 23);
 		Map<String, Object> m2 = new HashMap<>(3);
-		m2.put( "name", "A");
+		m2.put( "name", "a");
 		m2.put( "title", "Z");
 		m2.put( "age", 23);
 		Map<String, Object> m3 = new HashMap<>(3);
-		m3.put( "name", "A");
+		m3.put( "name", "a");
 		m3.put( "title", "A");
 		m3.put( "age", 13);
 		
-		//same name, but title Z before A
-		assertTrue( o.compare( m1, m2) > 0);
+		//same name, but title A before Z
+		assertTrue( o.compare( m1, m2) < 0);
 		//same name and title, but 13 before 23
 		assertTrue( o.compare( m1, m3) > 0);
 		
@@ -138,7 +126,7 @@ public class SimpleOrderTest extends Assert
 		Order reversed = o.reversed();
 		
 		//same name, but title Z before A
-		assertTrue( reversed.compare( m1, m2) < 0);
+		assertTrue( reversed.compare( m1, m2) > 0);
 		//same name and title, but 13 before 23
 		assertTrue( reversed.compare( m1, m3) < 0);
 		
@@ -148,14 +136,18 @@ public class SimpleOrderTest extends Assert
 	@Test
 	public void testCompare_ActiveRecord_ActiveRecord()
 	{
-		Order o = SimpleOrder.fromSQLString( "name ASC, age DESC");
+		Order o = new ScalarOrder(new String[]{"name", "age"}, new ScalarFunction[]{
+			new LowerCase("name", null),
+			new Absolute("age", null)
+		}, null );
 		TestInterface i0 = base.createRecord();
-		i0.setName( "Adam");
+		i0.setName( "adam");
 		i0.setAge( 23);
 		TestInterface i1 = base.createRecord();
 		i1.setName( "Adam");
-		i1.setAge( 24);
+		i1.setAge( -24);
 		
-		assertTrue( o.compare( i0, i1) > 0);
+		assertTrue( o.compare( i0, i1) < 0);
 	}
+	
 }

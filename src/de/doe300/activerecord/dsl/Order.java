@@ -53,6 +53,10 @@ public interface Order extends Comparator<ActiveRecord>
 	
 	public int compare(Map<String, Object> o1, Map<String, Object> o2);
 	
+	/**
+	 * @return an Order with exact the inverse ordering
+	 * @since 0.7
+	 */
 	@Override
 	public Order reversed();
 }
