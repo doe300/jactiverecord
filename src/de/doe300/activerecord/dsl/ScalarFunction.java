@@ -96,4 +96,14 @@ public abstract class ScalarFunction<T extends ActiveRecord, C, R> implements SQ
 	}
 
 	protected abstract R applySQLFunction(@Nullable final C columnValue);
+
+	@Override
+	public boolean equals( Object obj )
+	{
+		if(obj == null || !(obj instanceof SQLFunction))
+		{
+			return false;
+		}
+		return equals( (SQLFunction)obj);
+	}
 }

@@ -58,4 +58,16 @@ public interface SQLFunction<T extends ActiveRecord, R> extends Function<T, R>
 	 * @throws UnsupportedOperationException if the method is not supported
 	 */
 	public R apply(@Nonnull final Map<String, Object> map);
+	
+	/**
+	 * Two SQL-functions are considered equal, if their default SQL representations are the same
+	 * @param func
+	 * @return whether the two SQL functions are equal
+	 * @since 0.7
+	 */
+	public default boolean equals(@Nonnull final SQLFunction<?,?> func)
+	{
+		final JDBCDriver driver = new JDBCDriver();
+		return toSQL( driver, null ).equals( func.toSQL( driver, null));
+	}
 }

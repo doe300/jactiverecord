@@ -132,6 +132,16 @@ public abstract class AggregateFunction<T extends ActiveRecord, C, V extends Agg
 	{
 		return aggregateValues( Stream.of( columnFunction.apply( t)));
 	}
+	
+	@Override
+	public boolean equals( Object obj )
+	{
+		if(obj == null || !(obj instanceof SQLFunction))
+		{
+			return false;
+		}
+		return equals( (SQLFunction)obj);
+	}
 
 	public static class ValueHolder<T>
 	{
