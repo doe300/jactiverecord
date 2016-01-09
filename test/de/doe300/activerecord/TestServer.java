@@ -57,7 +57,7 @@ public class TestServer extends Assert
 	/*
 	 * XXX: Need to test all test-cases for the various record-store implementations
 	 */
-	public static final Class<? extends RecordStore> testStore = SimpleJDBCRecordStore.class;
+	public static final Class<? extends RecordStore> testStore = CachedJDBCRecordStore.class;
 	
 	@Nonnull
 	public static RecordCore getTestCore() throws SQLException
@@ -117,8 +117,6 @@ public class TestServer extends Assert
 			 */
 			//start server with "systemctl start postgresql.service"
 //			con = DriverManager.getConnection( "jdbc:postgresql:postgres", "postgres", "");
-			
-			//TODO run all tests with MemoryRecordStore
 			
 		}
 		printMetaData( con );

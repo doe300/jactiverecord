@@ -24,6 +24,9 @@
  */
 package de.doe300.activerecord.dsl;
 
+import de.doe300.activerecord.jdbc.driver.JDBCDriver;
+import java.util.HashMap;
+import java.util.Map;
 import org.junit.Assert;
 import org.junit.Test;
 
@@ -34,7 +37,6 @@ import org.junit.Test;
  */
 public class CombinedOrderTest extends Assert
 {
-	
 	public CombinedOrderTest()
 	{
 	}
@@ -45,9 +47,35 @@ public class CombinedOrderTest extends Assert
 		Order o = SimpleOrder.fromSQLString( "name ASC, age DESC");
 		
 		assertEquals( o, CombinedOrder.combine( o, o, o, o));
-		
+		assertEquals( o, CombinedOrder.combine( o));
 		assertEquals( o, CombinedOrder.combine( o, null));
-		
 		assertNotSame(o, CombinedOrder.combine( o, new SimpleOrder("age", SimpleOrder.OrderType.ASCENDING)));
+	}
+
+	@Test
+	public void testToSQL()
+	{
+		Order o = new CombinedOrder(SimpleOrder.fromSQLString( "name ASC"), SimpleOrder.fromSQLString( "age DESC") );
+		assertEquals( o.toSQL( new JDBCDriver()), "name ASC, age DESC");
+	}
+
+	@Test
+	public void testReversed()
+	{
+		Order o = new CombinedOrder(SimpleOrder.fromSQLString( "name ASC"), SimpleOrder.fromSQLString( "age DESC") );
+		assertEquals( o.reversed(), SimpleOrder.fromSQLString( "name DESC, age asc"));
+	}
+
+	@Test
+	public void testCompare_Map_Map()
+	{
+		Order o = new CombinedOrder(SimpleOrder.fromSQLString( "name ASC"), SimpleOrder.fromSQLString( "age DESC") );
+		final Map<String, Object> obj1 = new HashMap<>(2);
+		obj1.put( "name", "Adam");
+		obj1.put( "age", 112);
+		final Map<String, Object> obj2 = new HashMap<>(2);
+		obj2.put( "name", "Adam");
+		obj2.put( "age", 113);
+		assertTrue( o.compare( obj1, obj2) > 0);
 	}
 }

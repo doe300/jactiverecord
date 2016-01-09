@@ -27,6 +27,9 @@ package de.doe300.activerecord;
 import de.doe300.activerecord.dsl.Comparison;
 import de.doe300.activerecord.dsl.QueryResult;
 import de.doe300.activerecord.dsl.SimpleCondition;
+import de.doe300.activerecord.dsl.SimpleOrder;
+import de.doe300.activerecord.dsl.functions.Absolute;
+import de.doe300.activerecord.dsl.functions.Sum;
 import de.doe300.activerecord.record.RecordType;
 import de.doe300.activerecord.scope.Scope;
 import de.doe300.activerecord.record.validation.ValidationFailed;
@@ -35,6 +38,8 @@ import java.sql.SQLException;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
+import java.util.HashMap;
+import java.util.Map;
 import org.junit.AfterClass;
 import org.junit.Assert;
 import org.junit.BeforeClass;
@@ -396,15 +401,29 @@ public class RecordBaseTest<T extends TestInterface> extends Assert
 	@Test
 	public void testFindForMap()
 	{
+		//tests single condition
 		T t = base.createRecord();
 		assertTrue( base.findFor(Collections.singletonMap( base.getPrimaryColumn(), t.getPrimaryKey())).count() == 1);
+		//tests multiple conditions
+		t.setAge( 123);
+		final Map<String, Object> conds = new HashMap<>(2);
+		conds.put( base.getPrimaryColumn(), t.getPrimaryKey());
+		conds.put( "age", 123);
+		assertTrue( base.findFor( conds).count() == 1 );
 	}
 	
 	@Test
 	public void testFindFirstForMap()
 	{
+		//tests single condition
 		T t = base.createRecord();
 		assertSame(t, base.findFirstFor(Collections.singletonMap( base.getPrimaryColumn(), t.getPrimaryKey())));
+		//tests multiple conditions
+		t.setAge( 124);
+		final Map<String, Object> conds = new HashMap<>(2);
+		conds.put( base.getPrimaryColumn(), t.getPrimaryKey());
+		conds.put( "age", 124);
+		assertTrue( base.findFor( conds).count() == 1 );
 	}
 
 	@Test
@@ -418,7 +437,21 @@ public class RecordBaseTest<T extends TestInterface> extends Assert
 	{
 		T record = base.createRecord( Collections.singletonMap( "name", "Afam"));
 		assertNotNull( record);
-		assertEquals( "Afam", record.getName());
+		
+	}
+	
+	@Test(expected = RecordException.class)
+	public void testCreateRecord_Map_Consumer()
+	{
+		T record = base.createRecord( Collections.singletonMap( "name", "Afam"), 
+				(final T t) -> {
+					assertEquals( "Afam", t.getName());
+				}
+		);
+		assertNotNull( record);
+		base.createRecord( null, (final T t) -> {
+			throw new IllegalArgumentException("Dummy error");
+		});
 	}
 
 	@Test
@@ -465,5 +498,49 @@ public class RecordBaseTest<T extends TestInterface> extends Assert
 	public void testIsAutoCreate()
 	{
 		assertFalse( base.isAutoCreate());
+	}
+
+	@Test
+	public void testAggregate()
+	{
+		final T min = base.createRecord();
+		min.setName( "Aaaa");
+		min.setAge( -112);
+		//to compensate the -112 for sum-test
+		base.createRecord().setAge( 113);
+		final T max = base.createRecord();
+		max.setName( "Aaaa");
+		max.setAge( 112200);
+		//default aggregates
+		assertTrue( base.minimum( "age", TestInterface::getAge) <= min.getAge());
+		assertTrue( min.getName().compareTo(base.minimum( "name", TestInterface::getName)) >= 0);
+		assertTrue( base.maximum( "age", TestInterface::getAge) >= max.getAge() );
+		//we have duplicate name, so count must be larger than count distinct
+		assertTrue( base.count( "name", TestInterface::getName) > base.countDistinct( "name", TestInterface::getName));
+		assertTrue( base.sum( "age", TestInterface::getAge) > max.getAge());
+		assertEquals( base.sum( "age", TestInterface::getAge), base.sumFloating( "age", TestInterface::getAge), 0.01d);
+		assertTrue( base.average( "age", TestInterface::getAge) < max.getAge());
+		//more complex aggregates
+		assertTrue( base.aggregate( new Sum<>(new Absolute<>("age", TestInterface::getAge)), null).longValue() > base.sum( "age", TestInterface::getAge));
+	}
+
+	@Test
+	public void testWithScope()
+	{
+		assertEquals( base.where( new SimpleCondition("age", 12, Comparison.LARGER)).getEstimatedSize(), base.withScope( 
+				new Scope(new SimpleCondition("age", 12, Comparison.LARGER), SimpleOrder.fromSQLString( "age DESC"), Scope.NO_LIMIT )).stream().count() );
+	}
+
+	@Test
+	public void testGetAll()
+	{
+		assertEquals( base.getAll().size(), base.where( null).getEstimatedSize());
+		assertEquals( base.getAll().getOrder(), base.getDefaultOrder());
+	}
+
+	@Test
+	public void testGetForCondition()
+	{
+		assertEquals( base.getForCondition( null, null).size(), base.count( null));
 	}
 }

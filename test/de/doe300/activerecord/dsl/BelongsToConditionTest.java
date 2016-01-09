@@ -27,7 +27,10 @@ package de.doe300.activerecord.dsl;
 import de.doe300.activerecord.RecordBase;
 import de.doe300.activerecord.TestInterface;
 import de.doe300.activerecord.TestServer;
+import de.doe300.activerecord.record.ActiveRecord;
+import java.util.Collections;
 import java.util.HashMap;
+import java.util.Map;
 import org.junit.AfterClass;
 import org.junit.Assert;
 import org.junit.BeforeClass;
@@ -111,12 +114,21 @@ public class BelongsToConditionTest extends Assert
 		assertFalse( cond3.test( t1));
 		assertTrue( cond3.test( t2));
 		assertTrue( cond3.test( t3));
+		
+		assertFalse( cond1.test((ActiveRecord)null));
+		TestInterface t4 = base.createRecord();
+		//t4 has no fk_test_id set
+		assertFalse( cond1.test( t4));
 	}
 
 	@Test
 	public void testTest_Map()
 	{
-		cond1.test( new HashMap<String, Object>(0) );
+		TestInterface t4 = base.createRecord();
+		assertFalse( cond1.test( (Map<String, Object>)null));
+		assertFalse( cond1.test( new HashMap<String, Object>(0) ));
+		assertFalse( cond2.test( t4));
+		assertTrue( cond2.test( Collections.singletonMap( "fk_test_id", t3.getPrimaryKey())));
 	}
 
 	@Test

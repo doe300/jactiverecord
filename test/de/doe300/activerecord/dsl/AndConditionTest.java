@@ -73,7 +73,7 @@ public class AndConditionTest extends Assert
 		assertNotNull( AndCondition.andConditions( new Condition[0]));
 	}
 	
-	@Test
+	@Test(expected = IllegalArgumentException.class)
 	public void testAndConditions()
 	{
 		Condition simpleCond = new SimpleCondition(base.getPrimaryColumn(), 3, Comparison.SMALLER_EQUALS);
@@ -91,6 +91,8 @@ public class AndConditionTest extends Assert
 		//removes duplicates
 		Condition c5 = AndCondition.andConditions( simpleCond, simpleCond, simpleCond, simpleCond2, c1);
 		assertSame( c5, simpleCond);
+		//error-test
+		AndCondition.andConditions( new Condition[0]);
 	}
 	
 	@Test

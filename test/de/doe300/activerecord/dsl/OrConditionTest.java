@@ -79,7 +79,7 @@ public class OrConditionTest extends Assert
 		assertNotNull( OrCondition.orConditions( new Condition[0]));
 	}
 	
-	@Test
+	@Test(expected = IllegalArgumentException.class)
 	public void testOrConditions()
 	{
 		Condition c1 = OrCondition.orConditions(cond);
@@ -98,6 +98,8 @@ public class OrConditionTest extends Assert
 		assertSame( s2, c4);
 		//test skip nulls
 		assertSame( s1, OrCondition.orConditions( s1, null, null, null));
+		
+		OrCondition.orConditions( new Condition[0]);
 	}
 
 	@Test

@@ -27,6 +27,7 @@ package de.doe300.activerecord.dsl;
 import de.doe300.activerecord.RecordBase;
 import de.doe300.activerecord.TestInterface;
 import de.doe300.activerecord.TestServer;
+import de.doe300.activerecord.record.ActiveRecord;
 import java.util.HashMap;
 import org.junit.AfterClass;
 import static org.junit.Assert.assertEquals;
@@ -126,6 +127,8 @@ public class HasOneConditionTest
 		assertFalse( cond3.test( t1));
 		assertFalse( cond3.test( t2));
 		assertTrue( cond3.test( t3));
+		
+		assertFalse( cond3.test( (ActiveRecord)null));
 	}
 
 	@Test

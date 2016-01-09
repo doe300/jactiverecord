@@ -68,6 +68,9 @@ public class SimpleOrderTest extends Assert
 		String src = "name DESC, age ASC, title ASC";
 		Order o = SimpleOrder.fromSQLString( src );
 		assertEquals( src, o.toSQL(new JDBCDriver()) );
+		assertNull( SimpleOrder.fromSQLString(null ) );
+		assertNull( SimpleOrder.fromSQLString("" ) );
+		assertEquals( o, SimpleOrder.fromSQLString( "ORDER BY name DESC, age ASC, title ASC"));
 	}
 
 	@Test

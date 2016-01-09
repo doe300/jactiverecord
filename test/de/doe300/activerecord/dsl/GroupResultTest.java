@@ -116,7 +116,7 @@ public class GroupResultTest extends Assert
 	public void testSize()
 	{
 		GroupResult<String,TestInterface> res = new GroupResult<String,TestInterface>("Adam5", base.find( new SimpleCondition("name", "Adam5", Comparison.IS)), GroupResult.SIZE_UNKNOWN, base.getDefaultOrder());
-		assertTrue( res.size() == GroupResult.SIZE_UNKNOWN);
+		assertTrue( res.getEstimatedSize() == GroupResult.SIZE_UNKNOWN);
 		//XXX does not close stream
 	}
 }

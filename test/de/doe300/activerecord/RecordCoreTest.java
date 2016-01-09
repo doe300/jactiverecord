@@ -63,18 +63,24 @@ public class RecordCoreTest extends Assert
 	public void testFromDatabase() throws Exception
 	{
 		assertNotNull( RecordCore.fromDatabase( TestServer.getTestConnection(), false));
+		final RecordCore tmp = RecordCore.fromDatabase( TestServer.getTestConnection(), false);
+		assertSame( tmp, RecordCore.fromDatabase( TestServer.getTestConnection(), true));
 	}
 
 	@Test
 	public void testNewMemoryStore() throws Exception
 	{
 		assertNotNull( RecordCore.newMemoryStore( "test1"));
+		final RecordCore tmp = RecordCore.newMemoryStore("test113");
+		assertSame( tmp, RecordCore.newMemoryStore("test113"));
 	}
 
 	@Test
 	public void testFromStore() throws Exception
 	{
 		assertNotNull( RecordCore.fromStore( "test2", new MemoryRecordStore()));
+		final RecordCore tmp = RecordCore.fromStore( "test2", new MemoryRecordStore());
+		assertSame( tmp, RecordCore.fromStore( "test2", new MemoryRecordStore()));
 	}
 
 	@Test
@@ -122,8 +128,10 @@ public class RecordCoreTest extends Assert
 		};
 		
 		core.addRecordListener( TestInterface.class, l);
+		core.addRecordListener( TestInterface.class, l);
 		core.addRecordListener( TestSingleInheritancePOJO.class, failL);
 		core.fireRecordEvent( RecordListener.RecordEvent.RECORD_CREATED, core.getBase( TestInterface.class ), core.getBase( TestInterface.class).createRecord());
+		core.removeRecordListener( TestInterface.class, l);
 		core.removeRecordListener( TestInterface.class, l);
 	}
 

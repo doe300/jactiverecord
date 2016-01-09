@@ -85,7 +85,7 @@ public class InvertedConditionTest extends Assert
 		assertFalse( base.find( InvertedCondition.invertCondition(cond)).anyMatch( (TestInterface i) -> i.equals( t3)));
 	}
 	
-	@Test
+	@Test(expected = IllegalArgumentException.class)
 	public void testInvertedCondition()
 	{
 		//matches t1
@@ -93,6 +93,8 @@ public class InvertedConditionTest extends Assert
 		//matches t2 and t3
 		assertTrue( base.find( InvertedCondition.invertCondition(cond)).count() >= 2 );
 		assertFalse( base.find( InvertedCondition.invertCondition(cond)).anyMatch( (TestInterface i) -> i.equals( t1)));
+		
+		InvertedCondition.invertCondition( null);
 	}
 
 	@Test

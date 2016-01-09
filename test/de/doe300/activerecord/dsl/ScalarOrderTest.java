@@ -30,10 +30,11 @@ import de.doe300.activerecord.TestInterface;
 import de.doe300.activerecord.TestServer;
 import de.doe300.activerecord.dsl.functions.Absolute;
 import de.doe300.activerecord.dsl.functions.LowerCase;
+import de.doe300.activerecord.jdbc.driver.JDBCDriver;
 import java.util.HashMap;
 import java.util.Map;
 import org.junit.AfterClass;
-import static org.junit.Assert.assertTrue;
+import org.junit.Assert;
 import org.junit.BeforeClass;
 import org.junit.Test;
 
@@ -42,7 +43,7 @@ import org.junit.Test;
  * @author doe300
  * @since 0.7
  */
-public class ScalarOrderTest
+public class ScalarOrderTest extends Assert
 {
 	
 	private static RecordBase<TestInterface> base;
@@ -149,5 +150,14 @@ public class ScalarOrderTest
 		
 		assertTrue( o.compare( i0, i1) < 0);
 	}
-	
+
+	@Test
+	public void testToSQL()
+	{
+		Order o = new ScalarOrder(new String[]{"name", "age"}, new ScalarFunction[]{
+			new LowerCase("name", null),
+			new Absolute("age", null)
+		}, null );
+		assertEquals( o.toSQL( new JDBCDriver()), "LOWER(name) ASC, CAST(ABS(age) AS BIGINT) ASC");
+	}
 }

@@ -27,6 +27,7 @@ package de.doe300.activerecord.dsl;
 import de.doe300.activerecord.RecordBase;
 import de.doe300.activerecord.TestInterface;
 import de.doe300.activerecord.TestServer;
+import de.doe300.activerecord.record.ActiveRecord;
 import java.util.HashMap;
 import org.junit.AfterClass;
 import org.junit.Assert;
@@ -114,12 +115,14 @@ public class HasManyThroughConditionTest extends Assert
 		assertFalse( cond3.test( t1));
 		assertTrue( cond3.test( t2));
 		assertTrue( cond3.test( t3));
+		
+		assertFalse( cond1.test( (ActiveRecord)null));
 	}
 
 	@Test
 	public void testTest_Map()
 	{
-		cond1.test( new HashMap<String, Object>(0) );
+		assertFalse( cond1.test( new HashMap<String, Object>(0) ));
 	}
 
 	@Test

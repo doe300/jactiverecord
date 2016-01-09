@@ -88,7 +88,7 @@ public class QueryResultTest extends Assert
 	@Test
 	public void testSize()
 	{
-		assertTrue( base.where( new SimpleCondition("name", base, Comparison.IS_NOT_NULL)).size() == 3);
+		assertTrue( base.where( new SimpleCondition("name", base, Comparison.IS_NOT_NULL)).getEstimatedSize() == 3);
 	}
 
 	@Test
