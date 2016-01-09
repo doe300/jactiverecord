@@ -106,7 +106,7 @@ public interface FinderMethods<T extends ActiveRecord>
 		{
 			return find( conds.get( 0));
 		}
-		return find( AndCondition.andConditions( new Condition[conds.size()]) );
+		return find( AndCondition.andConditions( conds.toArray( new Condition[conds.size()])) );
 	}
 
 	/**

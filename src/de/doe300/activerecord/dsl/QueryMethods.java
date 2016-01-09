@@ -43,7 +43,7 @@ import javax.annotation.Nonnegative;
 public interface QueryMethods<T extends ActiveRecord> extends FinderMethods<T>, AggregateMethods<T>
 {
 	/**
-	 * Value for unknown size
+	 * Value for unknown getEstimatedSize
 	 */
 	public static final int SIZE_UNKNOWN = -1;
 
@@ -60,7 +60,7 @@ public interface QueryMethods<T extends ActiveRecord> extends FinderMethods<T>, 
 	@Nonnull
 	public default QueryResult<T> where(@Nullable final Condition condition)
 	{
-		return withScope( new Scope(condition, null, size()));
+		return withScope(new Scope(condition, null, getEstimatedSize()));
 	}
 	
 	/**
@@ -80,13 +80,13 @@ public interface QueryMethods<T extends ActiveRecord> extends FinderMethods<T>, 
 	@Nonnull
 	public default QueryResult<T> order(@Nullable final Order order)
 	{
-		return withScope( new Scope(null, order, size()));
+		return withScope(new Scope(null, order, getEstimatedSize()));
 	}
 
 	/**
 	 * @return the estimated number of records, or {@link #SIZE_UNKNOWN} if the number is not known
 	 */
-	public int size();
+	public int getEstimatedSize();
 	
 	/**
 	 * @return the {@link Order} this query is sorted by

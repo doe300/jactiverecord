@@ -325,7 +325,15 @@ public abstract class RecordBase<T extends ActiveRecord> implements ReadOnlyReco
 		records.put( key, record );
 		if(onCreation != null)
 		{
-			onCreation.accept( record );
+			try
+			{
+				onCreation.accept( record );
+			}
+			catch(final Exception e)
+			{
+				record.destroy();
+				throw new RecordException(e);
+			}
 		}
 		if(hasCallbacks())
 		{
@@ -445,6 +453,7 @@ public abstract class RecordBase<T extends ActiveRecord> implements ReadOnlyReco
 	{
 		final Collection<String> columnNames = store.getAllColumnNames( getTableName());
 		final Map<String, Object> copyValues = store.getValues( this, record.getPrimaryKey(), columnNames.toArray( new String[columnNames.size()]));
+		//TODO seems not to copy the column values
 		return createRecord( copyValues );
 	}
 

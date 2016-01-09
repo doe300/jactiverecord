@@ -91,7 +91,7 @@ public class QueryResult<T extends ActiveRecord> implements QueryMethods<T>, Aut
 	}
 
 	@Override
-	public int size()
+	public int getEstimatedSize()
 	{
 		return size;
 	}

@@ -45,6 +45,7 @@ import de.doe300.activerecord.record.ActiveRecord;
  * @author doe300
  * @param <T>
  * @param <C>
+ * @param <V>
  * @param <R>
  * @since 0.5
  */
@@ -73,8 +74,20 @@ public abstract class AggregateFunction<T extends ActiveRecord, C, V extends Agg
 	@Override
 	public String toSQL(final JDBCDriver driver, @Nullable final String tableName)
 	{
-		final String arg = column instanceof SQLFunction ? ((SQLFunction)column).toSQL(driver, tableName) : (String)column;
-		return driver.getSQLFunction(command, tableName != null ? tableName + "." + column : arg);
+		final String arg;
+		if(column instanceof SQLFunction)
+		{
+			arg = ((SQLFunction)column).toSQL(driver, tableName);
+		}
+		else if(tableName != null)
+		{
+			arg =  tableName + "." + (String)column;
+		}
+		else
+		{
+			arg = (String)column;
+		}
+		return driver.getSQLFunction(command, arg);
 	}
 
 	/**

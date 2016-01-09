@@ -50,7 +50,7 @@ public class GroupResult<R, T extends ActiveRecord> implements QueryMethods<T>, 
 	/**
 	 * @param key the value this group has in common
 	 * @param baseStream the elements in this group
-	 * @param size the size of the group
+	 * @param size the getEstimatedSize of the group
 	 * @param order the ordering of the elements
 	 */
 	public GroupResult(@Nonnull final R key, @Nonnull final Stream<T> baseStream, final int size,
@@ -100,7 +100,7 @@ public class GroupResult<R, T extends ActiveRecord> implements QueryMethods<T>, 
 	}
 
 	@Override
-	public int size()
+	public int getEstimatedSize()
 	{
 		return size;
 	}

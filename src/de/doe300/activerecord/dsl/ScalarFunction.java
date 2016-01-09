@@ -67,8 +67,20 @@ public abstract class ScalarFunction<T extends ActiveRecord, C, R> implements SQ
 	@Override
 	public String toSQL(final JDBCDriver driver, @Nullable final String tableName)
 	{
-		final String arg = column instanceof SQLFunction? ((SQLFunction)column).toSQL(driver, tableName) : (String)column;
-		return driver.getSQLFunction(command, tableName != null ? tableName + "." + column : arg);
+		final String arg;
+		if(column instanceof SQLFunction)
+		{
+			arg = ((SQLFunction)column).toSQL(driver, tableName);
+		}
+		else if(tableName != null)
+		{
+			arg =  tableName + "." + (String)column;
+		}
+		else
+		{
+			arg = (String)column;
+		}
+		return driver.getSQLFunction(command, arg);
 	}
 
 	@Override

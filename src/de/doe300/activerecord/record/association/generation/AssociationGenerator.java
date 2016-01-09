@@ -403,7 +403,7 @@ public class AssociationGenerator extends AbstractProcessor
 					append( annotation.associationKey() ).append( "\", null);\n");
 			//return new HasManyAssociationSet<<record-type>>(otherBase, cond, setAssoc, unsetAssoc );
 			code.append( "\t\treturn new HasManyAssociationSet<").append(typeName).
-					append(">(otherBase, cond, setAssoc, unsetAssoc );");
+					append(">(otherBase, cond, null, setAssoc, unsetAssoc );");
 		}
 		
 		// }
