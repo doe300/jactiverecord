@@ -2,7 +2,7 @@
   <modelVersion>4.0.0</modelVersion>
   <groupId>de.doe300</groupId>
   <artifactId>JActiveRecord</artifactId>
-  <version>0.0.1-SNAPSHOT</version>
+  <version>0.7-SNAPSHOT</version>
   <description>An java-based object-database-binding on top of JDBC inspired by Rails ActiveRecord.</description>
   <build>
     <sourceDirectory>src</sourceDirectory>

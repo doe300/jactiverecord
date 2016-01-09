@@ -120,5 +120,14 @@ public class CombinedOrder implements Order
 		}
 		return compare;
 	}
-	
+
+	@Override
+	public boolean equals( Object obj )
+	{
+		if(obj == null || !(obj instanceof Order))
+		{
+			return false;
+		}
+		return equals( (Order)obj);
+	}
 }

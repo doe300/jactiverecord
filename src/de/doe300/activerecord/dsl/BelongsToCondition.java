@@ -145,4 +145,14 @@ public class BelongsToCondition implements Condition
 	{
 		return InvertedCondition.invertCondition(this );
 	}
+	
+	@Override
+	public boolean equals( Object obj )
+	{
+		if(obj == null || !(obj instanceof Condition))
+		{
+			return false;
+		}
+		return equals( (Condition)obj);
+	}
 }

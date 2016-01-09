@@ -59,4 +59,17 @@ public interface Order extends Comparator<ActiveRecord>
 	 */
 	@Override
 	public Order reversed();
+
+	/**
+	 * Orders are equal, if their SQL-representation is the same
+	 * @param order
+	 * @return whether the two orders are equal
+	 * @see #equals(java.lang.Object) 
+	 * @since 0.7
+	 */
+	public default boolean equals( @Nonnull final Order order )
+	{
+		final JDBCDriver driver = new JDBCDriver();
+		return toSQL( driver ).equals( order.toSQL( driver));
+	}
 }

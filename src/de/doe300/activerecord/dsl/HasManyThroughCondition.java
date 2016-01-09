@@ -148,4 +148,13 @@ public class HasManyThroughCondition implements Condition
 		+ ") AND " + associatedBaseCondition.toSQL( driver, associatedTableName ) + ")";
 	}
 
+	@Override
+	public boolean equals( Object obj )
+	{
+		if(obj == null || !(obj instanceof Condition))
+		{
+			return false;
+		}
+		return equals( (Condition)obj);
+	}
 }

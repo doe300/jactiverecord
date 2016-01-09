@@ -81,4 +81,17 @@ public interface Condition extends Predicate<ActiveRecord>
 	@Override
 	@Nonnull
 	public Condition negate();
+
+	/**
+	 * Two conditions are equal, if the represent the same SQL-clause
+	 * @param condition
+	 * @return whether the two conditions are equal
+	 * @since 0.7
+	 * @see #equals(java.lang.Object) 
+	 */
+	public default boolean equals( @Nonnull final Condition condition )
+	{
+		final JDBCDriver driver = new JDBCDriver();
+		return toSQL( driver, null ).equals( condition.toSQL( driver, null));
+	}
 }

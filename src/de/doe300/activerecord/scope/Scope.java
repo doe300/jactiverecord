@@ -30,6 +30,7 @@ import javax.annotation.Nullable;
 
 import de.doe300.activerecord.dsl.Condition;
 import de.doe300.activerecord.dsl.Order;
+import java.util.Objects;
 import javax.annotation.concurrent.Immutable;
 
 /**
@@ -93,5 +94,33 @@ public final class Scope
 	public int getLimit()
 	{
 		return limit;
+	}
+
+	/**
+	 * Two scopes are considered equal, if the represent the same {@link Condition}, {@link Order} and limit
+	 * @param obj
+	 * @return whether the two scopes are equal
+	 * @see Object#equals(java.lang.Object) 
+	 * @since 0.7
+	 */
+	@Override
+	public boolean equals( Object obj )
+	{
+		if(obj == null || !(obj instanceof Scope))
+		{
+			return false;
+		}
+		return Objects.equals( ((Scope)obj).getCondition(), getCondition()) &&
+				Objects.equals( ((Scope)obj).getOrder(), getOrder()) && ((Scope)obj).getLimit() == limit;
+	}	
+
+	@Override
+	public int hashCode()
+	{
+		int hash = 7;
+		hash = 11 * hash + Objects.hashCode( this.condition );
+		hash = 11 * hash + Objects.hashCode( this.order );
+		hash = 11 * hash + this.limit;
+		return hash;
 	}
 }
