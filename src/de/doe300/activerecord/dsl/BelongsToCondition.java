@@ -139,12 +139,6 @@ public class BelongsToCondition implements Condition
 		}
 		return associatedTableCond.test(associatedRecord);
 	}
-
-	@Override
-	public Condition negate()
-	{
-		return InvertedCondition.invertCondition(this );
-	}
 	
 	@Override
 	public boolean equals( Object obj )

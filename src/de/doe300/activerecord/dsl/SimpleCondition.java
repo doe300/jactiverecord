@@ -222,12 +222,6 @@ public class SimpleCondition implements Condition
 		}
 		return comp.test(compValue0, compValue);
 	}
-
-	@Override
-	public Condition negate()
-	{
-		return InvertedCondition.invertCondition(this );
-	}
 	
 	@Override
 	public boolean equals( Object obj )

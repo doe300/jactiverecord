@@ -162,13 +162,6 @@ public class AndCondition implements Condition
 	}
 
 	@Override
-	@Nonnull
-	public Condition negate()
-	{
-		return InvertedCondition.invertCondition(this );
-	}
-
-	@Override
 	public boolean equals( Object obj )
 	{
 		if(obj == null || !(obj instanceof Condition))

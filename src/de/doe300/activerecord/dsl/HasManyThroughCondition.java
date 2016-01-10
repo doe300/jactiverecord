@@ -127,12 +127,6 @@ public class HasManyThroughCondition implements Condition
 	}
 
 	@Override
-	public Condition negate()
-	{
-		return InvertedCondition.invertCondition(this);
-	}
-
-	@Override
 	public String toSQL( final JDBCDriver driver, final String tableName )
 	{
 		String associatedTableName = JDBCDriver.getNextTableIdentifier( tableName );

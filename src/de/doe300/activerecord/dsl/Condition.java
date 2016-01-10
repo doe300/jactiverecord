@@ -80,7 +80,34 @@ public interface Condition extends Predicate<ActiveRecord>
 
 	@Override
 	@Nonnull
-	public Condition negate();
+	public default Condition negate()
+	{
+		return InvertedCondition.invertCondition(this );
+	}
+	
+	/**
+	 * combines the two conditions via an SQL AND
+	 * @param other
+	 * @return the combined condition
+	 * @since 0.7
+	 */
+	@Nonnull
+	public default Condition and(@Nullable final Condition other)
+	{
+		return AndCondition.andConditions( this, other);
+	}
+	
+	/**
+	 * Combines the two conditions with OR
+	 * @param other
+	 * @return the combined condition
+	 * @since 0.7
+	 */
+	@Nonnull
+	public default Condition or(@Nullable final Condition other)
+	{
+		return OrCondition.orConditions( this, other);
+	}
 
 	/**
 	 * Two conditions are equal, if the represent the same SQL-clause

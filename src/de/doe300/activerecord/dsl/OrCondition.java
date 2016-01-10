@@ -159,12 +159,6 @@ public class OrCondition implements Condition
 	{
 		return "("+ Arrays.stream( conditions ).map( (Condition c) -> c.toSQL(driver, tableName) ).collect( Collectors.joining( ") OR ("))+")";
 	}
-
-	@Override
-	public Condition negate()
-	{
-		return InvertedCondition.invertCondition(this );
-	}
 	
 	@Override
 	public boolean equals( Object obj )

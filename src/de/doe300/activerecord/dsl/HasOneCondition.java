@@ -119,12 +119,6 @@ public class HasOneCondition implements Condition
 	}
 
 	@Override
-	public Condition negate()
-	{
-		return InvertedCondition.invertCondition(this);
-	}
-	
-	@Override
 	public boolean equals( Object obj )
 	{
 		if(obj == null || !(obj instanceof Condition))
