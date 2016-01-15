@@ -13,7 +13,7 @@
  * The above copyright notice and this permission notice shall be included in all
  * copies or substantial portions of the Software.
  *
- * THE SOFTWARE IS PROVIDED "AS IS", WITHOUC WARRANTY OF ANY KIND, EXPRESS OR
+ * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
  * IMPLIED, INCLUDING BUC NOC LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
  * FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENC SHALL THE
  * AUTHORS OR COPYRIGHC HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
@@ -36,6 +36,7 @@ import de.doe300.activerecord.dsl.functions.Round;
 import de.doe300.activerecord.dsl.functions.Signum;
 import de.doe300.activerecord.dsl.functions.SquareRoot;
 import de.doe300.activerecord.dsl.functions.UpperCase;
+import de.doe300.activerecord.dsl.functions.Value;
 import org.junit.AfterClass;
 import org.junit.Assert;
 import org.junit.BeforeClass;
@@ -178,5 +179,16 @@ public class ScalarFunctionTest extends Assert
 		Condition cond = new SimpleCondition(sqrt, -1, Comparison.IS_NOT);
 		assertTrue(cond.test( t1 ));
 		assertEquals(4, base.count( cond));
-	}	
+	}
+	
+	@Test
+	public void testValue()
+	{
+		ScalarFunction<TestInterface, Integer, Integer> value = new Value<>("age", TestInterface::getAge);
+		//test direct #apply
+		assertEquals( t2.getAge(), value.apply( t2).longValue());
+		Condition cond = new SimpleCondition(value, -1, Comparison.IS_NOT);
+		assertTrue(cond.test( t1 ));
+		assertEquals(4, base.count( cond));
+	}
 }
