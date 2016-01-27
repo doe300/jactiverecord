@@ -74,6 +74,7 @@ public class JDBCDriver implements DBDriver
 	public static final String AGGREGATE_MINIMUM="MIN(%column%)";
 	public static final String AGGREGATE_MAXIMUM="MAX(%column%)";
 
+	public static final String SCALAR_VALUE = "%column%";
 	public static final String SCALAR_ABS = "CAST(ABS(%column%) AS BIGINT)";
 	public static final String SCALAR_ABS_DOUBLE = "CAST(ABS(%column%) AS DOUBLE)";
 	public static final String SCALAR_SIGN = "CAST(SIGN(%column%) AS BIGINT)";
@@ -83,6 +84,13 @@ public class JDBCDriver implements DBDriver
 	public static final String SCALAR_SQRT = "SQRT(%column%)";
 	public static final String SCALAR_UPPER = "UPPER(%column%)";
 	public static final String SCALAR_LOWER = "LOWER(%column%)";
+	public static final String SCALAR_STRING_LENGTH = "CHAR_LENGTH(%column%)";
+	public static final String SCALAR_TRIM = "TRIM(%column%)";
+	
+	public static final String JOIN_INNER = "INNER JOIN";
+	public static final String JOIN_LEFT_OUTER = "LEFT OUTER JOIN";
+	public static final String JOIN_RIGHT_OUTER = "RIGHT OUTER JOIN";
+	public static final String JOIN_FULL_OUTER = "FULL OUTER JOIN";
 
 	private static final String[] sql92Keywords = {
 		"absolute", "action", "allocate", "are", "assertion",
@@ -162,6 +170,30 @@ public class JDBCDriver implements DBDriver
 	{
 		return sqlFunction.replaceAll( "%column%", column);
 	}
+	
+	/**
+	 * @param joinType
+	 * @return the correct keyword for the JOIN-type for this SQL-dialect
+	 * @since 0.7
+	 */
+	/*@Nonnull
+	@Syntax(value = "SQL")
+	public String getSQLJoinKeyword(@Nonnull final JoinType joinType)
+	{
+		switch(joinType)
+		{
+			case INNER_JOIN:
+				return JDBCDriver.JOIN_INNER;
+			case LEFT_OUTER_JOIN:
+				return JDBCDriver.JOIN_LEFT_OUTER;
+			case RIGHT_OUTER_JOIN:
+				return JDBCDriver.JOIN_RIGHT_OUTER;
+			case FULL_OUTER_JOIN:
+				return JDBCDriver.JOIN_FULL_OUTER;
+			default:
+				throw new AssertionError( joinType.name() );
+		}
+	}*/
 
 	/**
 	 * For the default-implementation, see: https://en.wikibooks.org/wiki/SQL_Dialects_Reference/Data_structure_definition/Auto-increment_column
@@ -644,6 +676,23 @@ public class JDBCDriver implements DBDriver
 			catch(final NumberFormatException nfe)
 			{
 				return "otherAssociatedTable";
+			}
+		}
+		if(currentIdentifier.startsWith( "joinedTable"))
+		{
+			final String numString = currentIdentifier.substring( "joinedTable".length() );
+			if(numString.isEmpty())
+			{
+				return "joinedTable1";
+			}
+			try
+			{
+				final Integer num = Integer.parseInt( numString);
+				return "joinedTable"+num;
+			}
+			catch(final NumberFormatException nfe)
+			{
+				return "otherJoinedTable";
 			}
 		}
 		if("otherTable".equals( currentIdentifier))

@@ -126,6 +126,10 @@ public class SQLiteDriver extends JDBCDriver
 		{
 			throw new IllegalArgumentException("SQRT not supported by SQLite");
 		}
+		if(SCALAR_STRING_LENGTH.equals(sqlFunction))
+		{
+			return "LENGTH(" + column + ")";
+		}
 		return super.getSQLFunction( sqlFunction, column );
 	}
 }

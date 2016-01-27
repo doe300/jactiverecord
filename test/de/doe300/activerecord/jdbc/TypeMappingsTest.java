@@ -77,6 +77,7 @@ public class TypeMappingsTest extends Assert
 	{
 		TestTypesInterface record = base.createRecord();
 		UUID id = UUID.randomUUID();
+		assertNull( record.getUUID());
 		record.setUUID( id);
 		assertEquals( id, record.getUUID());
 	}
@@ -86,6 +87,7 @@ public class TypeMappingsTest extends Assert
 	{
 		TestTypesInterface record = base.createRecord();
 		URL url = new URL("http://www.google.de");
+		assertNull( record.getURL());
 		record.setURL( url );
 		assertEquals( url, record.getURL());
 	}
@@ -95,6 +97,7 @@ public class TypeMappingsTest extends Assert
 	{
 		TestTypesInterface record = base.createRecord();
 		URI uri = URI.create( "mailto:test@example.com");
+		assertNull( record.getURI());
 		record.setURI( uri );
 		assertEquals( uri, record.getURI());
 	}
@@ -104,6 +107,7 @@ public class TypeMappingsTest extends Assert
 	{
 		TestTypesInterface record = base.createRecord();
 		Path path = Paths.get( System.getProperty( "user.home") );
+		assertNull( record.getPath());
 		record.setPath( path );
 		assertEquals( path, record.getPath());
 	}
@@ -113,6 +117,7 @@ public class TypeMappingsTest extends Assert
 	{
 		TestTypesInterface record = base.createRecord();
 		RoundingMode mode = RoundingMode.HALF_UP;
+		assertNull( record.getEnum());
 		record.setEnum( mode );
 		assertEquals( mode, record.getEnum());
 		//test ordinal for enum
@@ -127,6 +132,7 @@ public class TypeMappingsTest extends Assert
 	public void testDBMappable()
 	{
 		TestTypesInterface record = base.createRecord();
+		assertNull( record.getDBMappable());
 		TestTypesInterface.TestDBMappableImpl impl = new TestTypesInterface.TestDBMappableImpl();
 		impl.testString = "Test123";
 		impl.testInteger = 456;
@@ -140,6 +146,7 @@ public class TypeMappingsTest extends Assert
 	{
 		String xmlString = "<tag><subtag/>some text</tag>";
 		TestTypesInterface record = base.createRecord();
+		assertNull( record.readXML());
 		record.writeXML( xmlString);
 		String resultXML;
 		try(ByteArrayOutputStream bos = new ByteArrayOutputStream(xmlString.getBytes().length); InputStream is = record.readXML())
@@ -159,7 +166,9 @@ public class TypeMappingsTest extends Assert
 	{
 		assertTrue(TypeMappings.coerceToType( true, Boolean.class));
 		assertTrue(TypeMappings.coerceToType( 1, Boolean.TYPE));
+		assertTrue( TypeMappings.coerceToType( 1, Boolean.class));
 		assertEquals( Long.valueOf( 123), TypeMappings.coerceToType( new Date(123), Long.class));
+		assertEquals( Long.valueOf( 123), TypeMappings.coerceToType( new Date(123), Long.TYPE));
 		Timestamp ts = new Timestamp(System.currentTimeMillis());
 		assertEquals( ts, TypeMappings.coerceToType( ts.getTime(), Timestamp.class));
 		try{

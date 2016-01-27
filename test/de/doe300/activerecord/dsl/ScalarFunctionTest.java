@@ -35,6 +35,8 @@ import de.doe300.activerecord.dsl.functions.LowerCase;
 import de.doe300.activerecord.dsl.functions.Round;
 import de.doe300.activerecord.dsl.functions.Signum;
 import de.doe300.activerecord.dsl.functions.SquareRoot;
+import de.doe300.activerecord.dsl.functions.StringLength;
+import de.doe300.activerecord.dsl.functions.TrimString;
 import de.doe300.activerecord.dsl.functions.UpperCase;
 import de.doe300.activerecord.dsl.functions.Value;
 import org.junit.AfterClass;
@@ -67,7 +69,7 @@ public class ScalarFunctionTest extends Assert
 		t3.setAge( -914);
 		//record with not-unique age
 		t4 = base.createRecord();
-		t4.setName( "SomeName");
+		t4.setName( "  SomeName  ");
 		t4.setAge( -913);
 	}
 	
@@ -190,5 +192,27 @@ public class ScalarFunctionTest extends Assert
 		Condition cond = new SimpleCondition(value, -1, Comparison.IS_NOT);
 		assertTrue(cond.test( t1 ));
 		assertEquals(4, base.count( cond));
+	}
+	
+	@Test
+	public void testStringLength()
+	{
+		ScalarFunction<TestInterface, String, Number> length = new StringLength<>("name", TestInterface::getName);
+		//test direct #apply
+		assertEquals( "123Name4".length(), length.apply( t3));
+		Condition cond = new SimpleCondition(length, 8, Comparison.IS);
+		assertTrue( cond.test( t3));
+		assertEquals( 3, base.count( cond));
+	}
+	
+	@Test
+	public void testTRIM()
+	{
+		ScalarFunction<TestInterface, String, String> trim = new TrimString<>("name", TestInterface::getName);
+		//test direct #apply
+		assertEquals( "SomeName", trim.apply( t4));
+		Condition cond = new SimpleCondition(trim, "SomeName", Comparison.IS);
+		assertTrue( cond.test( t4));
+		assertEquals( 1, base.count( cond));
 	}
 }
