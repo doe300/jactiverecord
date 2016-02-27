@@ -65,10 +65,27 @@ public interface DBDriver
 	@Nonnull
 	public Migration createMigration(@Nonnull final Class<? extends ActiveRecord> recordType, @Nonnull final RecordStore store);
 	
+	/**
+	 * Creates a new migration to create, update or drop a manually created table
+	 * @param storeName the name of the record-store/table
+	 * @param columns the names and types of the columns to create/drop/update
+	 * @param store the record-store to apply this migration to
+	 * @return a new migration with the given values
+	 */
 	@Nonnull
 	public Migration createMigration(@Nonnull final String storeName, @Nonnull final Map<String, Class<?>> columns,
 			 @Nonnull final RecordStore store);
 	
+	/**
+	 * Creates a new migration which additionally changes the indices of a record-store
+	 * @param storeName the name of the record-store/table
+	 * @param columns the names and types of the columns to create/drop/update
+	 * @param indices the indices (indexed attributes and type of index) to change
+	 * @param store the record-store to apply this migration to
+	 * @return the migration
+	 * @throws UnsupportedOperationException if this method is not supported by this implementation
+	 * @see #createMigration(java.lang.String, java.util.Map, de.doe300.activerecord.store.RecordStore) 
+	 */
 	@Nonnull
 	public default Migration createMigration(@Nonnull final String storeName, @Nonnull final Map<String, Class<?>> columns, 
 			@Nullable final Map<Set<String>, IndexType> indices,  @Nonnull final RecordStore store) throws UnsupportedOperationException
@@ -76,6 +93,15 @@ public interface DBDriver
 		throw new UnsupportedOperationException("Operation not supported by default implementation");
 	}
 	
+	/**
+	 * Creates a completely manual migration specifying specific commands for the apply/update and revert actions
+	 * @param applyCommand the command to execute for the apply-action
+	 * @param updateCommand the command for the update-action
+	 * @param revertCommand the command for the revert-method
+	 * @param store the record-store to apply this migration to
+	 * @return the newly created Migration
+	 * @throws UnsupportedOperationException if this method is not supported by this implementation
+	 */
 	@Nonnull
 	public default Migration createMigration(@Nullable final String applyCommand, @Nullable final String updateCommand, 
 			@Nullable final String revertCommand,  @Nonnull final RecordStore store) throws UnsupportedOperationException

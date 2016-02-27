@@ -24,14 +24,6 @@
  */
 package de.doe300.activerecord.migration;
 
-import java.sql.Connection;
-import java.sql.ResultSet;
-import java.sql.SQLException;
-
-import javax.annotation.Nonnull;
-
-import de.doe300.activerecord.store.RecordStore;
-
 /**
  *
  * @author doe300
@@ -60,30 +52,4 @@ public interface Migration
 	 * @throws Exception
 	 */
 	public boolean update(final boolean dropColumns) throws Exception;
-
-	/**
-	 * @param con
-	 * @param name
-	 * @return whether the structure already exists
-	 * @deprecated Use {@link RecordStore#exists(String)}
-	 */
-	@Deprecated
-	public default boolean structureExists(@Nonnull final Connection con, @Nonnull final String name)
-	{
-		try (ResultSet set = con.getMetaData().getTables(con.getCatalog(), con.getSchema(), null, null))
-		{
-			while(set.next())
-			{
-				if(set.getString( "TABLE_NAME").equalsIgnoreCase(name))
-				{
-					return true;
-				}
-			}
-			return false;
-		}
-		catch ( final SQLException ex )
-		{
-			return false;
-		}
-	}
 }

@@ -50,6 +50,7 @@ import de.doe300.activerecord.record.association.RecordSet;
 import de.doe300.activerecord.record.attributes.AttributeGetter;
 import de.doe300.activerecord.record.attributes.AttributeSetter;
 import de.doe300.activerecord.record.attributes.Attributes;
+import javax.annotation.Nonnull;
 
 /**
  * This migration is used to automatically create a table from a given record-type.
@@ -435,4 +436,28 @@ public class AutomaticMigration implements Migration
 		return columns;
 	}
 
+	/**
+	 * @param con
+	 * @param name
+	 * @return whether the structure already exists
+	 * @deprecated Use {@link RecordStore#exists(String)}
+	 */
+	private boolean structureExists(@Nonnull final Connection con, @Nonnull final String name)
+	{
+		try (ResultSet set = con.getMetaData().getTables(con.getCatalog(), con.getSchema(), null, null))
+		{
+			while(set.next())
+			{
+				if(set.getString( "TABLE_NAME").equalsIgnoreCase(name))
+				{
+					return true;
+				}
+			}
+			return false;
+		}
+		catch ( final SQLException ex )
+		{
+			return false;
+		}
+	}
 }

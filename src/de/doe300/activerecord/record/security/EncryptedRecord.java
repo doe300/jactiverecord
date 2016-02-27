@@ -37,10 +37,19 @@ import javax.annotation.Nullable;
  */
 public interface EncryptedRecord extends ActiveRecord
 {
+	/**
+	 * @return the encryption-algorithm in use
+	 */
 	@Nonnull
 	@ExcludeAttribute
 	public EncryptionAlgorithm getEncryptionAlgorithm();
 	
+	/**
+	 * Encrypts the given value
+	 * @param rawValue the value to encrypt
+	 * @return the encrypted result
+	 * @throws GeneralSecurityException if any error occurs while encrypting
+	 */
 	@Nullable
 	public default String encryptValue(@Nullable final String rawValue) throws GeneralSecurityException
 	{
@@ -51,6 +60,12 @@ public interface EncryptedRecord extends ActiveRecord
 		return new String(getEncryptionAlgorithm().encryptValue( rawValue.getBytes() ));
 	}
 	
+	/**
+	 * Decrypts the given value
+	 * @param encryptedValue the encrypted value to decrypt
+	 * @return the plain-text result
+	 * @throws GeneralSecurityException if any error occurs while decrypting
+	 */
 	@Nullable
 	public default String decryptValue(@Nullable final String encryptedValue) throws GeneralSecurityException
 	{

@@ -95,6 +95,11 @@ public abstract class ScalarFunction<T extends ActiveRecord, C, R> implements SQ
 		return applySQLFunction((C) map.get(column));
 	}
 
+	/**
+	 * Applies this scalar SQL-function to the given column-value
+	 * @param columnValue
+	 * @return the result
+	 */
 	protected abstract R applySQLFunction(@Nullable final C columnValue);
 
 	@Override

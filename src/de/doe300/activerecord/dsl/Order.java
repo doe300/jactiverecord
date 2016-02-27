@@ -51,6 +51,12 @@ public interface Order extends Comparator<ActiveRecord>
 	@Override
 	public int compare(ActiveRecord o1, ActiveRecord o2);
 	
+	/**
+	 * @param o1 the attribute-value map for the first record
+	 * @param o2 the attribute-value map for the second record
+	 * @return the comparison-value
+	 * @see #compare(de.doe300.activerecord.record.ActiveRecord, de.doe300.activerecord.record.ActiveRecord) 
+	 */
 	public int compare(Map<String, Object> o1, Map<String, Object> o2);
 	
 	/**
