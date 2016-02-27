@@ -24,6 +24,7 @@
  */
 package de.doe300.activerecord.jdbc.driver;
 
+import de.doe300.activerecord.dsl.joins.JoinType;
 import java.math.BigDecimal;
 import java.sql.Connection;
 import java.sql.DatabaseMetaData;
@@ -48,6 +49,7 @@ import de.doe300.activerecord.migration.Migration;
 import de.doe300.activerecord.migration.constraints.IndexType;
 import de.doe300.activerecord.record.ActiveRecord;
 import de.doe300.activerecord.store.DBDriver;
+import de.doe300.activerecord.store.JDBCRecordStore;
 import de.doe300.activerecord.store.RecordStore;
 import java.util.Map;
 import java.util.Set;
@@ -176,7 +178,7 @@ public class JDBCDriver implements DBDriver
 	 * @return the correct keyword for the JOIN-type for this SQL-dialect
 	 * @since 0.7
 	 */
-	/*@Nonnull
+	@Nonnull
 	@Syntax(value = "SQL")
 	public String getSQLJoinKeyword(@Nonnull final JoinType joinType)
 	{
@@ -193,7 +195,7 @@ public class JDBCDriver implements DBDriver
 			default:
 				throw new AssertionError( joinType.name() );
 		}
-	}*/
+	}
 
 	/**
 	 * For the default-implementation, see: https://en.wikibooks.org/wiki/SQL_Dialects_Reference/Data_structure_definition/Auto-increment_column
@@ -239,6 +241,7 @@ public class JDBCDriver implements DBDriver
 	 * @param resultSet the ResultSet of the INSERT-statement
 	 * @param primaryColumn the primary-column to extract
 	 * @return the ID of the newly created row
+	 * @throws java.sql.SQLException if a SQL error occurs
 	 */
 	public int getCreatedRowID(@Nonnull final ResultSet resultSet, @Nonnull final String primaryColumn) throws SQLException
 	{
@@ -493,7 +496,9 @@ public class JDBCDriver implements DBDriver
 	@Override
 	public Migration createMigration(final Class<? extends ActiveRecord> recordType, final RecordStore store)
 	{
-		return new AutomaticMigration(recordType, store.getConnection());
+		if(!(store instanceof JDBCRecordStore))
+			throw new IllegalArgumentException("RecordStore must beof type JDBCRecordStore!");
+		return new AutomaticMigration(recordType, ((JDBCRecordStore)store).getConnection());
 	}
 
 	@Override
@@ -524,9 +529,11 @@ public class JDBCDriver implements DBDriver
 	}
 
 	@Override
-	public Migration createMigration( String applyCommand, String updateCommand, String revertCommand,  final RecordStore store ) throws UnsupportedOperationException
+	public Migration createMigration( String applyCommand, String updateCommand, String revertCommand,  final RecordStore store )
 	{
-		return new ManualMigration(applyCommand, updateCommand, revertCommand, store.getConnection());
+		if(!(store instanceof JDBCRecordStore))
+			throw new IllegalArgumentException("RecordStore must beof type JDBCRecordStore!");
+		return new ManualMigration(applyCommand, updateCommand, revertCommand, ((JDBCRecordStore)store).getConnection());
 	}
 
 	/**
