@@ -144,10 +144,6 @@ public class ProfilingRecordStoreTest extends Assert
 		recordStore.getProfiler().printStatistics(true);
 		System.out.println(  );
 		System.out.println( "Connection:" );
-		if(recordStore.getConnection() != null)
-		{
-			((ProfilingConnection)recordStore.getConnection()).getProfiler().printStatistics(true);
-		}
 		System.out.println(  );
 		System.out.println(  );
 	}

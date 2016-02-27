@@ -24,7 +24,6 @@
  */
 package de.doe300.activerecord.profiling;
 
-import java.sql.Connection;
 import java.util.Map;
 import java.util.Set;
 import java.util.stream.Stream;
@@ -55,12 +54,6 @@ public class ProfilingRecordStore implements RecordStore
 	public Profiler getProfiler()
 	{
 		return profiler;
-	}
-
-	@Override
-	public Connection getConnection()
-	{
-		return profiler.profile( "getConnection", () -> store.getConnection());
 	}
 
 	@Override

@@ -82,7 +82,8 @@ public class AttributeGenerator extends AbstractProcessor
 			processAddAttributes( recordTypeElement, addAttributes );
 		});
 		
-		return true;
+		//we have multiple processors handling the same annotations, so don't consume
+		return false;
 	}
 	
 	private void processAddAttributes(final TypeElement recordTypeElement, final AddAttribute[] addAttributes)

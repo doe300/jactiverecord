@@ -24,7 +24,6 @@
  */
 package de.doe300.activerecord.store;
 
-import java.sql.Connection;
 import java.sql.Timestamp;
 import java.util.Map;
 import java.util.Set;
@@ -49,13 +48,6 @@ import de.doe300.activerecord.scope.Scope;
  */
 public interface RecordStore extends AutoCloseable
 {
-	/**
-	 * @return the underlying Connection or <code>null</code>
-	 */
-	@Nullable
-	@Deprecated
-	public Connection getConnection();
-
 	/**
 	 * @return the driver to be used for the underlying data-store
 	 */
@@ -343,6 +335,7 @@ public interface RecordStore extends AutoCloseable
 	 * NOTE: If this RecordStore is based on a SQL-implementation, the aggregation should be 
 	 * performed within the SQL-implementation for performance reasons
 	 * 
+	 * @param <R> the result-type
 	 * @param base the {@link RecordBase} to aggregate over
 	 * @param aggregateFunction the {@link AggregateFunction aggregation-function}
 	 * @param condition the condition to filter the aggregated values

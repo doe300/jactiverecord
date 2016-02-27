@@ -61,12 +61,6 @@ public class MemoryRecordStoreTest extends Assert
 	}
 
 	@Test
-	public void testGetConnection()
-	{
-		assertNull( store.getConnection() );
-	}
-
-	@Test
 	public void testExists()
 	{
 		assertTrue( store.exists( base.getTableName()));

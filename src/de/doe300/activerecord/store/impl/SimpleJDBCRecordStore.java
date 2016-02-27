@@ -60,13 +60,13 @@ import de.doe300.activerecord.record.RecordType;
 import de.doe300.activerecord.record.TimestampedRecord;
 import de.doe300.activerecord.scope.Scope;
 import de.doe300.activerecord.store.DBDriver;
-import de.doe300.activerecord.store.RecordStore;
+import de.doe300.activerecord.store.JDBCRecordStore;
 
 /**
  * Simple non-caching implementation of the RecordStore backed by a JDBC-Connection.
  * @author doe300
  */
-public class SimpleJDBCRecordStore implements RecordStore
+public class SimpleJDBCRecordStore implements JDBCRecordStore
 {
 	@Nonnull
 	protected final Connection con;

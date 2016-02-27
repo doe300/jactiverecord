@@ -42,12 +42,10 @@ import java.util.UUID;
 
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
-import javax.xml.transform.Source;
-import javax.xml.transform.dom.DOMResult;
 
-import de.doe300.activerecord.RecordException;
 import de.doe300.activerecord.migration.Attribute;
 import de.doe300.activerecord.record.ActiveRecord;
+import de.doe300.activerecord.store.JDBCRecordStore;
 import java.io.ByteArrayInputStream;
 
 /**
@@ -282,36 +280,6 @@ public final class TypeMappings
 	public static final int XML_TYPE = Types.SQLXML;
 
 	/**
-	 * To be used in attribute-getters for XML Sources
-	 * @param <T>
-	 * @param sourceType the type of the source
-	 * @param record
-	 * @param columnName
-	 * @return the Source or <code>null</code>
-	 * @throws SQLException
-	 * @see SQLXML#getSource(java.lang.Class)
-	 */
-	@Nullable
-	public static <T extends Source> T readXML(@Nonnull final Class<T> sourceType, @Nonnull final ActiveRecord record,
-		@Nonnull final String columnName) throws SQLException
-	{
-		final Object value = record.getBase().getStore().getValue( record.getBase(), record.getPrimaryKey(), columnName);
-		if(value == null)
-		{
-			return null;
-		}
-		if(sourceType.isInstance( value))
-		{
-			return sourceType.cast( value );
-		}
-		if(value instanceof SQLXML)
-		{
-			return ((SQLXML)value).getSource( sourceType );
-		}
-		return null;
-	}
-
-	/**
 	 * To be used in attribute-getters for XML InputStreams
 	 * @param record
 	 * @param columnName
@@ -339,43 +307,6 @@ public final class TypeMappings
 	}
 
 	/**
-	 * To be used in attribute-setters for XML DOMResults
-	 * @param result the result to copy the content from
-	 * @param record
-	 * @param columnName
-	 * @throws SQLException
-	 */
-	public static void writeXML(@Nullable final DOMResult result, @Nonnull final ActiveRecord record,
-		@Nonnull final String columnName) throws SQLException
-	{
-		final Object value;
-		if(record.getBase().getStore().getAllColumnTypes( record.getBase().getTableName()).get( columnName).isAssignableFrom( DOMResult.class))
-		{
-			value = result;
-		}
-		else
-		{
-			final Connection con = record.getBase().getStore().getConnection();
-			if(con == null || con.isClosed())
-			{
-				throw new RecordException(record, "no JDBC-Connection for this database");
-			}
-			if (result == null)
-			{
-				record.getBase().getStore().setValue(record.getBase(), record.getPrimaryKey(), columnName, null);
-				return;
-			}
-			final SQLXML xml = con.createSQLXML();
-			final DOMResult writeResult = xml.setResult( DOMResult.class);
-			writeResult.setNextSibling( result.getNextSibling());
-			writeResult.setNode( result.getNode());
-			writeResult.setSystemId( result.getSystemId());
-			value = xml;
-		}
-		record.getBase().getStore().setValue( record.getBase(), record.getPrimaryKey(), columnName, value);
-	}
-
-	/**
 	 * To be used in attribute-setters for XML-Strings
 	 * @param xmlString the XML to store
 	 * @param record
@@ -385,21 +316,26 @@ public final class TypeMappings
 	public static void writeXML(@Nullable final String xmlString, @Nonnull final ActiveRecord record,
 		@Nonnull final String columnName) throws SQLException
 	{
-		//TODO doesn't support MemoryRecordStore, if column-type is SQLXML, but how to solve??
 		final Object xml;
-		if(record.getBase().getStore().getAllColumnTypes( record.getBase().getTableName()).get( columnName).isAssignableFrom( String.class))
+		final Class<?> columnType = record.getBase().getStore().getAllColumnTypes( record.getBase().getTableName()).get( columnName);
+		if(columnType.isAssignableFrom( String.class))
 		{
 			xml = xmlString;
 		}
-		else
+		else if(SQLXML.class.isAssignableFrom( columnType ))
 		{
-			final Connection con = record.getBase().getStore().getConnection();
-			if(con == null || con.isClosed())
-			{
-				throw new RecordException(record, "no JDBC-Connection for this database");
-			}
+			throw new UnsupportedOperationException("Not supported!");
+			//TODO doesn't support MemoryRecordStore, if column-type is SQLXML, but how to solve??
+		}
+		else if(record.getBase().getStore() instanceof JDBCRecordStore)
+		{
+			final Connection con = ((JDBCRecordStore)record.getBase().getStore()).getConnection();
 			xml = con.createSQLXML();
 			((SQLXML)xml).setString(xmlString);
+		}
+		else
+		{
+			throw new IllegalArgumentException("Can't store XML in given RecordStore!");
 		}
 		record.getBase().getStore().setValue( record.getBase(), record.getPrimaryKey(), columnName, xml);
 	}

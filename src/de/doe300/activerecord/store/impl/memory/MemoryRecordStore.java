@@ -24,7 +24,6 @@
  */
 package de.doe300.activerecord.store.impl.memory;
 
-import java.sql.Connection;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
@@ -59,12 +58,6 @@ public class MemoryRecordStore implements RecordStore
 	public MemoryRecordStore()
 	{
 		this.tables = new TreeMap<>();
-	}
-
-	@Override
-	public Connection getConnection()
-	{
-		return null;
 	}
 
 	@Override
