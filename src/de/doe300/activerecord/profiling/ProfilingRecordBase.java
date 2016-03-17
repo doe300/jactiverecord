@@ -68,6 +68,12 @@ public class ProfilingRecordBase<T extends ActiveRecord> extends RecordBase<T>
 	}
 
 	@Override
+	protected RecordBase<T> createShardBase( String shardTable )
+	{
+		return profiler.profile( "createShard", () -> otherBase.getShardBase( shardTable));
+	}
+
+	@Override
 	public int count( final Condition condition )
 	{
 		return profiler.profileInt("count", () -> otherBase.count(condition));

@@ -53,6 +53,11 @@ public class POJOBase<T extends ActiveRecord> extends RecordBase<T>
 	{
 		super( recordType, core, store );
 	}
+	
+	protected POJOBase(@Nonnull final POJOBase<T> origBase, @Nonnull final String shardTable)
+	{
+		super(origBase, shardTable );
+	}
 
 	@Override
 	protected T createProxy( final int primaryKey, final boolean newRecord, final Map<String, Object> recordData ) throws RecordException
@@ -65,6 +70,12 @@ public class POJOBase<T extends ActiveRecord> extends RecordBase<T>
 		{
 			throw new RecordException(ex);
 		}
+	}
+
+	@Override
+	protected RecordBase<T> createShardBase( String shardTable )
+	{
+		return new POJOBase<T>(this, shardTable );
 	}
 
 	/**

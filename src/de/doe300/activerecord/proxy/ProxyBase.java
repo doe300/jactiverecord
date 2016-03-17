@@ -61,6 +61,13 @@ public final class ProxyBase<T extends ActiveRecord> extends RecordBase<T>
 		this.proxyType = proxyType;
 		this.proxyHandlers = proxyHandlers;
 	}
+	
+	private ProxyBase(@Nonnull final ProxyBase<T> origBase, @Nonnull final String shardTable)
+	{
+		super(origBase, shardTable );
+		this.proxyType = origBase.proxyType;
+		this.proxyHandlers = origBase.proxyHandlers;
+	}
 
 	@Override
 	protected T createProxy(final int primaryKey, final boolean newRecord, final Map<String, Object> recordData) throws RecordException
@@ -73,5 +80,11 @@ public final class ProxyBase<T extends ActiveRecord> extends RecordBase<T>
 		{
 			throw new RecordException(ex);
 		}
+	}
+
+	@Override
+	protected RecordBase<T> createShardBase( String shardTable )
+	{
+		return new ProxyBase<T>(this, shardTable);
 	}
 }

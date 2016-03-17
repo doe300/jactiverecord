@@ -24,6 +24,7 @@
  */
 package de.doe300.activerecord.pojo;
 
+import de.doe300.activerecord.RecordBase;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.util.Map;
@@ -60,6 +61,13 @@ public class SingleInheritanceBase<T extends ActiveRecord> extends POJOBase<T>
 		@Nonnull final RecordStore store) throws RecordException
 	{
 		super( recordType, core, store );
+		this.inheritance = Objects.requireNonNull( recordType.getAnnotation( SingleTableInheritance.class));
+		this.recordFactoryMethod = SingleInheritanceBase.getRecordFactoryMethod( inheritance );
+	}
+	
+	private SingleInheritanceBase(@Nonnull final SingleInheritanceBase<T> origBase, @Nonnull final String shardTable)
+	{
+		super(origBase, shardTable);
 		this.inheritance = Objects.requireNonNull( recordType.getAnnotation( SingleTableInheritance.class));
 		this.recordFactoryMethod = SingleInheritanceBase.getRecordFactoryMethod( inheritance );
 	}
@@ -109,5 +117,11 @@ public class SingleInheritanceBase<T extends ActiveRecord> extends POJOBase<T>
 		{
 			throw new RecordException("Error while invoking factory-method", ex);
 		}
+	}
+
+	@Override
+	protected RecordBase<T> createShardBase( String shardTable )
+	{
+		return new SingleInheritanceBase<T>(this, shardTable );
 	}
 }
