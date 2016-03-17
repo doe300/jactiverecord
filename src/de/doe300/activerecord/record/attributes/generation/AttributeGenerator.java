@@ -25,6 +25,7 @@
 package de.doe300.activerecord.record.attributes.generation;
 
 import de.doe300.activerecord.annotations.ProcessorUtils;
+import de.doe300.activerecord.jdbc.TypeMappings;
 import de.doe300.activerecord.migration.Attribute;
 import de.doe300.activerecord.migration.constraints.ReferenceRule;
 import de.doe300.activerecord.record.ActiveRecord;
@@ -110,6 +111,7 @@ public class AttributeGenerator extends AbstractProcessor
 				writer.append( ";\n");
 
 				writer.append( "import ").append( Attribute.class.getCanonicalName()).append( ";\n");
+				writer.append( "import ").append( TypeMappings.class.getCanonicalName()).append( ";\n");
 				if(addNullableAnnotation())
 				{
 					writer.append( "import ").append( Nullable.class.getCanonicalName()).append( ";\n");
@@ -207,8 +209,8 @@ public class AttributeGenerator extends AbstractProcessor
 		//public default Type get(is)AttributeName() {
 		return "\tpublic default " + classType + (isBoolean ? " is" : " get") 
 				+ Attributes.toCamelCase( source.name()) + "() {\n"
-				//return Type.cast(getBase.getStore.getValue(getBase(), getPrimaryKey(), "attributeName"));
-				+ "\t\treturn " + classType + ".class.cast(getBase().getStore().getValue(getBase(), getPrimaryKey(), \"" + source.name() + "\"));\n"
+				//return TypeMappings.coerceToType(getBase.getStore.getValue(getBase(), getPrimaryKey(), "attributeName"), Type.class);
+				+ "\t\treturn TypeMappings.coerceToType(getBase().getStore().getValue(getBase(), getPrimaryKey(), \"" + source.name() + "\"), " + classType + ".class);"
 				//}
 				+ "\t}\n\n";
 	}

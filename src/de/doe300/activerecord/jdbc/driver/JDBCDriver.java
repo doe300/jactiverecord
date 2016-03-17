@@ -381,6 +381,11 @@ public class JDBCDriver implements DBDriver
 		{
 			return getSQLType( String.class);
 		}
+		if( java.io.Serializable.class.isAssignableFrom( javaType ))
+		{
+			//any Serializable object can be mapped from and to BLOBs
+			return "BLOB";
+		}
 		throw new IllegalArgumentException( "Type not mapped: " + javaType );
 	}
 

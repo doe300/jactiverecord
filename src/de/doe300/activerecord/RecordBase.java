@@ -57,6 +57,7 @@ import de.doe300.activerecord.scope.Scope;
 import de.doe300.activerecord.store.RecordStore;
 import de.doe300.activerecord.record.validation.ValidatedRecord;
 import de.doe300.activerecord.record.validation.ValidationFailed;
+import java.util.SortedMap;
 import javax.annotation.Nonnegative;
 
 /**
@@ -73,7 +74,9 @@ public abstract class RecordBase<T extends ActiveRecord> implements ReadOnlyReco
 	@Nonnull
 	protected final RecordStore store;
 	@Nonnull
-	protected final TreeMap<Integer, T> records;
+	protected final SortedMap<Integer, T> records;
+	@Nullable
+	protected final SortedMap<String, RecordBase<T>> shards;
 
 	//caching variables
 	private String[] defaultColumns;
@@ -93,8 +96,26 @@ public abstract class RecordBase<T extends ActiveRecord> implements ReadOnlyReco
 		this.core = core;
 		this.store = store;
 		this.records = new TreeMap<>();
+		this.shards = new TreeMap<>();
 	}
-
+	
+	/**
+	 * Constructor for creating table-shards
+	 * @param origBase
+	 * @param tableName
+	 * @since 0.7
+	 */
+	protected RecordBase(@Nonnull final RecordBase<T> origBase, @Nonnull final String tableName)
+	{
+		this.recordType = origBase.recordType;
+		this.core = origBase.core;
+		this.store = origBase.store;
+		this.tableName = tableName;
+		this.records = new TreeMap<>();
+		//disallow creating shars from shards ...
+		this.shards = null;
+	}
+	
 	/**
 	 * @return the store
 	 */
@@ -112,6 +133,34 @@ public abstract class RecordBase<T extends ActiveRecord> implements ReadOnlyReco
 	{
 		return core;
 	}
+	
+	/**
+	 * @param shardTable the name of the table-shard
+	 * @return the record-base for the shard
+	 * @sicne 0.7
+	 */
+	@Nonnull
+	public RecordBase<T> getShardBase(@Nonnull final String shardTable)
+	{
+		if(shards == null)
+		{
+			throw new IllegalStateException("Can't create table-shard from table-shard!");
+		}
+		if(!shards.containsKey( shardTable))
+		{
+			final RecordBase<T> shardBase = createShardBase( shardTable );
+			shards.put( shardTable, shardBase);
+		}
+		return shards.get( shardTable);
+	}
+	
+	/**
+	 * @param shardTable
+	 * @return a new instance of this record-base implementation for the table-shard
+	 * @since 0.7
+	 */
+	@Nonnull
+	protected abstract RecordBase<T> createShardBase(@Nonnull final String shardTable);
 
 	@Override
 	public Class<T> getRecordType()
@@ -453,7 +502,9 @@ public abstract class RecordBase<T extends ActiveRecord> implements ReadOnlyReco
 	{
 		final Collection<String> columnNames = store.getAllColumnNames( getTableName());
 		final Map<String, Object> copyValues = store.getValues( this, record.getPrimaryKey(), columnNames.toArray( new String[columnNames.size()]));
-		//TODO seems not to copy the column values
+		//FIXME somehow copyValues is empty (not even keys), but columnNames has all correct columns
+		//break in CachedRecordStore#gteValues() cancells getting rest of columns
+		//but how can column "other" not exist in RowCache, after being retrieved from DB???
 		return createRecord( copyValues );
 	}
 
