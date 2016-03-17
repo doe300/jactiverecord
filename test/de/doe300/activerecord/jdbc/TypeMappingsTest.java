@@ -180,4 +180,15 @@ public class TypeMappingsTest extends Assert
 			
 		}
 	}
+	
+	@Test
+	public void testSerializable() throws SQLException
+	{
+		final UUID uuid = UUID.randomUUID();
+		TestTypesInterface record = base.createRecord();
+		assertNull( record.getSerializable());
+		record.setSerializable(uuid );
+		assertEquals( uuid, record.getSerializable());
+		
+	}
 }

@@ -27,6 +27,7 @@ package de.doe300.activerecord.jdbc;
 import de.doe300.activerecord.migration.Attribute;
 import de.doe300.activerecord.record.ActiveRecord;
 import java.io.InputStream;
+import java.io.Serializable;
 import java.math.RoundingMode;
 import java.net.MalformedURLException;
 import java.net.URI;
@@ -128,6 +129,17 @@ public interface TestTypesInterface extends ActiveRecord
 	public default void writeXML(String xml) throws SQLException
 	{
 		TypeMappings.writeXML( xml, this, "xml");
+	}
+	
+	@Attribute(name = "serial", typeName = "VARBINARY(20)")
+	public default Serializable getSerializable() throws SQLException
+	{
+		return TypeMappings.readSerializable( UUID.class, this, "serial");
+	}
+	
+	public default void setSerializable(Serializable obj) throws SQLException
+	{
+		TypeMappings.writeSerializable( obj, this, "serial");
 	}
 			
 	static class TestDBMappableImpl implements DBMappable

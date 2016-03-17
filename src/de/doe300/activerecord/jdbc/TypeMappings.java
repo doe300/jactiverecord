@@ -518,28 +518,48 @@ public final class TypeMappings
 	/**
 	 * Reads a serializable object from it serialized form.
 	 * 
-	 * Supports reading from {@link String} or {@link java.sql.Blob}
+	 * Supports reading from {@link Byte byte[]}, {@link String} or {@link java.sql.Blob}
 	 * @param <T>
 	 * @param serializableType
 	 * @param record
 	 * @param columnName
 	 * @return the read serializable object of the correct type
+	 * @throws java.sql.SQLException
 	 * @since 0.7
 	 */
 	@Nullable
-	public static <T extends Serializable> T readSerializable(@Nonnull final Class<T> serializableType, @Nonnull final ActiveRecord record, @Nonnull final String columnName)
+	public static <T extends Serializable> T readSerializable(@Nonnull final Class<T> serializableType, @Nonnull final ActiveRecord record, @Nonnull final String columnName) throws SQLException
 	{
 		final Object value = record.getBase().getStore().getValue( record.getBase(), record.getPrimaryKey(), columnName);
-		//extract Serializable from BLOB-field
-		if(value instanceof java.sql.Blob)
+		if(value == null)
 		{
+			return null;
+		}
+		else if(value.getClass().isArray() && (value.getClass().getComponentType().equals( Byte.class) || value.getClass().getComponentType().equals( Byte.TYPE)))
+		{
+			try(final ObjectInputStream ois = new ObjectInputStream(new ByteArrayInputStream((byte[])value)))
+			{
+				return serializableType.cast(ois.readObject());
+			}
+			catch(final IOException ioe)
+			{
+				throw new SQLException(ioe);
+			}
+			catch (final ClassNotFoundException ex )
+			{
+				throw new IllegalArgumentException("Can't deserialize VARBINARY to nonexisting type '"+serializableType+"'");
+			}
+		}
+		else if(value instanceof java.sql.Blob)
+		{
+			//extract Serializable from BLOB-field
 			try(final ObjectInputStream ois = new ObjectInputStream(((java.sql.Blob)value).getBinaryStream() ))
 			{
 				return serializableType.cast(ois.readObject());
 			}
-			catch(final IOException|SQLException ioe)
+			catch(final IOException ioe)
 			{
-				throw new IllegalArgumentException(ioe);
+				throw new SQLException(ioe);
 			}
 			catch (final ClassNotFoundException ex )
 			{
@@ -554,7 +574,7 @@ public final class TypeMappings
 			}
 			catch(final IOException ioe)
 			{
-				throw new IllegalArgumentException(ioe);
+				throw new SQLException(ioe);
 			}
 			catch (final ClassNotFoundException ex )
 			{
@@ -567,17 +587,30 @@ public final class TypeMappings
 	/**
 	 * Writes a serializable object by serializing it and storing it in the database.
 	 * 
-	 * Supports writing to {@link String} or {@link java.sql.Blob}
+	 * Supports writing to {@link Byte byte[]}, {@link String} or {@link java.sql.Blob}
 	 * @param <T>
 	 * @param serializableObject
 	 * @param record
 	 * @param columnName 
+	 * @throws java.sql.SQLException 
 	 * @since 0.7
 	 */
-	public static <T extends Serializable> void writeSerializable(@Nullable final T serializableObject, @Nonnull final ActiveRecord record, @Nonnull final String columnName)
+	public static <T extends Serializable> void writeSerializable(@Nullable final T serializableObject, @Nonnull final ActiveRecord record, @Nonnull final String columnName) throws SQLException
 	{
 		final Class<?> columnType = record.getBase().getStore().getAllColumnTypes( record.getBase().getTableName()).get( columnName);
-		if(java.sql.Blob.class.isAssignableFrom( columnType))
+		if(columnType.isArray() && (Byte.class.isAssignableFrom( columnType.getComponentType()) || Byte.TYPE.isAssignableFrom( columnType.getComponentType()))) 
+		{
+			try(final ByteArrayOutputStream bos = new ByteArrayOutputStream(); final ObjectOutputStream oos = new ObjectOutputStream(bos ))
+			{
+				oos.writeObject( serializableObject);
+				record.getBase().getStore().setValue( record.getBase(), record.getPrimaryKey(), columnName, bos.toByteArray());
+			}
+			catch ( final IOException ex )
+			{
+				throw new SQLException(ex);
+			}
+		}
+		else if(java.sql.Blob.class.isAssignableFrom( columnType))
 		{
 			try(final OutputStream stream = ((java.sql.Blob)record.getBase().getStore().getValue( record.getBase(), record.getPrimaryKey(), columnName)).setBinaryStream( 0);
 					final ObjectOutputStream oos = new ObjectOutputStream(stream))
@@ -585,9 +618,9 @@ public final class TypeMappings
 				//XXX doesn't work if object in DB is null
 				oos.writeObject(serializableObject);
 			}
-			catch ( final IOException|SQLException ex )
+			catch ( final IOException ex )
 			{
-				throw new RuntimeException(ex);
+				throw new SQLException(ex);
 			}
 		}
 		else if(String.class.isAssignableFrom( columnType ))
@@ -599,7 +632,7 @@ public final class TypeMappings
 			}
 			catch ( IOException ex )
 			{
-				throw new RuntimeException(ex);
+				throw new SQLException(ex);
 			}
 		}
 		else

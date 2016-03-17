@@ -51,6 +51,7 @@ import de.doe300.activerecord.record.ActiveRecord;
 import de.doe300.activerecord.store.DBDriver;
 import de.doe300.activerecord.store.JDBCRecordStore;
 import de.doe300.activerecord.store.RecordStore;
+import java.lang.reflect.Array;
 import java.util.Map;
 import java.util.Set;
 import java.util.stream.Collectors;
@@ -383,8 +384,8 @@ public class JDBCDriver implements DBDriver
 		}
 		if( java.io.Serializable.class.isAssignableFrom( javaType ))
 		{
-			//any Serializable object can be mapped from and to BLOBs
-			return "BLOB";
+			//any Serializable object can be mapped from and to BLOBs and VARBINARYs
+			return "VARBINARY(max)";
 		}
 		throw new IllegalArgumentException( "Type not mapped: " + javaType );
 	}
@@ -461,6 +462,11 @@ public class JDBCDriver implements DBDriver
 		if ( sqlTypeUpper.startsWith( "SHORTINT" ) )
 		{
 			return Short.class;
+		}
+		if( sqlTypeUpper.startsWith( "VARBINARY") || sqlTypeUpper.startsWith( "BINARY"))
+		{
+			//JDBC maps VARBINARY to byte[]
+			return Array.newInstance( Byte.TYPE, 0).getClass();
 		}
 		//MySQL has data-type INT
 		if ( sqlTypeUpper.startsWith( "INT" ) )
