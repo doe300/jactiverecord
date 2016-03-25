@@ -43,7 +43,7 @@ import org.junit.Test;
 public class SimpleConditionTest extends Assert
 {
 	private static RecordBase<TestInterface> base;
-	private static TestInterface t1, t2,t3;
+	private static TestInterface t1, t2,t3, t4;
 	
 	@BeforeClass
 	public static void createTables() throws Exception
@@ -60,6 +60,7 @@ public class SimpleConditionTest extends Assert
 		t3 = base.createRecord();
 		t3.setName( "123Name4");
 		t3.setAge( -913);
+		t4 = base.createRecord();
 	}
 	
 	@AfterClass
@@ -134,9 +135,9 @@ public class SimpleConditionTest extends Assert
 	public void testIsNullCondition()
 	{
 		//test Predicate
-		assertSame( t3, base.findFirst( new SimpleCondition("name", "123Name1", Comparison.IS_NOT)));
+		assertSame( t4, base.findFirst( new SimpleCondition("name", "123Name1", Comparison.IS_NULL)));
 		//test SQL
-		assertEquals( (Integer)t3.getPrimaryKey(), base.getStore().findFirst( base, toScope( new SimpleCondition("name", "123Name1", Comparison.IS_NOT))));
+		assertEquals( (Integer)t4.getPrimaryKey(), base.getStore().findFirst( base, toScope( new SimpleCondition("name", "123Name1", Comparison.IS_NULL))));
 	}
 	
 	@Test

@@ -25,6 +25,7 @@
 package de.doe300.activerecord;
 
 import de.doe300.activerecord.jdbc.TypeMappings;
+import de.doe300.activerecord.pojo.AbstractActiveRecord;
 import de.doe300.activerecord.pojo.POJOBase;
 import de.doe300.activerecord.record.ActiveRecord;
 import de.doe300.activerecord.record.RecordType;
@@ -41,56 +42,39 @@ import java.sql.Timestamp;
 @Searchable(searchableColumns = {"name","age"})
 @RecordType(typeName = "TESTTABLE", primaryKey = "id", defaultColumns = {"id", "name", "age"})
 @Validate(attribute = "name", type = ValidationType.NOT_NULL)
-public class TestPOJO implements ActiveRecord, TestInterface
+public class TestPOJO extends AbstractActiveRecord implements ActiveRecord, TestInterface
 {
-	private final int primaryKey;
-	private final POJOBase<TestPOJO> base;
-
 	/**
 	 * @param key
 	 * @param base
 	 */
 	public TestPOJO(final int key, final POJOBase<TestPOJO> base)
 	{
-		this.primaryKey = key;
-		this.base = base;
-	}
-
-
-	@Override
-	public int getPrimaryKey()
-	{
-		return primaryKey;
-	}
-
-	@Override
-	public RecordBase<?> getBase()
-	{
-		return base;
+		super(key, base );
 	}
 
 	@Override
 	public void setName(final String name)
 	{
-		base.setProperty( primaryKey, "name", name);
+		setProperty( "name", name);
 	}
 
 	@Override
 	public String getName()
 	{
-		return base.getProperty( primaryKey, "name", String.class);
+		return getProperty( "name", String.class);
 	}
 
 	@Override
 	public void setAge(final int age)
 	{
-		base.setProperty( primaryKey, "age", age);
+		setProperty( "age", age);
 	}
 
 	@Override
 	public int getAge()
 	{
-		return base.getProperty( primaryKey, "age", Integer.class);
+		return getProperty( "age", Integer.class);
 	}
 
 	@Override
@@ -98,7 +82,7 @@ public class TestPOJO implements ActiveRecord, TestInterface
 	{
 		try
 		{
-			return base.getCore().getBase( TestInterface.class).getRecord(base.getProperty( primaryKey, "fk_test_id", Integer.class));
+			return getBase().getCore().getBase( TestInterface.class).getRecord(getProperty( "fk_test_id", Integer.class));
 		}
 		catch ( final ClassCastException | RecordException ex )
 		{
@@ -109,25 +93,25 @@ public class TestPOJO implements ActiveRecord, TestInterface
 	@Override
 	public void setOther( final TestInterface it )
 	{
-		base.setProperty( primaryKey, "fk_test_id", it.getPrimaryKey());
+		setProperty( "fk_test_id", it.getPrimaryKey());
 	}
 
 	@Override
 	public Timestamp getCreatedAt()
 	{
-		return base.getProperty( primaryKey, TimestampedRecord.COLUMN_CREATED_AT, Timestamp.class);
+		return getProperty( TimestampedRecord.COLUMN_CREATED_AT, Timestamp.class);
 	}
 
 	@Override
 	public Timestamp getUpdatedAt()
 	{
-		return base.getProperty( primaryKey, TimestampedRecord.COLUMN_UPDATED_AT, Timestamp.class);
+		return getProperty( TimestampedRecord.COLUMN_UPDATED_AT, Timestamp.class);
 	}
 
 	@Override
 	public void touch()
 	{
-		base.getStore().touch( base, primaryKey );
+		getBase().getStore().touch( getBase(), primaryKey );
 	}
 
 	@Override
@@ -139,7 +123,7 @@ public class TestPOJO implements ActiveRecord, TestInterface
 	@Override
 	public String toString()
 	{
-		return getClass().getSimpleName()+"{"+primaryKey+"@"+base.getRecordType().getCanonicalName()+"}";
+		return getClass().getSimpleName()+"{"+primaryKey+"@"+getBase().getRecordType().getCanonicalName()+"}";
 	}
 
 	@Override

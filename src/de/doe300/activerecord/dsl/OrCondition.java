@@ -123,7 +123,10 @@ public class OrCondition implements Condition
 		List<Object> values = new ArrayList<>(conditions.length);
 		for(Condition cond:conditions)
 		{
-			values.addAll( Arrays.asList( cond.getValues()));
+			if(cond.hasWildcards())
+			{
+				values.addAll( Arrays.asList( cond.getValues()));
+			}
 		}
 		return values.toArray();
 	}

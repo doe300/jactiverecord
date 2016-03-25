@@ -124,7 +124,10 @@ public class AndCondition implements Condition
 		final List<Object> values = new ArrayList<>(conditions.length);
 		for(final Condition cond:conditions)
 		{
-			values.addAll( Arrays.asList( cond.getValues()));
+			if(cond.hasWildcards())
+			{
+				values.addAll( Arrays.asList( cond.getValues()));
+			}
 		}
 		return values.toArray();
 	}

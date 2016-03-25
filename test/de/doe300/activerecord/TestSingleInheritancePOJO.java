@@ -26,6 +26,7 @@ package de.doe300.activerecord;
 
 import de.doe300.activerecord.jdbc.TypeMappings;
 import de.doe300.activerecord.migration.Attribute;
+import de.doe300.activerecord.pojo.AbstractActiveRecord;
 import de.doe300.activerecord.pojo.POJOBase;
 import de.doe300.activerecord.record.ActiveRecord;
 import de.doe300.activerecord.record.RecordType;
@@ -44,10 +45,8 @@ import java.sql.Timestamp;
 @RecordType(typeName = "TESTTABLE", primaryKey = "id", defaultColumns = {"id", "type", "name", "age"})
 @Validate(attribute = "name", type = ValidationType.NOT_NULL)
 @SingleTableInheritance(typeColumnName = "type", factoryClass = TestSingleInheritancePOJO.class, factoryMethod = "getPOJO")
-public class TestSingleInheritancePOJO implements ActiveRecord, TestInterface
+public class TestSingleInheritancePOJO extends AbstractActiveRecord implements ActiveRecord, TestInterface
 {
-	private final int primaryKey;
-	private final POJOBase<TestSingleInheritancePOJO> base;
 
 	/**
 	 * @param key
@@ -55,45 +54,31 @@ public class TestSingleInheritancePOJO implements ActiveRecord, TestInterface
 	 */
 	public TestSingleInheritancePOJO(final int key, final POJOBase<TestSingleInheritancePOJO> base)
 	{
-		this.primaryKey = key;
-		this.base = base;
-	}
-
-
-	@Override
-	public int getPrimaryKey()
-	{
-		return primaryKey;
-	}
-
-	@Override
-	public RecordBase<?> getBase()
-	{
-		return base;
+		super(key, base );
 	}
 
 	@Override
 	public void setName(final String name)
 	{
-		base.setProperty( primaryKey, "name", name);
+		setProperty("name", name);
 	}
 
 	@Override
 	public String getName()
 	{
-		return base.getProperty( primaryKey, "name", String.class);
+		return getProperty( "name", String.class);
 	}
 
 	@Override
 	public void setAge(final int age)
 	{
-		base.setProperty( primaryKey, "age", age);
+		setProperty( "age", age);
 	}
 
 	@Override
 	public int getAge()
 	{
-		return base.getProperty( primaryKey, "age", Integer.class);
+		return getProperty( "age", Integer.class);
 	}
 
 	@Override
@@ -101,7 +86,7 @@ public class TestSingleInheritancePOJO implements ActiveRecord, TestInterface
 	{
 		try
 		{
-			return base.getCore().getBase( TestInterface.class).getRecord(base.getProperty( primaryKey, "fk_test_id", Integer.class));
+			return getBase().getCore().getBase( TestInterface.class).getRecord(getProperty( "fk_test_id", Integer.class));
 		}
 		catch ( final ClassCastException | RecordException ex )
 		{
@@ -112,25 +97,25 @@ public class TestSingleInheritancePOJO implements ActiveRecord, TestInterface
 	@Override
 	public void setOther( final TestInterface it )
 	{
-		base.setProperty( primaryKey, "fk_test_id", it.getPrimaryKey());
+		setProperty( "fk_test_id", it.getPrimaryKey());
 	}
 
 	@Override
 	public Timestamp getCreatedAt()
 	{
-		return base.getProperty( primaryKey, TimestampedRecord.COLUMN_CREATED_AT, Timestamp.class);
+		return getProperty( TimestampedRecord.COLUMN_CREATED_AT, Timestamp.class);
 	}
 
 	@Override
 	public Timestamp getUpdatedAt()
 	{
-		return base.getProperty( primaryKey, TimestampedRecord.COLUMN_UPDATED_AT, Timestamp.class);
+		return getProperty( TimestampedRecord.COLUMN_UPDATED_AT, Timestamp.class);
 	}
 
 	@Override
 	public void touch()
 	{
-		base.getStore().touch( base, primaryKey );
+		getBase().getStore().touch( getBase(), primaryKey );
 	}
 
 	@Override
@@ -142,7 +127,7 @@ public class TestSingleInheritancePOJO implements ActiveRecord, TestInterface
 	@Override
 	public String toString()
 	{
-		return getClass().getSimpleName()+"{"+primaryKey+"@"+base.getRecordType().getCanonicalName()+"}";
+		return getClass().getSimpleName()+"{"+primaryKey+"@"+getBase().getRecordType().getCanonicalName()+"}";
 	}
 
 	@Override
@@ -160,7 +145,7 @@ public class TestSingleInheritancePOJO implements ActiveRecord, TestInterface
 	@Attribute(name = "type", type = String.class, typeName = "VARCHAR(100)")
 	public String getType()
 	{
-		return base.getProperty( primaryKey, "type", String.class);
+		return getProperty( "type", String.class);
 	}
 	
 	public static TestSingleInheritancePOJO getPOJO(POJOBase<TestSingleInheritancePOJO> base, int primaryKey, Object type)
