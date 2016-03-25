@@ -72,7 +72,8 @@ class RowCache implements Comparable<RowCache>
 	 */
 	public synchronized Object setData(final String columnName, final Object value, final boolean updateValues)
 	{
-		if(Objects.equals(getData( columnName.toLowerCase()), value))
+		//we need to check for existence, to allow storing null-objects, for later checks
+		if(hasData( columnName ) && Objects.equals(getData( columnName.toLowerCase()), value))
 		{
 			return value;
 		}
@@ -93,7 +94,7 @@ class RowCache implements Comparable<RowCache>
 	{
 		for(int i=0;i<names.length;i++)
 		{
-			if(Objects.equals( getData( names[i].toLowerCase()), values[i]))
+			if(hasData( names[i].toLowerCase() ) && Objects.equals( getData( names[i].toLowerCase()), values[i]))
 			{
 				continue;
 			}

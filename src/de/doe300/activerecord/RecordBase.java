@@ -502,9 +502,6 @@ public abstract class RecordBase<T extends ActiveRecord> implements ReadOnlyReco
 	{
 		final Collection<String> columnNames = store.getAllColumnNames( getTableName());
 		final Map<String, Object> copyValues = store.getValues( this, record.getPrimaryKey(), columnNames.toArray( new String[columnNames.size()]));
-		//FIXME somehow copyValues is empty (not even keys), but columnNames has all correct columns
-		//break in CachedRecordStore#gteValues() cancells getting rest of columns
-		//but how can column "other" not exist in RowCache, after being retrieved from DB???
 		return createRecord( copyValues );
 	}
 

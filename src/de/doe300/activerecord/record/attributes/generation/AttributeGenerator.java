@@ -198,6 +198,7 @@ public class AttributeGenerator extends AbstractProcessor
 		//public default void setAttributeName(final Type value) {
 		return "\tpublic default void set" + Attributes.toCamelCase( source.name()) + "("+(withNullable ? "@Nullable" : "")+" final "
 				+ classType + " value) {\n"
+				//TODO setter does not support type-mapping
 				//getBase.getStore.setValue(getBase(), getPrimaryKey(), "attributeName", value);
 				+ "\t\tgetBase().getStore().setValue(getBase(), getPrimaryKey(), \"" + source.name() + "\", value);\n"
 				//}

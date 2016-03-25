@@ -198,6 +198,7 @@ public final class RecordHandler<T extends ActiveRecord> implements InvocationHa
 			{
 				setAttribute( record, column, converterMethod.invoke( proxy, args[0] ) );
 			}
+			//TODO setter does not support type-mapping
 			//setters are void-methods
 			return null;
 		}

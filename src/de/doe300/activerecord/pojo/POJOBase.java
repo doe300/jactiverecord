@@ -86,6 +86,7 @@ public class POJOBase<T extends ActiveRecord> extends RecordBase<T>
 	 */
 	public void setProperty(final int primaryKey, @Nonnull final String name, @Nullable final Object value)
 	{
+		//TODO setter does not support type-mapping
 		store.setValue( this, primaryKey, name, value );
 	}
 

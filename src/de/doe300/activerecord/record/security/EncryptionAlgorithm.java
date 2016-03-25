@@ -34,8 +34,6 @@ import javax.annotation.Nullable;
  */
 public interface EncryptionAlgorithm
 {
-	//FIXME need to accept arbitrary sizes, but how to add pading??
-	
 	/**
 	 * NOTE: the parameter for this method may need to be padded!
 	 * 
