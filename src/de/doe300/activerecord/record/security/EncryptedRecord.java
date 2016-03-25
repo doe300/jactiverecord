@@ -26,9 +26,7 @@ package de.doe300.activerecord.record.security;
 
 import de.doe300.activerecord.migration.ExcludeAttribute;
 import de.doe300.activerecord.record.ActiveRecord;
-import java.security.GeneralSecurityException;
 import javax.annotation.Nonnull;
-import javax.annotation.Nullable;
 
 /**
  * An ActiveRecord which encrypt several of its fields
@@ -43,36 +41,4 @@ public interface EncryptedRecord extends ActiveRecord
 	@Nonnull
 	@ExcludeAttribute
 	public EncryptionAlgorithm getEncryptionAlgorithm();
-	
-	/**
-	 * Encrypts the given value
-	 * @param rawValue the value to encrypt
-	 * @return the encrypted result
-	 * @throws GeneralSecurityException if any error occurs while encrypting
-	 */
-	@Nullable
-	public default String encryptValue(@Nullable final String rawValue) throws GeneralSecurityException
-	{
-		if(rawValue == null)
-		{
-			return null;
-		}
-		return new String(getEncryptionAlgorithm().encryptValue( rawValue.getBytes() ));
-	}
-	
-	/**
-	 * Decrypts the given value
-	 * @param encryptedValue the encrypted value to decrypt
-	 * @return the plain-text result
-	 * @throws GeneralSecurityException if any error occurs while decrypting
-	 */
-	@Nullable
-	public default String decryptValue(@Nullable final String encryptedValue) throws GeneralSecurityException
-	{
-		if(encryptedValue == null)
-		{
-			return null;
-		}
-		return new String(getEncryptionAlgorithm().decryptValue( encryptedValue.getBytes() ));
-	}
 }

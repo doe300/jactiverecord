@@ -104,10 +104,12 @@ public class QueryResultTest extends Assert
 	}
 
 	@Test
-	public void testGetOrder()
+	public void testGetOrder() throws Exception
 	{
-		assertSame( base.getDefaultOrder(), base.where( new SimpleCondition("name", null, Comparison.IS_NOT_NULL)).getOrder());
-		//XXX does not close stream
+		try(final QueryResult<TestInterface> res = base.where( new SimpleCondition("name", null, Comparison.IS_NOT_NULL)))
+		{
+			assertSame( base.getDefaultOrder(), res.getOrder());
+		}
 	}
 	
 	@Test

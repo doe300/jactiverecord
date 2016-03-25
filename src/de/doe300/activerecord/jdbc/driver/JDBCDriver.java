@@ -507,8 +507,9 @@ public class JDBCDriver implements DBDriver
 	@Override
 	public Migration createMigration(final Class<? extends ActiveRecord> recordType, final RecordStore store)
 	{
-		if(!(store instanceof JDBCRecordStore))
+		if(!(store instanceof JDBCRecordStore)) {
 			throw new IllegalArgumentException("RecordStore must beof type JDBCRecordStore!");
+		}
 		return new AutomaticMigration(recordType, ((JDBCRecordStore)store).getConnection());
 	}
 
@@ -542,8 +543,9 @@ public class JDBCDriver implements DBDriver
 	@Override
 	public Migration createMigration( String applyCommand, String updateCommand, String revertCommand,  final RecordStore store )
 	{
-		if(!(store instanceof JDBCRecordStore))
+		if(!(store instanceof JDBCRecordStore)) {
 			throw new IllegalArgumentException("RecordStore must beof type JDBCRecordStore!");
+		}
 		return new ManualMigration(applyCommand, updateCommand, revertCommand, ((JDBCRecordStore)store).getConnection());
 	}
 

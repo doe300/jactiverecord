@@ -636,7 +636,9 @@ public final class TypeMappings
 			}
 		}
 		else
+		{
 			throw new IllegalArgumentException("Illegal column-type!");
+		}
 	}
 }
 

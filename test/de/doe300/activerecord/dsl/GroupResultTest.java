@@ -105,18 +105,20 @@ public class GroupResultTest extends Assert
 	}
 
 	@Test
-	public void testGetKey()
+	public void testGetKey() throws Exception
 	{
-		GroupResult<String,TestInterface> res = new GroupResult<String,TestInterface>("Adam5", base.find( new SimpleCondition("name", "Adam5", Comparison.IS)), GroupResult.SIZE_UNKNOWN, base.getDefaultOrder());
-		assertEquals( "Adam5", res.getKey());
-		//XXX does not close stream
+		try(GroupResult<String,TestInterface> res = new GroupResult<String,TestInterface>("Adam5", base.find( new SimpleCondition("name", "Adam5", Comparison.IS)), GroupResult.SIZE_UNKNOWN, base.getDefaultOrder()))
+		{
+			assertEquals( "Adam5", res.getKey());
+		}
 	}
 
 	@Test
-	public void testSize()
+	public void testSize() throws Exception
 	{
-		GroupResult<String,TestInterface> res = new GroupResult<String,TestInterface>("Adam5", base.find( new SimpleCondition("name", "Adam5", Comparison.IS)), GroupResult.SIZE_UNKNOWN, base.getDefaultOrder());
-		assertTrue( res.getEstimatedSize() == GroupResult.SIZE_UNKNOWN);
-		//XXX does not close stream
+		try(GroupResult<String,TestInterface> res = new GroupResult<String,TestInterface>("Adam5", base.find( new SimpleCondition("name", "Adam5", Comparison.IS)), GroupResult.SIZE_UNKNOWN, base.getDefaultOrder()))
+		{
+			assertTrue( res.getEstimatedSize() == GroupResult.SIZE_UNKNOWN);
+		}
 	}
 }

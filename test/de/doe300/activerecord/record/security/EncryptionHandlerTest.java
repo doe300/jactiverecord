@@ -26,6 +26,7 @@ package de.doe300.activerecord.record.security;
 
 import de.doe300.activerecord.RecordBase;
 import de.doe300.activerecord.TestServer;
+import de.doe300.activerecord.migration.Attribute;
 import javax.crypto.SecretKeyFactory;
 import javax.crypto.spec.DESKeySpec;
 import org.junit.AfterClass;
@@ -59,9 +60,12 @@ public class EncryptionHandlerTest extends Assert
 	
 	public static interface TestEncryptedRecord extends EncryptedRecord
 	{
+		//PostgreSQL wants "BYTEA" as SQL-type
+		@Attribute(name = "name", typeName = "VARBINARY(255)")
 		@EncryptedAttribute(attribute = "name")
 		public String getName();
 		
+		@EncryptedAttribute(attribute = "name")
 		public void setName(String name);
 	}
 	
@@ -75,7 +79,8 @@ public class EncryptionHandlerTest extends Assert
 		record.setName( "AdamAdam");
 		assertEquals( "AdamAdam", record.getName());
 		
-		//TODO currently fails because of padding
+		//TODO currently fails (because of padding)
+		//algorithm used in test converts '\0' zero-bytes to ' ' spaces
 		record.setName( "Eve");
 		assertEquals( "Eve", record.getName());
 	}

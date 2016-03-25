@@ -24,14 +24,14 @@
  */
 package de.doe300.activerecord.record.security;
 
-import java.nio.ByteBuffer;
+import java.io.ByteArrayOutputStream;
+import java.io.IOException;
 import java.security.GeneralSecurityException;
 import java.security.Key;
 import java.security.cert.Certificate;
 import javax.annotation.Nonnull;
-import javax.crypto.BadPaddingException;
 import javax.crypto.Cipher;
-import javax.crypto.IllegalBlockSizeException;
+import javax.crypto.CipherOutputStream;
 
 /**
  *
@@ -66,43 +66,48 @@ public class CipherEncryptionWrapper implements EncryptionAlgorithm
 	}
 
 	@Override
-	public byte[] encryptValue( byte[] rawValue ) throws IllegalBlockSizeException, BadPaddingException
+	public byte[] encryptValue( byte[] rawValue ) throws GeneralSecurityException
 	{
 		if(rawValue == null)
 		{
 			return null;
 		}
-		ByteBuffer resultBuffer = ByteBuffer.allocate( encryptionCipher.getOutputSize( rawValue.length));
-		final int blockSize = encryptionCipher.getBlockSize();
-		int offset = 0;
-		while(offset < rawValue.length - blockSize)
+		try(ByteArrayOutputStream bos = new ByteArrayOutputStream(rawValue.length); CipherOutputStream cos = new CipherOutputStream(bos, encryptionCipher ))
 		{
-			resultBuffer.put( encryptionCipher.update(rawValue, offset, blockSize));
-			offset += blockSize;
+			cos.write( rawValue);
+			if(encryptionCipher.getBlockSize() != 0 && rawValue.length % encryptionCipher.getBlockSize() != 0)
+			{
+				//needs padding
+				final int paddingCount = encryptionCipher.getBlockSize() - (rawValue.length % encryptionCipher.getBlockSize());
+				final byte[] padding = new byte[paddingCount];
+				cos.write( padding );
+			}
+			cos.flush();
+			return bos.toByteArray();
 		}
-		//final step
-		resultBuffer.put( encryptionCipher.doFinal( rawValue, offset, Math.min( blockSize, rawValue.length - offset)));
-		return resultBuffer.array();
+		catch(final IOException e)
+		{
+			throw new GeneralSecurityException(e);
+		}
 	}
 
 	@Override
-	public byte[] decryptValue( byte[] encryptedValue ) throws IllegalBlockSizeException, BadPaddingException
+	public byte[] decryptValue( byte[] encryptedValue ) throws GeneralSecurityException
 	{
 		if(encryptedValue == null)
 		{
 			return null;
 		}
-		ByteBuffer resultBuffer = ByteBuffer.allocate( decryptionCipher.getOutputSize( encryptedValue.length));
-		final int blockSize = decryptionCipher.getBlockSize();
-		int offset = 0;
-		while(offset < encryptedValue.length - blockSize)
+		try(ByteArrayOutputStream bos = new ByteArrayOutputStream(encryptedValue.length); CipherOutputStream cos = new CipherOutputStream(bos, decryptionCipher))
 		{
-			resultBuffer.put( decryptionCipher.update(encryptedValue, offset, blockSize));
-			offset += blockSize;
+			cos.write( encryptedValue);
+			cos.flush();
+			return bos.toByteArray();
 		}
-		//final step
-		resultBuffer.put( decryptionCipher.doFinal( encryptedValue, offset, Math.min( blockSize, encryptedValue.length - offset)));
-		return resultBuffer.array();
+		catch(final IOException e)
+		{
+			throw new GeneralSecurityException(e);
+		}
 	}
 
 }

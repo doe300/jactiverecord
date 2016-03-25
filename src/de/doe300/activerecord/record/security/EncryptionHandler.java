@@ -63,26 +63,75 @@ public class EncryptionHandler implements ProxyHandler
 			{
 				return algorithm;
 			}
-			if(method.equals( EncryptedRecord.class.getMethod( "encryptValue", String.class)))
-			{
-				return new String(algorithm.encryptValue( ((String)args[0]).getBytes()));
-			}
-			if(method.equals( EncryptedRecord.class.getMethod( "decryptValue", String.class)))
-			{
-				return new String(algorithm.decryptValue(((String)args[0]).getBytes()));
-			}
+			//TODO currently both setter and getter must be annotated
 			if(method.isAnnotationPresent( EncryptedAttribute.class))
 			{
-				//FIXME fails, because it contains non-printable characters
-				//data would need to be saved in BINARY or VARBINARY format, BLOB, etc.
 				String attributeName = method.getAnnotation( EncryptedAttribute.class).attribute();
 				if(Attributes.isGetter( method, true ))
 				{
-					return new String(algorithm.decryptValue( ((String)record.getBase().getStore().getValue( record.getBase(), record.getPrimaryKey(), attributeName)).getBytes()));
+					final Object dbValue = record.getBase().getStore().getValue( record.getBase(), record.getPrimaryKey(), attributeName);
+					final byte[] decryptedValue;
+					if(dbValue == null)
+					{
+						return null;
+					}
+					else if(dbValue instanceof String)
+					{
+						decryptedValue = algorithm.decryptValue( ((String)dbValue).getBytes());
+					}
+					else if(dbValue.getClass().isArray() && Byte.TYPE.isAssignableFrom( dbValue.getClass().getComponentType()))
+					{
+						decryptedValue = algorithm.decryptValue( (byte[])dbValue );
+					}
+					else
+					{
+						throw new IllegalArgumentException("Illegal DB-type for encrypted value");
+					}
+					if(String.class.isAssignableFrom( method.getReturnType()))
+					{
+						return new String(decryptedValue);
+					}
+					else if(method.getReturnType().isArray() && Byte.TYPE.isAssignableFrom( method.getReturnType().getComponentType()))
+					{
+						return decryptedValue;
+					}
+					throw new IllegalArgumentException("Invalid return-type for encrypted getter");
 				}
 				if(Attributes.isSetter( method, args[0].getClass(), true ))
 				{
-					record.getBase().getStore().setValue( record.getBase(), record.getPrimaryKey(), attributeName, new String(algorithm.encryptValue( ((String)args[0]).getBytes())));
+					final Class<?> dbType = record.getBase().getStore().getAllColumnTypes( record.getBase().getTableName()).get( attributeName);
+					if(!(String.class.isAssignableFrom( dbType ) || dbType.isArray() && Byte.TYPE.isAssignableFrom( dbType.getComponentType())))
+					{
+						throw new IllegalArgumentException("Illegal DB-type for encrypted value");
+					}
+					final Object dbValue;
+					if(args[0] == null)
+					{
+						dbValue = null;
+					}
+					else if(args[0] instanceof String)
+					{
+						if(String.class.isAssignableFrom( dbType))
+						{
+							dbValue = new String(algorithm.encryptValue( ((String)args[0]).getBytes()));
+						}
+						else
+						{
+							dbValue = algorithm.encryptValue( ((String)args[0]).getBytes());
+						}
+					}
+					else
+					{
+						if(String.class.isAssignableFrom( dbType))
+						{
+							dbValue = new String(algorithm.encryptValue( ((byte[])args[0])));
+						}
+						else
+						{
+							dbValue = algorithm.encryptValue( ((byte[])args[0]));
+						}
+					}
+					record.getBase().getStore().setValue( record.getBase(), record.getPrimaryKey(), attributeName, dbValue);
 					return null;
 				}
 			}

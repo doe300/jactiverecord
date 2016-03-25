@@ -34,7 +34,9 @@ import java.lang.annotation.Target;
 /**
  * Annotation for an attribute which will be saved in an encrypted state.
  * 
- * NOTE: This annotation can only be applied to {@link String}-attributes.
+ * NOTE: This annotation can only be applied to {@link String}- or {@Byte byte[]}-attributes.
+ * The corresponding database-type must be natively mappable to {@link String} or {@link Byte byte[]}.
+ * NOTE: Both methods (attribute-getter and -setter) need to be annotated with the same annotation (same attribute-name)
  * 
  * @author doe300
  * @see Attribute

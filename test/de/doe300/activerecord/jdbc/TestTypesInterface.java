@@ -131,6 +131,7 @@ public interface TestTypesInterface extends ActiveRecord
 		TypeMappings.writeXML( xml, this, "xml");
 	}
 	
+	//XXX PostgreSQL wants "BYTEA" as SQL-type
 	@Attribute(name = "serial", typeName = "VARBINARY(20)")
 	public default Serializable getSerializable() throws SQLException
 	{

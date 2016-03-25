@@ -25,6 +25,7 @@
 package de.doe300.activerecord.jdbc.driver;
 
 import de.doe300.activerecord.migration.constraints.IndexType;
+import java.lang.reflect.Array;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.UUID;
@@ -103,6 +104,10 @@ public class PostgreSQLDriver extends JDBCDriver
 		{
 			return String.class;
 		}
+		if(sqlType.toUpperCase().startsWith( "BYTEA"))
+		{
+			return Array.newInstance( Byte.TYPE, 0).getClass();
+		}
 		return super.getJavaType( sqlType );
 	}
 
@@ -116,6 +121,10 @@ public class PostgreSQLDriver extends JDBCDriver
 		if(Double.class.equals( javaType))
 		{
 			return "DOUBLE PRECISION";
+		}
+		if( java.io.Serializable.class.isAssignableFrom( javaType ))
+		{
+			return "BYTEA";
 		}
 		return super.getSQLType( javaType );
 	}
