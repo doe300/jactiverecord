@@ -103,6 +103,6 @@ public class Maximum<T extends ActiveRecord, C extends Comparable<? super C>> ex
 	@Override
 	protected C aggregateValues( final Stream<C> valueStream )
 	{
-		return valueStream.max( new AggregateFunction.NullSkippingComparator<C>(false)).orElse( null);
+		return valueStream.max(new NullSkippingComparator<C>(false)).orElse( null);
 	}
 }

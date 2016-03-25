@@ -53,6 +53,4 @@ public interface DBMappable
 	 */
 	@Nullable
 	public Object toDBValue();
-	
-	//TODO java-type of db-mapped value
 }

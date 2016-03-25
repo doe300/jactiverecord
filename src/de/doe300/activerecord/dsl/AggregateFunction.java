@@ -25,7 +25,6 @@
 package de.doe300.activerecord.dsl;
 
 import java.util.Arrays;
-import java.util.Comparator;
 import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
@@ -166,28 +165,4 @@ public abstract class AggregateFunction<T extends ActiveRecord, C, V extends Agg
 		}
 	}
 
-	public static class NullSkippingComparator<T extends Comparable<? super T>> implements Comparator<T>
-	{
-		private final boolean isNullHigher;
-
-		public NullSkippingComparator( final boolean isNullHigher )
-		{
-			this.isNullHigher = isNullHigher;
-		}
-
-		@Override
-		public int compare( final T o1, final T o2 )
-		{
-			if(o1 == null)
-			{
-				return isNullHigher ? 1 : -1;
-			}
-			if(o2 == null)
-			{
-				return isNullHigher ? -1 : 1;
-			}
-			return Comparable.class.cast(o1).compareTo(o2);
-		}
-
-	}
 }

@@ -26,6 +26,7 @@ package de.doe300.activerecord.store.impl.memory;
 
 import de.doe300.activerecord.dsl.Comparison;
 import de.doe300.activerecord.dsl.SimpleCondition;
+import de.doe300.activerecord.dsl.SimpleOrder;
 import de.doe300.activerecord.scope.Scope;
 import java.util.Collections;
 import java.util.Map;
@@ -62,7 +63,8 @@ public class MemoryTableTest extends Assert
 		table.putValue( row, "name", "Adam");
 		assertNotNull( table.getValue( row, "name"));
 		
-		//failure-test
+		//failure-tests
+		assertFalse( table.putValue( 120431230, "name", "Adam"));
 		table.putValue( row, "noSuchColumn", "Steve");
 	}
 
@@ -84,7 +86,8 @@ public class MemoryTableTest extends Assert
 		table.putValues( row, Collections.singletonMap( "name", "Adam"));
 		assertEquals( "Adam", table.getValue( row, "name"));
 		
-		//failure test
+		//failure tests
+		assertFalse( table.putValues( 10112203, Collections.singletonMap( "name", "Adam")));
 		table.putValues( row, Collections.singletonMap( "age", "Eve"));
 	}
 
@@ -140,7 +143,8 @@ public class MemoryTableTest extends Assert
 	{
 		int row = table.insertRow();
 		table.putValue( row, "age", -123);
-		assertTrue( Objects.equals( row, table.findFirstRow( new Scope(new SimpleCondition("age", -123, Comparison.IS), null, row)).getKey()));
+		assertTrue( Objects.equals( row, table.findFirstRow( new Scope(new SimpleCondition("age", -123, Comparison.IS), null, Scope.NO_LIMIT)).getKey()));
+		assertTrue( Objects.equals( row, table.findFirstRow( new Scope(new SimpleCondition("age", -123, Comparison.IS), SimpleOrder.fromSQLString( "age DESC"), Scope.NO_LIMIT)).getKey()));
 	}
 
 	@Test

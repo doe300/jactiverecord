@@ -29,6 +29,9 @@ import de.doe300.activerecord.RecordCore;
 import de.doe300.activerecord.TestInterface;
 import de.doe300.activerecord.dsl.Comparison;
 import de.doe300.activerecord.dsl.SimpleCondition;
+import de.doe300.activerecord.dsl.functions.Maximum;
+import de.doe300.activerecord.jdbc.driver.JDBCDriver;
+import de.doe300.activerecord.scope.Scope;
 import java.util.Collections;
 import java.util.Map;
 import java.util.Set;
@@ -180,5 +183,31 @@ public class MemoryRecordStoreTest extends Assert
 		assertTrue( store.containsRecord( base, key));
 		i.destroy();
 		assertFalse( store.containsRecord( base, key));
+	}
+
+	@Test
+	public void testGetDriver()
+	{
+		assertFalse(store.getDriver() instanceof JDBCDriver);
+	}
+
+	@Test
+	public void testGetAllColumnTypes()
+	{
+		assertTrue(String.class.equals(store.getAllColumnTypes( base.getTableName()).get( "name")));
+	}
+
+	@Test
+	public void testFindFirstWithData()
+	{
+		assertEquals("Adam", store.findFirstWithData( base, new String[]{"name"}, Scope.DEFAULT).get( "name"));
+		final Scope noMatch = new Scope(new SimpleCondition("name", "Stevenson", Comparison.IS), null, Scope.NO_LIMIT);
+		assertTrue( store.findFirstWithData( base, new String[]{"name"}, noMatch).isEmpty());
+	}
+
+	@Test
+	public void testAggregate()
+	{
+		assertEquals( "Steve", store.aggregate( base, new Maximum<TestInterface, String>("name", TestInterface::getName), null));
 	}
 }
