@@ -75,7 +75,6 @@ public interface Order extends Comparator<ActiveRecord>
 	 */
 	public default boolean equals( @Nonnull final Order order )
 	{
-		final JDBCDriver driver = new JDBCDriver();
-		return toSQL( driver ).equals( order.toSQL( driver));
+		return toSQL( JDBCDriver.DEFAULT ).equals( order.toSQL( JDBCDriver.DEFAULT));
 	}
 }

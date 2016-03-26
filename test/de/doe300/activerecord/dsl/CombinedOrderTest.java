@@ -55,21 +55,21 @@ public class CombinedOrderTest extends Assert
 	@Test
 	public void testToSQL()
 	{
-		Order o = new CombinedOrder(SimpleOrder.fromSQLString( "name ASC"), SimpleOrder.fromSQLString( "age DESC") );
-		assertEquals( o.toSQL( new JDBCDriver()), "name ASC, age DESC");
+		Order o = CombinedOrder.combine(SimpleOrder.fromSQLString( "name ASC"), SimpleOrder.fromSQLString( "age DESC") );
+		assertEquals( o.toSQL( JDBCDriver.DEFAULT), "name ASC, age DESC");
 	}
 
 	@Test
 	public void testReversed()
 	{
-		Order o = new CombinedOrder(SimpleOrder.fromSQLString( "name ASC"), SimpleOrder.fromSQLString( "age DESC") );
+		Order o = CombinedOrder.combine(SimpleOrder.fromSQLString( "name ASC"), SimpleOrder.fromSQLString( "age DESC") );
 		assertEquals( o.reversed(), SimpleOrder.fromSQLString( "name DESC, age asc"));
 	}
 
 	@Test
 	public void testCompare_Map_Map()
 	{
-		Order o = new CombinedOrder(SimpleOrder.fromSQLString( "name ASC"), SimpleOrder.fromSQLString( "age DESC") );
+		Order o = CombinedOrder.combine(SimpleOrder.fromSQLString( "name ASC"), SimpleOrder.fromSQLString( "age DESC") );
 		final Map<String, Object> obj1 = new HashMap<>(2);
 		obj1.put( "name", "Adam");
 		obj1.put( "age", 112);

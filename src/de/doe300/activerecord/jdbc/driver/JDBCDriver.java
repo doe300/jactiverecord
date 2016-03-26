@@ -24,7 +24,6 @@
  */
 package de.doe300.activerecord.jdbc.driver;
 
-import de.doe300.activerecord.dsl.joins.JoinType;
 import java.math.BigDecimal;
 import java.sql.Connection;
 import java.sql.DatabaseMetaData;
@@ -55,6 +54,7 @@ import java.lang.reflect.Array;
 import java.util.Map;
 import java.util.Set;
 import java.util.stream.Collectors;
+import javax.annotation.concurrent.Immutable;
 
 /**
  * The abstract driver for JDBC-based storages
@@ -63,6 +63,7 @@ import java.util.stream.Collectors;
  * @since 0.5
  * @see "https://en.wikibooks.org/wiki/SQL_Dialects_Reference"
  */
+@Immutable
 public class JDBCDriver implements DBDriver
 {
 	public static final int STRING_TYPE_LENGTH = 4096;
@@ -90,11 +91,6 @@ public class JDBCDriver implements DBDriver
 	public static final String SCALAR_STRING_LENGTH = "CHAR_LENGTH(%column%)";
 	public static final String SCALAR_TRIM = "TRIM(%column%)";
 	
-	public static final String JOIN_INNER = "INNER JOIN";
-	public static final String JOIN_LEFT_OUTER = "LEFT OUTER JOIN";
-	public static final String JOIN_RIGHT_OUTER = "RIGHT OUTER JOIN";
-	public static final String JOIN_FULL_OUTER = "FULL OUTER JOIN";
-
 	private static final String[] sql92Keywords = {
 		"absolute", "action", "allocate", "are", "assertion",
 		"bit", "bit_length", "both", "cascaded", "case", "cast", "catalog", "char", "char_length", "character",
@@ -111,6 +107,20 @@ public class JDBCDriver implements DBDriver
 		"translation", "trim", "true", "unknown", "upper", "usage", "value", "varchar", "when", "whenever", "write",
 		"year", "zone"
 	};
+	
+	/**
+	 * The default JDBC driver for no particular DBMS
+	 * @since 0.7
+	 */
+	public static final JDBCDriver DEFAULT = new JDBCDriver();
+	
+	/**
+	 * Default constructor - hidden from the public eye
+	 */
+	protected JDBCDriver()
+	{
+		//hidden 
+	}
 
 	@Override
 	public boolean isTypeSupported(final Class<?> javaType )
@@ -174,30 +184,6 @@ public class JDBCDriver implements DBDriver
 		return sqlFunction.replaceAll( "%column%", column);
 	}
 	
-	/**
-	 * @param joinType
-	 * @return the correct keyword for the JOIN-type for this SQL-dialect
-	 * @since 0.7
-	 */
-	@Nonnull
-	@Syntax(value = "SQL")
-	public String getSQLJoinKeyword(@Nonnull final JoinType joinType)
-	{
-		switch(joinType)
-		{
-			case INNER_JOIN:
-				return JDBCDriver.JOIN_INNER;
-			case LEFT_OUTER_JOIN:
-				return JDBCDriver.JOIN_LEFT_OUTER;
-			case RIGHT_OUTER_JOIN:
-				return JDBCDriver.JOIN_RIGHT_OUTER;
-			case FULL_OUTER_JOIN:
-				return JDBCDriver.JOIN_FULL_OUTER;
-			default:
-				throw new AssertionError( joinType.name() );
-		}
-	}
-
 	/**
 	 * For the default-implementation, see: https://en.wikibooks.org/wiki/SQL_Dialects_Reference/Data_structure_definition/Auto-increment_column
 	 *

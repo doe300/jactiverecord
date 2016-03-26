@@ -158,6 +158,6 @@ public class ScalarOrderTest extends Assert
 			new LowerCase("name", null),
 			new Absolute("age", null)
 		}, null );
-		assertEquals( o.toSQL( new JDBCDriver()), "LOWER(name) ASC, CAST(ABS(age) AS BIGINT) ASC");
+		assertEquals( o.toSQL( JDBCDriver.DEFAULT), "LOWER(name) ASC, CAST(ABS(age) AS BIGINT) ASC");
 	}
 }

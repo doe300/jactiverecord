@@ -242,7 +242,7 @@ public abstract class RecordBase<T extends ActiveRecord> implements ReadOnlyReco
 			{
 				defaultOrder = new SimpleOrder(getPrimaryColumn(), SimpleOrder.OrderType.ASCENDING);
 			}
-			Logging.getLogger().debug( recordType.getSimpleName(), "Using default order: "+defaultOrder.toSQL(new JDBCDriver()));
+			Logging.getLogger().debug( recordType.getSimpleName(), "Using default order: "+defaultOrder.toSQL(JDBCDriver.DEFAULT));
 		}
 		return defaultOrder;
 	}

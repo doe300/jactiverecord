@@ -115,4 +115,10 @@ public class InvertedCondition implements Condition
 		}
 		return equals( (Condition)obj);
 	}
+	
+	@Override
+	public int hashCode()
+	{
+		return toSQL( JDBCDriver.DEFAULT, null ).hashCode();
+	}
 }

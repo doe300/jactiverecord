@@ -118,7 +118,6 @@ public interface Condition extends Predicate<ActiveRecord>
 	 */
 	public default boolean equals( @Nonnull final Condition condition )
 	{
-		final JDBCDriver driver = new JDBCDriver();
-		return toSQL( driver, null ).equals( condition.toSQL( driver, null));
+		return toSQL( JDBCDriver.DEFAULT, null ).equals( condition.toSQL( JDBCDriver.DEFAULT, null));
 	}
 }

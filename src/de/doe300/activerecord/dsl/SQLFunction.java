@@ -67,7 +67,6 @@ public interface SQLFunction<T extends ActiveRecord, R> extends Function<T, R>
 	 */
 	public default boolean equals(@Nonnull final SQLFunction<?,?> func)
 	{
-		final JDBCDriver driver = new JDBCDriver();
-		return toSQL( driver, null ).equals( func.toSQL( driver, null));
+		return toSQL( JDBCDriver.DEFAULT, null ).equals( func.toSQL( JDBCDriver.DEFAULT, null));
 	}
 }

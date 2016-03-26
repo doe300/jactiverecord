@@ -40,6 +40,7 @@ import java.util.Collection;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Objects;
 import org.junit.AfterClass;
 import org.junit.Assert;
 import org.junit.BeforeClass;
@@ -236,7 +237,7 @@ public class RecordBaseTest<T extends TestInterface> extends Assert
 	public void testIsSynchronized() throws Exception
 	{
 		base.destroy( 101);
-		T t = base.newRecord( 101);
+		T t = Objects.requireNonNull(base.newRecord( 101));
 		t.setName( "Johny");
 		if(base.getStore().isCached())
 		{

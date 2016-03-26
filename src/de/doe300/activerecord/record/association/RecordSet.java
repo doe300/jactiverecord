@@ -104,8 +104,7 @@ public interface RecordSet<T extends ActiveRecord> extends SortedSet<T>, FinderM
 	@Nullable
 	public default Comparator<? super T> comparator()
 	{
-		//uses natural ordering
-		return null;
+		return getOrder();
 	}
 
 	@Override

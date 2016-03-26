@@ -52,7 +52,7 @@ class MemoryMigration extends AutomaticMigration
 	 */
 	MemoryMigration(@Nonnull final MemoryRecordStore memoryStore, @Nonnull final Class<? extends ActiveRecord> recordType)
 	{
-		super(recordType, null, new JDBCDriver());
+		super(recordType, null, JDBCDriver.DEFAULT);
 		this.memoryStore = memoryStore;
 		convertColumns();
 	}
@@ -65,7 +65,7 @@ class MemoryMigration extends AutomaticMigration
 	 */
 	MemoryMigration(@Nonnull final MemoryRecordStore memoryStore, @Nonnull final String tableName, @Nonnull final MemoryColumn[] columns, @Nonnull final String primaryColumn)
 	{
-		super(null, null, new JDBCDriver());
+		super(null, null, JDBCDriver.DEFAULT);
 		this.memoryStore = memoryStore;
 		this.tableName = tableName;
 		this.columns = columns;

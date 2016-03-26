@@ -170,7 +170,7 @@ public class SimpleOrder implements Order
 	@Override
 	public String toString()
 	{
-		return toSQL(new JDBCDriver());
+		return toSQL(JDBCDriver.DEFAULT);
 	}
 
 	@Override
@@ -192,6 +192,12 @@ public class SimpleOrder implements Order
 			return false;
 		}
 		return equals( (Order)obj);
+	}
+	
+	@Override
+	public int hashCode()
+	{
+		return toSQL( JDBCDriver.DEFAULT ).hashCode();
 	}
 
 	/**

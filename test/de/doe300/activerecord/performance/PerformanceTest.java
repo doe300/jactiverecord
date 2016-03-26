@@ -35,6 +35,7 @@ import java.sql.SQLException;
 import java.util.Arrays;
 import java.util.Collection;
 import org.junit.Assert;
+import org.junit.Ignore;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.junit.runners.Parameterized;
@@ -44,6 +45,7 @@ import org.junit.runners.Parameterized;
  * @author doe300
  * @param <T>
  */
+@Ignore("Too heavy for 'normal' error-tests")
 @RunWith(Parameterized.class)
 public class PerformanceTest<T extends ProxyPerformance> extends Assert
 {

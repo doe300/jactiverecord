@@ -46,7 +46,7 @@ public class CombinedOrder implements Order
 	/**
 	 * @param orders the list of orders
 	 */
-	public CombinedOrder( @Nonnull final Order... orders )
+	private CombinedOrder( @Nonnull final Order... orders )
 	{
 		this.orders = orders;
 	}
@@ -129,5 +129,11 @@ public class CombinedOrder implements Order
 			return false;
 		}
 		return equals( (Order)obj);
+	}
+	
+	@Override
+	public int hashCode()
+	{
+		return toSQL( JDBCDriver.DEFAULT ).hashCode();
 	}
 }
