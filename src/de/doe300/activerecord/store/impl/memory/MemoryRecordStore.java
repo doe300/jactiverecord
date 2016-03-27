@@ -82,6 +82,28 @@ public class MemoryRecordStore implements RecordStore
 		}
 		return table;
 	}
+	
+	private void assertColumnsExist(@Nonnull final MemoryTable table, @Nonnull final String... columns) throws IllegalArgumentException
+	{
+		for(final String column : columns)
+		{
+			if(!table.getColumnNames().contains( column))
+			{
+				throw new IllegalArgumentException("Invalid column: " +column);
+			}
+		}
+	}
+	
+	private void assertColumnsExist(@Nonnull final MemoryTable table, @Nonnull final Iterable<String> columns) throws IllegalArgumentException
+	{
+		for(final String column : columns)
+		{
+			if(!table.getColumnNames().contains( column))
+			{
+				throw new IllegalArgumentException("Invalid column: " +column);
+			}
+		}
+	}
 
 	@Nonnull
 	private MemoryTable createTableIfNotExists(@Nonnull final RecordBase<?> recordBase) throws IllegalArgumentException
@@ -121,8 +143,9 @@ public class MemoryRecordStore implements RecordStore
 		final RecordBase<?> base, final int primaryKey, final String name, final Object value ) throws IllegalArgumentException
 	{
 		final MemoryTable table = assertTableExists( base.getTableName() );
+		assertColumnsExist( table, name);
 		table.putValue( primaryKey, name, value );
-		updateTimestamps( base, primaryKey );
+		updateTimestamps( base, primaryKey, false);
 	}
 
 	@Override
@@ -130,8 +153,9 @@ public class MemoryRecordStore implements RecordStore
 		final RecordBase<?> base, final int primaryKey, final String[] names, final Object[] values ) throws IllegalArgumentException
 	{
 		final MemoryTable table = assertTableExists( base.getTableName() );
+		assertColumnsExist( table, names );
 		table.putValues( primaryKey, names, values );
-		updateTimestamps( base, primaryKey );
+		updateTimestamps( base, primaryKey, false);
 	}
 
 	@Override
@@ -139,8 +163,9 @@ public class MemoryRecordStore implements RecordStore
 		final RecordBase<?> base, final int primaryKey, final Map<String, Object> values ) throws IllegalArgumentException
 	{
 		final MemoryTable table = assertTableExists( base.getTableName() );
+		assertColumnsExist( table, values.keySet());
 		table.putValues( primaryKey, values );
-		updateTimestamps( base, primaryKey );
+		updateTimestamps( base, primaryKey, false);
 	}
 
 	@Override
@@ -148,6 +173,7 @@ public class MemoryRecordStore implements RecordStore
 		final RecordBase<?> base, final int primaryKey, final String name ) throws IllegalArgumentException
 	{
 		final MemoryTable table = assertTableExists( base.getTableName() );
+		assertColumnsExist( table, name);
 		return table.getValue( primaryKey, name );
 	}
 
@@ -156,6 +182,7 @@ public class MemoryRecordStore implements RecordStore
 		final RecordBase<?> base, final int primaryKey, final String[] columns ) throws IllegalArgumentException
 	{
 		final MemoryTable table = assertTableExists( base.getTableName() );
+		assertColumnsExist( table, columns);
 		return table.getValues( primaryKey, columns);
 	}
 
@@ -164,6 +191,7 @@ public class MemoryRecordStore implements RecordStore
 	IllegalArgumentException
 	{
 		final MemoryTable table = assertTableExists( tableName );
+		assertColumnsExist( table, column, condColumn);
 		return table.getValues( column, condColumn, condValue );
 	}
 
@@ -171,6 +199,7 @@ public class MemoryRecordStore implements RecordStore
 	public boolean addRow( final String tableName, final String[] columns, final Object[] values ) throws IllegalArgumentException
 	{
 		final MemoryTable table = assertTableExists( tableName );
+		assertColumnsExist( table, columns);
 		final int index = table.insertRow();
 		table.putValues( index, columns, values );
 		return true;
@@ -217,6 +246,10 @@ public class MemoryRecordStore implements RecordStore
 	public int insertNewRecord(final RecordBase<?> base, final Map<String, Object> columnData )
 	{
 		final MemoryTable table = createTableIfNotExists(base );
+		if(columnData != null)
+		{
+			assertColumnsExist( table, columnData.keySet());
+		}
 		final int rowIndex = table.insertRow();
 		if(columnData != null)
 		{
@@ -225,7 +258,7 @@ public class MemoryRecordStore implements RecordStore
 				table.putValue( rowIndex, e.getKey(), e.getValue());
 			}
 		}
-		updateTimestamps( base, rowIndex );
+		updateTimestamps( base, rowIndex, true);
 		return rowIndex;
 	}
 
@@ -253,6 +286,7 @@ public class MemoryRecordStore implements RecordStore
 	public Map<String, Object> findFirstWithData(final RecordBase<?> base, final String[] columns, final Scope scope )
 	{
 		final MemoryTable table = assertTableExists( base.getTableName() );
+		assertColumnsExist( table, columns);
 		final Map.Entry<Integer, MemoryRow> row = table.findFirstRow( scope);
 		if(row != null)
 		{
@@ -265,6 +299,7 @@ public class MemoryRecordStore implements RecordStore
 	public Stream<Map<String, Object>> streamAllWithData(final RecordBase<?> base, final String[] columns, final Scope scope )
 	{
 		final MemoryTable table = assertTableExists( base.getTableName() );
+		assertColumnsExist( table, columns);
 		return table.findAllRows( scope ).map( (final Map.Entry<Integer, MemoryRow> e) -> e.getValue().getRowMap());
 	}
 
@@ -309,20 +344,23 @@ public class MemoryRecordStore implements RecordStore
 		return tables.remove( tableName) != null;
 	}
 	
-	private void updateTimestamps(@Nonnull final RecordBase<?> base, @Nonnegative final int primaryKey)
+	private void updateTimestamps(@Nonnull final RecordBase<?> base, @Nonnegative final int primaryKey, final boolean setCreationDate)
 	{
 		if(!base.isTimestamped())
 		{
 			return;
 		}
 		MemoryTable table = assertTableExists( base.getTableName());
-		table.putValues( primaryKey, new String[]{
-			TimestampedRecord.COLUMN_CREATED_AT,
-			TimestampedRecord.COLUMN_UPDATED_AT
-		}, new Object[]{
-			new java.sql.Timestamp(System.currentTimeMillis()),
-			new java.sql.Timestamp(System.currentTimeMillis())
-		} );
-		
+		if(setCreationDate)
+		{
+			table.putValue( primaryKey, TimestampedRecord.COLUMN_CREATED_AT, new java.sql.Timestamp(System.currentTimeMillis()));
+		}
+		table.putValue( primaryKey, TimestampedRecord.COLUMN_UPDATED_AT, new java.sql.Timestamp(System.currentTimeMillis()));
+	}
+	
+	@Override
+	public void touch(@Nonnull final RecordBase<?> base, @Nonnegative final int primaryKey)
+	{
+		updateTimestamps(base, primaryKey, false);
 	}
 }

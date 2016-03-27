@@ -28,6 +28,7 @@ import de.doe300.activerecord.RecordBase;
 import de.doe300.activerecord.TestInterface;
 import de.doe300.activerecord.TestServer;
 import de.doe300.activerecord.record.ActiveRecord;
+import java.util.Collections;
 import java.util.HashMap;
 import org.junit.AfterClass;
 import static org.junit.Assert.assertEquals;
@@ -134,7 +135,8 @@ public class HasOneConditionTest
 	@Test
 	public void testTest_Map()
 	{
-		cond1.test( new HashMap<String, Object>(0) );
+		assertFalse( cond1.test( new HashMap<String, Object>(0) ));
+		assertTrue( cond3.test( Collections.singletonMap( "id", t3.getPrimaryKey())));
 	}
 
 	@Test

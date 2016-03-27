@@ -43,6 +43,7 @@ import org.junit.Test;
  *
  * @author doe300
  */
+@Deprecated
 public class MemoryRecordStoreTest extends Assert
 {
 	private static MemoryRecordStore store;

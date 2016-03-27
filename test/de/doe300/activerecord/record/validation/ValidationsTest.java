@@ -51,6 +51,7 @@ public class ValidationsTest extends Assert
 		assertFalse( Validations.notEmpty( Collections.emptyList()));
 		assertFalse( Validations.notEmpty( new Object[]{}));
 		assertTrue( Validations.notEmpty( Collections.singletonMap( "a", null)));
+		assertFalse( Validations.notEmpty( Collections.emptyMap()));
 		assertFalse( Validations.notEmpty(0));
 		assertTrue( Validations.notEmpty(5L));
 		
@@ -61,6 +62,9 @@ public class ValidationsTest extends Assert
 	@Test(expected = ValidationFailed.class)
 	public void testValidate()
 	{
+		//succeeds
+		Validations.validate( "name", "Adam", Validations::notEmpty, "is wrong1");
+		//fails
 		Validations.validate("name", null, (Object obj) -> obj != null, "is null");
 	}
 
@@ -93,10 +97,4 @@ public class ValidationsTest extends Assert
 		assertFalse( Validations.negativeNumber( null));
 		Validations.negativeNumber( 'c' );
 	}
-
-	@Test
-	public void testGetValidationMethod()
-	{
-	}
-	
 }

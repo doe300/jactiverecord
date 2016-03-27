@@ -30,43 +30,64 @@ import de.doe300.activerecord.TestInterface;
 import de.doe300.activerecord.TestServer;
 import de.doe300.activerecord.dsl.Comparison;
 import de.doe300.activerecord.dsl.SimpleCondition;
+import de.doe300.activerecord.dsl.SimpleOrder;
 import de.doe300.activerecord.dsl.functions.Sum;
 import de.doe300.activerecord.scope.Scope;
+import de.doe300.activerecord.store.RecordStore;
+import de.doe300.activerecord.store.impl.memory.MemoryRecordStore;
+import java.sql.SQLException;
+import java.sql.Timestamp;
 import java.util.Arrays;
+import java.util.Collection;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Objects;
 import org.junit.AfterClass;
 import org.junit.Assert;
 import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertTrue;
 import org.junit.BeforeClass;
 import org.junit.Test;
+import org.junit.runner.RunWith;
+import org.junit.runners.Parameterized;
 
 /**
- *
- * @author daniel
+ * @author doe300
+ * @since 0.7
  */
-@Deprecated
-public class SimpleJDBCRecordStoreTest extends Assert
+@RunWith(Parameterized.class)
+public class RecordStoreTest extends Assert
 {
-	private static SimpleJDBCRecordStore store;
-	private static RecordBase<TestInterface> base;
-	private static int primaryKey;
+	private final RecordStore store;
+	private final RecordBase<TestInterface> base;
+	private final int primaryKey;
 	
-	public SimpleJDBCRecordStoreTest()
+	public RecordStoreTest(final RecordStore store) throws Exception
 	{
+		this.store = store;
+		this.base = RecordCore.fromStore( store.getClass().getCanonicalName(), store).getBase( TestInterface.class);
+		if(store instanceof MemoryRecordStore)
+		{
+			store.getDriver().createMigration( TestInterface.class, store).apply();
+		}
+		this.primaryKey = base.createRecord().getPrimaryKey();
 	}
 	
 	@BeforeClass
 	public static void createTables() throws Exception
 	{
 		TestServer.buildTestTables();
-		store = new SimpleJDBCRecordStore(TestServer.getTestConnection());
-		base = RecordCore.fromStore( "Test1", store).getBase(TestInterface.class);
-		assertNotNull( base );
-		primaryKey = base.createRecord().getPrimaryKey();
+	}
+	
+	@Parameterized.Parameters
+	public static Collection<Object[]> getParameters() throws SQLException
+	{
+		return Arrays.asList(
+			new Object[]{new SimpleJDBCRecordStore(TestServer.getTestConnection())},
+			new Object[]{new CachedJDBCRecordStore(TestServer.getTestConnection())},
+			new Object[]{new MemoryRecordStore()}
+		);
 	}
 	
 	@AfterClass
@@ -74,20 +95,29 @@ public class SimpleJDBCRecordStoreTest extends Assert
 	{
 		TestServer.destroyTestTables();
 	}
-
+	
 	@Test
-	public void testSetValue()
+	public void testContainsRecord()
 	{
-		store.setValue( base, primaryKey, "age", 104);
-		assertEquals( 104, store.getValue( base, primaryKey, "age"));
+		assertTrue( store.containsRecord( base, primaryKey));
+		assertFalse( store.containsRecord( base, primaryKey+2000) );
 	}
 
-	@Test
+	@Test(expected = IllegalArgumentException.class)
+	public void testSetValue()
+	{
+		store.setValue( base, primaryKey, "name", "Eve");
+		assertEquals( "Eve", store.getValue( base, primaryKey, "name"));
+		store.setValue( base, primaryKey, "no_such_column", "Value");
+	}
+
+	@Test(expected = IllegalArgumentException.class)
 	public void testSetValues_4args()
 	{
 		store.setValues( base, primaryKey, new String[]{"name", "age"}, new Object[]{"Adam", 10000});
 		assertEquals( "Adam", store.getValue( base, primaryKey, "name"));
 		assertEquals( 10000, store.getValue( base, primaryKey, "age"));
+		store.setValues( base, primaryKey, new String[]{"no_such_column", "no_column"}, new Object[]{"valu1", 1000});
 	}
 
 	@Test(expected = IllegalArgumentException.class)
@@ -129,17 +159,46 @@ public class SimpleJDBCRecordStoreTest extends Assert
 		//negative test - throws exception
 		store.getValues( base, primaryKey, new String[]{"no_column"});
 	}
+	
+	@Test(expected = IllegalArgumentException.class)
+	public void testGetValues_4args()
+	{
+		store.setValue( base, primaryKey, "name", "Heinz");
+		assertEquals("Heinz", store.getValues( base.getTableName(), "name", base.getPrimaryColumn(), primaryKey).findFirst().get());
+		//no results
+		assertEquals( 0, store.getValues( base.getTableName(), "name", base.getPrimaryColumn(), primaryKey+1000 ).count());
+		//negative test - throws exception
+		store.getValues( base.getTableName(), "no_column", base.getPrimaryColumn(), primaryKey);
+	}
+
+	@Test
+	public void testSave()
+	{
+		store.setValue( base, primaryKey, "name", "Alex");
+		assertTrue(store.isCached() == store.save( base, primaryKey ));
+		assertFalse( store.save( base, primaryKey));
+		store.clearCache( base, primaryKey );
+		assertEquals( "Alex", store.getValue( base, primaryKey, "name"));
+		assertFalse( store.save( base, primaryKey + 12341));
+	}
+
+	@Test
+	public void testSaveAll()
+	{
+		store.setValue( base, primaryKey, "age", 113);
+		assertTrue( store.isCached() == store.saveAll( base ));
+		assertFalse( store.saveAll( base));
+		store.clearCache( base, primaryKey );
+		assertEquals( 113, store.getValue( base, primaryKey, "age"));
+	}
 
 	@Test
 	public void testIsSynchronized()
 	{
+		store.setValue( base, primaryKey, "name", "Smith");
+		assertTrue( store.isCached() != store.isSynchronized( base, primaryKey));
+		assertTrue( store.isCached() == store.save( base, primaryKey ));
 		assertTrue( store.isSynchronized( base, primaryKey));
-	}
-
-	@Test
-	public void testContainsRecord()
-	{
-		assertTrue( store.containsRecord( base, primaryKey));
 	}
 
 	@Test
@@ -148,6 +207,7 @@ public class SimpleJDBCRecordStoreTest extends Assert
 		int key = store.insertNewRecord( base, null);
 		assertTrue( key >= 0);
 		assertTrue( store.containsRecord( base, key));
+		store.setValue( base, key, "name", "Adam");
 		store.destroy( base, key );
 		assertFalse( store.containsRecord( base, key));
 	}
@@ -167,31 +227,37 @@ public class SimpleJDBCRecordStoreTest extends Assert
 	}
 
 	@Test(expected = IllegalArgumentException.class)
-	public void testCount()
-	{
-		assertTrue( store.count( base, new SimpleCondition(base.getPrimaryColumn(), primaryKey, Comparison.IS)) == 1);
-		//test no results
-		assertEquals( 0, store.count( base, new SimpleCondition(base.getPrimaryColumn(), null, Comparison.IS_NULL)));
-		//negative test - throws exception
-		store.count( base, new SimpleCondition("no_column", base, Comparison.IS));
-	}
-
-	@Test(expected = IllegalArgumentException.class)
 	public void testStreamAllWithData()
 	{
 		Scope scope = new Scope(new SimpleCondition(base.getPrimaryColumn(), primaryKey, Comparison.IS), null, 2 );
 		assertTrue( store.streamAllWithData( base, new String[]{base.getPrimaryColumn()}, scope).count() == 1);
 		
+		Scope scope2 = new Scope(new SimpleCondition("name", "Failes", Comparison.IS), SimpleOrder.fromSQLString( "id DESC"), 2 );
+		//Tests streaming with data in cache but not in store
+		TestInterface i = base.createRecord();
+		i.setName( "Failes");
+		if(store.isCached())
+		{
+			assertTrue( store.streamAllWithData( base, new String[]{base.getPrimaryColumn()}, scope2).anyMatch(
+					(Map<String,Object> m) -> ((Integer)i.getPrimaryKey()).equals(m.get( base.getPrimaryColumn()))
+			));
+		}
+
 		//Test Limit
-		Scope scope2 = new Scope(new SimpleCondition("age", 123, Comparison.IS), null, 2 );
+		Scope scope4 = new Scope(new SimpleCondition("age", 123, Comparison.IS), null, 2 );
 		base.createRecord().setAge( 123);
 		base.createRecord().setAge( 123);
 		base.createRecord().setAge( 123);
-		assertTrue( store.streamAllWithData( base, base.getDefaultColumns(), scope2).count() == 2);
+		assertTrue( store.streamAllWithData( base, base.getDefaultColumns(), scope4).count() == 2);
 		
 		//test empty condition
 		Scope scope3 = new Scope(null, null, 2);
 		assertEquals( 2, store.streamAllWithData( base, base.getDefaultColumns(), scope3).count());
+
+		//Test Order (the two last added records should be returned, so the first is not in the results)
+		assertFalse( store.streamAllWithData( base, base.getDefaultColumns(), scope4).anyMatch(
+				(Map<String,Object> map) -> Integer.valueOf( i.getPrimaryKey()).equals( map.get( base.getPrimaryColumn()))
+		));
 		
 		//negative test - throws exception
 		store.streamAllWithData( base, new String[]{"id", "no_colunm"}, scope);
@@ -211,6 +277,21 @@ public class SimpleJDBCRecordStoreTest extends Assert
 		assertTrue( ( store.getAllColumnNames( base.getTableName()) ).containsAll( Arrays.asList( new String[]{"id", "name", "age", "fk_test_id", "other", "created_at", "updated_at", "test_enum"})) );
 	}
 
+	@Test
+	public void testClearCache()
+	{
+		if(!store.isCached())
+		{
+			return;
+		}
+		store.setValue( base, primaryKey, "age", 112 );
+		store.save( base, primaryKey );
+		store.setValue( base, primaryKey, "age", -112);
+		store.clearCache( base, primaryKey );
+		assertFalse( Objects.equals( store.getValue( base, primaryKey, "age"), -112));
+		assertEquals( 112, store.getValue( base, primaryKey, "age"));
+	}
+
 	@Test(expected = IllegalArgumentException.class)
 	public void testInsertNewRecord()
 	{
@@ -220,33 +301,13 @@ public class SimpleJDBCRecordStoreTest extends Assert
 	}
 
 	@Test(expected = IllegalArgumentException.class)
-	public void testGetValues_4args()
+	public void testCount()
 	{
-		store.setValue( base, primaryKey, "name", "Heinz");
-		assertEquals("Heinz", store.getValues( base.getTableName(), "name", base.getPrimaryColumn(), primaryKey).findFirst().get());
-		//no results
-		assertEquals( 0, store.getValues( base.getTableName(), "name", base.getPrimaryColumn(), primaryKey+1000 ).count());
+		assertTrue( store.count( base, new SimpleCondition(base.getPrimaryColumn(), primaryKey, Comparison.IS)) == 1);
+		//test no results
+		assertEquals( 0, store.count( base, new SimpleCondition(base.getPrimaryColumn(), null, Comparison.IS_NULL)));
 		//negative test - throws exception
-		store.getValues( base.getTableName(), "no_column", base.getPrimaryColumn(), primaryKey);
-	}
-
-
-	@Test
-	public void testIsCached()
-	{
-		assertFalse( store.isCached());
-	}
-
-	@Test
-	public void testSave()
-	{
-		assertFalse( store.save( base, primaryKey));
-	}
-
-	@Test
-	public void testSaveAll()
-	{
-		assertFalse( store.saveAll( base));
+		store.count( base, new SimpleCondition("no_column", base, Comparison.IS));
 	}
 
 	@Test(expected = IllegalArgumentException.class)
@@ -281,6 +342,15 @@ public class SimpleJDBCRecordStoreTest extends Assert
 		int conditional = store.aggregate( base, new Sum<TestInterface, Integer>("age", TestInterface::getAge), new SimpleCondition("name", null, Comparison.IS_NOT_NULL) ).intValue();
 		assertTrue(conditional < total);
 		store.aggregate( base, new Sum<TestInterface, Integer>("no_such_row", TestInterface::getAge), null ) ;
+	}
+
+	@Test
+	public void testTouch()
+	{
+		Timestamp start = base.getRecord( primaryKey ).getUpdatedAt();
+		store.touch( base, primaryKey );
+		Timestamp end = base.getRecord( primaryKey ).getUpdatedAt();
+		assertTrue( end.compareTo( start) >= 0);
 	}
 
 	@Test(expected = IllegalArgumentException.class)

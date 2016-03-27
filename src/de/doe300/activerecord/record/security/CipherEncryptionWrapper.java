@@ -51,16 +51,14 @@ public class CipherEncryptionWrapper implements EncryptionAlgorithm
 
 	public CipherEncryptionWrapper(@Nonnull final String transformation, @Nonnull final Key key) throws GeneralSecurityException
 	{
-		this.encryptionCipher = Cipher.getInstance( transformation);
-		this.decryptionCipher = Cipher.getInstance( transformation );
+		this(Cipher.getInstance( transformation), Cipher.getInstance( transformation));
 		encryptionCipher.init( Cipher.ENCRYPT_MODE, key);
 		decryptionCipher.init( Cipher.DECRYPT_MODE, key);
 	}
 	
 	public CipherEncryptionWrapper(@Nonnull final String transformation, @Nonnull final Certificate certificate) throws GeneralSecurityException
 	{
-		this.encryptionCipher = Cipher.getInstance( transformation);
-		this.decryptionCipher = Cipher.getInstance( transformation );
+		this(Cipher.getInstance( transformation), Cipher.getInstance( transformation));
 		encryptionCipher.init( Cipher.ENCRYPT_MODE, certificate);
 		decryptionCipher.init( Cipher.DECRYPT_MODE, certificate);
 	}

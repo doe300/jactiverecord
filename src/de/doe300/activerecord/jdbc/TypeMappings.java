@@ -518,7 +518,7 @@ public final class TypeMappings
 	/**
 	 * Reads a serializable object from it serialized form.
 	 * 
-	 * Supports reading from {@link Byte byte[]}, {@link String} or {@link java.sql.Blob}
+	 * Supports reading from {@link Byte byte[]} or {@link java.sql.Blob}
 	 * @param <T>
 	 * @param serializableType
 	 * @param record
@@ -566,28 +566,13 @@ public final class TypeMappings
 				throw new IllegalArgumentException("Can't deserialize BLOB to nonexisting type '"+serializableType+"'");
 			}
 		}
-		else if(value instanceof String)
-		{
-			try(final ObjectInputStream ois = new ObjectInputStream(new ByteArrayInputStream(((String)value).getBytes())))
-			{
-				return serializableType.cast(ois.readObject());
-			}
-			catch(final IOException ioe)
-			{
-				throw new SQLException(ioe);
-			}
-			catch (final ClassNotFoundException ex )
-			{
-				throw new IllegalArgumentException("Can't deserialize BLOB to nonexisting type '"+serializableType+"'");
-			}
-		}
 		throw new IllegalArgumentException("Illegal column-type!");
 	}
 	
 	/**
 	 * Writes a serializable object by serializing it and storing it in the database.
 	 * 
-	 * Supports writing to {@link Byte byte[]}, {@link String} or {@link java.sql.Blob}
+	 * Supports writing to {@link Byte byte[]} or {@link java.sql.Blob}
 	 * @param <T>
 	 * @param serializableObject
 	 * @param record
@@ -619,18 +604,6 @@ public final class TypeMappings
 				oos.writeObject(serializableObject);
 			}
 			catch ( final IOException ex )
-			{
-				throw new SQLException(ex);
-			}
-		}
-		else if(String.class.isAssignableFrom( columnType ))
-		{
-			try(final ByteArrayOutputStream stream = new ByteArrayOutputStream(); final ObjectOutputStream oos = new ObjectOutputStream(stream ))
-			{
-				oos.writeObject( serializableObject);
-				record.getBase().getStore().setValue( record.getBase(), record.getPrimaryKey(), columnName, stream.toString());
-			}
-			catch ( IOException ex )
 			{
 				throw new SQLException(ex);
 			}

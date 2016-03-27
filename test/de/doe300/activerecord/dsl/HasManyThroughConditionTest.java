@@ -28,6 +28,7 @@ import de.doe300.activerecord.RecordBase;
 import de.doe300.activerecord.TestInterface;
 import de.doe300.activerecord.TestServer;
 import de.doe300.activerecord.record.ActiveRecord;
+import java.util.Collections;
 import java.util.HashMap;
 import org.junit.AfterClass;
 import org.junit.Assert;
@@ -123,6 +124,7 @@ public class HasManyThroughConditionTest extends Assert
 	public void testTest_Map()
 	{
 		assertFalse( cond1.test( new HashMap<String, Object>(0) ));
+		assertTrue( cond2.test( Collections.singletonMap( "id", t1.getPrimaryKey())));
 	}
 
 	@Test

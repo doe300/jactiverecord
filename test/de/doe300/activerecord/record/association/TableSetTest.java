@@ -184,7 +184,7 @@ public class TableSetTest extends Assert
 	@Test
 	public void testComparator()
 	{
-		assertNull( set.comparator());
+		assertNotNull( set.comparator());
 	}
 	
 	@Test

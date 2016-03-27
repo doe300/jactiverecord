@@ -33,6 +33,7 @@ import javax.annotation.Nonnull;
 /**
  * ActiveRecord which provides has some kind of attached resource
  * @author doe300
+ * @see AttachmentHandler
  */
 public interface HasAttachment extends ActiveRecord
 {
@@ -79,5 +80,15 @@ public interface HasAttachment extends ActiveRecord
 	public default OutputStream writeAttachment() throws IOException
 	{
 		return getAttachmentHandler().writeAttachment( this );
+	}
+	
+	/**
+	 * @return whether the attachment was removed
+	 * @throws IOException 
+	 * @since 0.7
+	 */
+	public default boolean removeAttachment() throws IOException
+	{
+		return getAttachmentHandler().removeAttachment( this );
 	}
 }

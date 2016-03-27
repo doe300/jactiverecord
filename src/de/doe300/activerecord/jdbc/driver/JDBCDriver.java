@@ -387,6 +387,10 @@ public class JDBCDriver implements DBDriver
 	public Class<?> getJavaType( final String sqlType ) throws IllegalArgumentException
 	{
 		final String sqlTypeUpper = sqlType.toUpperCase();
+		if(sqlTypeUpper.startsWith( getStringDataType().toUpperCase()))
+		{
+			return String.class;
+		}
 		//map SQL-types
 		if(sqlTypeUpper.startsWith( "ARRAY"))
 		{

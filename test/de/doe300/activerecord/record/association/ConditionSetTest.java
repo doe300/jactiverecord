@@ -215,7 +215,7 @@ public class ConditionSetTest extends Assert
 	@Test
 	public void testComparator()
 	{
-		assertNull( set.comparator());
+		assertNotNull( set.comparator() );
 	}
 	
 	@Test

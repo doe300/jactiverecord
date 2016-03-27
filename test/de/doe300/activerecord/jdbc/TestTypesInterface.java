@@ -142,7 +142,7 @@ public interface TestTypesInterface extends ActiveRecord
 	{
 		TypeMappings.writeSerializable( obj, this, "serial");
 	}
-			
+	
 	static class TestDBMappableImpl implements DBMappable
 	{
 		 String testString;

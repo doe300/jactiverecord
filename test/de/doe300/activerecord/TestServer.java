@@ -125,21 +125,11 @@ public class TestServer extends Assert
 	
 	public static void buildTestTables() throws SQLException, Exception
 	{
-		buildTestTables(testStore);
-	}
-	
-	public static void buildTestTables(@Nonnull final Class<? extends RecordStore> testStore) throws SQLException, Exception
-	{
 		MigrationTest.init();
 		new MigrationTest().testApply();
 	}
 	
 	public static void destroyTestTables() throws SQLException, Exception
-	{
-		destroyTestTables(testStore);
-	}
-	
-	public static void destroyTestTables(@Nonnull final Class<? extends RecordStore> testStore) throws SQLException, Exception
 	{
 		new MigrationTest().testRevert();
 	}

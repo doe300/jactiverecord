@@ -79,6 +79,10 @@ public class CachedJDBCRecordStore extends SimpleJDBCRecordStore
 
 	private RowCache getCache(final RecordBase<?> base, final Integer primaryKey)
 	{
+		if(!super.containsRecord( base, primaryKey ))
+		{
+			throw new IllegalArgumentException("Invalid row ID: " + primaryKey);
+		}
 		BaseCache tableCache = cache.get( base);
 		if(tableCache == null)
 		{
@@ -130,6 +134,10 @@ public class CachedJDBCRecordStore extends SimpleJDBCRecordStore
 	@Override
 	public void setValues( final RecordBase<?> base, final int primaryKey, final String[] names, final Object[] values ) throws IllegalArgumentException
 	{
+		if(names.length != values.length)
+		{
+			throw new IllegalArgumentException("Number of columns and values do not match!");
+		}
 		if(!getAllColumnNames( base.getTableName()).containsAll( Arrays.asList( names)))
 		{
 			throw new IllegalArgumentException("No such columns for the names: " + Arrays.toString( names));
@@ -189,6 +197,23 @@ public class CachedJDBCRecordStore extends SimpleJDBCRecordStore
 			}
 		}
 		return result;
+	}
+
+	@Override
+	public Stream<Object> getValues( String tableName, String column, String condColumn, Object condValue ) throws IllegalArgumentException
+	{
+		//need to write cache into DB(if request on managed/cached table)
+		for(final Map.Entry<RecordBase<?>, BaseCache> c : cache.entrySet())
+		{
+			if(c.getKey().getTableName().equals( tableName))
+			{
+				if(c.getValue() != null)
+				{
+					c.getValue().writeAllBack( this );
+				}
+			}
+		}
+		return super.getValues( tableName, column, condColumn, condValue );
 	}
 
 	/* Loads the whole row into cache at once */

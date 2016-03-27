@@ -114,6 +114,12 @@ public class ScalarFunctionTest extends Assert
 		Condition cond = new SimpleCondition(abs, 913, Comparison.IS_NOT);
 		assertTrue( cond.test( t1 ));
 		assertEquals( 2, base.count( cond));
+		
+		ScalarFunction<TestInterface, Number, Long> absFunc = new Absolute<>(new StringLength<>("name", TestInterface::getName));
+		assertEquals( Long.valueOf( 8), absFunc.apply( t2));
+		Condition condFunc = new SimpleCondition(absFunc, 8, Comparison.IS_NOT);
+		assertTrue( condFunc.test( t4 ));
+		assertEquals( 1, base.count( condFunc));
 	}
 
 	@Test

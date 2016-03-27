@@ -97,7 +97,7 @@ public class EncryptionHandler implements ProxyHandler
 					}
 					throw new IllegalArgumentException("Invalid return-type for encrypted getter");
 				}
-				if(Attributes.isSetter( method, args[0].getClass(), true ))
+				if(Attributes.isSetter( method, null, true ))
 				{
 					final Class<?> dbType = record.getBase().getStore().getAllColumnTypes( record.getBase().getTableName()).get( attributeName);
 					if(!(String.class.isAssignableFrom( dbType ) || dbType.isArray() && Byte.TYPE.isAssignableFrom( dbType.getComponentType())))

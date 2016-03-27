@@ -157,7 +157,7 @@ public final class ProcessorUtils
 	 * @param type
 	 * @return the type-mirror for this type
 	 * @since 0.4
-	 * @see http://blog.retep.org/2009/02/13/getting-class-values-from-annotations-in-an-annotationprocessor/
+	 * @see "http://blog.retep.org/2009/02/13/getting-class-values-from-annotations-in-an-annotationprocessor/"
 	 */
 	@Nullable
 	public static DeclaredType getTypeMirror(@Nullable final ProcessingEnvironment processingEnv, @Nonnull final Supplier<Class<?>> type)

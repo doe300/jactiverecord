@@ -48,6 +48,7 @@ import org.junit.Test;
  *
  * @author daniel
  */
+@Deprecated
 public class CachedJDBCRecordStoreTest extends Assert
 {
 	private static CachedJDBCRecordStore store;
@@ -61,7 +62,7 @@ public class CachedJDBCRecordStoreTest extends Assert
 	@BeforeClass
 	public static void createTables() throws Exception
 	{
-		TestServer.buildTestTables(CachedJDBCRecordStore.class);
+		TestServer.buildTestTables();
 		store = new CachedJDBCRecordStore(TestServer.getTestConnection());
 		base = RecordCore.fromStore( "Test1", store).getBase(TestInterface.class);
 		assertNotNull( base );
@@ -71,7 +72,7 @@ public class CachedJDBCRecordStoreTest extends Assert
 	@AfterClass
 	public static void destroyTables() throws Exception
 	{
-		TestServer.destroyTestTables(CachedJDBCRecordStore.class);
+		TestServer.destroyTestTables();
 	}
 	
 	@Test
@@ -103,20 +104,22 @@ public class CachedJDBCRecordStoreTest extends Assert
 		assertSame( 13, store.getValue( base, primaryKey, "age"));
 	}
 
-	@Test
+	@Test(expected = IllegalArgumentException.class)
 	public void testGetValue()
 	{
 		assertEquals( primaryKey, store.getValue( base, primaryKey, base.getPrimaryColumn()));
-		assertNull(store.getValue( base, 100000, "name"));
+		store.getValue( base, 100000, "name");
 	}
 
-	@Test
+	@Test(expected = IllegalArgumentException.class)
 	public void testGetValues()
 	{
 		store.setValue( base, primaryKey, "name", "Tom");
-		Map<String,Object> m = store.getValues( base, primaryKey, new String[]{base.getPrimaryColumn(), "name"});
+		final Map<String,Object> m = store.getValues( base, primaryKey, new String[]{base.getPrimaryColumn(), "name"});
 		assertEquals( "Tom", m.get( "name"));
 		assertEquals( primaryKey, m.get( base.getPrimaryColumn()));
+		
+		store.getValues( base, primaryKey + 1110, new String[]{base.getPrimaryColumn(), "name"} );
 	}
 
 	@Test
@@ -127,6 +130,7 @@ public class CachedJDBCRecordStoreTest extends Assert
 		assertFalse( store.save( base, primaryKey));
 		store.clearCache( base, primaryKey );
 		assertEquals( "Alex", store.getValue( base, primaryKey, "name"));
+		assertFalse( store.save( base, primaryKey + 12341));
 	}
 
 	@Test

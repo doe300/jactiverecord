@@ -28,6 +28,9 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.net.URL;
+import java.util.Objects;
+import javax.annotation.Nonnull;
+import javax.annotation.Nullable;
 
 /**
  *
@@ -50,6 +53,10 @@ public class URLAttachmentHandler implements AttachmentHandler
 	{
 		try
 		{
+			if(pathFunc.getAttachmentPath(record ) == null)
+			{
+				return false;
+			}
 			pathFunc.getAttachmentPath(record ).openConnection().getContentType();
 			//could connect and read content-type
 			return true;
@@ -63,13 +70,20 @@ public class URLAttachmentHandler implements AttachmentHandler
 	@Override
 	public InputStream readAttachment( final HasAttachment record ) throws IOException
 	{
-		return pathFunc.getAttachmentPath(record ).openConnection().getInputStream();
+		return Objects.requireNonNull( pathFunc.getAttachmentPath(record ), "Can't read null attachment").openConnection().getInputStream();
 	}
 
 	@Override
 	public OutputStream writeAttachment( final HasAttachment record ) throws IOException
 	{
-		return pathFunc.getAttachmentPath( record ).openConnection().getOutputStream();
+		return Objects.requireNonNull( pathFunc.getAttachmentPath( record ), "Can't write into null attachment").openConnection().getOutputStream();
+	}
+
+	@Override
+	public boolean removeAttachment( HasAttachment record ) throws IOException
+	{
+		//can't delete URLs
+		return false;
 	}
 
 	/**
@@ -83,6 +97,7 @@ public class URLAttachmentHandler implements AttachmentHandler
 		 * @return the URL for the attachment
 		 * @throws IOException if any IO error occurs
 		 */
-		public URL getAttachmentPath(HasAttachment record) throws IOException;
+		@Nullable
+		public URL getAttachmentPath(@Nonnull final HasAttachment record) throws IOException;
 	}
 }

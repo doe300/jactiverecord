@@ -35,6 +35,7 @@ import de.doe300.activerecord.dsl.functions.Minimum;
 import de.doe300.activerecord.dsl.functions.Sum;
 import de.doe300.activerecord.dsl.functions.SumDouble;
 import de.doe300.activerecord.scope.Scope;
+import java.util.Collections;
 import java.util.stream.Stream;
 import org.junit.AfterClass;
 import org.junit.Assert;
@@ -175,6 +176,8 @@ public class AggregateFunctionTest extends Assert
 		Number averageAge = Stream.of( t1, t2, t3, t4).collect( average);
 		double avgAge = (t1.getAge() + t2.getAge() + t3.getAge() + t4.getAge()) / 4.0;
 		
+		assertEquals( avgAge, average.apply( Collections.singletonMap( "age", averageAge)));
+		assertEquals( t1.getAge(), average.apply( t1).intValue());
 		assertEquals( avgAge, averageAge.doubleValue(), 0.0);
 		assertEquals( avgAge, base.aggregate( average, null).doubleValue(), 0.0);
 		assertEquals( avgAge, base.getStore().aggregate( base, average, null).doubleValue(), 0.0);

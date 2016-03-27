@@ -85,13 +85,13 @@ public class ProfilingRecordStoreTest extends Assert
 	@Before
 	public void setUp() throws Exception
 	{
-		TestServer.buildTestTables(recordStore.getClass());
+		TestServer.buildTestTables();
 	}
 	
 	@After
 	public void tearDown() throws Exception
 	{
-		TestServer.destroyTestTables(recordStore.getClass());
+		TestServer.destroyTestTables();
 	}
 
 	@Test

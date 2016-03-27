@@ -22,72 +22,80 @@
  * SOFTWARE.
  *
  */
-package de.doe300.activerecord.record.security;
+package de.doe300.activerecord.record.attachment;
 
 import de.doe300.activerecord.RecordBase;
 import de.doe300.activerecord.TestServer;
 import de.doe300.activerecord.migration.Attribute;
-import javax.crypto.SecretKeyFactory;
-import javax.crypto.spec.DESKeySpec;
+import de.doe300.activerecord.pojo.AbstractActiveRecord;
+import de.doe300.activerecord.pojo.POJOBase;
+import java.io.InputStream;
+import java.io.OutputStream;
+import java.nio.file.Paths;
 import org.junit.AfterClass;
 import org.junit.Assert;
 import org.junit.BeforeClass;
 import org.junit.Test;
 
 /**
+ *
  * @author doe300
- * @since 0.6
  */
-public class EncryptionHandlerTest extends Assert
+public class FileAttachmentHandlerTest extends Assert
 {
-	private static RecordBase<TestEncryptedRecord> base;
-	private static TestEncryptedRecord record;
+	private static RecordBase<TestFileAttachmentRecord> base;
+	
+	public FileAttachmentHandlerTest()
+	{
+	}
 	
 	@BeforeClass
 	public static void createTables() throws Exception
 	{
-		final EncryptionAlgorithm algrithm = new CipherEncryptionWrapper("DES/ECB/NoPadding", SecretKeyFactory.getInstance( "DES").generateSecret( new DESKeySpec("Hallo !!".getBytes())));
-		base = TestServer.getTestCore().getBase( TestEncryptedRecord.class, new EncryptionHandler(algrithm ));
-		base.getCore().createTable( TestEncryptedRecord.class);
-		record = base.createRecord();
+		Attachments.registerHandler( TestFileAttachmentRecord.class, new FileAttachmentHandler(Paths.get( System.getProperty("java.io.tmpdir"))));
+		
+		base = TestServer.getTestCore().getBase( TestFileAttachmentRecord.class);
+		base.getCore().createTable( TestFileAttachmentRecord.class);
 	}
 	
 	@AfterClass
 	public static void destroyTables() throws Exception
 	{
-		base.getCore().dropTable( TestEncryptedRecord.class);
-	}
-	
-	public static interface TestEncryptedRecord extends EncryptedRecord
-	{
-		//PostgreSQL wants "BYTEA" as SQL-type
-		@Attribute(name = "name", typeName = "VARBINARY(255)")
-		@EncryptedAttribute(attribute = "name")
-		public String getName();
-		
-		@EncryptedAttribute(attribute = "name")
-		public void setName(String name);
-	}
-	
-	public EncryptionHandlerTest()
-	{
+		base.getCore().dropTable( TestFileAttachmentRecord.class);
 	}
 
 	@Test
-	public void testEncryptedAttribute()
+	public void testAttachmentIO() throws Exception
 	{
-		assertTrue(record.getEncryptionAlgorithm() instanceof CipherEncryptionWrapper);
-		assertNull( record.getName());
-		
-		record.setName( "AdamAdam");
-		assertEquals( "AdamAdam", record.getName());
-		
-		//TODO currently fails (because of padding)
-		//algorithm used in test converts '\0' zero-bytes to ' ' spaces
-		record.setName( "Eve");
-		assertEquals( "Eve", record.getName());
-		
-		record.setName( null);
-		assertNull( record.getName());
+		TestFileAttachmentRecord r = base.createRecord();
+		assertFalse( r.attachmentExists());
+		try(final OutputStream os = r.writeAttachment())
+		{
+			os.write( 5);
+		}
+		assertTrue( r.attachmentExists());
+		try(final InputStream is = r.readAttachment())
+		{
+			assertEquals( 5, is.read());
+		}
+		assertTrue( r.removeAttachment());
+		assertFalse( r.attachmentExists());
+	}
+	
+	public static class TestFileAttachmentRecord extends AbstractActiveRecord implements HasAttachment
+	{
+
+		public TestFileAttachmentRecord( int primaryKey,POJOBase<?> base )
+		{
+			super( primaryKey, base );
+		}
+
+		@Override
+		@Attribute(name = "attachment")
+		public String getAttachmentColumn()
+		{
+			return "attachment";
+		}
+
 	}
 }

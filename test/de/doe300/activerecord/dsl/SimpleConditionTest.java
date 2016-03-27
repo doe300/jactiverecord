@@ -78,19 +78,19 @@ public class SimpleConditionTest extends Assert
 	public void testAndCondition()
 	{
 		//test Predicate
-		assertSame( t1, base.findFirst( AndCondition.andConditions(new SimpleCondition("age", -912, Comparison.IS ), new SimpleCondition("name", "123Name1", Comparison.IS))) );
+		assertSame( t1, base.findFirst( new SimpleCondition("age", -912, Comparison.IS ).and(new SimpleCondition("name", "123Name1", Comparison.IS))) );
 		//test SQL
-		assertEquals((Integer)t1.getPrimaryKey()	, base.getStore().findFirst( base,  toScope( AndCondition.andConditions(new SimpleCondition("age", -912, Comparison.IS ), new SimpleCondition("name", "123Name1", Comparison.IS)))));
+		assertEquals((Integer)t1.getPrimaryKey()	, base.getStore().findFirst( base,  toScope( new SimpleCondition("age", -912, Comparison.IS ).and(new SimpleCondition("name", "123Name1", Comparison.IS)))));
 	}
 	
 	@Test
 	public void testOrCondition()
 	{
 		//test Predicate
-		assertSame( t3, base.findFirst( OrCondition.orConditions(new SimpleCondition("age", -910, Comparison.IS), new SimpleCondition("name",
+		assertSame( t3, base.findFirst( new SimpleCondition("age", -910, Comparison.IS).or(new SimpleCondition("name",
 				"123Name4", Comparison.IS))));
 		//test SQL
-		assertEquals( (Integer)t3.getPrimaryKey(), base.getStore().findFirst( base, toScope( OrCondition.orConditions(new SimpleCondition("age", -910, Comparison.IS), new SimpleCondition("name",
+		assertEquals( (Integer)t3.getPrimaryKey(), base.getStore().findFirst( base, toScope(new SimpleCondition("age", -910, Comparison.IS).or(new SimpleCondition("name",
 				"123Name4", Comparison.IS)))));
 	}
 	

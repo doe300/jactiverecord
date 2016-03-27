@@ -31,6 +31,9 @@ import javax.annotation.Nonnull;
 
 /**
  * Handles a set of attachments, e.g. stores them in files or the DB
+ * 
+ * NOTE: This handler does not manage the attribute containing the attachment-key!
+ * 
  * @author doe300
  */
 public interface AttachmentHandler
@@ -57,4 +60,14 @@ public interface AttachmentHandler
 	 */
 	@Nonnull
 	public OutputStream writeAttachment(@Nonnull final HasAttachment record) throws IOException;
+	
+	/**
+	 * Removes the attachment for the given record by deleting the resource, etc.
+	 * 
+	 * @param record
+	 * @return whether there was an attachment which was removed
+	 * @throws IOException if any IO error occurs while deleting the attachment
+	 * @since 0.7
+	 */
+	public boolean removeAttachment(@Nonnull final HasAttachment record) throws IOException;
 }

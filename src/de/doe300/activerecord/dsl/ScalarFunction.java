@@ -63,7 +63,6 @@ public abstract class ScalarFunction<T extends ActiveRecord, C, R> implements SQ
 		this.columnFunction = sqlFunction;
 	}
 
-
 	@Override
 	public String toSQL(final JDBCDriver driver, @Nullable final String tableName)
 	{
@@ -92,6 +91,7 @@ public abstract class ScalarFunction<T extends ActiveRecord, C, R> implements SQ
 	@Override
 	public R apply(final Map<String, Object> map)
 	{
+		//TODO doesn't work if column is SQLFunction
 		return applySQLFunction((C) map.get(column));
 	}
 

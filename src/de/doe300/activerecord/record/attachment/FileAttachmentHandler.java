@@ -29,6 +29,7 @@ import java.io.InputStream;
 import java.io.OutputStream;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import javax.annotation.Nonnull;
 
 /**
  *
@@ -61,7 +62,14 @@ public class FileAttachmentHandler implements AttachmentHandler
 	@Override
 	public OutputStream writeAttachment( HasAttachment record ) throws IOException
 	{
+		createAttachmentsPath( record.getClass());
 		return Files.newOutputStream( getAttachmentPath( record));
+	}
+
+	@Override
+	public boolean removeAttachment( HasAttachment record ) throws IOException
+	{
+		return Files.deleteIfExists( getAttachmentPath( record));
 	}
 
 	/**
@@ -75,5 +83,10 @@ public class FileAttachmentHandler implements AttachmentHandler
 	protected Path getAttachmentPath(HasAttachment record)
 	{
 		return rootDirectory.resolve( record.getClass().getSimpleName()).resolve( record.getAttachmentColumn()+record.getPrimaryKey());
+	}
+	
+	private void createAttachmentsPath(@Nonnull final Class<? extends HasAttachment> recordType) throws IOException
+	{
+		Files.createDirectories( rootDirectory.resolve( recordType.getSimpleName()));
 	}
 }

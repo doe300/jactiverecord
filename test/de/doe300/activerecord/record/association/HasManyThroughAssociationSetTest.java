@@ -36,7 +36,6 @@ import java.util.SortedSet;
 import org.junit.AfterClass;
 import org.junit.Assert;
 import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertSame;
 import static org.junit.Assert.assertTrue;
 import org.junit.BeforeClass;
@@ -192,7 +191,7 @@ public class HasManyThroughAssociationSetTest extends Assert
 	@Test
 	public void testComparator()
 	{
-		assertNull( set.comparator());
+		assertNotNull( set.comparator());
 	}
 	
 	@Test
