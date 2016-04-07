@@ -80,6 +80,7 @@ public class ComparisonTest extends Assert
 		 assertFalse( Comparison.LIKE.test( a, "%Saft"));
 		 assertFalse( Comparison.LIKE.test( a, "Birne"));
 		 assertFalse( Comparison.LIKE.test( a, "Saftapfel"));
+		 assertFalse( Comparison.LIKE.test( a, null));
 	 }
 	 
 	 @Test(expected = ClassCastException.class)

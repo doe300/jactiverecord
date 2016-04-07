@@ -92,6 +92,9 @@ public class ScalarFunctionTest extends Assert
 		Condition cond = new SimpleCondition(lower, "123name1", Comparison.IS);
 		assertTrue( cond.test( t1 ));
 		assertEquals( 2, base.count( cond));
+		
+		ScalarFunction<TestInterface, String, String> lower2 = new LowerCase<>(new TrimString<>("name", TestInterface::getName));
+		assertEquals( "123name1", lower2.apply( t1));
 	}
 
 	@Test
@@ -103,6 +106,9 @@ public class ScalarFunctionTest extends Assert
 		Condition cond = new SimpleCondition(upper, "123NAME1", Comparison.IS);
 		assertTrue( cond.test( t1 ));
 		assertEquals( 2, base.count( cond));
+		
+		ScalarFunction<TestInterface, String, String> upper2 = new UpperCase<>(new TrimString<>("name", TestInterface::getName));
+		assertEquals( "123NAME1", upper2.apply( t1));
 	}
 
 	@Test
@@ -131,6 +137,9 @@ public class ScalarFunctionTest extends Assert
 		Condition cond = new SimpleCondition(abs, 913, Comparison.IS_NOT);
 		assertTrue( cond.test( t1 ));
 		assertEquals( 2, base.count( cond));
+		
+		ScalarFunction<TestInterface, Integer, Double> abs2 = new AbsoluteDouble<>(new Signum<>("age", TestInterface::getAge));
+		assertEquals( Double.valueOf( 1.0), abs2.apply( t1));
 	}
 
 	@Test
@@ -142,6 +151,9 @@ public class ScalarFunctionTest extends Assert
 		Condition cond = new SimpleCondition(sign, -1, Comparison.IS_NOT);
 		assertFalse(cond.test( t1 ));
 		assertEquals(0, base.count( cond));
+		
+		ScalarFunction<TestInterface, Number, Integer> sign2 = new Signum<>(new StringLength<TestInterface>("name", TestInterface::getName));
+		assertEquals( Integer.valueOf( 1), sign2.apply( t1));
 	}
 
 	@Test
@@ -153,6 +165,10 @@ public class ScalarFunctionTest extends Assert
 		Condition cond = new SimpleCondition(floor, -1, Comparison.IS_NOT);
 		assertTrue(cond.test( t1 ));
 		assertEquals(4, base.count( cond));
+		
+		ScalarFunction<TestInterface, Double, Long> floor2 = new Floor<>(new SquareRoot<>(new Absolute<>("age", TestInterface::getAge)));
+		assertEquals( Long.valueOf( 30), floor2.apply( t1));
+		
 	}
 
 	@Test
@@ -164,6 +180,9 @@ public class ScalarFunctionTest extends Assert
 		Condition cond = new SimpleCondition(ceil, -1, Comparison.IS_NOT);
 		assertTrue(cond.test( t1 ));
 		assertEquals(4, base.count( cond));
+		
+		ScalarFunction<TestInterface, Double, Long> ceil2 = new Ceiling<>(new SquareRoot<>(new Absolute<>("age", TestInterface::getAge)));
+		assertEquals( Long.valueOf( 31), ceil2.apply( t1));
 	}
 
 	@Test
@@ -175,6 +194,9 @@ public class ScalarFunctionTest extends Assert
 		Condition cond = new SimpleCondition(round, -1, Comparison.IS_NOT);
 		assertTrue(cond.test( t1 ));
 		assertEquals(4, base.count( cond));
+		
+		ScalarFunction<TestInterface, Long, Long> round2 = new Round<>(new Absolute<>("age", TestInterface::getAge));
+		assertEquals( Long.valueOf( -t1.getAge()), round2.apply( t1));
 	}
 
 	@Test
@@ -187,6 +209,9 @@ public class ScalarFunctionTest extends Assert
 		Condition cond = new SimpleCondition(sqrt, -1, Comparison.IS_NOT);
 		assertTrue(cond.test( t1 ));
 		assertEquals(4, base.count( cond));
+		
+		ScalarFunction<TestInterface, Long, Double> sqrt2 = new SquareRoot<>(new Absolute<>("age", TestInterface::getAge));
+		assertEquals( 30, sqrt2.apply( t1), 0.2);
 	}
 	
 	@Test
@@ -209,6 +234,12 @@ public class ScalarFunctionTest extends Assert
 		Condition cond = new SimpleCondition(length, 8, Comparison.IS);
 		assertTrue( cond.test( t3));
 		assertEquals( 3, base.count( cond));
+		
+		ScalarFunction<TestInterface, String, Number> length2 = new StringLength<>(new TrimString<>("name", TestInterface::getName));
+		TestInterface ti = base.createRecord();
+		ti.setName( " Steve is cool!   ");
+		assertEquals( 14, length2.apply( ti));
+		ti.destroy();
 	}
 	
 	@Test
@@ -220,5 +251,8 @@ public class ScalarFunctionTest extends Assert
 		Condition cond = new SimpleCondition(trim, "SomeName", Comparison.IS);
 		assertTrue( cond.test( t4));
 		assertEquals( 1, base.count( cond));
+		
+		ScalarFunction<TestInterface, String, String> trim2 = new TrimString<>(new UpperCase<>("name", TestInterface::getName));
+		assertEquals( trim.apply( t4).toUpperCase(), trim2.apply( t4));
 	}
 }

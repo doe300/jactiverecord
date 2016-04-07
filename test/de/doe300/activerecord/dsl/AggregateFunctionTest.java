@@ -26,12 +26,14 @@ package de.doe300.activerecord.dsl;
 
 import de.doe300.activerecord.RecordBase;
 import de.doe300.activerecord.TestInterface;
+import de.doe300.activerecord.TestPOJO;
 import de.doe300.activerecord.TestServer;
 import de.doe300.activerecord.dsl.functions.Average;
 import de.doe300.activerecord.dsl.functions.CountDistinct;
 import de.doe300.activerecord.dsl.functions.CountNotNull;
 import de.doe300.activerecord.dsl.functions.Maximum;
 import de.doe300.activerecord.dsl.functions.Minimum;
+import de.doe300.activerecord.dsl.functions.Signum;
 import de.doe300.activerecord.dsl.functions.Sum;
 import de.doe300.activerecord.dsl.functions.SumDouble;
 import de.doe300.activerecord.scope.Scope;
@@ -82,6 +84,15 @@ public class AggregateFunctionTest extends Assert
 	{
 		TestServer.destroyTestTables();
 	}
+	
+	@Test
+	public void testEquals()
+	{
+		AggregateFunction<TestInterface, Integer, ?, Integer> ag1 = new Minimum<>( "age", TestInterface::getAge);
+		AggregateFunction<TestPOJO, Integer, ?, Integer> ag2 = new Minimum<>( "age", TestPOJO::getAge);
+		
+		assertEquals( ag1, ag2);
+	}
 
 	@Test
 	public void testMINIMUM()
@@ -95,6 +106,9 @@ public class AggregateFunctionTest extends Assert
 		assertEquals( Integer.valueOf( t1.getAge()), min.aggregate( 
 				base.getStore().findAllWithData( base, new String[]{"age"}, Scope.DEFAULT).
 						values().stream()));
+		
+		AggregateFunction<TestInterface, Integer, ?, Integer> min2 = new Minimum<>(new Signum<>("age", TestInterface::getAge));
+		assertEquals( Long.valueOf( 1), base.aggregate( min2, null));
 	}
 
 	@Test
@@ -109,6 +123,9 @@ public class AggregateFunctionTest extends Assert
 		assertEquals( Integer.valueOf( t3.getAge()), max.aggregate( 
 				base.getStore().findAllWithData( base, new String[]{"age"}, Scope.DEFAULT).
 						values().stream()));
+		
+		AggregateFunction<TestInterface, Integer, ?, Integer> max2 = new Maximum<>(new Signum<>("age", TestInterface::getAge));
+		assertEquals( Long.valueOf( 1), base.aggregate( max2, null));
 	}
 
 	@Test
@@ -167,6 +184,9 @@ public class AggregateFunctionTest extends Assert
 		assertEquals( otherSum, sumFloat.aggregate( 
 				base.getStore().findAllWithData( base, new String[]{"age"}, Scope.DEFAULT).
 						values().stream()).doubleValue(), 0.0);
+		
+		AggregateFunction<TestInterface, Integer, ?, Number> sumFloat2 = new SumDouble<>(new Signum<>("age", TestInterface::getAge));
+		assertEquals( 4.0, base.aggregate( sumFloat2, null) );
 	}
 
 	@Test
@@ -184,5 +204,8 @@ public class AggregateFunctionTest extends Assert
 		assertEquals( avgAge, average.aggregate( 
 				base.getStore().findAllWithData( base, new String[]{"age"}, Scope.DEFAULT).
 						values().stream()).doubleValue(), 0.0);
+		
+		AggregateFunction<TestInterface, Integer, ?, Number> average2 = new Average<>(new Signum<>("age", TestInterface::getAge));
+		assertEquals( 1, base.aggregate( average2, null).intValue());
 	}
 }

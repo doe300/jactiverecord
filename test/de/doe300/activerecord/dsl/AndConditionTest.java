@@ -147,4 +147,14 @@ public class AndConditionTest extends Assert
 		assertFalse( condition.test( t2));
 	}
 
+	@Test
+	public void testEquals()
+	{
+		Condition con1 = AndCondition.andConditions(
+				new SimpleCondition("age", 913, Comparison.IS),
+				new SimpleCondition("name", "123Name1", Comparison.IS));
+		Condition con2 = AndCondition.andConditions(con1);
+		
+		assertEquals( con1, con2);
+	}
 }

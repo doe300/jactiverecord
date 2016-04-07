@@ -26,6 +26,7 @@ package de.doe300.activerecord.jdbc;
 
 import de.doe300.activerecord.migration.Attribute;
 import de.doe300.activerecord.record.ActiveRecord;
+import de.doe300.activerecord.record.RecordType;
 import java.io.InputStream;
 import java.io.Serializable;
 import java.math.RoundingMode;
@@ -42,6 +43,7 @@ import java.util.UUID;
  * @author doe300
  * @see TypeMappings
  */
+@RecordType(typeName = "testTypes", defaultColumns = {"id", "uuid"}, autoCreate = true)
 public interface TestTypesInterface extends ActiveRecord
 {
 	@Attribute(name = "uuid")

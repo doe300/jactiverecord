@@ -78,4 +78,19 @@ public class CombinedOrderTest extends Assert
 		obj2.put( "age", 113);
 		assertTrue( o.compare( obj1, obj2) > 0);
 	}
+
+	@Test
+	public void testCompare_ActiveRecord_ActiveRecord()
+	{
+		//TODO
+	}
+
+	@Test
+	public void testEquals()
+	{
+		Order o1 = CombinedOrder.combine(SimpleOrder.fromSQLString( "name ASC"), SimpleOrder.fromSQLString( "age DESC") );
+		Order o2 = CombinedOrder.combine(SimpleOrder.fromSQLString( "name ASC, age DESC"));
+		
+		assertEquals( o1, o2);
+	}
 }
