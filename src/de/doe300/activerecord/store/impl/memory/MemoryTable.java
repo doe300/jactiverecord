@@ -56,7 +56,8 @@ class MemoryTable
 	private final SortedMap<String, MemoryColumn> columns;
 	private final SortedMap<Integer, MemoryRow> data;
 	
-	//TODO add indices (SortedMaps for specific key(s), need to be updated!!!)
+	//XXX add indices (SortedMaps for specific key(s), need to be updated!!!)
+	// -> would only be of use for getValues() with condition-column
 	
 	//cache values
 	private Map<String, Class<?>> columnTypes;
@@ -115,9 +116,13 @@ class MemoryTable
 	
 	public boolean putValues(@Nonnegative int primaryKey, @Nonnull final String[] columnNames, @Nonnull final Object[] values)
 	{
+		if(!data.containsKey( primaryKey))
+		{
+			return false;
+		}
 		for(int i = 0; i < columnNames.length; i++)
 		{
-			putValue( primaryKey, columnNames[i], values[i]);
+			data.get(primaryKey ).putRowValue( columnNames[i], checkColumn( columnNames[i], values[i] ) );
 		}
 		return true;
 	}
@@ -252,7 +257,7 @@ class MemoryTable
 	}
 	
 	@Nonnull
-	private Stream<Map.Entry<Integer, MemoryRow>> sortResult(@Nonnull final Order order, @Nonnull final Stream<Map.Entry<Integer, MemoryRow>> result)
+	private static Stream<Map.Entry<Integer, MemoryRow>> sortResult(@Nonnull final Order order, @Nonnull final Stream<Map.Entry<Integer, MemoryRow>> result)
 	{
 		return result.sorted( (Map.Entry<Integer, MemoryRow> e1, Map.Entry<Integer, MemoryRow> e2) -> 
 		{
