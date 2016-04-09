@@ -93,16 +93,6 @@ public interface ActiveRecord extends Comparable<ActiveRecord>
 	}
 	
 	/**
-	 * Discards all changes made to this record so.
-	 * @see #save()
-	 * @see #isSynchronized() 
-	 */
-	public default void reload()
-	{
-		getBase().reload( this );
-	}
-
-	/**
 	 * <code>default</code>-Methods in interfaces can't override {@link Object#toString() toString()}.
 	 * 
 	 * So this custom method can be overridden and is called for proxy-based records on call to {@link #toString() }

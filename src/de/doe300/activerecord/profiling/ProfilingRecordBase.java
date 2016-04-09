@@ -266,12 +266,6 @@ public class ProfilingRecordBase<T extends ActiveRecord> extends RecordBase<T>
 	}
 
 	@Override
-	public void reload( final ActiveRecord record )
-	{
-		profiler.profile("reload", () -> otherBase.reload( record ));
-	}
-
-	@Override
 	public boolean save( final ActiveRecord record ) throws ValidationFailed
 	{
 		return profiler.profileBoolean("save", () -> otherBase.save(record));

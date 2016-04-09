@@ -228,7 +228,6 @@ public class RecordBaseTest<T extends TestInterface> extends Assert
 			//we already have everything in storage
 			assertFalse( t.save());
 		}
-		base.reload( t);
 		assertEquals(23, t.getAge());
 		assertEquals( 23, base.getStore().getValue( base, t.getPrimaryKey(), "age"));
 	}
@@ -246,39 +245,6 @@ public class RecordBaseTest<T extends TestInterface> extends Assert
 			assertTrue( t.save());
 		}
 		assertTrue( t.isSynchronized());
-	}
-
-	@Test
-	public void testReload() throws Exception
-	{
-		T t = base.createRecord();
-		assertNotNull( t );
-		t.setAge( 12);
-		t.setName( "Test123");
-		assertEquals( 12, t.getAge());
-		if(base.getStore().isCached())
-		{
-			assertFalse( t.isSynchronized());
-		}
-		assertTrue( t.inRecordStore());
-		if(base.getStore().isCached())
-		{
-			assertTrue( t.save());
-		}
-		
-		base.getStore().setValue( base, t.getPrimaryKey(), "age", 13);
-		//or t.setAge(13);
-		t.reload();
-		assertTrue( t.inRecordStore());
-		assertTrue( t.isSynchronized());
-		if(base.getStore().isCached())
-		{
-			assertEquals(12, t.getAge() );
-		}
-		else
-		{
-			assertEquals( 13, t.getAge());
-		}
 	}
 
 	@Test

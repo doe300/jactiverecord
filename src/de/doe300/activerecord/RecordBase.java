@@ -301,10 +301,18 @@ public abstract class RecordBase<T extends ActiveRecord> implements ReadOnlyReco
 	 * @throws RecordException
 	 * @throws IllegalArgumentException
 	 *             if the record with this ID already exists
+	 * @deprecated Doesn't with {@link ValidatedRecord#validate() validation} on save and {@link RecordCallbacks#beforeSave() onSave}-callback. 
+	 * Any access to attributes in those methods will cause error, since the record does not yet exist in the underlying storage
 	 */
 	@Nullable
+	@Deprecated
 	public T newRecord(final int primaryKey) throws RecordException
 	{
+		//XXX possible solution for new records:
+		//maintain a list of new records, on save, create entry in storage
+		//problem: can only store ID in storage, which may violate constraints on other attributes
+		//2. problem: if values are set before first save, throws exception
+		// -> we need to create entry in storage anyway before doing anything else
 		if(records.containsKey( primaryKey) || store.containsRecord(this, primaryKey))
 		{
 			Logging.getLogger().error( recordType.getSimpleName(), "Record with primary-key "+primaryKey+" already exists");
@@ -402,6 +410,10 @@ public abstract class RecordBase<T extends ActiveRecord> implements ReadOnlyReco
 	@Nonnull
 	protected abstract T createProxy(@Nonnegative int primaryKey, boolean newRecord, @Nullable Map<String, Object> recordData) throws RecordException;
 
+	/**
+	 * @param primaryKey
+	 * @return whether the record is stored in the underlying {@link RecordStore}
+	 */
 	@Override
 	public boolean hasRecord(final int primaryKey)
 	{
@@ -463,15 +475,6 @@ public abstract class RecordBase<T extends ActiveRecord> implements ReadOnlyReco
 	public boolean isSynchronized(@Nonnull final ActiveRecord record)
 	{
 		return store.isSynchronized(this, record.getPrimaryKey());
-	}
-
-	/**
-	 * Discards all changes made to this record and reloads it from the database
-	 * @param record
-	 */
-	public void reload(@Nonnull final ActiveRecord record)
-	{
-		store.clearCache(this,record.getPrimaryKey());
 	}
 
 	/**

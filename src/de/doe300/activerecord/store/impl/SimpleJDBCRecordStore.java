@@ -24,6 +24,7 @@
  */
 package de.doe300.activerecord.store.impl;
 
+import de.doe300.activerecord.util.Pair;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
@@ -111,18 +112,16 @@ public class SimpleJDBCRecordStore implements JDBCRecordStore
 		return base.getDefaultOrder();
 	}
 
-	protected String toColumnsList(final String[] columns, final String primaryColumn, String tableName)
+	protected String toColumnsList(@Nonnull final String[] columns, @Nonnull final String primaryColumn, @Nullable final String tableName)
 	{
 		String tableID = tableName != null ? tableName + "." : "";
-		if(columns==null||columns.length==0)
+		if(columns.length == 0 || (columns.length == 1 && columns[0].equalsIgnoreCase(primaryColumn)))
 		{
 			return tableID+primaryColumn;
 		}
-		if(Arrays.stream( columns ).anyMatch( (final String col)-> col.equalsIgnoreCase(primaryColumn)))
-		{
-			return Arrays.stream( columns ).map((String col) -> tableID+col).collect( Collectors.joining(", "));
-		}
-		return tableID+primaryColumn+", "+Arrays.stream( columns ).map((String col) -> tableID+col).collect( Collectors.joining(", "));
+		return tableID + primaryColumn + ", " + Arrays.stream( columns)
+				.filter((final String col)-> !col.equalsIgnoreCase(primaryColumn))
+				.map( (String col) -> tableID + col).collect( Collectors.joining(", "));
 	}
 
 	protected void fillStatement(@Nonnull final PreparedStatement stm, @Nonnull final Condition condition)
@@ -198,6 +197,43 @@ public class SimpleJDBCRecordStore implements JDBCRecordStore
 		}
 	}
 
+	/**
+	 * Checks and converts the given values and returns a pair of arrays for the columns and their values to be set
+	 * @param base
+	 * @param data
+	 * @return the resulting columns and values
+	 * @since 0.7
+	 */
+	@Nonnull
+	protected Pair<String[], Object[]> prepareWriteValues(@Nonnull final RecordBase<?> base, @Nonnull final Map<String,Object> data)
+	{
+		final Map<String,Object> tmp = new HashMap<>(data.size());
+		//convert all column names to correct case
+		data.forEach( (final String s,final Object obj) -> tmp.put( convertIdentifier( s), obj));
+		//add timestamp if not present
+		if(base.isTimestamped() && !data.containsKey( TimestampedRecord.COLUMN_UPDATED_AT))
+		{
+			tmp.put( TimestampedRecord.COLUMN_UPDATED_AT, new Timestamp(System.currentTimeMillis()));
+		}
+		//Don't update ID
+		tmp.remove( convertIdentifier( base.getPrimaryColumn()));
+		if(tmp.isEmpty())
+		{
+			//cancel, if only ID was to be updated
+			return Pair.EMPTY;
+		}
+		final Iterator<Map.Entry<String,Object>> entries = tmp.entrySet().iterator();
+		final String[] columns = new String[tmp.size()];
+		final Object[] values = new Object[tmp.size()];
+		for(int i=0;i<columns.length && entries.hasNext();i++)
+		{
+			final Map.Entry<String,Object> e = entries.next();
+			columns[i] = e.getKey();
+			values[i] = e.getValue();
+		}
+		return Pair.createPair( columns, values);
+	}
+	
 	@Override
 	public Connection getConnection()
 	{
@@ -231,40 +267,21 @@ public class SimpleJDBCRecordStore implements JDBCRecordStore
 	public void setValues(final RecordBase<?> base, final int primaryKey, final Map<String,Object> data) throws IllegalArgumentException
 	{
 		//1. get updated columns
-		final Map<String,Object> tmp = new HashMap<>(data.size());
-		//convert all column names to correct case
-		data.forEach( (final String s,final Object obj) -> tmp.put( convertIdentifier( s), obj));
-		//add timestamp if not present
-		if(base.isTimestamped() && !data.containsKey( TimestampedRecord.COLUMN_UPDATED_AT))
+		final Pair<String[], Object[]> values = prepareWriteValues( base, data );
+		if(!values.hasFirst())
 		{
-			tmp.put( TimestampedRecord.COLUMN_UPDATED_AT, new Timestamp(System.currentTimeMillis()));
-		}
-		//Don't update ID
-		tmp.remove( convertIdentifier( base.getPrimaryColumn()));
-		if(tmp.isEmpty())
-		{
-			//cancel, if only ID was to be updated
 			return;
-		}
-		final Iterator<Map.Entry<String,Object>> entries = tmp.entrySet().iterator();
-		final String[] columns = new String[tmp.size()];
-		final Object[] values = new Object[tmp.size()];
-		for(int i=0;i<columns.length && entries.hasNext();i++)
-		{
-			final Map.Entry<String,Object> e = entries.next();
-			columns[i] = e.getKey();
-			values[i] = e.getValue();
 		}
 		//2. create statement
 		String sql = "UPDATE "+base.getTableName()+" SET ";
-		sql+= Arrays.stream( columns).map( (final String s)-> s+ " = ? ").collect( Collectors.joining(", "));
+		sql+= Arrays.stream( values.getFirstOrThrow()).map( (final String s)-> s+ " = ? ").collect( Collectors.joining(", "));
 		sql += " WHERE "+base.getPrimaryColumn()+" = "+primaryKey;
 		Logging.getLogger().debug( "JDBCStore", sql);
 		try(PreparedStatement stm = con.prepareStatement( sql ))
 		{
-			for(int i=0;i<values.length;i++)
+			for(int i=0;i<values.getSecondOrThrow().length;i++)
 			{
-				stm.setObject( i+1, values[i]);
+				stm.setObject( i+1, values.getSecondOrThrow()[i]);
 			}
 			//3. execute
 			stm.execute();
@@ -809,13 +826,13 @@ public class SimpleJDBCRecordStore implements JDBCRecordStore
 	}
 
 	@Override
-	public boolean addRow( final String tableName, final String[] rows, final Object[] values ) throws IllegalArgumentException
+	public boolean addRow( final String tableName, final String[] columns, final Object[] values ) throws IllegalArgumentException
 	{
 		if(!exists( tableName ))
 		{
 			throw new IllegalArgumentException("Table doesn't exists: "+tableName);
 		}
-		final String sql = "INSERT INTO "+tableName+" ("+Arrays.stream( rows).collect( Collectors.joining(", "))+") VALUES ("+
+		final String sql = "INSERT INTO "+tableName+" ("+Arrays.stream( columns).collect( Collectors.joining(", "))+") VALUES ("+
 			Arrays.stream( values ).map( (final Object obj) -> "?").collect( Collectors.joining(", "))+")";
 		Logging.getLogger().debug( "JDBCStore", sql);
 		try(PreparedStatement stm = con.prepareStatement( sql ))

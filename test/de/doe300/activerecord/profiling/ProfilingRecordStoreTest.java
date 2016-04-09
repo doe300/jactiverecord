@@ -112,7 +112,6 @@ public class ProfilingRecordStoreTest extends Assert
 			AssociationHelper.addHasManyThrough( t, t, "mappingTable", "fk_test1", "fk_test2");
 			AssociationHelper.addHasManyThrough( t, t, "mappingTable", "fk_test2", "fk_test1");
 			t.getPrimaryKey();
-			t.reload();
 			t.setAge( 212);
 			t.setName( "NextName");
 			t.save();

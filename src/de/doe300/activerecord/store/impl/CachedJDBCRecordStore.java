@@ -24,6 +24,7 @@
  */
 package de.doe300.activerecord.store.impl;
 
+import de.doe300.activerecord.util.Pair;
 import java.sql.Connection;
 import java.sql.ResultSet;
 import java.sql.SQLException;
@@ -166,7 +167,7 @@ public class CachedJDBCRecordStore extends SimpleJDBCRecordStore
 		// write changes in cache to DB so #getDBValue does not override cached
 		// changes with old data
 		save(base, primaryKey);
-		final Object value=getDBValue( base, primaryKey, c, name);
+		final Object value = getDBValue( base, primaryKey, c, name).getFirst();
 		c.setData( name, value, false );
 		return value;
 	}
@@ -187,13 +188,13 @@ public class CachedJDBCRecordStore extends SimpleJDBCRecordStore
 			//this else clause is only called the first time a column is not in the cache
 			else
 			{
-				final Object val = getDBValue( base, primaryKey, c, col );
-				if(!c.hasData( col ))
+				final Pair<Object, Boolean> val = getDBValue( base, primaryKey, c, col );
+				if(!val.getSecond())
 				{
 					//no data was written into cache -> row was not read from DB -> every successive call will fail to read data too
 					break;
 				}
-				result.put( col, val );
+				result.put( col, val.getFirst() );
 			}
 		}
 		return result;
@@ -217,7 +218,8 @@ public class CachedJDBCRecordStore extends SimpleJDBCRecordStore
 	}
 
 	/* Loads the whole row into cache at once */
-	private Object getDBValue(final RecordBase<?> base, final int primaryKey, final RowCache cacheRow, final String name) throws IllegalArgumentException
+	@Nonnull
+	private Pair<Object, Boolean> getDBValue(final RecordBase<?> base, final int primaryKey, final RowCache cacheRow, final String name) throws IllegalArgumentException
 	{
 		final String sql =
 			"SELECT * FROM " + base.getTableName() + " WHERE " + base.getPrimaryColumn() + " = " + primaryKey;
@@ -228,9 +230,9 @@ public class CachedJDBCRecordStore extends SimpleJDBCRecordStore
 			if(res.next())
 			{
 				cacheRow.update( res);
-				return cacheRow.getData( name );
+				return Pair.createPair( cacheRow.getData( name ), true);
 			}
-			return null;
+			return Pair.createPair( null, false);
 		}
 		catch ( final SQLException ex )
 		{
@@ -279,12 +281,11 @@ public class CachedJDBCRecordStore extends SimpleJDBCRecordStore
 	 * @param primaryKey
 	 * @param values
 	 */
-		void setDBValues(@Nonnull final RecordBase<?> base, final int primaryKey,
-			@Nonnull final Map<String, Object> values)
+	void setDBValues(@Nonnull final RecordBase<?> base, final int primaryKey, @Nonnull final Map<String, Object> values)
 	{
 		super.setValues( base, primaryKey, values );
 	}
-
+	
 	@Override
 	public boolean isSynchronized( final RecordBase<?> base, final int primaryKey )
 	{
