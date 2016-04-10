@@ -123,6 +123,6 @@ public class CountDistinct<T extends ActiveRecord, C> extends AggregateFunction<
 	@Override
 	protected Long aggregateValues( final Stream<C> valueStream )
 	{
-		return valueStream.distinct().count();
+		return valueStream.parallel().distinct().count();
 	}
 }

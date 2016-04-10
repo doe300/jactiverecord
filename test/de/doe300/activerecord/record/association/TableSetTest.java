@@ -29,6 +29,7 @@ import de.doe300.activerecord.TestInterface;
 import de.doe300.activerecord.TestServer;
 import de.doe300.activerecord.dsl.Comparison;
 import de.doe300.activerecord.dsl.SimpleCondition;
+import de.doe300.activerecord.dsl.functions.CountNotNull;
 import de.doe300.activerecord.scope.Scope;
 import java.util.Arrays;
 import java.util.SortedSet;
@@ -246,5 +247,17 @@ public class TableSetTest extends Assert
 	public void testFindFirstWithScope()
 	{
 		assertEquals( base.findFirstWithScope( new Scope(null, null, Scope.NO_LIMIT)), set.findFirstWithScope( new Scope(null, null, Scope.NO_LIMIT)));
+	}
+
+	@Test
+	public void testGetOrder()
+	{
+		assertEquals( set.getOrder(), base.getDefaultOrder());
+	}
+
+	@Test
+	public void testAggregate()
+	{
+		assertEquals( base.count( null), set.aggregate( new CountNotNull<>(base.getPrimaryColumn(), TestInterface::getPrimaryKey), null).intValue());
 	}
 }

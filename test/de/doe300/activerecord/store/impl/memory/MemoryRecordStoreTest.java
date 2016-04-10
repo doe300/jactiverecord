@@ -55,7 +55,6 @@ public class MemoryRecordStoreTest extends Assert
 	{
 		store = new MemoryRecordStore();
 		base = RecordCore.fromStore( "memory", store).getBase( TestInterface.class);
-		base.getCore().createTable( TestInterface.class);
 		primaryKey = base.createRecord().getPrimaryKey();
 		base.createRecord().setName( "Adam");
 	}

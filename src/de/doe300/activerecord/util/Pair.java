@@ -27,6 +27,7 @@ package de.doe300.activerecord.util;
 import java.util.Objects;
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
+import javax.annotation.concurrent.Immutable;
 
 /**
  *
@@ -35,6 +36,7 @@ import javax.annotation.Nullable;
  * @param <U>
  * @since 0.7
  */
+@Immutable
 public class Pair<T, U>
 {
 	public static final Pair EMPTY = new Pair<>(null, null );
@@ -96,5 +98,22 @@ public class Pair<T, U>
 	public U getSecondOrThrow()
 	{
 		return Objects.requireNonNull( second);
+	}
+
+	@Override
+	public boolean equals( Object o )
+	{
+		return (o instanceof Pair) &&
+				Objects.equals(first, ((Pair)o).first) &&
+				Objects.equals( second, ((Pair)o).second);
+	}
+
+	@Override
+	public int hashCode()
+	{
+		int hash = 7;
+		hash = 79 * hash + Objects.hashCode( this.first );
+		hash = 79 * hash + Objects.hashCode( this.second );
+		return hash;
 	}
 }

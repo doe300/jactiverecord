@@ -92,6 +92,7 @@ public class AggregateFunctionTest extends Assert
 		AggregateFunction<TestPOJO, Integer, ?, Integer> ag2 = new Minimum<>( "age", TestPOJO::getAge);
 		
 		assertEquals( ag1, ag2);
+		assertNotEquals( ag1, new Object());
 	}
 
 	@Test

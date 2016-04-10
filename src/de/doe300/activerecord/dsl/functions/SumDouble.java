@@ -104,6 +104,6 @@ public class SumDouble<T extends ActiveRecord, C extends Number> extends Aggrega
 	@Override
 	protected Double aggregateValues( final Stream<C> valueStream )
 	{
-		return valueStream.reduce( 0d, (final Double d, final C c) -> d + c.doubleValue(), (final Double d1, final Double d2) -> d1 + d2);
+		return valueStream.parallel().reduce( 0d, (final Double d, final C c) -> d + c.doubleValue(), (final Double d1, final Double d2) -> d1 + d2);
 	}
 }

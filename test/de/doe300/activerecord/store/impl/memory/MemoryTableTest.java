@@ -66,6 +66,7 @@ public class MemoryTableTest extends Assert
 		//failure-tests
 		assertFalse( table.putValue( 120431230, "name", "Adam"));
 		table.putValue( row, "noSuchColumn", "Steve");
+		table.removeRow( row );
 	}
 
 	@Test(expected = IllegalArgumentException.class)
@@ -75,8 +76,10 @@ public class MemoryTableTest extends Assert
 		table.putValues( row, new String[]{"name", "age"}, new Object[]{"Eve", 42} );
 		assertNotNull( table.getValue( row, "name"));
 		
+		assertFalse( table.putValues( row + 2000, new String[]{"name", "age"}, new Object[]{"Eve", 42} ));
 		//failure-test
 		table.putValues( row, new String[]{"name", "noSuchColumn"}, new Object[]{"Eve", "42"} );
+		table.removeRow( row );
 	}
 
 	@Test(expected = IllegalArgumentException.class)
@@ -89,6 +92,7 @@ public class MemoryTableTest extends Assert
 		//failure tests
 		assertFalse( table.putValues( 10112203, Collections.singletonMap( "name", "Adam")));
 		table.putValues( row, Collections.singletonMap( "age", "Eve"));
+		table.removeRow( row );
 	}
 
 	@Test
@@ -98,6 +102,7 @@ public class MemoryTableTest extends Assert
 		assertNull( table.getValue( row, "name"));
 		table.putValue( row, "name", "Steve");
 		assertNotNull( table.getValue( row, "name"));
+		table.removeRow( row );
 	}
 	
 	@Test
@@ -106,6 +111,7 @@ public class MemoryTableTest extends Assert
 		int row = table.insertRow();
 		table.putValue( row, "name", "Steve");
 		assertTrue( table.getValues( "age", "name", "Steve").count() >= 1);
+		table.removeRow( row );
 	}
 
 	@Test(expected = IllegalArgumentException.class)
@@ -118,6 +124,7 @@ public class MemoryTableTest extends Assert
 		
 		//failure-test
 		table.getValues( row, new String[]{"name", "noSuchColumn"});
+		table.removeRow( row );
 	}
 
 	@Test
@@ -125,6 +132,7 @@ public class MemoryTableTest extends Assert
 	{
 		int row = table.insertRow();
 		assertTrue( row >= 0);
+		table.removeRow( row );
 	}
 
 	@Test
@@ -136,6 +144,7 @@ public class MemoryTableTest extends Assert
 		table.removeRow( row );
 		
 		assertNull( table.getValue( row, "name"));
+		table.removeRow( row );
 	}
 
 	@Test
@@ -143,8 +152,9 @@ public class MemoryTableTest extends Assert
 	{
 		int row = table.insertRow();
 		table.putValue( row, "age", -123);
-		assertTrue( Objects.equals( row, table.findFirstRow( new Scope(new SimpleCondition("age", -123, Comparison.IS), null, Scope.NO_LIMIT)).getKey()));
-		assertTrue( Objects.equals( row, table.findFirstRow( new Scope(new SimpleCondition("age", -123, Comparison.IS), SimpleOrder.fromSQLString( "age DESC"), Scope.NO_LIMIT)).getKey()));
+		assertEquals( row, table.findFirstRow( new Scope(new SimpleCondition("age", -123, Comparison.IS), null, Scope.NO_LIMIT)).getKey().intValue());
+		assertEquals( row, table.findFirstRow( new Scope(new SimpleCondition("age", -123, Comparison.IS), SimpleOrder.fromSQLString( "age DESC"), Scope.NO_LIMIT)).getKey().intValue());
+		table.removeRow( row );
 	}
 
 	@Test
@@ -153,8 +163,9 @@ public class MemoryTableTest extends Assert
 		int row = table.insertRow();
 		table.putValue( row, "age", -123);
 		table.putValue( row, "name", "Steve");
-		assertTrue( table.findAllRows( new Scope(new SimpleCondition("name", "Steve", Comparison.IS), null, row)).
+		assertTrue( table.findAllRows( new Scope(new SimpleCondition("name", "Steve", Comparison.IS), SimpleOrder.fromSQLString( "name ASC"), row)).
 				anyMatch( (Map.Entry<Integer, MemoryRow> e) -> Objects.equals( e.getValue().getRowValue( "age"), -123) ));
+		table.removeRow( row );
 	}
 	
 }

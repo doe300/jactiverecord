@@ -83,7 +83,7 @@ public class HasManyThroughAssociationSet<T extends ActiveRecord> extends Abstra
 
 	protected Stream<Integer> getAssocationKeys()
 	{
-		return destBase.getStore().getValues( mappingTableName, foreignMappingKey, thisMappingKey, thisPrimaryKey ).map( (final Object o) -> (Integer)o);
+		return destBase.getStore().getValues( mappingTableName, foreignMappingKey, thisMappingKey, thisPrimaryKey ).parallel().map( (final Object o) -> (Integer)o);
 	}
 
 	@Override

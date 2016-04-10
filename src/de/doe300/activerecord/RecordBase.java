@@ -293,42 +293,6 @@ public abstract class RecordBase<T extends ActiveRecord> implements ReadOnlyReco
 	}
 
 	/**
-	 * Returns a new record which is not yet stored to the underlying
-	 * record-store
-	 *
-	 * @param primaryKey
-	 * @return the newly created record or <code>null</code>
-	 * @throws RecordException
-	 * @throws IllegalArgumentException
-	 *             if the record with this ID already exists
-	 * @deprecated Doesn't with {@link ValidatedRecord#validate() validation} on save and {@link RecordCallbacks#beforeSave() onSave}-callback. 
-	 * Any access to attributes in those methods will cause error, since the record does not yet exist in the underlying storage
-	 */
-	@Nullable
-	@Deprecated
-	public T newRecord(final int primaryKey) throws RecordException
-	{
-		//XXX possible solution for new records:
-		//maintain a list of new records, on save, create entry in storage
-		//problem: can only store ID in storage, which may violate constraints on other attributes
-		//2. problem: if values are set before first save, throws exception
-		// -> we need to create entry in storage anyway before doing anything else
-		if(records.containsKey( primaryKey) || store.containsRecord(this, primaryKey))
-		{
-			Logging.getLogger().error( recordType.getSimpleName(), "Record with primary-key "+primaryKey+" already exists");
-			throw new IllegalArgumentException("Record with primaryKey "+primaryKey+" already exists for table "+getTableName());
-		}
-		final T record = createProxy(primaryKey, true, null);
-		records.put( primaryKey, record );
-		if(hasCallbacks())
-		{
-			((RecordCallbacks)record).afterCreate();
-		}
-		core.fireRecordEvent( RecordListener.RecordEvent.RECORD_CREATED, this, record );
-		return record;
-	}
-
-	/**
 	 * Unlike {@link #newRecord(int)}, this method creates a new entry in the
 	 * underlying record-store
 	 *

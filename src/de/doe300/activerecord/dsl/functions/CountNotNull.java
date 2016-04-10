@@ -102,6 +102,6 @@ public class CountNotNull<T extends ActiveRecord, C> extends AggregateFunction<T
 	@Override
 	protected Long aggregateValues( final Stream<C> valueStream )
 	{
-		return valueStream.count();
+		return valueStream.parallel().count();
 	}
 }

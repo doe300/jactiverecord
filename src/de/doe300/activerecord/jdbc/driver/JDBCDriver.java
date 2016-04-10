@@ -256,6 +256,10 @@ public class JDBCDriver implements DBDriver
 	 */
 	public boolean convertDBToBoolean(@Nonnull final Object value)
 	{
+		if(value instanceof String)
+		{
+			return Boolean.valueOf( (String)value);
+		}
 		return ( boolean ) value;
 	}
 
@@ -681,7 +685,7 @@ public class JDBCDriver implements DBDriver
 			try
 			{
 				final Integer num = Integer.parseInt( numString);
-				return "associatedTable"+num;
+				return "associatedTable" + (num + 1);
 			}
 			catch(final NumberFormatException nfe)
 			{
@@ -698,7 +702,7 @@ public class JDBCDriver implements DBDriver
 			try
 			{
 				final Integer num = Integer.parseInt( numString);
-				return "joinedTable"+num;
+				return "joinedTable" + (num + 1);
 			}
 			catch(final NumberFormatException nfe)
 			{

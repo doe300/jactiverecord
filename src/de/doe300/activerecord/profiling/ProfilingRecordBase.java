@@ -254,12 +254,6 @@ public class ProfilingRecordBase<T extends ActiveRecord> extends RecordBase<T>
 	}
 
 	@Override
-	public T newRecord( final int primaryKey ) throws RecordException
-	{
-		return profiler.profile("newRecord", ()-> otherBase.newRecord( primaryKey ));
-	}
-
-	@Override
 	public boolean recordStoreExists()
 	{
 		return profiler.profileBoolean("recordStoreExists", () -> otherBase.recordStoreExists());

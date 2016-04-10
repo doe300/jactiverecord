@@ -72,7 +72,7 @@ public class CachedJDBCRecordStoreTest extends Assert
 	@AfterClass
 	public static void destroyTables() throws Exception
 	{
-		TestServer.destroyTestTables();
+		//TestServer.destroyTestTables();
 	}
 	
 	@Test
@@ -174,7 +174,7 @@ public class CachedJDBCRecordStoreTest extends Assert
 	public void testStreamAllWithData()
 	{
 		Scope scope = new Scope(new SimpleCondition(base.getPrimaryColumn(), primaryKey, Comparison.IS), null, 2 );
-		assertTrue( store.streamAllWithData( base, new String[]{base.getPrimaryColumn()}, scope).count() == 1);
+		assertEquals(1, store.streamAllWithData( base, new String[]{base.getPrimaryColumn()}, scope).count());
 		
 		Scope scope2 = new Scope(new SimpleCondition("name", "Failes", Comparison.IS), SimpleOrder.fromSQLString( "id DESC"), 2 );
 		//Tests streaming with data in cache but not in store

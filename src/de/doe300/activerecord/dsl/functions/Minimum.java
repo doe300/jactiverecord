@@ -105,6 +105,6 @@ public class Minimum<T extends ActiveRecord, C extends Comparable<? super C>> ex
 	@Override
 	protected C aggregateValues( final Stream<C> valueStream )
 	{
-		return valueStream.min(new NullSkippingComparator<C>(true ) ).orElse( null);
+		return valueStream.parallel().min(new NullSkippingComparator<C>(true ) ).orElse( null);
 	}
 }

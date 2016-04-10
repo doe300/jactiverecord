@@ -139,19 +139,6 @@ public class RecordBaseTest<T extends TestInterface> extends Assert
 		assertNull( base.getRecord( key ));
 	}
 
-	@Test(expected = IllegalArgumentException.class)
-	public void testNewRecord() throws Exception
-	{
-		base.destroy( 50);
-		TestInterface i = base.newRecord( 50);
-		assertNotNull(i);
-		assertFalse( i.inRecordStore() );
-		assertFalse( i.isSynchronized());
-		i.setName( "Adam");
-		//throws exception
-		base.newRecord( 50);
-	}
-
 	@Test
 	public void testCreateRecord() throws Exception
 	{
@@ -235,8 +222,7 @@ public class RecordBaseTest<T extends TestInterface> extends Assert
 	@Test
 	public void testIsSynchronized() throws Exception
 	{
-		base.destroy( 101);
-		T t = Objects.requireNonNull(base.newRecord( 101));
+		T t = Objects.requireNonNull(base.createRecord());
 		t.setName( "Johny");
 		if(base.getStore().isCached())
 		{

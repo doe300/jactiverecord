@@ -117,7 +117,7 @@ public class SimpleJDBCRecordStore implements JDBCRecordStore
 		String tableID = tableName != null ? tableName + "." : "";
 		if(columns.length == 0 || (columns.length == 1 && columns[0].equalsIgnoreCase(primaryColumn)))
 		{
-			return tableID+primaryColumn;
+			return tableID + primaryColumn;
 		}
 		return tableID + primaryColumn + ", " + Arrays.stream( columns)
 				.filter((final String col)-> !col.equalsIgnoreCase(primaryColumn))

@@ -103,6 +103,6 @@ public class Sum<T extends ActiveRecord, C extends Number> extends AggregateFunc
 	@Override
 	protected Long aggregateValues( final Stream<C> valueStream )
 	{
-		return valueStream.reduce( 0L, (final Long c1, final C c2) -> c1.longValue() + c2.longValue(), (final Long l1, final Long l2) -> l1 + l2);
+		return valueStream.parallel().reduce( 0L, (final Long c1, final C c2) -> c1.longValue() + c2.longValue(), (final Long l1, final Long l2) -> l1 + l2);
 	}
 }

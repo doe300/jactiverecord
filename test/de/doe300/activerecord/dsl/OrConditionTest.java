@@ -142,4 +142,13 @@ public class OrConditionTest extends Assert
 		assertFalse(invCond.test( t2));
 		assertFalse( invCond.test( t3));
 	}
+	
+	@Test
+	public void testEquals()
+	{
+		final Condition cond1 = OrCondition.orConditions( cond);
+		assertEquals( cond, cond1 );
+		
+		assertNotEquals( cond, new Object());
+	}
 }

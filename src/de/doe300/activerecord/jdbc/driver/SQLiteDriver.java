@@ -100,6 +100,10 @@ public class SQLiteDriver extends JDBCDriver
 	@Override
 	public Class<?> getJavaType( String sqlType ) throws IllegalArgumentException
 	{
+		if("TEXT".equals( sqlType.toUpperCase()))
+		{
+			return String.class;
+		}
 		return super.getJavaType( sqlType );
 	}
 

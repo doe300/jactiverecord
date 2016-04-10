@@ -92,17 +92,20 @@ class RowCache implements Comparable<RowCache>
 	 */
 	public synchronized void setData(final String[] names, final Object[] values)
 	{
+		//prevents updating only the timestamps
+		boolean anyUpdates = false;
 		for(int i=0;i<names.length;i++)
 		{
 			if(hasData( names[i].toLowerCase() ) && Objects.equals( getData( names[i].toLowerCase()), values[i]))
 			{
 				continue;
 			}
+			anyUpdates = true;
 			modifiedData.put( names[i].toLowerCase(), values[i]);
 			parent.setModified( this );
 			columnData.put( names[i].toLowerCase(), values[i]);
 		}
-		if(isTimestamped)
+		if(anyUpdates && isTimestamped)
 		{
 			updateModifiedTimestamp();
 		}

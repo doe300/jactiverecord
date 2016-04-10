@@ -29,6 +29,7 @@ import de.doe300.activerecord.TestInterface;
 import de.doe300.activerecord.TestServer;
 import de.doe300.activerecord.dsl.Comparison;
 import de.doe300.activerecord.dsl.SimpleCondition;
+import de.doe300.activerecord.dsl.functions.Sum;
 import de.doe300.activerecord.scope.Scope;
 import java.util.Arrays;
 import java.util.Objects;
@@ -297,5 +298,17 @@ public class ConditionSetTest extends Assert
 	public void testFindFirstWithScope()
 	{
 		assertNotNull( set.findFirstWithScope( new Scope(null, null, Scope.NO_LIMIT)));
+	}
+
+	@Test
+	public void testGetOrder()
+	{
+		assertEquals( set.getOrder(), base.getDefaultOrder());
+	}
+
+	@Test
+	public void testAggregate()
+	{
+		assertEquals( Long.valueOf( 69), set.aggregate( new Sum<>("age", TestInterface::getAge), null));
 	}
 }

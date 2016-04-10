@@ -122,7 +122,7 @@ public class Average<T extends ActiveRecord, C extends Number> extends Aggregate
 	@Override
 	protected Double aggregateValues( final Stream<C> valueStream )
 	{
-		return valueStream.map( (final C c) -> new AggregateFunction.BiValueHolder<Double, Long>(c.doubleValue(), 1L)).
+		return valueStream.parallel().map( (final C c) -> new AggregateFunction.BiValueHolder<Double, Long>(c.doubleValue(), 1L)).
 			reduce( (final AggregateFunction.BiValueHolder<Double, Long> b1, final AggregateFunction.BiValueHolder<Double, Long> b2) ->
 			{
 				return new AggregateFunction.BiValueHolder<>(b1.value+b2.value, b1.secondValue + b2.secondValue);

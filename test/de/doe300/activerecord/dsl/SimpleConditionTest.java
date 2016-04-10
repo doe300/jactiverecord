@@ -30,6 +30,7 @@ import de.doe300.activerecord.TestServer;
 import de.doe300.activerecord.scope.Scope;
 import de.doe300.activerecord.dsl.functions.Absolute;
 import de.doe300.activerecord.dsl.functions.LowerCase;
+import java.util.Arrays;
 import org.junit.AfterClass;
 import org.junit.Assert;
 import org.junit.BeforeClass;
@@ -135,9 +136,9 @@ public class SimpleConditionTest extends Assert
 	public void testIsNullCondition()
 	{
 		//test Predicate
-		assertSame( t4, base.findFirst( new SimpleCondition("name", "123Name1", Comparison.IS_NULL)));
+		assertSame( t4, base.findFirst( new SimpleCondition("name", null, Comparison.IS_NULL)));
 		//test SQL
-		assertEquals( (Integer)t4.getPrimaryKey(), base.getStore().findFirst( base, toScope( new SimpleCondition("name", "123Name1", Comparison.IS_NULL))));
+		assertEquals( (Integer)t4.getPrimaryKey(), base.getStore().findFirst( base, toScope( new SimpleCondition("name", null, Comparison.IS_NULL))));
 	}
 	
 	@Test
@@ -190,6 +191,7 @@ public class SimpleConditionTest extends Assert
 	{
 		//test Predicate
 		assertSame( t1, base.findFirst( new SimpleCondition("age", new Integer[]{-912,-913}, Comparison.IN)));
+		assertSame( t1, base.findFirst( new SimpleCondition("age", Arrays.asList( -912,-913), Comparison.IN)));
 		//test SQL
 		assertEquals( (Integer)t1.getPrimaryKey(), base.getStore().findFirst( base, toScope( new SimpleCondition("age", new Integer[]{-912,-913}, Comparison.IN))));
 	}
@@ -213,6 +215,9 @@ public class SimpleConditionTest extends Assert
 		TestInterface t1 = base.createRecord();
 		t1.setName( "adam");
 		assertTrue( cond1.test( t1));
+		
+		t.destroy();
+		t1.destroy();
 	}
 	
 	@Test(expected = IllegalArgumentException.class)

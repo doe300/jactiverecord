@@ -122,7 +122,9 @@ public class PostgreSQLDriver extends JDBCDriver
 		{
 			return "DOUBLE PRECISION";
 		}
-		if( java.io.Serializable.class.isAssignableFrom( javaType ))
+		if( java.io.Serializable.class.isAssignableFrom( javaType ) 
+				&& !String.class.isAssignableFrom( javaType )&& !java.sql.Date.class.isAssignableFrom( javaType ))
+			//TODO better filter for all otherwise-supported and serializable types
 		{
 			return "BYTEA";
 		}

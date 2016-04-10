@@ -177,8 +177,6 @@ public class CachedJDBCRecordStore extends SimpleJDBCRecordStore
 	{
 		final Map<String,Object> result = new HashMap<>(columns.length);
 		final RowCache c = getCache( base,primaryKey );
-		//write changes in cache to DB so #getDBValue does not override cached changes with old data
-		save( base, primaryKey );
 		for(final String col:columns)
 		{
 			if(c.hasData( col ))
@@ -188,6 +186,8 @@ public class CachedJDBCRecordStore extends SimpleJDBCRecordStore
 			//this else clause is only called the first time a column is not in the cache
 			else
 			{
+				//write changes in cache to DB so #getDBValue does not override cached changes with old data
+				save( base, primaryKey );
 				final Pair<Object, Boolean> val = getDBValue( base, primaryKey, c, col );
 				if(!val.getSecond())
 				{
@@ -232,6 +232,7 @@ public class CachedJDBCRecordStore extends SimpleJDBCRecordStore
 				cacheRow.update( res);
 				return Pair.createPair( cacheRow.getData( name ), true);
 			}
+			//no such row in DB
 			return Pair.createPair( null, false);
 		}
 		catch ( final SQLException ex )
