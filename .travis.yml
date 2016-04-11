@@ -3,16 +3,16 @@ language: java
 jdk:
   - oraclejdk8
 
-before_install:
-  - sudo apt-get update -qq > /dev/null
-  - sudo apt-get install -qq libhsqldb-java hsqldb-utils
+# before_install:
+#  - sudo apt-get update -qq > /dev/null
+#  - sudo apt-get install -qq libhsqldb-java hsqldb-utils
 
 install:
   - mvn install -Dmaven.compiler.target=1.8 -Dmaven.compiler.source=1.8 -DskipTests=true
-  - mvn dependency:copy-dependencies
+#  - mvn dependency:copy-dependencies
   
-before_script:
-  - dpkg -L libhsqldb-java
-  - cp /usr/share/java/hsqldb* ./
+# before_script:
+#  - dpkg -L libhsqldb-java
+#  - cp /usr/share/java/hsqldb* ./
 
 script: mvn test

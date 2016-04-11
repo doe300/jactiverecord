@@ -9,7 +9,7 @@ A java-based object-database-binding on top of JDBC inspired by Rails ActiveReco
 Requirements
 ------
 This library requires **Java 8**, **JDBC** and any JDBC DB-driver with a configured database.
-Additionally, **JSR 305: Annotations for Software Defect Detection in Java** is required (in version *2.0.3* or higher) for code-quality improvement.
+Additionally, **JSR 305: Annotations for Software Defect Detection in Java** is required for code-quality improvement.
 It can be obtained via the [Google Code Project](https://code.google.com/p/jsr-305/) 
 or [the Maven Repo](http://search.maven.org/#search|gav|1|g%3A%22com.google.code.findbugs%22%20AND%20a%3A%22jsr305%22).
 
@@ -17,8 +17,8 @@ This library is based upon Java 8 due to its use of *java.util.stream.Stream* fo
 
 Testing
 ------
-The test cases use **junit 4.10** and are executed with **hsqldb** *(version 2.3.1)*, **sqlite-jdbc** *(version 3.8.7)*,
-**mysql-connector-java** *(version 5.1.23)* and with **postgresql** *(version 9.4-1204)* which are all available over [Maven](http://search.maven.org/).
+The test cases use **junit 4** and are executed with **hsqldb**, **sqlite-jdbc**,
+**mysql-connector-java** and with **postgresql** which are all automatically managed in their latest version via [Maven](http://search.maven.org/).
 
 The tests are run at regular intervals and also with **JaCoCoverage** to make sure, all essential code is being tested.
 
