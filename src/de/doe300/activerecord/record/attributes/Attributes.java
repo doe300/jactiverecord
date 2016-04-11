@@ -96,12 +96,13 @@ public final class Attributes
 	{
 		final StringBuilder res = new StringBuilder( attribute.length() );
 		boolean nextUpperCase = true;
-		for ( final char c : attribute.toCharArray() )
+		//skip leading and trailing whitespaces
+		for ( final char c : attribute.trim().toCharArray() )
 		{
-			//skip whitespaces
 			if( Character.isWhitespace( c))
 			{
-				continue;
+				//whitespaces in the attribute are errors
+				throw new IllegalArgumentException("Attribute-name can't contain whitespaces!");
 			}
 			//convert '_' to camel-case
 			if ( c == '_' )

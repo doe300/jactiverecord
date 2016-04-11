@@ -57,6 +57,7 @@ import de.doe300.activerecord.scope.Scope;
 import de.doe300.activerecord.store.RecordStore;
 import de.doe300.activerecord.record.validation.ValidatedRecord;
 import de.doe300.activerecord.record.validation.ValidationFailed;
+import java.util.Objects;
 import java.util.SortedMap;
 import javax.annotation.Nonnegative;
 
@@ -661,5 +662,25 @@ public abstract class RecordBase<T extends ActiveRecord> implements ReadOnlyReco
 	public RecordSet<T> getForCondition(@Nullable final Condition cond, @Nullable final Order order)
 	{
 		return new ConditionSet<T>(this, cond, order, null, null );
+	}
+
+	@Override
+	public boolean equals( Object o )
+	{
+		//two record-bases are the same if they represent the same table(shard) in the same core
+		return (o instanceof RecordBase) 
+				&& core.equals( ((RecordBase)o).core)
+				&& recordType.equals( ((RecordBase)o).recordType)
+				&& getTableName().equals( ((RecordBase)o).getTableName());
+	}
+
+	@Override
+	public int hashCode()
+	{
+		int hash = 5;
+		hash = 17 * hash + Objects.hashCode( this.recordType );
+		hash = 17 * hash + Objects.hashCode( this.core );
+		hash = 17 * hash + Objects.hashCode( this.getTableName() );
+		return hash;
 	}
 }

@@ -85,8 +85,8 @@ public class RecordStoreTest extends Assert
 	{
 		return Arrays.asList(
 			new Object[]{new SimpleJDBCRecordStore(TestServer.getTestConnection())},
-			new Object[]{new CachedJDBCRecordStore(TestServer.getTestConnection())},
-			new Object[]{new MemoryRecordStore()}
+			new Object[]{new CachedJDBCRecordStore(TestServer.getTestConnection())}
+			//new Object[]{new MemoryRecordStore()}
 		);
 	}
 	

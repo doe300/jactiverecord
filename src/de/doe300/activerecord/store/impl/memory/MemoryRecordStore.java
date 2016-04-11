@@ -119,7 +119,7 @@ public class MemoryRecordStore implements RecordStore
 				}
 				throw new IllegalArgumentException("Failed to create memory-table for: " + recordBase.getTableName());
 			}
-			throw new IllegalArgumentException("No such table");
+			throw new IllegalArgumentException("No such table: " + recordBase.getTableName());
 		}
 		return table;
 	}

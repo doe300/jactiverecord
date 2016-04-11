@@ -57,12 +57,28 @@ public final class AssociationHelper
 	public static <T extends ActiveRecord> T getBelongsTo(@Nonnull final ActiveRecord record,
 		@Nonnull final Class<T> type, @Nonnull final String foreignKeyColumn)
 	{
+		final RecordBase<T> otherBase = record.getBase().getCore().getBase( type);
+		return getBelongsTo( record, otherBase, foreignKeyColumn );
+	}
+	
+	/**
+	 * In a belongs-to association, the foreign key is stored in the table represented by <code>record</code>
+	 * @param <T>
+	 * @param record
+	 * @param otherBase
+	 * @param foreignKeyColumn the column (of this model), the foreign-key for the other model is stored
+	 * @return the associated record or <code>null</code>
+	 * @since 0.7
+	 */
+	@Nullable
+	public static <T extends ActiveRecord> T getBelongsTo(@Nonnull final ActiveRecord record,
+		@Nonnull final RecordBase<T> otherBase, @Nonnull final String foreignKeyColumn)
+	{
 		final Integer foreignKey = ( Integer ) record.getBase().getStore().getValue( record.getBase(), record.getPrimaryKey(), foreignKeyColumn);
 		if(foreignKey == null)
 		{
 			return null;
 		}
-		RecordBase<T> otherBase = record.getBase().getCore().getBase( type);
 		return getBelongsTo( foreignKey, otherBase, otherBase.getPrimaryColumn() );
 	}
 	

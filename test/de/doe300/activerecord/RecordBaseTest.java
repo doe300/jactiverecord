@@ -100,6 +100,13 @@ public class RecordBaseTest<T extends TestInterface> extends Assert
 	{
 		assertNotNull( base.getCore());
 	}
+	
+	@Test(expected = IllegalStateException.class)
+	public void testGetShardBase() throws Exception
+	{
+		assertEquals(base, base.getCore().getBase( type ).getShardBase( RecordBaseTest.class.getSimpleName()));
+		base.getShardBase( "dummyShard");
+	}
 
 	@Test
 	public void testGetRecordType()

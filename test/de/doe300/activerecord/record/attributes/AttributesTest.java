@@ -111,6 +111,8 @@ public class AttributesTest
 		assertEquals("age", Attributes.getPropertyName( m2.getName()));
 		assertEquals("updated_at", Attributes.getPropertyName( m3.getName()));
 		assertEquals("valid", Attributes.getPropertyName( m4.getName()));
+		assertNull(Attributes.getPropertyName( "get" ));
+		assertNull(Attributes.getPropertyName( "set" ));
 	}
 
 	@Test
@@ -149,9 +151,10 @@ public class AttributesTest
 		assertEquals( 42, Attributes.getLength( i, "fk_test_id", (Object obj) -> (obj instanceof Number) ? 42 : -1, null));
 	}
 
-	@Test
+	@Test(expected = IllegalArgumentException.class)
 	public void testToCamelCase()
 	{
 		assertEquals( "AttributeWithCamelCase", Attributes.toCamelCase( "attribute_with_camel_case"));
+		Attributes.toCamelCase( " no such attribute");
 	}	
 }
