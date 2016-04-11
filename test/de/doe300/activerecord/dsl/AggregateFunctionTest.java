@@ -62,8 +62,8 @@ public class AggregateFunctionTest extends Assert
 	@BeforeClass
 	public static void setUpClass() throws Exception
 	{
-		TestServer.buildTestTables();
-		base = TestServer.getTestCore().getBase( TestInterface.class);
+		TestServer.buildTestTables(TestInterface.class, AggregateFunctionTest.class.getSimpleName());
+		base = TestServer.getTestCore().getBase( TestInterface.class).getShardBase( AggregateFunctionTest.class.getSimpleName());
 		t1 = base.createRecord();
 		t1.setName( "123Name1");
 		t1.setAge( 912);
@@ -82,7 +82,7 @@ public class AggregateFunctionTest extends Assert
 	@AfterClass
 	public static void destroyTables() throws Exception
 	{
-		TestServer.destroyTestTables();
+		TestServer.destroyTestTables(TestInterface.class, AggregateFunctionTest.class.getSimpleName());
 	}
 	
 	@Test

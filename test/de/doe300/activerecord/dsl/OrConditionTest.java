@@ -50,9 +50,9 @@ public class OrConditionTest extends Assert
 	@BeforeClass
 	public static void createTables() throws Exception
 	{
-		TestServer.buildTestTables();
+		TestServer.buildTestTables( TestInterface.class, OrConditionTest.class.getSimpleName());
 		
-		base = TestServer.getTestCore().getBase( TestInterface.class);
+		base = TestServer.getTestCore().getBase( TestInterface.class).getShardBase( OrConditionTest.class.getSimpleName());
 		t1 = base.createRecord();
 		t1.setName( "123Name1");
 		t1.setAge( -912);
@@ -70,7 +70,7 @@ public class OrConditionTest extends Assert
 	@AfterClass
 	public static void destroyTables() throws Exception
 	{
-		TestServer.destroyTestTables();
+		TestServer.destroyTestTables( TestInterface.class, OrConditionTest.class.getSimpleName());
 	}
 	
 	@Test(expected = IllegalArgumentException.class)

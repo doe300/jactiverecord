@@ -51,15 +51,15 @@ public class SimpleOrderTest extends Assert
 	@BeforeClass
 	public static void setUpClass() throws Exception
 	{
+		TestServer.buildTestTables(TestInterface.class, SimpleOrderTest.class.getSimpleName());
 		RecordCore core = TestServer.getTestCore();
-		core.createTable( TestInterface.class);
-		base = core.getBase( TestInterface.class);
+		base = core.getBase( TestInterface.class).getShardBase( SimpleOrderTest.class.getSimpleName());
 	}
 
 	@AfterClass
 	public static void tearDownClass() throws Exception
 	{
-		base.getCore().dropTable( TestInterface.class);
+		TestServer.destroyTestTables(TestInterface.class, SimpleOrderTest.class.getSimpleName());
 	}
 
 	@Test

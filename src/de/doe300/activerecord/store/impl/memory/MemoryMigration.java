@@ -43,7 +43,7 @@ class MemoryMigration extends AutomaticMigration
 {
 	private final MemoryRecordStore memoryStore;
 	private MemoryColumn[] columns;
-	private String tableName, primaryColumn;
+	private String primaryColumn;
 
 	/**
 	 * To be called only from {@link MemoryDBDriver#createMigration(java.lang.Class, de.doe300.activerecord.store.RecordStore) }
@@ -56,6 +56,20 @@ class MemoryMigration extends AutomaticMigration
 		this.memoryStore = memoryStore;
 		convertColumns();
 	}
+	
+	/**
+	 * To be called only from {@link MemoryDBDriver#createMigration(java.lang.Class, de.doe300.activerecord.store.RecordStore) }
+	 * @param memoryStore
+	 * @param recordType
+	 * @param tableName 
+	 * @since 0.7
+	 */
+	MemoryMigration(@Nonnull final MemoryRecordStore memoryStore, @Nonnull final Class<? extends ActiveRecord> recordType, @Nonnull final String tableName)
+	{
+		super(recordType, tableName, null, JDBCDriver.DEFAULT);
+		this.memoryStore = memoryStore;
+		convertColumns();
+	}
 
 	/**
 	 * @param memoryStore
@@ -65,16 +79,14 @@ class MemoryMigration extends AutomaticMigration
 	 */
 	MemoryMigration(@Nonnull final MemoryRecordStore memoryStore, @Nonnull final String tableName, @Nonnull final MemoryColumn[] columns, @Nonnull final String primaryColumn)
 	{
-		super(null, null, JDBCDriver.DEFAULT);
+		super(null, tableName, null, JDBCDriver.DEFAULT);
 		this.memoryStore = memoryStore;
-		this.tableName = tableName;
 		this.columns = columns;
 		this.primaryColumn = primaryColumn;
 	}
 
 	private void convertColumns()
 	{
-		tableName = getTableName(recordType);
 		final Map<String, String> sqlColumns = getColumnsFromModel( recordType );
 		columns = new MemoryColumn[sqlColumns.size()];
 		int index = 0;

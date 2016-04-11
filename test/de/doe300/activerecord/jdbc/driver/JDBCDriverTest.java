@@ -126,7 +126,22 @@ public class JDBCDriverTest extends Assert
 		assertNotNull( driver.getSQLFunction( JDBCDriver.SCALAR_LOWER, "test_column"));
 		assertNotNull( driver.getSQLFunction( JDBCDriver.SCALAR_ROUND, "test_column"));
 		assertNotNull( driver.getSQLFunction( JDBCDriver.SCALAR_SIGN, "test_column"));
-		assertNotNull( driver.getSQLFunction( JDBCDriver.SCALAR_SQRT, "test_column"));
+		if(driver instanceof SQLiteDriver)
+		{
+			try
+			{
+				driver.getSQLFunction( JDBCDriver.SCALAR_SQRT, "test_column");
+				fail( "No exception thrown!");
+			}
+			catch(final RuntimeException e)
+			{
+				//exception is expected here!
+			}
+		}
+		else
+		{
+			assertNotNull( driver.getSQLFunction( JDBCDriver.SCALAR_SQRT, "test_column"));
+		}
 		assertNotNull( driver.getSQLFunction( JDBCDriver.SCALAR_STRING_LENGTH, "test_column"));
 		assertNotNull( driver.getSQLFunction( JDBCDriver.SCALAR_TRIM, "test_column"));
 		assertNotNull( driver.getSQLFunction( JDBCDriver.SCALAR_UPPER, "test_column"));

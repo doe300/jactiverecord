@@ -48,8 +48,8 @@ public class AndConditionTest extends Assert
 	@BeforeClass
 	public static void setUpClass() throws Exception
 	{
-		TestServer.buildTestTables();
-		base = TestServer.getTestCore().getBase( TestInterface.class);
+		TestServer.buildTestTables(TestInterface.class, AndConditionTest.class.getSimpleName());
+		base = TestServer.getTestCore().getBase( TestInterface.class).getShardBase( AndConditionTest.class.getSimpleName() );
 		t1 = base.createRecord();
 		t1.setName( "123Name1");
 		t1.setAge( 912);
@@ -64,7 +64,7 @@ public class AndConditionTest extends Assert
 	@AfterClass
 	public static void destroyTables() throws Exception
 	{
-		TestServer.destroyTestTables();
+		TestServer.destroyTestTables(TestInterface.class, AndConditionTest.class.getSimpleName());
 	}
 	
 	@Test(expected = IllegalArgumentException.class)

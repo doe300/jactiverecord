@@ -1,5 +1,7 @@
 JActiveRecord
 =============
+
+[![BuildStatus](https://travis-ci.org/doe300/jactiverecord.svg)](https://travis-ci.org/doe300/jactiverecord)
 [![GitHub license](https://img.shields.io/github/license/doe300/jactiverecord.svg)](https://github.com/doe300/jactiverecord/blob/master/LICENSE)
 [![Release](https://img.shields.io/github/tag/doe300/jactiverecord.svg)](https://github.com/doe300/jactiverecord/releases/latest)
 [![Dependency Status](https://www.versioneye.com/user/projects/570638fbfcd19a004543fceb/badge.svg?style=flat)](https://www.versioneye.com/user/projects/570638fbfcd19a004543fceb)

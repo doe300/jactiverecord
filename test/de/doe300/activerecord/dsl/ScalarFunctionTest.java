@@ -56,8 +56,8 @@ public class ScalarFunctionTest extends Assert
 	@BeforeClass
 	public static void setUpClass() throws Exception
 	{
-		TestServer.buildTestTables();
-		base = TestServer.getTestCore().getBase( TestInterface.class);
+		TestServer.buildTestTables( TestInterface.class, ScalarFunctionTest.class.getSimpleName());
+		base = TestServer.getTestCore().getBase( TestInterface.class).getShardBase( ScalarFunctionTest.class.getSimpleName());
 		t1 = base.createRecord();
 		t1.setName( "123Name1");
 		t1.setAge( -912);
@@ -76,7 +76,7 @@ public class ScalarFunctionTest extends Assert
 	@AfterClass
 	public static void destroyTables() throws Exception
 	{
-		TestServer.destroyTestTables();
+		TestServer.destroyTestTables( TestInterface.class, ScalarFunctionTest.class.getSimpleName());
 	}
 	
 	public ScalarFunctionTest()

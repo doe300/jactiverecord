@@ -504,7 +504,16 @@ public class JDBCDriver implements DBDriver
 		if(!(store instanceof JDBCRecordStore)) {
 			throw new IllegalArgumentException("RecordStore must beof type JDBCRecordStore!");
 		}
-		return new AutomaticMigration(recordType, ((JDBCRecordStore)store).getConnection());
+		return new AutomaticMigration(recordType, ((JDBCRecordStore)store).getConnection(), this);
+	}
+
+	@Override
+	public Migration createMigration(Class<? extends ActiveRecord> recordType, String storeName, RecordStore store )
+	{
+		if(!(store instanceof JDBCRecordStore)) {
+			throw new IllegalArgumentException("RecordStore must beof type JDBCRecordStore!");
+		}
+		return new AutomaticMigration(recordType, storeName, ((JDBCRecordStore)store).getConnection(), this);
 	}
 
 	@Override
@@ -580,7 +589,7 @@ public class JDBCDriver implements DBDriver
 				Logging.getLogger().error( "JDBCDriver", e);
 			}
 		}
-		return new JDBCDriver();
+		return JDBCDriver.DEFAULT;
 	}
 
 	/**

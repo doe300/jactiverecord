@@ -84,28 +84,34 @@ import javax.annotation.Nonnull;
 public class AutomaticMigration implements Migration
 {
 	protected final Class<? extends ActiveRecord> recordType;
+	protected final String tableName;
 	protected final Connection con;
 	protected final JDBCDriver driver;
-
-	/**
-	 * @param recordType the type to create and drop the table for
-	 * @param con the Connection
-	 */
-	public AutomaticMigration(final Class<? extends ActiveRecord> recordType, @Nullable final Connection con )
-	{
-		this.recordType = recordType;
-		this.con = con;
-		this.driver = JDBCDriver.guessDriver(con);
-	}
 
 	/**
 	 * @param recordType the type to create and drop the table for
 	 * @param con the SQL-Connection
 	 * @param driver the vendor-specific driver for the vendor used (if known)
 	 */
-	public AutomaticMigration(final Class<? extends ActiveRecord> recordType, @Nullable final Connection con, final JDBCDriver driver )
+	public AutomaticMigration(@Nonnull final Class<? extends ActiveRecord> recordType, @Nullable final Connection con, @Nonnull final JDBCDriver driver )
 	{
 		this.recordType = recordType;
+		this.tableName = getTableName( recordType );
+		this.con = con;
+		this.driver = driver;
+	}
+
+	/**
+	 * @param recordType the type to create and drop the table for
+	 * @param tableName the table-name to use
+	 * @param con the SQL-Connection
+	 * @param driver the vendor-specific driver for the vendor used (if known)
+	 * @since 0.7
+	 */
+	public AutomaticMigration(@Nonnull final Class<? extends ActiveRecord> recordType, @Nonnull final String tableName, @Nullable final Connection con, @Nonnull final JDBCDriver driver )
+	{
+		this.recordType = recordType;
+		this.tableName = tableName;
 		this.con = con;
 		this.driver = driver;
 	}
@@ -113,7 +119,6 @@ public class AutomaticMigration implements Migration
 	@Override
 	public boolean apply() throws SQLException
 	{
-		final String tableName = getTableName( recordType );
 		//1. check if table exists
 		if(structureExists( con, tableName))
 		{
@@ -170,7 +175,6 @@ public class AutomaticMigration implements Migration
 	@Override
 	public boolean update(final boolean dropColumns) throws SQLException
 	{
-		final String tableName = getTableName( recordType );
 		//1. check if table exists
 		if(structureExists( con, tableName))
 		{
@@ -236,7 +240,6 @@ public class AutomaticMigration implements Migration
 	@Override
 	public boolean revert() throws SQLException
 	{
-		final String tableName = getTableName( recordType );
 		//1. check if table exists
 		if(!structureExists( con, tableName))
 		{
@@ -263,7 +266,7 @@ public class AutomaticMigration implements Migration
 		return true;
 	}
 
-	protected String getTableName(final Class<? extends ActiveRecord> type)
+	private static String getTableName(final Class<? extends ActiveRecord> type)
 	{
 		if(type.isAnnotationPresent(RecordType.class))
 		{
@@ -338,6 +341,7 @@ public class AutomaticMigration implements Migration
 				}
 				else if(ActiveRecord.class.isAssignableFrom( attributeType )) //try to deduce foreign key table from attribute-type
 				{
+					//TODO always references to base table for sharded tables
 					final RecordType associatedType = attributeType.getAnnotation( RecordType.class);
 					foreignKeyTable = associatedType != null ? associatedType.typeName() : attributeType.getSimpleName();
 					foreignKeyColumn = !att.foreignKeyColumn().isEmpty() ? att.foreignKeyColumn() : associatedType != null ? associatedType.primaryKey() : null;
@@ -442,7 +446,7 @@ public class AutomaticMigration implements Migration
 	 * @return whether the structure already exists
 	 * @deprecated Use {@link RecordStore#exists(String)}
 	 */
-	private boolean structureExists(@Nonnull final Connection con, @Nonnull final String name)
+	private static boolean structureExists(@Nonnull final Connection con, @Nonnull final String name)
 	{
 		try (ResultSet set = con.getMetaData().getTables(con.getCatalog(), con.getSchema(), null, null))
 		{

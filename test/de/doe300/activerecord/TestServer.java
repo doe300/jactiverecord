@@ -25,6 +25,7 @@
 package de.doe300.activerecord;
 
 import de.doe300.activerecord.migration.MigrationTest;
+import de.doe300.activerecord.record.ActiveRecord;
 import de.doe300.activerecord.store.RecordStore;
 import de.doe300.activerecord.store.impl.CachedJDBCRecordStore;
 import de.doe300.activerecord.store.impl.SimpleJDBCRecordStore;
@@ -123,15 +124,27 @@ public class TestServer extends Assert
 		return con;
 	}
 	
+	@Deprecated
 	public static void buildTestTables() throws SQLException, Exception
 	{
 		MigrationTest.init();
 		new MigrationTest().testApply();
 	}
 	
+	public static void buildTestTables(@Nonnull final Class<? extends ActiveRecord> type, @Nonnull final String tableName) throws SQLException, Exception
+	{
+		Assert.assertTrue( TestServer.getTestCore().getStore().getDriver().createMigration( type, tableName, TestServer.getTestCore().getStore() ).apply());
+	}
+	
+	@Deprecated
 	public static void destroyTestTables() throws SQLException, Exception
 	{
 		new MigrationTest().testRevert();
+	}
+	
+	public static void destroyTestTables(@Nonnull final Class<? extends ActiveRecord> type, @Nonnull final String tableName) throws SQLException, Exception
+	{
+		Assert.assertTrue( TestServer.getTestCore().getStore().getDriver().createMigration( type, tableName, TestServer.getTestCore().getStore() ).revert());
 	}
 	
 	static void printMetaData(Connection con) throws SQLException

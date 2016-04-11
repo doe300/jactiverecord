@@ -63,8 +63,8 @@ public class TableSetTest extends Assert
 	@BeforeClass
 	public static void createTables() throws Exception
 	{
-		TestServer.buildTestTables();
-		base = TestServer.getTestCore().getBase( TestInterface.class );
+		TestServer.buildTestTables( TestInterface.class, TableSetTest.class.getSimpleName());
+		base = TestServer.getTestCore().getBase( TestInterface.class ).getShardBase( TableSetTest.class.getSimpleName());
 		set = new TableSet<TestInterface>(base, null );
 		
 		//fill set
@@ -80,7 +80,7 @@ public class TableSetTest extends Assert
 	@AfterClass
 	public static void destroyTables() throws Exception
 	{
-		TestServer.destroyTestTables();
+		TestServer.destroyTestTables( TestInterface.class, TableSetTest.class.getSimpleName());
 	}
 
 	@Test

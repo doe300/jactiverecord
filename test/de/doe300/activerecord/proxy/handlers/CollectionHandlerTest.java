@@ -49,16 +49,16 @@ public class CollectionHandlerTest extends Assert
 	@BeforeClass
 	public static void createTables() throws Exception
 	{
-		TestServer.buildTestTables();
+		TestServer.buildTestTables(TestInterface.class, CollectionHandlerTest.class.getSimpleName());
 		handler = new CollectionHandler();
-		base = TestServer.getTestCore().getBase(CollectionHandlerTest.TestCollectionInterface.class, handler);
+		base = TestServer.getTestCore().getBase(CollectionHandlerTest.TestCollectionInterface.class, handler).getShardBase( CollectionHandlerTest.class.getSimpleName());
 		record = base.createRecord();
 	}
 	
 	@AfterClass
 	public static void destroyTables() throws Exception
 	{
-		TestServer.destroyTestTables();
+		TestServer.destroyTestTables(TestInterface.class, CollectionHandlerTest.class.getSimpleName());
 	}
 	
 	public CollectionHandlerTest()

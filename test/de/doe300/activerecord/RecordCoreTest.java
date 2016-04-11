@@ -48,14 +48,14 @@ public class RecordCoreTest extends Assert
 	@BeforeClass
 	public static void createTables() throws Exception
 	{
-		TestServer.buildTestTables();
+		TestServer.buildTestTables(TestInterface.class, RecordCoreTest.class.getSimpleName());
 		core = TestServer.getTestCore();
 	}
 	
 	@AfterClass
 	public static void destroyTables() throws Exception
 	{
-		TestServer.destroyTestTables();
+		TestServer.destroyTestTables(TestInterface.class, RecordCoreTest.class.getSimpleName());
 		core.close();
 	}
 	
@@ -130,15 +130,9 @@ public class RecordCoreTest extends Assert
 		core.addRecordListener( TestInterface.class, l);
 		core.addRecordListener( TestInterface.class, l);
 		core.addRecordListener( TestSingleInheritancePOJO.class, failL);
-		core.fireRecordEvent( RecordListener.RecordEvent.RECORD_CREATED, core.getBase( TestInterface.class ), core.getBase( TestInterface.class).createRecord());
+		final RecordBase<TestInterface> base = core.getBase( TestInterface.class ).getShardBase( RecordCoreTest.class.getSimpleName());
+		core.fireRecordEvent( RecordListener.RecordEvent.RECORD_CREATED, base, base.createRecord());
 		core.removeRecordListener( TestInterface.class, l);
 		core.removeRecordListener( TestInterface.class, l);
-	}
-
-	@Test
-	public void testCreateTable() throws Exception
-	{
-		assertTrue( core.dropTable( TestInterface.class));
-		assertTrue( core.createTable( TestInterface.class));
 	}
 }

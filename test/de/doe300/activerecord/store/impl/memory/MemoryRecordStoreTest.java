@@ -35,6 +35,7 @@ import de.doe300.activerecord.scope.Scope;
 import java.util.Collections;
 import java.util.Map;
 import java.util.Set;
+import org.junit.AfterClass;
 import org.junit.Assert;
 import org.junit.BeforeClass;
 import org.junit.Test;
@@ -54,9 +55,16 @@ public class MemoryRecordStoreTest extends Assert
 	public static void init() throws Exception
 	{
 		store = new MemoryRecordStore();
+		store.getDriver().createMigration( TestInterface.class, store).apply();
 		base = RecordCore.fromStore( "memory", store).getBase( TestInterface.class);
 		primaryKey = base.createRecord().getPrimaryKey();
 		base.createRecord().setName( "Adam");
+	}
+	
+	@AfterClass
+	public static void deinit() throws Exception
+	{
+		store.getDriver().createMigration( TestInterface.class, store).revert();
 	}
 	
 	public MemoryRecordStoreTest()
@@ -104,6 +112,7 @@ public class MemoryRecordStoreTest extends Assert
 	@Test
 	public void testGetValue()
 	{
+		store.setValue( base, primaryKey, "name", "Adam");
 		assertNotNull( store.getValue( base, primaryKey, "name"));
 		assertEquals( primaryKey, store.getValue( base, primaryKey, base.getPrimaryColumn()));
 	}
@@ -200,7 +209,7 @@ public class MemoryRecordStoreTest extends Assert
 	@Test
 	public void testFindFirstWithData()
 	{
-		assertEquals("Adam", store.findFirstWithData( base, new String[]{"name"}, Scope.DEFAULT).get( "name"));
+		assertEquals("Adam", store.findFirstWithData( base, new String[]{"name"}, new Scope(new SimpleCondition("name", "Adam", Comparison.IS), null, Scope.NO_LIMIT )).get( "name"));
 		final Scope noMatch = new Scope(new SimpleCondition("name", "Stevenson", Comparison.IS), null, Scope.NO_LIMIT);
 		assertTrue( store.findFirstWithData( base, new String[]{"name"}, noMatch).isEmpty());
 	}
@@ -208,6 +217,7 @@ public class MemoryRecordStoreTest extends Assert
 	@Test
 	public void testAggregate()
 	{
+		store.setValue( base, primaryKey, "name", "Steve");
 		assertEquals( "Steve", store.aggregate( base, new Maximum<TestInterface, String>("name", TestInterface::getName), null));
 	}
 }

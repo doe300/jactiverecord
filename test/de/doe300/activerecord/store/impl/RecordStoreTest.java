@@ -66,10 +66,10 @@ public class RecordStoreTest extends Assert
 	public RecordStoreTest(final RecordStore store) throws Exception
 	{
 		this.store = store;
-		this.base = RecordCore.fromStore( store.getClass().getCanonicalName(), store).getBase( TestInterface.class);
+		this.base = RecordCore.fromStore( store.getClass().getCanonicalName(), store).getBase( TestInterface.class).getShardBase( RecordStoreTest.class.getSimpleName());
 		if(store instanceof MemoryRecordStore)
 		{
-			store.getDriver().createMigration( TestInterface.class, store).apply();
+			store.getDriver().createMigration( TestInterface.class, RecordStoreTest.class.getSimpleName(), store).apply();
 		}
 		this.primaryKey = base.createRecord().getPrimaryKey();
 	}
@@ -77,7 +77,7 @@ public class RecordStoreTest extends Assert
 	@BeforeClass
 	public static void createTables() throws Exception
 	{
-		TestServer.buildTestTables();
+		TestServer.buildTestTables(TestInterface.class, RecordStoreTest.class.getSimpleName());
 	}
 	
 	@Parameterized.Parameters
@@ -93,7 +93,7 @@ public class RecordStoreTest extends Assert
 	@AfterClass
 	public static void destroyTables() throws Exception
 	{
-		TestServer.destroyTestTables();
+		TestServer.destroyTestTables(TestInterface.class, RecordStoreTest.class.getSimpleName());
 	}
 	
 	@Test

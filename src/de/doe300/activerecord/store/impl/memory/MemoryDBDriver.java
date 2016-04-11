@@ -58,6 +58,12 @@ public enum MemoryDBDriver implements DBDriver
 	}
 
 	@Override
+	public Migration createMigration(Class<? extends ActiveRecord> recordType, String storeName, RecordStore store )
+	{
+		return new MemoryMigration((MemoryRecordStore) store, recordType, storeName);
+	}
+	
+	@Override
 	public Migration createMigration( String storeName, Map<String, Class<?>> columns, RecordStore store )
 	{
 		return new MemoryMigration((MemoryRecordStore)store, storeName, columns.entrySet().stream().map(

@@ -89,7 +89,13 @@ public class EncryptionHandler implements ProxyHandler
 					}
 					if(String.class.isAssignableFrom( method.getReturnType()))
 					{
-						return new String(decryptedValue);
+						//if we return as string, remove all trailing '\0' (zero-bytes) since they most likely are padding
+						int lastIndex = decryptedValue.length;
+						while(lastIndex > 0 && decryptedValue[lastIndex-1] == '\0')
+						{
+							--lastIndex;
+						}
+						return new String(decryptedValue, 0, lastIndex);
 					}
 					else if(method.getReturnType().isArray() && Byte.TYPE.isAssignableFrom( method.getReturnType().getComponentType()))
 					{

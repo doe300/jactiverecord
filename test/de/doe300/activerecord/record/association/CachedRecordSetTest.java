@@ -30,6 +30,7 @@ import de.doe300.activerecord.TestServer;
 import de.doe300.activerecord.dsl.Comparison;
 import de.doe300.activerecord.dsl.SimpleCondition;
 import de.doe300.activerecord.scope.Scope;
+import org.junit.AfterClass;
 import org.junit.Assert;
 import org.junit.BeforeClass;
 import org.junit.Test;
@@ -48,8 +49,8 @@ public class CachedRecordSetTest extends Assert
 	@BeforeClass
 	public static void createTables() throws Exception
 	{
-		TestServer.buildTestTables();
-		base = TestServer.getTestCore().getBase( TestInterface.class );
+		TestServer.buildTestTables(TestInterface.class, CachedRecordSetTest.class.getSimpleName());
+		base = TestServer.getTestCore().getBase( TestInterface.class ).getShardBase( CachedRecordSetTest.class.getSimpleName());
 		set = new CachedRecordSet<>(new TableSet<TestInterface>(base, null ));
 		
 		//fill set
@@ -60,6 +61,12 @@ public class CachedRecordSetTest extends Assert
 		a3.setName( "Hans");
 		a4 = base.createRecord();
 		a5 = base.createRecord();
+	}
+	
+	@AfterClass
+	public static void dropTables() throws Exception
+	{
+		TestServer.destroyTestTables(TestInterface.class, CachedRecordSetTest.class.getSimpleName());
 	}
 	
 	public CachedRecordSetTest()

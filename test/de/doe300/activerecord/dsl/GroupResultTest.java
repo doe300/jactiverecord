@@ -47,8 +47,8 @@ public class GroupResultTest extends Assert
 	@BeforeClass
 	public static void createTables() throws Exception
 	{
-		TestServer.buildTestTables();
-		base = TestServer.getTestCore().getBase(TestInterface.class);
+		TestServer.buildTestTables(TestInterface.class, GroupResultTest.class.getSimpleName());
+		base = TestServer.getTestCore().getBase(TestInterface.class).getShardBase( GroupResultTest.class.getSimpleName());
 		TestInterface t = base.createRecord();
 		t.setName( "Adam5");
 		t.setAge( 145);
@@ -63,7 +63,7 @@ public class GroupResultTest extends Assert
 	@AfterClass
 	public static void destroyTables() throws Exception
 	{
-		TestServer.destroyTestTables();
+		TestServer.destroyTestTables(TestInterface.class, GroupResultTest.class.getSimpleName());
 	}
 	
 	@Test

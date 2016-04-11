@@ -148,6 +148,7 @@ public abstract class RecordBase<T extends ActiveRecord> implements ReadOnlyReco
 		}
 		if(!shards.containsKey( shardTable))
 		{
+			Logging.getLogger().info( recordType.getSimpleName(), "Created new table-shard: " + shardTable);
 			final RecordBase<T> shardBase = createShardBase( shardTable );
 			shards.put( shardTable, shardBase);
 		}

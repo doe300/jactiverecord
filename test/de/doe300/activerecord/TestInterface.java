@@ -26,8 +26,6 @@ package de.doe300.activerecord;
 
 import de.doe300.activerecord.record.association.AssociationHelper;
 import de.doe300.activerecord.migration.Attribute;
-import de.doe300.activerecord.migration.constraints.Index;
-import de.doe300.activerecord.migration.constraints.IndexType;
 import de.doe300.activerecord.record.RecordType;
 import de.doe300.activerecord.record.RecordCallbacks;
 import de.doe300.activerecord.record.Searchable;
@@ -46,13 +44,12 @@ import java.util.stream.Stream;
  * @author doe300
  */
 @Searchable(searchableColumns = {"name", "age"})
-@RecordType(typeName = "TESTTABLE", primaryKey = "id", defaultColumns = {"id", "name", "age"}, autoCreate = true)
+@RecordType(typeName = "TESTTABLE", primaryKey = "id", defaultColumns = {"id", "name", "age"})
 @Validates({
 	@Validate(attribute = "age", type = ValidationType.POSITIVE),
 	@Validate(attribute = "name", type = ValidationType.NOT_NULL),
 	@Validate(attribute = "name", type = ValidationType.NOT_EMPTY)
 })
-@Index(type = IndexType.DEFAULT, name = "fk_other", columns = {"other"})
 public interface TestInterface extends TimestampedRecord, ValidatedRecord, RecordCallbacks
 {
 	public String getName();
@@ -64,7 +61,7 @@ public interface TestInterface extends TimestampedRecord, ValidatedRecord, Recor
 	
 	public void setAge(int age);
 
-	@Attribute(name = "fk_test_id")
+	@Attribute(name = "fk_test_id", type = Integer.class)
 	public default TestInterface getDirectionOne()
 	{
 		return AssociationHelper.getBelongsTo(this, TestInterface.class, "fk_test_id" );

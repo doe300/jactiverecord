@@ -52,16 +52,16 @@ public class MapHandlerTest extends Assert
 	@BeforeClass
 	public static void createTables() throws Exception
 	{
-		TestServer.buildTestTables();
+		TestServer.buildTestTables(TestMapInterface.class, MapHandlerTest.class.getSimpleName());
 		handler = new MapHandler();
-		base = TestServer.getTestCore().getBase( TestMapInterface.class, handler);
+		base = TestServer.getTestCore().getBase( TestMapInterface.class, handler).getShardBase( MapHandlerTest.class.getSimpleName());
 		record = base.createRecord();
 	}
 	
 	@AfterClass
 	public static void destroyTables() throws Exception
 	{
-		TestServer.destroyTestTables();
+		TestServer.destroyTestTables(TestMapInterface.class, MapHandlerTest.class.getSimpleName());
 	}
 	
 	@Test

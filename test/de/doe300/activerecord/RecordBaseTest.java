@@ -61,32 +61,32 @@ public class RecordBaseTest<T extends TestInterface> extends Assert
 	
 	//FIXME validations fail for simple jdbc record-store / memory store /anything without cache??)
 	
-	public RecordBaseTest(Class<T> type, RecordBase<T> base) throws SQLException
+	public RecordBaseTest(Class<T> type) throws SQLException
 	{
 		this.type = type;
-		this.base = base;
+		this.base = TestServer.getTestCore().getBase( type).getShardBase( RecordBaseTest.class.getSimpleName());
 	}
 	
 	@Parameterized.Parameters
 	public static Collection<Object[]> getParameters() throws SQLException
 	{
 		return Arrays.asList(
-			new Object[]{TestInterface.class, TestServer.getTestCore().getBase( TestInterface.class )},
-			new Object[]{TestPOJO.class, TestServer.getTestCore().getBase( TestPOJO.class )},
-			new Object[]{TestSingleInheritancePOJO.class, TestServer.getTestCore().getBase( TestSingleInheritancePOJO.class )}
+			new Object[]{TestInterface.class},
+			new Object[]{TestPOJO.class},
+			new Object[]{TestSingleInheritancePOJO.class}
 		);
 	}
 	
 	@BeforeClass
 	public static void createTables() throws Exception
 	{
-		TestServer.buildTestTables();
+		TestServer.buildTestTables(TestInterface.class, RecordBaseTest.class.getSimpleName());
 	}
 	
 	@AfterClass
 	public static void destroyTables() throws Exception
 	{
-		TestServer.destroyTestTables();
+		TestServer.destroyTestTables(TestInterface.class, RecordBaseTest.class.getSimpleName());
 	}
 	
 	@Test
@@ -110,7 +110,7 @@ public class RecordBaseTest<T extends TestInterface> extends Assert
 	@Test
 	public void testGetTableName()
 	{
-		assertEquals(type.getAnnotation(RecordType.class).typeName(), base.getTableName());
+		assertEquals(RecordBaseTest.class.getSimpleName(), base.getTableName());
 	}
 
 	@Test
@@ -450,7 +450,7 @@ public class RecordBaseTest<T extends TestInterface> extends Assert
 	@Test
 	public void testIsAutoCreate()
 	{
-		assertFalse( base.isAutoCreate());
+		assertFalse(base.isAutoCreate());
 	}
 
 	@Test

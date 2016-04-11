@@ -50,7 +50,14 @@ public class ProfilingRecordBase<T extends ActiveRecord> extends RecordBase<T>
 
 	public ProfilingRecordBase( final RecordBase<T> otherBase )
 	{
-		super( null, null, null );
+		super( otherBase.getRecordType(), otherBase.getCore(), otherBase.getStore() );
+		this.otherBase = otherBase;
+		this.profiler = new Profiler(40);
+	}
+	
+	public ProfilingRecordBase( final RecordBase<T> otherBase, final String tableName)
+	{
+		super( otherBase, tableName);
 		this.otherBase = otherBase;
 		this.profiler = new Profiler(40);
 	}
@@ -68,9 +75,9 @@ public class ProfilingRecordBase<T extends ActiveRecord> extends RecordBase<T>
 	}
 
 	@Override
-	protected RecordBase<T> createShardBase( String shardTable )
+	protected ProfilingRecordBase<T> createShardBase( String shardTable )
 	{
-		return profiler.profile( "createShard", () -> otherBase.getShardBase( shardTable));
+		return profiler.profile( "createShard", () -> new ProfilingRecordBase<>(this, shardTable));
 	}
 
 	@Override

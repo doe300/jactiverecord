@@ -28,6 +28,7 @@ import de.doe300.activerecord.dsl.Condition;
 import de.doe300.activerecord.dsl.Order;
 import de.doe300.activerecord.scope.Scope;
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.Map;
@@ -163,6 +164,10 @@ class MemoryTable
 	@Nonnull
 	public Map<String, Object> getValues(@Nonnegative int primaryKey, @Nonnull final String[] columnNames)
 	{
+		if(!data.containsKey( primaryKey))
+		{
+			return Collections.emptyMap();
+		}
 		Map<String, Object> values = new HashMap<>(columnNames.length);
 		for(String columnName : columnNames)
 		{
@@ -278,6 +283,8 @@ class MemoryTable
 				while(rowKeys.hasNext())
 				{
 					currentRow = rowKeys.next();
+					//FIXME fails to throw exception if column in condition is not in map
+					//but how to test??
 					if(cond == null || cond.test( currentRow.getValue().getRowMap()))
 					{
 						action.accept( currentRow );

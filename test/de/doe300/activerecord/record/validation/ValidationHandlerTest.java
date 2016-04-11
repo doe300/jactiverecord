@@ -50,14 +50,14 @@ public class ValidationHandlerTest extends Assert
 	@BeforeClass
 	public static void createTables() throws Exception
 	{
-		TestServer.buildTestTables();
-		base = TestServer.getTestCore().getBase(TestInterface.class);
+		TestServer.buildTestTables(TestInterface.class, ValidationHandlerTest.class.getSimpleName());
+		base = TestServer.getTestCore().getBase(TestInterface.class).getShardBase( ValidationHandlerTest.class.getSimpleName());
 	}
 	
 	@AfterClass
 	public static void destroyTables() throws Exception
 	{
-		TestServer.destroyTestTables();
+		TestServer.destroyTestTables(TestInterface.class, ValidationHandlerTest.class.getSimpleName());
 	}
 
 	@Test

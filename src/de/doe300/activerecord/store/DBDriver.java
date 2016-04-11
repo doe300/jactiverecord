@@ -24,6 +24,7 @@
  */
 package de.doe300.activerecord.store;
 
+import de.doe300.activerecord.RecordBase;
 import javax.annotation.Nonnull;
 import javax.annotation.concurrent.Immutable;
 
@@ -64,6 +65,22 @@ public interface DBDriver
 	 */
 	@Nonnull
 	public Migration createMigration(@Nonnull final Class<? extends ActiveRecord> recordType, @Nonnull final RecordStore store);
+	
+	/**
+	 * This method is used to create and return a implementation-specific
+	 * migration to create/update/drop a data-store for the given record-type.
+	 * 
+	 * NOTE: This method can be used to create migrations for {@link RecordBase#getShardBase(java.lang.String) shards}
+	 *
+	 * @param recordType
+	 * @param storeName the name of the record-store
+	 * @param store 
+	 * @return a new automatic-migration for the given record-type
+	 * @since 0.7
+	 * @see #createMigration(java.lang.Class, de.doe300.activerecord.store.RecordStore) 
+	 */
+	@Nonnull
+	public Migration createMigration(@Nonnull final Class<? extends ActiveRecord> recordType, @Nonnull final String storeName, @Nonnull final RecordStore store);
 	
 	/**
 	 * Creates a new migration to create, update or drop a manually created table

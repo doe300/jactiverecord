@@ -174,7 +174,7 @@ public class SimpleJDBCRecordStore implements JDBCRecordStore
 				}
 				else
 				{
-					mig = new AutomaticMigration(base.getRecordType(), con, driver);
+					mig = new AutomaticMigration(base.getRecordType(), base.getTableName(), con, driver);
 				}
 				try
 				{
