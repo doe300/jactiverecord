@@ -47,7 +47,7 @@ public class QueryResultTest extends Assert
 	@BeforeClass
 	public static void createTables() throws Exception
 	{
-		TestServer.buildTestTables(TestInterface.class, QueryResultTest.class.getSimpleName());
+		TestServer.buildTestTable(TestInterface.class, QueryResultTest.class.getSimpleName());
 		base = TestServer.getTestCore().getBase( TestInterface.class).getShardBase( QueryResultTest.class.getSimpleName());
 		TestInterface i = base.createRecord();
 		i.setName( "Alfons");
@@ -63,7 +63,7 @@ public class QueryResultTest extends Assert
 	@AfterClass
 	public static void destroyTables() throws Exception
 	{
-		TestServer.destroyTestTables(TestInterface.class, QueryResultTest.class.getSimpleName());
+		TestServer.destroyTestTable(TestInterface.class, QueryResultTest.class.getSimpleName());
 	}
 	
 	@Test

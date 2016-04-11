@@ -59,10 +59,10 @@ public class HasManyAssociationSetTest extends Assert
 	@BeforeClass
 	public static void createTables() throws Exception
 	{
-		TestServer.buildTestTables();
-		base = TestServer.getTestCore().getBase( TestInterface.class );
+		TestServer.buildTestTable(TestInterface.class, HasManyAssociationSetTest.class.getSimpleName());
+		base = TestServer.getTestCore().getBase( TestInterface.class ).getShardBase( HasManyAssociationSetTest.class.getSimpleName());
 		assocI = base.createRecord();
-		set = AssociationHelper.getHasManySet( assocI, TestInterface.class, "fk_test_id" );
+		set = AssociationHelper.getHasManySet( assocI, base, "fk_test_id" );
 		
 		//fill set
 		a1 = base.createRecord();
@@ -80,7 +80,7 @@ public class HasManyAssociationSetTest extends Assert
 	@AfterClass
 	public static void destroyTables() throws Exception
 	{
-		TestServer.destroyTestTables();
+		TestServer.destroyTestTable(TestInterface.class, HasManyAssociationSetTest.class.getSimpleName());;
 	}
 	
 	@Before

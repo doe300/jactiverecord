@@ -60,7 +60,7 @@ public class ProfilingRecordStoreTest extends Assert
 	{
 		this.name = name;
 		this.recordStore = new ProfilingRecordStore(store );
-		base = new ProfilingRecordBase<>(RecordCore.fromStore( name, recordStore ).getBase( TestInterface.class));
+		base = ( ProfilingRecordBase<TestInterface> ) new ProfilingRecordBase<>(RecordCore.fromStore( name, recordStore ).getBase( TestInterface.class)).getShardBase( ProfilingRecordStoreTest.class.getSimpleName());
 		if(store instanceof MemoryRecordStore)
 		{
 			base.getCore().createTable( TestInterface.class);

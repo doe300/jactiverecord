@@ -182,6 +182,22 @@ public final class AssociationHelper
 		@Nonnull final Class<T> type, @Nonnull final String foreignKeyColumn)
 	{
 		final RecordBase<T> base = record.getBase().getCore().getBase( type);
+		return getHasManySet( record, base, foreignKeyColumn);
+	}
+	
+	/**
+	 * This given <code>record</code> has many associated records having this record's primary-key in the column specified in <code>foreignKeyColumn</code>
+	 * @param <T>
+	 * @param record
+	 * @param base
+	 * @param foreignKeyColumn the name of the column of the other model holding the primary key
+	 * @return the associated records as modifiable set
+	 * @since 0.7
+	 */
+	@Nonnull
+	public static <T extends ActiveRecord> RecordSet<T> getHasManySet(@Nonnull final ActiveRecord record,
+		@Nonnull final RecordBase<T> base, @Nonnull final String foreignKeyColumn)
+	{
 		final Condition cond = new SimpleCondition(foreignKeyColumn, record.getPrimaryKey(), Comparison.IS);
 		final Consumer<T> setAssoc = (final T t) -> base.getStore().setValue( base, t.getPrimaryKey(), foreignKeyColumn, record.getPrimaryKey() );
 		final Consumer<T> unsetAssoc = (final T t) -> base.getStore().setValue( base, t.getPrimaryKey(), foreignKeyColumn, null );
@@ -281,6 +297,25 @@ public final class AssociationHelper
 		@Nonnull final String thisForeignKeyColumn, @Nonnull final String otherForeignKeyColumn)
 	{
 		final RecordBase<T> otherBase = record.getBase().getCore().getBase( type );
+		return getHasManyThroughSet( record, otherBase, associationTable, thisForeignKeyColumn, otherForeignKeyColumn);
+	}
+	
+	/**
+	 * This helper is used to retrieve all associated records of the other model defined by <code>type</code> in a has-many through (the <code>associationTable</code>) association.
+	 * @param <T>
+	 * @param record
+	 * @param otherBase the base of the other model
+	 * @param associationTable the table storing pairs of foreign keys to both models
+	 * @param thisForeignKeyColumn the name of the column in the <code>associationTable</code> storing the foreign key to <code>record</code>
+	 * @param otherForeignKeyColumn the name of the column in the <code>associationTable</code> storing the foreign key to the other model defined by <code>type</code>
+	 * @return all matching associations as a modifiable Set
+	 * @since 0.7
+	 */
+	@Nonnull
+	public static <T extends ActiveRecord> RecordSet<T> getHasManyThroughSet(@Nonnull final ActiveRecord record,
+		@Nonnull final RecordBase<T> otherBase, @Nonnull final String associationTable,
+		@Nonnull final String thisForeignKeyColumn, @Nonnull final String otherForeignKeyColumn)
+	{
 		return new HasManyThroughAssociationSet<T>(otherBase, record.getPrimaryKey(), otherBase.getDefaultOrder(), associationTable, thisForeignKeyColumn,otherForeignKeyColumn);
 	}
 

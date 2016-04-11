@@ -49,7 +49,7 @@ public class CachedRecordSetTest extends Assert
 	@BeforeClass
 	public static void createTables() throws Exception
 	{
-		TestServer.buildTestTables(TestInterface.class, CachedRecordSetTest.class.getSimpleName());
+		TestServer.buildTestTable(TestInterface.class, CachedRecordSetTest.class.getSimpleName());
 		base = TestServer.getTestCore().getBase( TestInterface.class ).getShardBase( CachedRecordSetTest.class.getSimpleName());
 		set = new CachedRecordSet<>(new TableSet<TestInterface>(base, null ));
 		
@@ -66,7 +66,7 @@ public class CachedRecordSetTest extends Assert
 	@AfterClass
 	public static void dropTables() throws Exception
 	{
-		TestServer.destroyTestTables(TestInterface.class, CachedRecordSetTest.class.getSimpleName());
+		TestServer.destroyTestTable(TestInterface.class, CachedRecordSetTest.class.getSimpleName());
 	}
 	
 	public CachedRecordSetTest()

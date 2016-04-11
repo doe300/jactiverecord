@@ -48,14 +48,14 @@ public class RecordCoreTest extends Assert
 	@BeforeClass
 	public static void createTables() throws Exception
 	{
-		TestServer.buildTestTables(TestInterface.class, RecordCoreTest.class.getSimpleName());
+		TestServer.buildTestTable(TestInterface.class, RecordCoreTest.class.getSimpleName());
 		core = TestServer.getTestCore();
 	}
 	
 	@AfterClass
 	public static void destroyTables() throws Exception
 	{
-		TestServer.destroyTestTables(TestInterface.class, RecordCoreTest.class.getSimpleName());
+		TestServer.destroyTestTable(TestInterface.class, RecordCoreTest.class.getSimpleName());
 		core.close();
 	}
 	

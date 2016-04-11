@@ -43,6 +43,7 @@ import org.junit.Test;
 
 public class HasManyThroughConditionTest extends Assert
 {
+	private static final String mappingTable = "mappingTable" + HasManyThroughConditionTest.class.getSimpleName();
 	private static RecordBase<TestInterface> base;
 	private static TestInterface t1, t2, t3;
 	private static Condition cond1, cond2, cond3;
@@ -54,9 +55,10 @@ public class HasManyThroughConditionTest extends Assert
 	@BeforeClass
 	public static void createTables() throws Exception
 	{
-		TestServer.buildTestTables();
+		TestServer.buildTestMappingTable( mappingTable );
+		TestServer.buildTestTable(TestInterface.class, HasManyThroughConditionTest.class.getSimpleName());
 		
-		base = TestServer.getTestCore().getBase( TestInterface.class);
+		base = TestServer.getTestCore().getBase( TestInterface.class).getShardBase( HasManyThroughConditionTest.class.getSimpleName());
 		t1 = base.createRecord();
 		t1.setName( "123Name1");
 		t1.setAge( -912);
@@ -67,22 +69,23 @@ public class HasManyThroughConditionTest extends Assert
 		t3.setName( "123Name4");
 		t3.setAge( -913);
 		//associations
-		base.getStore().addRow( "mappingTable", new String[]{"fk_test1", "fk_test2"}, new Object[]{t1.getPrimaryKey(), t2.getPrimaryKey()} );
-		base.getStore().addRow( "mappingTable", new String[]{"fk_test1", "fk_test2"}, new Object[]{t2.getPrimaryKey(), t3.getPrimaryKey()} );
-		base.getStore().addRow( "mappingTable", new String[]{"fk_test1", "fk_test2"}, new Object[]{t3.getPrimaryKey(), t3.getPrimaryKey()} );
+		base.getStore().addRow( mappingTable, new String[]{"fk_test1", "fk_test2"}, new Object[]{t1.getPrimaryKey(), t2.getPrimaryKey()} );
+		base.getStore().addRow( mappingTable, new String[]{"fk_test1", "fk_test2"}, new Object[]{t2.getPrimaryKey(), t3.getPrimaryKey()} );
+		base.getStore().addRow( mappingTable, new String[]{"fk_test1", "fk_test2"}, new Object[]{t3.getPrimaryKey(), t3.getPrimaryKey()} );
 		
 		//has no entries
-		cond1 = new HasManyThroughCondition(base, "mappingTable", "fk_test1", "fk_test2", "id", base, new SimpleCondition("age", 200, Comparison.IS));
+		cond1 = new HasManyThroughCondition(base, mappingTable, "fk_test1", "fk_test2", "id", base, new SimpleCondition("age", 200, Comparison.IS));
 		//matches all
-		cond2 = new HasManyThroughCondition(base, "mappingTable", "fk_test1", "fk_test2", "id", base, new SimpleCondition("name", null, Comparison.IS_NOT_NULL));
+		cond2 = new HasManyThroughCondition(base, mappingTable, "fk_test1", "fk_test2", "id", base, new SimpleCondition("name", null, Comparison.IS_NOT_NULL));
 		//matches t2 and t3
-		cond3 = new HasManyThroughCondition(base, "mappingTable", "fk_test1", "fk_test2", "id", base, new SimpleCondition("name", "123Name4", Comparison.IS));
+		cond3 = new HasManyThroughCondition(base, mappingTable, "fk_test1", "fk_test2", "id", base, new SimpleCondition("name", "123Name4", Comparison.IS));
 	}
 	
 	@AfterClass
 	public static void destroyTables() throws Exception
 	{
-		TestServer.destroyTestTables();
+		TestServer.destroyTestTable(TestInterface.class, HasManyThroughConditionTest.class.getSimpleName());
+		TestServer.destroyTestMappingTable( mappingTable);
 	}
 
 	@Test

@@ -36,6 +36,8 @@ import java.sql.Driver;
 import java.sql.DriverManager;
 import java.sql.SQLException;
 import java.util.Enumeration;
+import java.util.HashMap;
+import java.util.Map;
 import javax.annotation.Nonnull;
 import org.junit.Assert;
 
@@ -131,9 +133,17 @@ public class TestServer extends Assert
 		new MigrationTest().testApply();
 	}
 	
-	public static void buildTestTables(@Nonnull final Class<? extends ActiveRecord> type, @Nonnull final String tableName) throws SQLException, Exception
+	public static void buildTestMappingTable(@Nonnull final String tableName) throws Exception
 	{
-		Assert.assertTrue( TestServer.getTestCore().getStore().getDriver().createMigration( type, tableName, TestServer.getTestCore().getStore() ).apply());
+		Map<String, Class<?>> columns = new HashMap<>(2);
+		columns.put( "fk_test1", Integer.class);
+		columns.put( "fk_test2", Integer.class);
+		getTestCore().getStore().getDriver().createMigration( tableName, columns, getTestCore().getStore()).apply();
+	}
+	
+	public static void buildTestTable(@Nonnull final Class<? extends ActiveRecord> type, @Nonnull final String tableName) throws SQLException, Exception
+	{
+		Assert.assertTrue( getTestCore().getStore().getDriver().createMigration( type, tableName, getTestCore().getStore() ).apply());
 	}
 	
 	@Deprecated
@@ -142,9 +152,17 @@ public class TestServer extends Assert
 		new MigrationTest().testRevert();
 	}
 	
-	public static void destroyTestTables(@Nonnull final Class<? extends ActiveRecord> type, @Nonnull final String tableName) throws SQLException, Exception
+	public static void destroyTestMappingTable(@Nonnull final String tableName) throws Exception
 	{
-		Assert.assertTrue( TestServer.getTestCore().getStore().getDriver().createMigration( type, tableName, TestServer.getTestCore().getStore() ).revert());
+		Map<String, Class<?>> columns = new HashMap<>(2);
+		columns.put( "fk_test1", Integer.class);
+		columns.put( "fk_test2", Integer.class);
+		getTestCore().getStore().getDriver().createMigration( tableName, columns, getTestCore().getStore()).revert();
+	}
+	
+	public static void destroyTestTable(@Nonnull final Class<? extends ActiveRecord> type, @Nonnull final String tableName) throws SQLException, Exception
+	{
+		Assert.assertTrue( getTestCore().getStore().getDriver().createMigration( type, tableName, getTestCore().getStore() ).revert());
 	}
 	
 	static void printMetaData(Connection con) throws SQLException

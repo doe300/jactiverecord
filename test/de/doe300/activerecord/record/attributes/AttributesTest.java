@@ -54,14 +54,14 @@ public class AttributesTest
 	@BeforeClass
 	public static void createTables() throws Exception
 	{
-		TestServer.buildTestTables();
-		base = TestServer.getTestCore().getBase( TestInterface.class);
+		TestServer.buildTestTable(TestInterface.class, AttributesTest.class.getSimpleName());
+		base = TestServer.getTestCore().getBase( TestInterface.class).getShardBase( AttributesTest.class.getSimpleName());
 	}
 	
 	@AfterClass
 	public static void destroyTables() throws Exception
 	{
-		TestServer.destroyTestTables();
+		TestServer.destroyTestTable(TestInterface.class, AttributesTest.class.getSimpleName());
 	}
 
 	@Test

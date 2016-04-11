@@ -53,7 +53,7 @@ public class HasOneConditionTest
 	@BeforeClass
 	public static void createTables() throws Exception
 	{
-		TestServer.buildTestTables(TestInterface.class, HasOneConditionTest.class.getSimpleName());
+		TestServer.buildTestTable(TestInterface.class, HasOneConditionTest.class.getSimpleName());
 		
 		base = TestServer.getTestCore().getBase( TestInterface.class).getShardBase( HasOneConditionTest.class.getSimpleName());
 		t1 = base.createRecord();
@@ -82,7 +82,7 @@ public class HasOneConditionTest
 	@AfterClass
 	public static void destroyTables() throws Exception
 	{
-		TestServer.destroyTestTables(TestInterface.class, HasOneConditionTest.class.getSimpleName());
+		TestServer.destroyTestTable(TestInterface.class, HasOneConditionTest.class.getSimpleName());
 	}
 	
 	public HasOneConditionTest()

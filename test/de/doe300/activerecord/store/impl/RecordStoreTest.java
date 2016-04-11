@@ -77,7 +77,7 @@ public class RecordStoreTest extends Assert
 	@BeforeClass
 	public static void createTables() throws Exception
 	{
-		TestServer.buildTestTables(TestInterface.class, RecordStoreTest.class.getSimpleName());
+		TestServer.buildTestTable(TestInterface.class, RecordStoreTest.class.getSimpleName());
 	}
 	
 	@Parameterized.Parameters
@@ -93,7 +93,7 @@ public class RecordStoreTest extends Assert
 	@AfterClass
 	public static void destroyTables() throws Exception
 	{
-		TestServer.destroyTestTables(TestInterface.class, RecordStoreTest.class.getSimpleName());
+		TestServer.destroyTestTable(TestInterface.class, RecordStoreTest.class.getSimpleName());
 	}
 	
 	@Test

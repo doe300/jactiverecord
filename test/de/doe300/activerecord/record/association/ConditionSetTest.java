@@ -65,7 +65,7 @@ public class ConditionSetTest extends Assert
 	@BeforeClass
 	public static void createTables() throws Exception
 	{
-		TestServer.buildTestTables(TestInterface.class, ConditionSetTest.class.getSimpleName());
+		TestServer.buildTestTable(TestInterface.class, ConditionSetTest.class.getSimpleName());
 		base = TestServer.getTestCore().getBase( TestInterface.class ).getShardBase( ConditionSetTest.class.getSimpleName());
 		set = AssociationHelper.getConditionSet( base, "age", 23, 12);
 		
@@ -87,7 +87,7 @@ public class ConditionSetTest extends Assert
 	@AfterClass
 	public static void destroyTables() throws Exception
 	{
-		TestServer.destroyTestTables(TestInterface.class, ConditionSetTest.class.getSimpleName());
+		TestServer.destroyTestTable(TestInterface.class, ConditionSetTest.class.getSimpleName());
 	}
 	
 	@Before

@@ -47,6 +47,7 @@ import org.junit.Test;
  */
 public class HasManyThroughAssociationSetTest extends Assert
 {
+	private static final String mappingTable = "hasManyThroughMappingTable";
 	private static RecordSet<TestInterface> set;
 	private static RecordBase<TestInterface> base;
 	private static TestInterface assocI;
@@ -60,19 +61,20 @@ public class HasManyThroughAssociationSetTest extends Assert
 	@BeforeClass
 	public static void setUpClass() throws Exception
 	{
-		TestServer.buildTestTables();
-		base = TestServer.getTestCore().getBase( TestInterface.class );
+		TestServer.buildTestMappingTable( mappingTable);
+		TestServer.buildTestTable(TestInterface.class, HasManyThroughAssociationSetTest.class.getSimpleName());
+		base = TestServer.getTestCore().getBase( TestInterface.class ).getShardBase( HasManyThroughAssociationSetTest.class.getSimpleName());
 		assocI = base.createRecord();
-		set = AssociationHelper.getHasManyThroughSet(assocI, TestInterface.class, "mappingTable", "fk_test1", "fk_test2" );
+		set = AssociationHelper.getHasManyThroughSet(assocI, base, mappingTable, "fk_test1", "fk_test2" );
 		
 		//fill set
 		a1 = base.createRecord();
-		AssociationHelper.addHasManyThrough( assocI, a1, "mappingTable", "fk_test1", "fk_test2");
+		AssociationHelper.addHasManyThrough( assocI, a1, mappingTable, "fk_test1", "fk_test2");
 		a2 = base.createRecord();
-		AssociationHelper.addHasManyThrough( assocI, a2, "mappingTable", "fk_test1", "fk_test2");
+		AssociationHelper.addHasManyThrough( assocI, a2, mappingTable, "fk_test1", "fk_test2");
 		a2.setName( "Hans");
 		a3 = base.createRecord();
-		AssociationHelper.addHasManyThrough( assocI, a3, "mappingTable", "fk_test1", "fk_test2");
+		AssociationHelper.addHasManyThrough( assocI, a3, mappingTable, "fk_test1", "fk_test2");
 		a3.setName( "Hans");
 		n1 = base.createRecord();
 		n2 = base.createRecord();
@@ -81,7 +83,8 @@ public class HasManyThroughAssociationSetTest extends Assert
 	@AfterClass
 	public static void tearDownClass() throws Exception
 	{
-		TestServer.destroyTestTables();
+		TestServer.destroyTestTable(TestInterface.class, HasManyThroughAssociationSetTest.class.getSimpleName());
+		TestServer.destroyTestMappingTable( mappingTable);
 	}
 
 	@Test

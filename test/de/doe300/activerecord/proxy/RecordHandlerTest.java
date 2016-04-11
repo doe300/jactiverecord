@@ -53,7 +53,7 @@ public class RecordHandlerTest extends Assert
 	@BeforeClass
 	public static void createTables() throws Exception
 	{
-		TestServer.buildTestTables(TestInterface.class, RecordHandlerTest.class.getSimpleName());
+		TestServer.buildTestTable(TestInterface.class, RecordHandlerTest.class.getSimpleName());
 		base = TestServer.getTestCore().getBase( TestInterface.class).getShardBase( RecordHandlerTest.class.getSimpleName());
 		testI = base.createRecord();
 		handler = new RecordHandler<TestInterface>(testI.getPrimaryKey(), base);
@@ -62,7 +62,7 @@ public class RecordHandlerTest extends Assert
 	@AfterClass
 	public static void destroyTables() throws Exception
 	{
-		TestServer.destroyTestTables(TestInterface.class, RecordHandlerTest.class.getSimpleName());
+		TestServer.destroyTestTable(TestInterface.class, RecordHandlerTest.class.getSimpleName());
 	}
 	
 	@Test

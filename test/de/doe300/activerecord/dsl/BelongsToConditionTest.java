@@ -48,7 +48,7 @@ public class BelongsToConditionTest extends Assert
 	@BeforeClass
 	public static void createTables() throws Exception
 	{
-		TestServer.buildTestTables(TestInterface.class, BelongsToConditionTest.class.getSimpleName());
+		TestServer.buildTestTable(TestInterface.class, BelongsToConditionTest.class.getSimpleName());
 		
 		base = TestServer.getTestCore().getBase( TestInterface.class).getShardBase( BelongsToConditionTest.class.getSimpleName());
 		t1 = base.createRecord();
@@ -76,7 +76,7 @@ public class BelongsToConditionTest extends Assert
 	@AfterClass
 	public static void destroyTables() throws Exception
 	{
-		TestServer.destroyTestTables(TestInterface.class, BelongsToConditionTest.class.getSimpleName());
+		TestServer.destroyTestTable(TestInterface.class, BelongsToConditionTest.class.getSimpleName());
 	}
 
 	public BelongsToConditionTest()

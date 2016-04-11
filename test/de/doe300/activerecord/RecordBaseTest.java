@@ -80,13 +80,13 @@ public class RecordBaseTest<T extends TestInterface> extends Assert
 	@BeforeClass
 	public static void createTables() throws Exception
 	{
-		TestServer.buildTestTables(TestInterface.class, RecordBaseTest.class.getSimpleName());
+		TestServer.buildTestTable(TestInterface.class, RecordBaseTest.class.getSimpleName());
 	}
 	
 	@AfterClass
 	public static void destroyTables() throws Exception
 	{
-		TestServer.destroyTestTables(TestInterface.class, RecordBaseTest.class.getSimpleName());
+		TestServer.destroyTestTable(TestInterface.class, RecordBaseTest.class.getSimpleName());
 	}
 	
 	@Test

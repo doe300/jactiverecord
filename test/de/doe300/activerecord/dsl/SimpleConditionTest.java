@@ -49,7 +49,7 @@ public class SimpleConditionTest extends Assert
 	@BeforeClass
 	public static void createTables() throws Exception
 	{
-		TestServer.buildTestTables( TestInterface.class, SimpleConditionTest.class.getSimpleName());
+		TestServer.buildTestTable( TestInterface.class, SimpleConditionTest.class.getSimpleName());
 		
 		base = TestServer.getTestCore().getBase( TestInterface.class).getShardBase( SimpleConditionTest.class.getSimpleName() );
 		t1 = base.createRecord();
@@ -67,7 +67,7 @@ public class SimpleConditionTest extends Assert
 	@AfterClass
 	public static void destroyTables() throws Exception
 	{
-		TestServer.destroyTestTables(TestInterface.class, SimpleConditionTest.class.getSimpleName());
+		TestServer.destroyTestTable(TestInterface.class, SimpleConditionTest.class.getSimpleName());
 	}
 	
 	protected Scope toScope(Condition cond)

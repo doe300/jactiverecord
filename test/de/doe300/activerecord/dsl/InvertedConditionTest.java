@@ -47,7 +47,7 @@ public class InvertedConditionTest extends Assert
 	@BeforeClass
 	public static void setUpClass() throws Exception
 	{
-		TestServer.buildTestTables(TestInterface.class, InvertedConditionTest.class.getSimpleName());
+		TestServer.buildTestTable(TestInterface.class, InvertedConditionTest.class.getSimpleName());
 		base = TestServer.getTestCore().getBase( TestInterface.class).getShardBase( InvertedConditionTest.class.getSimpleName());
 		t1 = base.createRecord();
 		t1.setName( "123Name1");
@@ -63,7 +63,7 @@ public class InvertedConditionTest extends Assert
 	@AfterClass
 	public static void destroyTables() throws Exception
 	{
-		TestServer.destroyTestTables(TestInterface.class, InvertedConditionTest.class.getSimpleName());
+		TestServer.destroyTestTable(TestInterface.class, InvertedConditionTest.class.getSimpleName());
 	}
 
 	@Test
