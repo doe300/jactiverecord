@@ -24,6 +24,7 @@
  */
 package de.doe300.activerecord.store;
 
+import de.doe300.activerecord.jdbc.driver.JDBCDriver;
 import java.sql.Connection;
 import javax.annotation.Nonnull;
 
@@ -40,4 +41,8 @@ public interface JDBCRecordStore extends RecordStore
 	 */
 	@Nonnull
 	public Connection getConnection();
+
+	@Override
+	@Nonnull
+	public JDBCDriver getDriver();
 }

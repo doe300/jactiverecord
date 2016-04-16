@@ -66,7 +66,15 @@ import javax.annotation.concurrent.Immutable;
 @Immutable
 public class JDBCDriver implements DBDriver
 {
+	/**
+	 * Default length for the string data-type
+	 */
 	public static final int STRING_TYPE_LENGTH = 4096;
+	
+	/**
+	 * Default unlimited limit for the number of host-parameters ("?") supported by the DBMS
+	 */
+	public static final long PARAMETERS_LIMIT_UNLIMITED = Long.MAX_VALUE;
 
 	// TODO move functions out of here
 	public static final String AGGREGATE_COUNT_ALL= "COUNT(*)";
@@ -550,6 +558,18 @@ public class JDBCDriver implements DBDriver
 			throw new IllegalArgumentException("RecordStore must beof type JDBCRecordStore!");
 		}
 		return new ManualMigration(applyCommand, updateCommand, revertCommand, ((JDBCRecordStore)store).getConnection());
+	}
+	
+	/**
+	 * Determines the maximum number of host-parameters ("?") supported by the DBMS.
+	 * Defaults to {@link #PARAMETERS_LIMIT_UNLIMITED} for unlimited number of host-parameters.
+	 * 
+	 * @return the maximum number of parameters
+	 * @since 0.7
+	 */
+	public long getParametersLimit()
+	{
+		return PARAMETERS_LIMIT_UNLIMITED;
 	}
 
 	/**

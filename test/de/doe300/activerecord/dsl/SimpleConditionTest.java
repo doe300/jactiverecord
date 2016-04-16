@@ -31,6 +31,9 @@ import de.doe300.activerecord.scope.Scope;
 import de.doe300.activerecord.dsl.functions.Absolute;
 import de.doe300.activerecord.dsl.functions.LowerCase;
 import java.util.Arrays;
+import java.util.List;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
 import org.junit.AfterClass;
 import org.junit.Assert;
 import org.junit.BeforeClass;
@@ -194,6 +197,16 @@ public class SimpleConditionTest extends Assert
 		assertSame( t1, base.findFirst( new SimpleCondition("age", Arrays.asList( -912,-913), Comparison.IN)));
 		//test SQL
 		assertEquals( (Integer)t1.getPrimaryKey(), base.getStore().findFirst( base, toScope( new SimpleCondition("age", new Integer[]{-912,-913}, Comparison.IN))));
+	}
+	
+	@Test
+	public void testLargeInCondition()
+	{
+		//only fails for SQLite
+		final List<Long> ids = Stream.iterate( 0L, (Long i) -> i+1).limit(10000).collect( Collectors.toList());
+		final Condition cond = new SimpleCondition("id", ids, Comparison.IN);
+		
+		assertEquals(base.getAll().size(), base.getForCondition( cond, null).size());
 	}
 	
 	@Test

@@ -72,18 +72,19 @@ class RowCache implements Comparable<RowCache>
 	 */
 	public synchronized Object setData(final String columnName, final Object value, final boolean updateValues)
 	{
+		final String columnLower = columnName.toLowerCase();
 		//we need to check for existence, to allow storing null-objects, for later checks
-		if(hasData( columnName ) && Objects.equals(getData( columnName.toLowerCase()), value))
+		if(hasData( columnName ) && Objects.equals(getData( columnLower), value))
 		{
 			return value;
 		}
 		if(updateValues)
 		{
-			modifiedData.put( columnName.toLowerCase(), value);
+			modifiedData.put( columnLower, value);
 			parent.setModified( this );
 			updateModifiedTimestamp();
 		}
-		return columnData.put( columnName.toLowerCase(), value );
+		return columnData.put( columnLower, value );
 	}
 
 	/**

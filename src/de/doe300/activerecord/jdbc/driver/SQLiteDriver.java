@@ -136,4 +136,11 @@ public class SQLiteDriver extends JDBCDriver
 		}
 		return super.getSQLFunction( sqlFunction, column );
 	}
+
+	@Override
+	public long getParametersLimit()
+	{
+		//see: https://sqlite.org/limits.html section 9
+		return 999;
+	}
 }

@@ -38,8 +38,11 @@ import de.doe300.activerecord.store.RecordStore;
 import de.doe300.activerecord.store.impl.CachedJDBCRecordStore;
 import de.doe300.activerecord.store.impl.SimpleJDBCRecordStore;
 import java.sql.PreparedStatement;
+import java.sql.ResultSet;
+import java.sql.SQLException;
 import java.util.HashMap;
 import java.util.Map;
+import org.junit.Assert;
 
 /**
  *
@@ -67,6 +70,8 @@ public class PerformanceComparison
 		testInsertRow( 1_000_000);
 		System.err.println( "" );
 		testUpdateRow( 1_000_000);
+		System.err.println( "" );
+		testResultSetTypes( 1_000_000);
 	}
 
 	private static void testInsertRow(final int numIterations) throws Exception
@@ -188,7 +193,7 @@ public class PerformanceComparison
 		System.err.println("simple RecordStore: " + recordStoreDuration + "ms (" + recordStoreDuration / (double) numIterations + ")");
 		core.dropTable( TestInterface.class);
 		
-		//7. cached JDBCRecordStore
+		//8. cached JDBCRecordStore
 		core.createTable( TestInterface.class);
 		final long startCachedRecordStore = System.currentTimeMillis();
 		final RecordBase<TestInterface> cachedBase = TestServer.getTestCore( CachedJDBCRecordStore.class).getBase( TestInterface.class);
@@ -321,5 +326,61 @@ public class PerformanceComparison
 		}
 		final long cachedRecordStoreDuration = System.currentTimeMillis() - startCachedRecordStore;
 		System.err.println("cached RecordStore: " + cachedRecordStoreDuration + "ms (" + cachedRecordStoreDuration / (double) numIterations + ")");
+	}
+	
+	private static void testResultSetTypes(final long numIterations) throws SQLException
+	{
+		System.err.println( "Query row: " + (numIterations - 1) );
+		final Connection con = ((JDBCRecordStore)core.getStore()).getConnection();
+		final String tableName = core.getBase( TestInterface.class).getTableName();
+		final String preparedSQL = "SELECT * FROM " +tableName + " WHERE id = ?";
+		
+		//1. "simple" prepared statement
+		final long startSimpleQuery = System.currentTimeMillis();
+		try(final PreparedStatement stmt = con.prepareStatement( preparedSQL))
+		{
+			for(int i = 1 ; i < numIterations; ++i)
+			{
+				stmt.setInt( 1, i);
+				try(final ResultSet set = stmt.executeQuery())
+				{
+					Assert.assertTrue( set.next());
+				}
+			}
+		}
+		final long simpleQueryDuration = System.currentTimeMillis() - startSimpleQuery;
+		System.err.println("simple Query: " + simpleQueryDuration + "ms (" + simpleQueryDuration / (double) numIterations + ")");
+		
+		//2. with result set type and concurrency set
+		final long startTypedQuery = System.currentTimeMillis();
+		try(final PreparedStatement stmt = con.prepareStatement( preparedSQL, ResultSet.TYPE_FORWARD_ONLY, ResultSet.CONCUR_READ_ONLY))
+		{
+			for(int i = 1 ; i < numIterations; ++i)
+			{
+				stmt.setInt( 1, i);
+				try(final ResultSet set = stmt.executeQuery())
+				{
+					Assert.assertTrue( set.next());
+				}
+			}
+		}
+		final long typedQueryDuration = System.currentTimeMillis() - startTypedQuery;
+		System.err.println("typed and concurrency Query: " + typedQueryDuration + "ms (" + typedQueryDuration / (double) numIterations + ")");
+		
+		//3. with additionally holdability set
+		final long startHoldabilityQuery = System.currentTimeMillis();
+		try(final PreparedStatement stmt = con.prepareStatement( preparedSQL, ResultSet.TYPE_FORWARD_ONLY, ResultSet.CONCUR_READ_ONLY, ResultSet.CLOSE_CURSORS_AT_COMMIT))
+		{
+			for(int i = 1 ; i < numIterations; ++i)
+			{
+				stmt.setInt( 1, i);
+				try(final ResultSet set = stmt.executeQuery())
+				{
+					Assert.assertTrue( set.next());
+				}
+			}
+		}
+		final long holdabilityDuration = System.currentTimeMillis() - startHoldabilityQuery;
+		System.err.println("additionally holdability Query: " + holdabilityDuration + "ms (" + holdabilityDuration / (double) numIterations + ")");
 	}
 }

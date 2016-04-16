@@ -60,7 +60,6 @@ import de.doe300.activerecord.migration.Migration;
 import de.doe300.activerecord.record.RecordType;
 import de.doe300.activerecord.record.TimestampedRecord;
 import de.doe300.activerecord.scope.Scope;
-import de.doe300.activerecord.store.DBDriver;
 import de.doe300.activerecord.store.JDBCRecordStore;
 
 /**
@@ -92,7 +91,8 @@ public class SimpleJDBCRecordStore implements JDBCRecordStore
 		this.driver = driver;
 	}
 
-	protected String toWhereClause(final Condition condition, String tableName)
+	@Nonnull
+	protected String toWhereClause(@Nullable final Condition condition, @Nullable String tableName)
 	{
 		if(condition==null)
 		{
@@ -103,7 +103,8 @@ public class SimpleJDBCRecordStore implements JDBCRecordStore
 		return clause;
 	}
 
-	protected Order toOrder(final RecordBase<?> base, final Scope scope)
+	@Nonnull
+	protected Order toOrder(@Nonnull final RecordBase<?> base, @Nonnull final Scope scope)
 	{
 		if(scope.getOrder()!=null)
 		{
@@ -112,6 +113,7 @@ public class SimpleJDBCRecordStore implements JDBCRecordStore
 		return base.getDefaultOrder();
 	}
 
+	@Nonnull
 	protected String toColumnsList(@Nonnull final String[] columns, @Nonnull final String primaryColumn, @Nullable final String tableName)
 	{
 		String tableID = tableName != null ? tableName + "." : "";
@@ -123,7 +125,27 @@ public class SimpleJDBCRecordStore implements JDBCRecordStore
 				.filter((final String col)-> !col.equalsIgnoreCase(primaryColumn))
 				.map( (String col) -> tableID + col).collect( Collectors.joining(", "));
 	}
-
+	
+	@Nonnull
+	@WillNotClose
+	protected ResultSet queryStatement(@Nonnull final String query, @Nullable final Condition cond) throws SQLException
+	{
+		if(cond != null && cond.hasWildcards())
+		{
+			if(cond.getValues().length > driver.getParametersLimit())
+			{
+				final String preparedQuery = StatementUtil.prepareStatment( query, cond );
+				return con.createStatement( ResultSet.TYPE_FORWARD_ONLY, ResultSet.CONCUR_READ_ONLY).executeQuery( preparedQuery );
+			}
+		}
+		final PreparedStatement stm = con.prepareStatement(query, ResultSet.TYPE_FORWARD_ONLY, ResultSet.CONCUR_READ_ONLY);
+		if(cond != null)
+		{
+			fillStatement( stm, cond );
+		}
+		return stm.executeQuery();
+	}
+	
 	protected void fillStatement(@Nonnull final PreparedStatement stm, @Nonnull final Condition condition)
 		throws SQLException
 	{
@@ -133,6 +155,10 @@ public class SimpleJDBCRecordStore implements JDBCRecordStore
 			if (values == null)
 			{
 				throw new IllegalArgumentException("Wildcard-Condition without any Arguments");
+			}
+			if(values.length > driver.getParametersLimit())
+			{
+				throw new IllegalArgumentException("Too many parameters in statement!");
 			}
 			for(int i=0;i<values.length;i++)
 			{
@@ -146,7 +172,8 @@ public class SimpleJDBCRecordStore implements JDBCRecordStore
 	 * @param input
 	 * @return the input in the correct case
 	 */
-	protected String convertIdentifier(final String input)
+	@Nonnull
+	protected String convertIdentifier(@Nonnull final String input)
 	{
 		return JDBCDriver.convertIdentifier( input, con );
 	}
@@ -159,7 +186,7 @@ public class SimpleJDBCRecordStore implements JDBCRecordStore
 	 * @param base
 	 * @throws IllegalStateException
 	 */
-	protected void checkTableExists(final RecordBase<?> base) throws IllegalStateException
+	protected void checkTableExists(@Nonnull final RecordBase<?> base) throws IllegalStateException
 	{
 		if(!exists( base.getTableName()))
 		{
@@ -241,7 +268,7 @@ public class SimpleJDBCRecordStore implements JDBCRecordStore
 	}
 
 	@Override
-	public DBDriver getDriver()
+	public JDBCDriver getDriver()
 	{
 		return driver;
 	}
@@ -362,9 +389,10 @@ public class SimpleJDBCRecordStore implements JDBCRecordStore
 		checkTableExists( base );
 		final String sql = "SELECT "+base.getPrimaryColumn()+" FROM "+base.getTableName()+" WHERE "+base.getPrimaryColumn()+" = "+primaryKey;
 		Logging.getLogger().debug( "JDBCStore", sql);
-		try(PreparedStatement stmt = con.prepareStatement( sql ))
+		try(final PreparedStatement stmt = con.prepareStatement( sql ); 
+				final ResultSet result = stmt.executeQuery())
 		{
-			return stmt.executeQuery().next();
+			return result.next();
 		}
 		catch ( final SQLException ex )
 		{
@@ -380,10 +408,10 @@ public class SimpleJDBCRecordStore implements JDBCRecordStore
 	{
 		checkTableExists( base );
 		final String sql = "DELETE FROM "+base.getTableName()+" WHERE "+base.getPrimaryColumn()+" = "+primaryKey;
-		try(Statement stm = con.createStatement())
+		try(final PreparedStatement stm = con.prepareStatement( sql ))
 		{
 			Logging.getLogger().debug( "JDBCStore", sql);
-			stm.executeUpdate( sql);
+			stm.executeUpdate();
 		}
 		catch ( final SQLException ex )
 		{
@@ -404,26 +432,19 @@ public class SimpleJDBCRecordStore implements JDBCRecordStore
 				+toWhereClause( scope.getCondition(), tableID )
 				+" ORDER BY "+toOrder( base, scope ).toSQL(driver)+" " + driver.getLimitClause( 0, 1);
 		Logging.getLogger().debug( "JDBCStore", sql);
-		try(PreparedStatement stm = con.prepareStatement(sql))
+		try (final ResultSet res = queryStatement( sql, scope.getCondition()))
 		{
-			if(scope.getCondition()!=null)
+			if (res.next())
 			{
-				fillStatement( stm, scope.getCondition() );
-			}
-			try (final ResultSet res = stm.executeQuery())
-			{
-				if (res.next())
+				final Map<String, Object> values = new HashMap<>(columns.length);
+				for (final String column : columns)
 				{
-					final Map<String, Object> values = new HashMap<>(columns.length);
-					for (final String column : columns)
-					{
-						values.put(column, res.getObject(column));
-					}
-					return values;
+					values.put(column, res.getObject(column));
 				}
-				Logging.getLogger().debug("JDBCStore", "No matching rows found");
-				return Collections.emptyMap();
+				return values;
 			}
+			Logging.getLogger().debug("JDBCStore", "No matching rows found");
+			return Collections.emptyMap();
 		}
 		catch ( final SQLException ex )
 		{
@@ -442,22 +463,14 @@ public class SimpleJDBCRecordStore implements JDBCRecordStore
 		final String sql = "SELECT " + driver.getSQLFunction( JDBCDriver.AGGREGATE_COUNT_ALL, base.getPrimaryColumn())+ " as size FROM "+base.getTableName()+" AS "+tableID+toWhereClause( condition, tableID );
 		Logging.getLogger().debug( "JDBCStore", sql);
 		//column name can't be count, because its a keyword
-		try(PreparedStatement stm = con.prepareStatement(sql))
+		try (final ResultSet res = queryStatement( sql, condition ))
 		{
-			if(condition!=null)
+			if (res.next())
 			{
-				fillStatement( stm, condition );
+				return res.getInt("size");
 			}
-			try (final ResultSet res = stm.executeQuery())
-			{
-				if (res.next())
-				{
-					return res.getInt("size");
-				}
-				Logging.getLogger().debug("JDBCStore", "No matching rows found");
-				return 0;
-			}
-
+			Logging.getLogger().debug("JDBCStore", "No matching rows found");
+			return 0;
 		}
 		catch ( final SQLException ex )
 		{
@@ -475,22 +488,14 @@ public class SimpleJDBCRecordStore implements JDBCRecordStore
 		String tableID = JDBCDriver.getNextTableIdentifier( null );
 		final String sql = "SELECT " + aggregateFunction.toSQL(driver, tableID) + " as result FROM "+base.getTableName()+" AS "+tableID+toWhereClause( condition, tableID );
 		Logging.getLogger().debug( "JDBCStore", sql);
-		try(PreparedStatement stm = con.prepareStatement(sql))
+		try (final ResultSet res = queryStatement( sql, condition ))
 		{
-			if(condition!=null)
+			if (res.next())
 			{
-				fillStatement( stm, condition );
+				return (R)res.getObject("result");
 			}
-			try (final ResultSet res = stm.executeQuery())
-			{
-				if (res.next())
-				{
-					return (R)res.getObject("result");
-				}
-				Logging.getLogger().debug("JDBCStore", "No matching rows found");
-				return null;
-			}
-
+			Logging.getLogger().debug("JDBCStore", "No matching rows found");
+			return null;
 		}
 		catch ( final SQLException ex )
 		{
@@ -514,14 +519,8 @@ public class SimpleJDBCRecordStore implements JDBCRecordStore
 		Logging.getLogger().debug( "JDBCStore", sql);
 		try
 		{
-			//this statement can't be try-with-resource because it would close the result-set
-			final PreparedStatement stm = con.prepareStatement(sql);
-			if(scope.getCondition()!=null)
-			{
-				fillStatement( stm, scope.getCondition() );
-			}
 			//this result-set can't be try-with-resource because it is required to stay open for asynchronous call
-			final ResultSet res = stm.executeQuery();
+			final ResultSet res = queryStatement( sql, scope.getCondition());
 			//we must add the primary-key to the list of columns, because it is not guaranteed to be in there
 			//and it is needed to prevent row-maps with same values to be counted as the same
 			Set<String> columnWithKey = new HashSet<>(Arrays.asList( columns ));
@@ -858,7 +857,7 @@ public class SimpleJDBCRecordStore implements JDBCRecordStore
 	{
 		final String sql = "DELETE FROM "+tableName + toWhereClause( cond, tableName );
 		Logging.getLogger().debug( "JDBCStore", sql);
-		try(PreparedStatement stm = con.prepareStatement( sql ))
+		try(PreparedStatement stm = con.prepareStatement( sql, ResultSet.TYPE_FORWARD_ONLY, ResultSet.CONCUR_READ_ONLY))
 		{
 			if (cond != null)
 			{
