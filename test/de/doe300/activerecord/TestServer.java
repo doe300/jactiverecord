@@ -24,12 +24,6 @@
  */
 package de.doe300.activerecord;
 
-import de.doe300.activerecord.migration.MigrationTest;
-import de.doe300.activerecord.record.ActiveRecord;
-import de.doe300.activerecord.store.RecordStore;
-import de.doe300.activerecord.store.impl.CachedJDBCRecordStore;
-import de.doe300.activerecord.store.impl.SimpleJDBCRecordStore;
-import de.doe300.activerecord.store.impl.memory.MemoryRecordStore;
 import java.sql.Connection;
 import java.sql.DatabaseMetaData;
 import java.sql.Driver;
@@ -38,8 +32,17 @@ import java.sql.SQLException;
 import java.util.Enumeration;
 import java.util.HashMap;
 import java.util.Map;
+
 import javax.annotation.Nonnull;
+
 import org.junit.Assert;
+
+import de.doe300.activerecord.migration.MigrationTest;
+import de.doe300.activerecord.record.ActiveRecord;
+import de.doe300.activerecord.store.RecordStore;
+import de.doe300.activerecord.store.impl.CachedJDBCRecordStore;
+import de.doe300.activerecord.store.impl.SimpleJDBCRecordStore;
+import de.doe300.activerecord.store.impl.memory.MemoryRecordStore;
 
 /**
  * Starts the HSQLDB server for testing
@@ -50,7 +53,7 @@ public class TestServer extends Assert
 	
 	static 
 	{
-		Enumeration<Driver> drivers = DriverManager.getDrivers();
+		final Enumeration<Driver> drivers = DriverManager.getDrivers();
 		while(drivers.hasMoreElements())
 		{
 			System.out.println( drivers.nextElement().getClass() );
@@ -135,7 +138,7 @@ public class TestServer extends Assert
 	
 	public static void buildTestMappingTable(@Nonnull final String tableName) throws Exception
 	{
-		Map<String, Class<?>> columns = new HashMap<>(2);
+		final Map<String, Class<?>> columns = new HashMap<>(2);
 		columns.put( "fk_test1", Integer.class);
 		columns.put( "fk_test2", Integer.class);
 		getTestCore().getStore().getDriver().createMigration( tableName, columns, getTestCore().getStore()).apply();
@@ -154,7 +157,7 @@ public class TestServer extends Assert
 	
 	public static void destroyTestMappingTable(@Nonnull final String tableName) throws Exception
 	{
-		Map<String, Class<?>> columns = new HashMap<>(2);
+		final Map<String, Class<?>> columns = new HashMap<>(2);
 		columns.put( "fk_test1", Integer.class);
 		columns.put( "fk_test2", Integer.class);
 		getTestCore().getStore().getDriver().createMigration( tableName, columns, getTestCore().getStore()).revert();
@@ -165,9 +168,9 @@ public class TestServer extends Assert
 		Assert.assertTrue( getTestCore().getStore().getDriver().createMigration( type, tableName, getTestCore().getStore() ).revert());
 	}
 	
-	static void printMetaData(Connection con) throws SQLException
+	static void printMetaData(final Connection con) throws SQLException
 	{
-		DatabaseMetaData data = con.getMetaData();
+		final DatabaseMetaData data = con.getMetaData();
 		System.out.println( "Driver:" );
 		System.out.println( "- Name: "+data.getDriverName());
 		System.out.println( "- Version: "+data.getDriverVersion() );

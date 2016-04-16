@@ -70,6 +70,7 @@ public final class RecordCore implements AutoCloseable
 	private final RecordStore store;
 	private final Map<Class<? extends ActiveRecord>, RecordBase<?>> bases;
 	private final Map<Class<? extends ActiveRecord>, Set<RecordListener>> recordListeners;
+	//XXX add weak RecordListeners using weak reference??
 
 	private RecordCore(@Nonnull final RecordStore store)
 	{

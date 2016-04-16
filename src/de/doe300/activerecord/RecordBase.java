@@ -587,6 +587,7 @@ public abstract class RecordBase<T extends ActiveRecord> implements ReadOnlyReco
 		{
 			conds[i] = new SimpleCondition(columns[i], "%" + term + "%", Comparison.LIKE);
 		}
+		//TODO search for non-character columns
 		return OrCondition.orConditions(conds );
 	}
 

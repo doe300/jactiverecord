@@ -187,7 +187,7 @@ public class AggregateFunctionTest extends Assert
 						values().stream()).doubleValue(), 0.0);
 		
 		AggregateFunction<TestInterface, Integer, ?, Number> sumFloat2 = new SumDouble<>(new Signum<>("age", TestInterface::getAge));
-		assertEquals( 4.0, base.aggregate( sumFloat2, null) );
+		assertEquals( 4.0, base.aggregate( sumFloat2, null).doubleValue(), 0.0001 );
 	}
 
 	@Test

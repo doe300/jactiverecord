@@ -128,6 +128,7 @@ public class ConditionSetTest extends Assert
 	@Test
 	public void testIterator()
 	{
+		//XXX fails to close Stream
 		assertNotNull( set.iterator() );
 	}
 
@@ -288,6 +289,7 @@ public class ConditionSetTest extends Assert
 	@Test
 	public void testFindWithScope()
 	{
+		//XXX fails to close Stream
 		TestInterface i = base.createRecord();
 		i.setName( "Hans");
 		i.setAge( 23);
@@ -297,6 +299,7 @@ public class ConditionSetTest extends Assert
 	@Test
 	public void testFindFirstWithScope()
 	{
+		//XXX fails to close Stream
 		assertNotNull( set.findFirstWithScope( new Scope(null, null, Scope.NO_LIMIT)));
 	}
 
@@ -309,6 +312,6 @@ public class ConditionSetTest extends Assert
 	@Test
 	public void testAggregate()
 	{
-		assertEquals( Long.valueOf( 69), set.aggregate( new Sum<>("age", TestInterface::getAge), null));
+		assertEquals( Long.valueOf( 69).longValue(), set.aggregate( new Sum<>("age", TestInterface::getAge), null).longValue());
 	}
 }

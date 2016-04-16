@@ -222,6 +222,7 @@ public class SimpleJDBCRecordStoreTest extends Assert
 	@Test(expected = IllegalArgumentException.class)
 	public void testGetValues_4args()
 	{
+		//XXX fails to close Stream
 		store.setValue( base, primaryKey, "name", "Heinz");
 		assertEquals("Heinz", store.getValues( base.getTableName(), "name", base.getPrimaryColumn(), primaryKey).findFirst().get());
 		//no results

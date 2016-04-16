@@ -125,6 +125,7 @@ class BaseCache
 		boolean changed = false;
 		synchronized(modifiedRows)
 		{
+			//TODO write with batched simple/prepared statements
 			for(final RowCache cache : modifiedRows)
 			{
 				if(cache.writeBack( store, base ))

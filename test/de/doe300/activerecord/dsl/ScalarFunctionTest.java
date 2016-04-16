@@ -202,16 +202,12 @@ public class ScalarFunctionTest extends Assert
 	@Test
 	public void testSQUARE_ROOT()
 	{
-		ScalarFunction<TestInterface, Integer, Double> sqrt = new SquareRoot<>("age", TestInterface::getAge);
+		ScalarFunction<TestInterface, Long, Double> sqrt = new SquareRoot<>(new Absolute<>("age", TestInterface::getAge));
 		//test direct #apply
-		assertEquals( Math.sqrt( t2.getAge()), sqrt.apply( t2), 0.00001);
-		//XXX fix test with SQRT of negative number
+		assertEquals( Math.sqrt( Math.abs(t2.getAge())), sqrt.apply( t2), 0.00001);
 		Condition cond = new SimpleCondition(sqrt, -1, Comparison.IS_NOT);
 		assertTrue(cond.test( t1 ));
 		assertEquals(4, base.count( cond));
-		
-		ScalarFunction<TestInterface, Long, Double> sqrt2 = new SquareRoot<>(new Absolute<>("age", TestInterface::getAge));
-		assertEquals( 30, sqrt2.apply( t1), 0.2);
 	}
 	
 	@Test
