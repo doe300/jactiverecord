@@ -11,9 +11,8 @@ A java-based object-database-binding on top of JDBC inspired by Rails ActiveReco
 Requirements
 ------
 This library requires **Java 8**, **JDBC** and any JDBC DB-driver with a configured database.
-Additionally, **JSR 305: Annotations for Software Defect Detection in Java** is required for code-quality improvement.
-It can be obtained via the [Google Code Project](https://code.google.com/p/jsr-305/) 
-or [the Maven Repo](http://search.maven.org/#search|gav|1|g%3A%22com.google.code.findbugs%22%20AND%20a%3A%22jsr305%22).
+Additionally, **JSR 305: Annotations for Software Defect Detection in Java** is required for code-quality improvements.
+It can be obtained via the [Maven Repo](http://search.maven.org/#search|gav|1|g%3A%22com.google.code.findbugs%22%20AND%20a%3A%22jsr305%22).
 
 This library is based upon Java 8 due to its use of *java.util.stream.Stream* for record retrieval.
 
