@@ -2,7 +2,7 @@
 	<modelVersion>4.0.0</modelVersion>
 	<groupId>de.doe300</groupId>
 	<artifactId>JActiveRecord</artifactId>
-	<version>0.7</version>
+	<version>0.7-SNAPSHOT</version>
 	<name>JActiveRecord</name>
 	<description>An java-based object-database-binding on top of JDBC inspired by Rails ActiveRecord.</description>
 	<url>https://github.com/doe300/jactiverecord</url>
@@ -84,6 +84,7 @@
 				<artifactId>maven-release-plugin</artifactId>
 				<version>2.5.3</version>
 				<configuration>
+					<tagNameFormat>v@{project.version}</tagNameFormat>
 					<arguments>-Dgpg.passphrase=${gpg.passphrase}</arguments>
 				</configuration>
 			</plugin>
