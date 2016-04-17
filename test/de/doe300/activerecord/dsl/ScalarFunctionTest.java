@@ -29,6 +29,7 @@ import de.doe300.activerecord.TestInterface;
 import de.doe300.activerecord.TestServer;
 import de.doe300.activerecord.dsl.functions.Absolute;
 import de.doe300.activerecord.dsl.functions.AbsoluteDouble;
+import de.doe300.activerecord.dsl.functions.CastType;
 import de.doe300.activerecord.dsl.functions.Ceiling;
 import de.doe300.activerecord.dsl.functions.Floor;
 import de.doe300.activerecord.dsl.functions.LowerCase;
@@ -255,5 +256,20 @@ public class ScalarFunctionTest extends Assert
 		
 		ScalarFunction<TestInterface, String, String> trim2 = new TrimString<>(new UpperCase<>("name", TestInterface::getName));
 		assertEquals( trim.apply( t4).toUpperCase(), trim2.apply( t4));
+	}
+	
+	@Test
+	public void testCAST()
+	{
+		//TODO for MySQL, can't cast to VARCHAR(XXX), needs to use CHAR. But where to set??
+		ScalarFunction<TestInterface, Integer, String> cast = new CastType<TestInterface, Integer, String>("age", TestInterface::getAge, String.class, (Integer i) -> Integer.toString( i ));
+		//test direct #apply
+		assertEquals( "-913", cast.apply( t4));
+		Condition cond = new SimpleCondition(cast, "-913", Comparison.IS);
+		assertTrue( cond.test( t4));
+		assertEquals( 2, base.count( cond));
+		
+		ScalarFunction<TestInterface, Long, String> cast2 = new CastType<TestInterface, Long, String>(new Absolute<>("age", TestInterface::getAge), String.class, (Long l) -> Long.toString( l ));
+		assertEquals("913", cast2.apply( t4));
 	}
 }

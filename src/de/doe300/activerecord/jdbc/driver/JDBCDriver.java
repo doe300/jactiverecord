@@ -98,6 +98,7 @@ public class JDBCDriver implements DBDriver
 	public static final String SCALAR_LOWER = "LOWER(%column%)";
 	public static final String SCALAR_STRING_LENGTH = "CHAR_LENGTH(%column%)";
 	public static final String SCALAR_TRIM = "TRIM(%column%)";
+	public static final String SCALAR_CAST = "CAST(%column% AS %type%)";
 	
 	private static final String[] sql92Keywords = {
 		"absolute", "action", "allocate", "are", "assertion",

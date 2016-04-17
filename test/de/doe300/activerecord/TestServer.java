@@ -103,18 +103,19 @@ public class TestServer extends Assert
 	{
 		if(con == null || con.isClosed())
 		{
-//			con = DriverManager.getConnection( "jdbc:hsqldb:mem:test", "sa", "");
-			con = DriverManager.getConnection("jdbc:sqlite::memory:");
+			con = DriverManager.getConnection( "jdbc:hsqldb:mem:test", "sa", "");
+//			con = DriverManager.getConnection("jdbc:sqlite::memory:");
 			//FIXME MySQL errors:
 			/**
-			 * - ???
+			 * - Seems to not be able to put any index on columns about a certain length (~700 characters/bytes)
+			 * - can't use VARCHAR as result-type for CAST, needs to be CHAR for casting to string
 			 */
 			//start server with "systemctl start mysqld.service"
 //			con = DriverManager.getConnection( "jdbc:mysql://localhost:3306/mysql", "root", "");
 			
 			//FIXME PostgreSQL errors:
 			/**
-			 * none currently...
+			 * - Doesn't support VARBINARY, types need to be BYTEA in tests
 			 */
 			//start server with "systemctl start postgresql.service"
 //			con = DriverManager.getConnection( "jdbc:postgresql:postgres", "postgres", "");

@@ -43,6 +43,7 @@ import de.doe300.activerecord.dsl.Order;
 import de.doe300.activerecord.dsl.QueryResult;
 import de.doe300.activerecord.dsl.SimpleCondition;
 import de.doe300.activerecord.dsl.SimpleOrder;
+import de.doe300.activerecord.dsl.functions.CastType;
 import de.doe300.activerecord.jdbc.driver.JDBCDriver;
 import de.doe300.activerecord.logging.Logging;
 import de.doe300.activerecord.record.ActiveRecord;
@@ -57,6 +58,7 @@ import de.doe300.activerecord.scope.Scope;
 import de.doe300.activerecord.store.RecordStore;
 import de.doe300.activerecord.record.validation.ValidatedRecord;
 import de.doe300.activerecord.record.validation.ValidationFailed;
+import de.doe300.activerecord.store.JDBCRecordStore;
 import java.util.Objects;
 import java.util.SortedMap;
 import javax.annotation.Nonnegative;
@@ -564,7 +566,7 @@ public abstract class RecordBase<T extends ActiveRecord> implements ReadOnlyReco
 			throw new UnsupportedOperationException("Called 'search' for non seachable record-type" );
 		}
 		final String[] columns = recordType.getAnnotation( Searchable.class).searchableColumns();
-		return find( RecordBase.toSearchClause( term, columns ) );
+		return find( toSearchClause( term, columns ) );
 	}
 
 	@Override
@@ -577,17 +579,27 @@ public abstract class RecordBase<T extends ActiveRecord> implements ReadOnlyReco
 			throw new UnsupportedOperationException("Called 'searchFirst' for non seachable record-type" );
 		}
 		final String[] columns = recordType.getAnnotation( Searchable.class).searchableColumns();
-		return findFirst( RecordBase.toSearchClause( term, columns ) );
+		return findFirst( toSearchClause( term, columns ) );
 	}
 
-	private static Condition toSearchClause(@Nonnull final String term, @Nonnull final String[] columns)
+	private Condition toSearchClause(@Nonnull final String term, @Nonnull final String[] columns)
 	{
+		final Map<String, Class<?>> columnTypes = store.getAllColumnTypes( getTableName());
 		final Condition[] conds = new Condition[columns.length];
 		for(int i=0;i<columns.length;i++)
 		{
-			conds[i] = new SimpleCondition(columns[i], "%" + term + "%", Comparison.LIKE);
+			final String column = columns[i];
+			if(store instanceof JDBCRecordStore && !CharSequence.class.isAssignableFrom( columnTypes.get( column.toLowerCase())))
+			{
+				//search for non character-based columns
+				Logging.getLogger().debug( recordType.getSimpleName(), "Converting column '"+column+"' to string-type for searching");
+				conds[i] = new SimpleCondition(new CastType<>(column, null, String.class, null), "%" + term + "%", Comparison.IS);
+			}
+			else
+			{
+				conds[i] = new SimpleCondition(column, "%" + term + "%", Comparison.LIKE);
+			}
 		}
-		//TODO search for non-character columns
 		return OrCondition.orConditions(conds );
 	}
 
