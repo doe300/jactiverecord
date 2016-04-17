@@ -33,6 +33,7 @@ import de.doe300.activerecord.RecordBase;
 import de.doe300.activerecord.jdbc.driver.JDBCDriver;
 import de.doe300.activerecord.record.ActiveRecord;
 import de.doe300.activerecord.record.association.AssociationHelper;
+import java.util.stream.Stream;
 
 /**
  * A Condition on a table referenced by a has-many-through association.
@@ -111,8 +112,10 @@ public class HasManyThroughCondition implements Condition
 		{
 			return false;
 		}
-		return AssociationHelper.getHasManyThrough( record.getPrimaryKey(), (RecordBase<?>)associatedBase, associationTable, associationTableThisForeignKey, associationTableOtherForeignKey).
-			anyMatch(associatedBaseCondition);
+		try(final Stream<? extends ActiveRecord> s = AssociationHelper.getHasManyThrough( record.getPrimaryKey(), (RecordBase<?>)associatedBase, associationTable, associationTableThisForeignKey, associationTableOtherForeignKey))
+		{
+			return s.anyMatch(associatedBaseCondition);
+		}
 	}
 
 	@Override
@@ -122,8 +125,10 @@ public class HasManyThroughCondition implements Condition
 		{
 			return false;
 		}
-		return AssociationHelper.getHasManyThrough( (Integer)map.get( thisBase.getPrimaryColumn()), (RecordBase<?>)associatedBase, associationTable, associationTableThisForeignKey, associationTableOtherForeignKey).
-			anyMatch(associatedBaseCondition);
+		try(final Stream<? extends ActiveRecord> s = AssociationHelper.getHasManyThrough( (Integer)map.get( thisBase.getPrimaryColumn()), (RecordBase<?>)associatedBase, associationTable, associationTableThisForeignKey, associationTableOtherForeignKey))
+		{
+			return s.anyMatch(associatedBaseCondition);
+		}
 	}
 
 	@Override

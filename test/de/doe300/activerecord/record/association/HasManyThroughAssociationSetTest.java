@@ -33,6 +33,7 @@ import de.doe300.activerecord.dsl.SimpleOrder;
 import de.doe300.activerecord.scope.Scope;
 import java.util.Arrays;
 import java.util.SortedSet;
+import java.util.stream.Stream;
 import org.junit.AfterClass;
 import org.junit.Assert;
 import static org.junit.Assert.assertEquals;
@@ -106,7 +107,10 @@ public class HasManyThroughAssociationSetTest extends Assert
 	@Test
 	public void testIterator()
 	{
-		assertNotNull( set.iterator() );
+		for(final TestInterface i : set)
+		{
+			assertTrue( set.contains( i));
+		}
 	}
 
 	@Test
@@ -258,7 +262,10 @@ public class HasManyThroughAssociationSetTest extends Assert
 	@Test
 	public void testFindWithScope()
 	{
-		assertSame( a3, set.findWithScope( new Scope(null, new SimpleOrder(base.getPrimaryColumn(), SimpleOrder.OrderType.DESCENDING), 5)).findFirst().get());
+		try(final Stream<TestInterface> s = set.findWithScope( new Scope(null, new SimpleOrder(base.getPrimaryColumn(), SimpleOrder.OrderType.DESCENDING), 5)))
+		{
+			assertSame( a3, s.findFirst().get());
+		}
 	}
 
 	@Test

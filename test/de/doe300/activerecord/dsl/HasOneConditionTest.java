@@ -30,6 +30,7 @@ import de.doe300.activerecord.TestServer;
 import de.doe300.activerecord.record.ActiveRecord;
 import java.util.Collections;
 import java.util.HashMap;
+import java.util.stream.Stream;
 import org.junit.AfterClass;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
@@ -110,8 +111,14 @@ public class HasOneConditionTest
 		assertEquals( 0, base.count( cond1));
 		assertEquals( 2, base.count( cond2 ));
 		assertEquals( 1, base.count( cond3));
-		assertTrue( base.find( cond3).anyMatch( (TestInterface i) -> i.equals( t3)));
-		assertFalse( base.find( cond3).anyMatch( (TestInterface i) -> i.equals( t1)));
+		try(final Stream<TestInterface> s = base.find( cond3))
+		{
+			assertTrue( s.anyMatch( (TestInterface i) -> i.equals( t3)));
+		}
+		try(final Stream<TestInterface> s = base.find( cond3))
+		{
+			assertFalse(s.anyMatch( (TestInterface i) -> i.equals( t1)));
+		}
 	}
 
 	@Test

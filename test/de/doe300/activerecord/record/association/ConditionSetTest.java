@@ -34,6 +34,7 @@ import de.doe300.activerecord.scope.Scope;
 import java.util.Arrays;
 import java.util.Objects;
 import java.util.SortedSet;
+import java.util.stream.Stream;
 import org.junit.AfterClass;
 import org.junit.Assert;
 import static org.junit.Assert.assertEquals;
@@ -128,8 +129,10 @@ public class ConditionSetTest extends Assert
 	@Test
 	public void testIterator()
 	{
-		//XXX fails to close Stream
-		assertNotNull( set.iterator() );
+		for(TestInterface i : set)
+		{
+			assertTrue( set.contains( i));
+		}
 	}
 
 	@Test
@@ -289,11 +292,13 @@ public class ConditionSetTest extends Assert
 	@Test
 	public void testFindWithScope()
 	{
-		//XXX fails to close Stream
 		TestInterface i = base.createRecord();
 		i.setName( "Hans");
 		i.setAge( 23);
-		assertTrue( set.findWithScope( new Scope(null, null, Scope.NO_LIMIT)).anyMatch( (TestInterface t) -> Objects.equals( t.getName(), "Hans")));
+		try(final Stream<TestInterface> s = set.findWithScope( new Scope(null, null, Scope.NO_LIMIT)))
+		{
+			assertTrue( s.anyMatch( (TestInterface t) -> Objects.equals( t.getName(), "Hans")));
+		}
 	}
 
 	@Test

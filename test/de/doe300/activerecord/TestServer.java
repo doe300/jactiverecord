@@ -103,13 +103,8 @@ public class TestServer extends Assert
 	{
 		if(con == null || con.isClosed())
 		{
-			con = DriverManager.getConnection( "jdbc:hsqldb:mem:test", "sa", "");
-			//FIXME SQLite errors:
-			/**
-			 * - At AutomaticMigration#revert throws "database table is locked"
-			 *		Some Query not yet closed? Perhaps some query with stream, they could stay open if not read to the end
-			 */
-//			con = DriverManager.getConnection("jdbc:sqlite::memory:");
+//			con = DriverManager.getConnection( "jdbc:hsqldb:mem:test", "sa", "");
+			con = DriverManager.getConnection("jdbc:sqlite::memory:");
 			//FIXME MySQL errors:
 			/**
 			 * - ???

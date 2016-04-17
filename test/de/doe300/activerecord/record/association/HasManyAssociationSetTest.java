@@ -111,7 +111,10 @@ public class HasManyAssociationSetTest extends Assert
 	@Test
 	public void testIterator()
 	{
-		assertNotNull( set.iterator() );
+		for(TestInterface i : set)
+		{
+			assertTrue( set.contains( i));
+		}
 	}
 
 	@Test
@@ -271,7 +274,7 @@ public class HasManyAssociationSetTest extends Assert
 	@Test
 	public void testFindWithScope()
 	{
-		assertTrue( set.findWithScope( new Scope(null, null, Scope.NO_LIMIT)).count() == 3);
+		assertEquals(3, set.findWithScope( new Scope(null, null, Scope.NO_LIMIT)).count());
 	}
 
 	@Test
@@ -289,6 +292,6 @@ public class HasManyAssociationSetTest extends Assert
 	@Test
 	public void testAggregate()
 	{
-		assertEquals( Long.valueOf( 2), set.aggregate( new CountNotNull<>("name", TestInterface::getName), null));
+		assertEquals( 2L, set.aggregate( new CountNotNull<>("name", TestInterface::getName), null).longValue());
 	}
 }

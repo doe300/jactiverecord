@@ -36,11 +36,9 @@ import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.stream.Stream;
 import org.junit.AfterClass;
 import org.junit.Assert;
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.assertTrue;
 import org.junit.BeforeClass;
 import org.junit.Test;
 
@@ -180,21 +178,25 @@ public class SimpleJDBCRecordStoreTest extends Assert
 	public void testStreamAllWithData()
 	{
 		Scope scope = new Scope(new SimpleCondition(base.getPrimaryColumn(), primaryKey, Comparison.IS), null, 2 );
-		assertTrue( store.streamAllWithData( base, new String[]{base.getPrimaryColumn()}, scope).count() == 1);
+		assertEquals(1, store.streamAllWithData( base, new String[]{base.getPrimaryColumn()}, scope).count());
 		
 		//Test Limit
 		Scope scope2 = new Scope(new SimpleCondition("age", 123, Comparison.IS), null, 2 );
 		base.createRecord().setAge( 123);
 		base.createRecord().setAge( 123);
 		base.createRecord().setAge( 123);
-		assertTrue( store.streamAllWithData( base, base.getDefaultColumns(), scope2).count() == 2);
+		//TODO somehow fails on Travis CI
+		assertEquals(2, store.streamAllWithData( base, base.getDefaultColumns(), scope2).count());
 		
 		//test empty condition
 		Scope scope3 = new Scope(null, null, 2);
 		assertEquals( 2, store.streamAllWithData( base, base.getDefaultColumns(), scope3).count());
 		
 		//negative test - throws exception
-		store.streamAllWithData( base, new String[]{"id", "no_colunm"}, scope);
+		try(final Stream<Map<String, Object>> s = store.streamAllWithData( base, new String[]{"id", "no_colunm"}, scope))
+		{
+			
+		}
 	}
 
 	@Test
@@ -222,13 +224,18 @@ public class SimpleJDBCRecordStoreTest extends Assert
 	@Test(expected = IllegalArgumentException.class)
 	public void testGetValues_4args()
 	{
-		//XXX fails to close Stream
 		store.setValue( base, primaryKey, "name", "Heinz");
-		assertEquals("Heinz", store.getValues( base.getTableName(), "name", base.getPrimaryColumn(), primaryKey).findFirst().get());
+		try(final Stream<Object> s = store.getValues( base.getTableName(), "name", base.getPrimaryColumn(), primaryKey))
+		{
+			assertEquals("Heinz", s.findFirst().get());
+		}
 		//no results
 		assertEquals( 0, store.getValues( base.getTableName(), "name", base.getPrimaryColumn(), primaryKey+1000 ).count());
 		//negative test - throws exception
-		store.getValues( base.getTableName(), "no_column", base.getPrimaryColumn(), primaryKey);
+		try(final Stream<Object> s = store.getValues( base.getTableName(), "no_column", base.getPrimaryColumn(), primaryKey))
+		{
+			
+		}
 	}
 
 

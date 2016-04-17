@@ -28,6 +28,7 @@ import de.doe300.activerecord.RecordBase;
 import de.doe300.activerecord.TestInterface;
 import de.doe300.activerecord.TestServer;
 import java.util.Collections;
+import java.util.stream.Stream;
 import org.junit.AfterClass;
 import org.junit.Assert;
 import org.junit.BeforeClass;
@@ -82,7 +83,10 @@ public class InvertedConditionTest extends Assert
 		Condition cond = AndCondition.andConditions(new SimpleCondition("age", 913, Comparison.IS), new SimpleCondition("name", "123Name4", Comparison.IS) );
 		//matches t1 and t2
 		assertTrue( base.find( InvertedCondition.invertCondition(cond)).count() >= 2 );
-		assertFalse( base.find( InvertedCondition.invertCondition(cond)).anyMatch( (TestInterface i) -> i.equals( t3)));
+		try(final Stream<TestInterface> s = base.find( InvertedCondition.invertCondition(cond)))
+		{
+			assertFalse( s.anyMatch( (TestInterface i) -> i.equals( t3)));
+		}
 	}
 	
 	@Test(expected = IllegalArgumentException.class)
@@ -92,7 +96,10 @@ public class InvertedConditionTest extends Assert
 		Condition cond = InvertedCondition.invertCondition(new SimpleCondition("age", 913, Comparison.IS));
 		//matches t2 and t3
 		assertTrue( base.find( InvertedCondition.invertCondition(cond)).count() >= 2 );
-		assertFalse( base.find( InvertedCondition.invertCondition(cond)).anyMatch( (TestInterface i) -> i.equals( t1)));
+		try(final Stream<TestInterface> s = base.find( InvertedCondition.invertCondition(cond)))
+		{
+			assertFalse( s.anyMatch( (TestInterface i) -> i.equals( t1)));
+		}
 		
 		InvertedCondition.invertCondition( null);
 	}

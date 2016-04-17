@@ -39,6 +39,7 @@ import de.doe300.activerecord.dsl.functions.StringLength;
 import de.doe300.activerecord.dsl.functions.TrimString;
 import de.doe300.activerecord.dsl.functions.UpperCase;
 import de.doe300.activerecord.dsl.functions.Value;
+import de.doe300.activerecord.jdbc.driver.SQLiteDriver;
 import org.junit.AfterClass;
 import org.junit.Assert;
 import org.junit.BeforeClass;
@@ -207,7 +208,11 @@ public class ScalarFunctionTest extends Assert
 		assertEquals( Math.sqrt( Math.abs(t2.getAge())), sqrt.apply( t2), 0.00001);
 		Condition cond = new SimpleCondition(sqrt, -1, Comparison.IS_NOT);
 		assertTrue(cond.test( t1 ));
-		assertEquals(4, base.count( cond));
+		if(!(base.getStore().getDriver() instanceof SQLiteDriver))
+		{
+			//SQLite doesn't support SQRT
+			assertEquals(4, base.count( cond));
+		}
 	}
 	
 	@Test

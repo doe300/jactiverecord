@@ -106,7 +106,10 @@ public class HasManyThroughAssociationSet<T extends ActiveRecord> extends Abstra
 			return false;
 		}
 		final T otherRecord = destBase.getRecordType().cast( o );
-		return getAssocationKeys().anyMatch( (final Integer i) -> i == otherRecord.getPrimaryKey() );
+		try(final Stream<Integer> keys = getAssocationKeys())
+		{
+			return keys.anyMatch( (final Integer i) -> i == otherRecord.getPrimaryKey() );
+		}
 	}
 
 	@Override

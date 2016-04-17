@@ -108,8 +108,8 @@ public class AggregateFunctionTest extends Assert
 				base.getStore().findAllWithData( base, new String[]{"age"}, Scope.DEFAULT).
 						values().stream()));
 		
-		AggregateFunction<TestInterface, Integer, ?, Integer> min2 = new Minimum<>(new Signum<>("age", TestInterface::getAge));
-		assertEquals( Long.valueOf( 1), base.aggregate( min2, null));
+		AggregateFunction<TestInterface, ? extends Number, ?, ? extends Number> min2 = new Minimum<>(new Signum<>("age", TestInterface::getAge));
+		assertEquals( 1L, base.aggregate( min2, null).longValue());
 	}
 
 	@Test
@@ -125,8 +125,8 @@ public class AggregateFunctionTest extends Assert
 				base.getStore().findAllWithData( base, new String[]{"age"}, Scope.DEFAULT).
 						values().stream()));
 		
-		AggregateFunction<TestInterface, Integer, ?, Integer> max2 = new Maximum<>(new Signum<>("age", TestInterface::getAge));
-		assertEquals( Long.valueOf( 1), base.aggregate( max2, null));
+		AggregateFunction<TestInterface, ? extends Number, ?, ? extends Number> max2 = new Maximum<>(new Signum<>("age", TestInterface::getAge));
+		assertEquals( 1L, base.aggregate( max2, null).longValue());
 	}
 
 	@Test

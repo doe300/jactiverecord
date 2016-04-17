@@ -38,6 +38,7 @@ import java.util.Arrays;
 import java.util.Collections;
 import java.util.Map;
 import java.util.Objects;
+import java.util.stream.Stream;
 import org.junit.AfterClass;
 import org.junit.Assert;
 import static org.junit.Assert.assertTrue;
@@ -180,9 +181,10 @@ public class CachedJDBCRecordStoreTest extends Assert
 		//Tests streaming with data in cache but not in store
 		TestInterface i = base.createRecord();
 		i.setName( "Failes");
-		assertTrue( store.streamAllWithData( base, new String[]{base.getPrimaryColumn()}, scope2).anyMatch(
-				(Map<String,Object> m) -> ((Integer)i.getPrimaryKey()).equals(m.get( base.getPrimaryColumn()))
-		));
+		try(final Stream<Map<String, Object>> s = store.streamAllWithData( base, new String[]{base.getPrimaryColumn()}, scope2))
+		{
+			assertTrue( s.anyMatch((Map<String,Object> m) -> ((Integer)i.getPrimaryKey()).equals(m.get( base.getPrimaryColumn()))));
+		}
 		
 		//Test Limit
 		base.createRecord().setName( "Failes");
@@ -190,9 +192,10 @@ public class CachedJDBCRecordStoreTest extends Assert
 		assertTrue( store.streamAllWithData( base, base.getDefaultColumns(), scope2).count() == 2);
 		
 		//Test Order (the two last added records should be returned, so the first is not in the results)
-		assertFalse( store.streamAllWithData( base, base.getDefaultColumns(), scope2).anyMatch(
-				(Map<String,Object> map) -> Integer.valueOf( i.getPrimaryKey()).equals( map.get( base.getPrimaryColumn()))
-		));
+		try(final Stream<Map<String, Object>> s =  store.streamAllWithData( base, base.getDefaultColumns(), scope2))
+		{
+			assertFalse( s.anyMatch((Map<String,Object> map) -> Integer.valueOf( i.getPrimaryKey()).equals( map.get( base.getPrimaryColumn()))));
+		}
 	}
 
 	@Test
@@ -238,7 +241,7 @@ public class CachedJDBCRecordStoreTest extends Assert
 		Timestamp start = base.getRecord( primaryKey ).getUpdatedAt();
 		store.touch( base, primaryKey );
 		Timestamp end = base.getRecord( primaryKey ).getUpdatedAt();
-		assertTrue( end.compareTo( start) > 0);
+		assertTrue( end.compareTo( start) >= 0);
 	}
 
 	@Test

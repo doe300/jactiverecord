@@ -135,14 +135,20 @@ public interface RecordSet<T extends ActiveRecord> extends SortedSet<T>, FinderM
 	@Nonnull
 	public default T first()
 	{
-		return stream().sorted( getOrder()).findFirst().get();
+		try(final Stream<T> s = stream().sorted( getOrder()))
+		{
+			return s.findFirst().get();
+		}
 	}
 
 	@Override
 	@Nonnull
 	public default T last()
 	{
-		return stream().sorted( getOrder().reversed()).findFirst().get();
+		try(final Stream<T> s = stream().sorted(getOrder().reversed()))
+		{
+			return s.findFirst().get();
+		}
 	}
 	
 	/**

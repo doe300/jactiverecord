@@ -275,11 +275,13 @@ public class RecordBaseTest<T extends TestInterface> extends Assert
 	}
 
 	@Test
-	public void testWhere()
+	public void testWhere() throws Exception
 	{
-		QueryResult<T> res = base.where( new SimpleCondition("name", base, Comparison.TRUE));
-		assertNotNull( res );
-		assertEquals( base.getDefaultOrder(), res.getOrder());
+		try(QueryResult<T> res = base.where( new SimpleCondition("name", base, Comparison.TRUE)))
+		{
+			assertNotNull( res );
+			assertEquals( base.getDefaultOrder(), res.getOrder());
+		}
 	}
 
 	@Test
@@ -348,7 +350,7 @@ public class RecordBaseTest<T extends TestInterface> extends Assert
 	public void testFindForColumn()
 	{
 		T t = base.createRecord();
-		assertTrue( base.findFor(base.getPrimaryColumn(), t.getPrimaryKey()).count() == 1);
+		assertEquals(1, base.findFor(base.getPrimaryColumn(), t.getPrimaryKey()).count());
 	}
 	
 	@Test
@@ -363,13 +365,13 @@ public class RecordBaseTest<T extends TestInterface> extends Assert
 	{
 		//tests single condition
 		T t = base.createRecord();
-		assertTrue( base.findFor(Collections.singletonMap( base.getPrimaryColumn(), t.getPrimaryKey())).count() == 1);
+		assertEquals(1, base.findFor(Collections.singletonMap( base.getPrimaryColumn(), t.getPrimaryKey())).count());
 		//tests multiple conditions
 		t.setAge( 123);
 		final Map<String, Object> conds = new HashMap<>(2);
 		conds.put( base.getPrimaryColumn(), t.getPrimaryKey());
 		conds.put( "age", 123);
-		assertTrue( base.findFor( conds).count() == 1 );
+		assertEquals(1, base.findFor( conds).count());
 	}
 	
 	@Test
@@ -383,7 +385,7 @@ public class RecordBaseTest<T extends TestInterface> extends Assert
 		final Map<String, Object> conds = new HashMap<>(2);
 		conds.put( base.getPrimaryColumn(), t.getPrimaryKey());
 		conds.put( "age", 124);
-		assertTrue( base.findFor( conds).count() == 1 );
+		assertEquals(1, base.findFor( conds).count());
 	}
 
 	@Test
@@ -446,12 +448,14 @@ public class RecordBaseTest<T extends TestInterface> extends Assert
 	}
 
 	@Test
-	public void testQueryWithScope()
+	public void testQueryWithScope() throws Exception
 	{
 		Scope scope = new Scope(new SimpleCondition("name", base, Comparison.TRUE), null, Scope.NO_LIMIT );
-		QueryResult<T> res = base.withScope(scope);
-		assertNotNull( res );
-		assertEquals( base.getDefaultOrder(), res.getOrder());
+		try(QueryResult<T> res = base.withScope(scope))
+		{
+			assertNotNull( res );
+			assertEquals( base.getDefaultOrder(), res.getOrder());
+		}
 	}
 
 	@Test
@@ -485,16 +489,22 @@ public class RecordBaseTest<T extends TestInterface> extends Assert
 	}
 
 	@Test
-	public void testWithScope()
+	public void testWithScope() throws Exception
 	{
-		assertEquals( base.where( new SimpleCondition("age", 12, Comparison.LARGER)).getEstimatedSize(), base.withScope( 
+		try(QueryResult<T> r = base.where( new SimpleCondition("age", 12, Comparison.LARGER)))
+		{
+			assertEquals( r.getEstimatedSize(), base.withScope( 
 				new Scope(new SimpleCondition("age", 12, Comparison.LARGER), SimpleOrder.fromSQLString( "age DESC"), Scope.NO_LIMIT )).stream().count() );
+		}
 	}
 
 	@Test
-	public void testGetAll()
+	public void testGetAll() throws Exception
 	{
-		assertEquals( base.getAll().size(), base.where( null).getEstimatedSize());
+		try(QueryResult<T> r = base.where( null))
+		{
+			assertEquals( base.getAll().size(), r.getEstimatedSize());
+		}
 		assertEquals( base.getAll().getOrder(), base.getDefaultOrder());
 	}
 

@@ -87,16 +87,25 @@ public class GroupResultTest extends Assert
 	}
 
 	@Test
-	public void testGetOrder()
+	public void testGetOrder() throws Exception
 	{
-		assertTrue( getGroup().getOrder().equals( base.getDefaultOrder()));
+		try(GroupResult<Object, TestInterface> res = getGroup())
+		{
+			assertTrue( res.getOrder().equals( base.getDefaultOrder()));
+		}
 	}
 	
 	@Test
-	public void testOrder()
+	public void testOrder() throws Exception
 	{
-		assertEquals(122, getGroup().order( SimpleOrder.fromSQLString( "age ASC")).findFirst( null ).getAge() );
-		assertEquals(145, getGroup().order( SimpleOrder.fromSQLString( "age DESC")).findFirst( null ).getAge() );
+		try(GroupResult<Object, TestInterface> res = getGroup())
+		{
+			assertEquals(122, res.order( SimpleOrder.fromSQLString( "age ASC")).findFirst( null ).getAge() );
+		}
+		try(GroupResult<Object, TestInterface> res = getGroup())
+		{
+			assertEquals(145, res.order( SimpleOrder.fromSQLString( "age DESC")).findFirst( null ).getAge() );
+		}
 	}
 	
 	private GroupResult<Object, TestInterface> getGroup()

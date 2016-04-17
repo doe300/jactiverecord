@@ -43,6 +43,7 @@ import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Objects;
+import java.util.stream.Stream;
 import org.junit.AfterClass;
 import org.junit.Assert;
 import static org.junit.Assert.assertEquals;
@@ -164,11 +165,17 @@ public class RecordStoreTest extends Assert
 	public void testGetValues_4args()
 	{
 		store.setValue( base, primaryKey, "name", "Heinz");
-		assertEquals("Heinz", store.getValues( base.getTableName(), "name", base.getPrimaryColumn(), primaryKey).findFirst().get());
+		try(final Stream<Object> s = store.getValues( base.getTableName(), "name", base.getPrimaryColumn(), primaryKey))
+		{
+			assertEquals("Heinz", s.findFirst().get());
+		}
 		//no results
 		assertEquals( 0, store.getValues( base.getTableName(), "name", base.getPrimaryColumn(), primaryKey+1000 ).count());
 		//negative test - throws exception
-		store.getValues( base.getTableName(), "no_column", base.getPrimaryColumn(), primaryKey);
+		try(Stream<Object> s = store.getValues( base.getTableName(), "no_column", base.getPrimaryColumn(), primaryKey))
+		{
+			
+		}
 	}
 
 	@Test
@@ -238,9 +245,10 @@ public class RecordStoreTest extends Assert
 		i.setName( "Failes");
 		if(store.isCached())
 		{
-			assertTrue( store.streamAllWithData( base, new String[]{base.getPrimaryColumn()}, scope2).anyMatch(
-					(Map<String,Object> m) -> ((Integer)i.getPrimaryKey()).equals(m.get( base.getPrimaryColumn()))
-			));
+			try(Stream<Map<String, Object>> s = store.streamAllWithData( base, new String[]{base.getPrimaryColumn()}, scope2))
+			{
+				assertTrue( s.anyMatch((Map<String,Object> m) -> ((Integer)i.getPrimaryKey()).equals(m.get( base.getPrimaryColumn()))));
+			}
 		}
 
 		//Test Limit
@@ -255,9 +263,10 @@ public class RecordStoreTest extends Assert
 		assertEquals( 2, store.streamAllWithData( base, base.getDefaultColumns(), scope3).count());
 
 		//Test Order (the two last added records should be returned, so the first is not in the results)
-		assertFalse( store.streamAllWithData( base, base.getDefaultColumns(), scope4).anyMatch(
-				(Map<String,Object> map) -> Integer.valueOf( i.getPrimaryKey()).equals( map.get( base.getPrimaryColumn()))
-		));
+		try(Stream<Map<String, Object>> s = store.streamAllWithData( base, base.getDefaultColumns(), scope4))
+		{
+			assertFalse( s.anyMatch((Map<String,Object> map) -> Integer.valueOf( i.getPrimaryKey()).equals( map.get( base.getPrimaryColumn()))));
+		}
 		
 		//negative test - throws exception
 		store.streamAllWithData( base, new String[]{"id", "no_colunm"}, scope);

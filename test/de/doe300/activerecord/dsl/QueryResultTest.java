@@ -86,9 +86,12 @@ public class QueryResultTest extends Assert
 	}
 
 	@Test
-	public void testSize()
+	public void testSize() throws Exception
 	{
-		assertTrue( base.where( new SimpleCondition("name", base, Comparison.IS_NOT_NULL)).getEstimatedSize() == 3);
+		try(final QueryResult<TestInterface> r = base.where( new SimpleCondition("name", base, Comparison.IS_NOT_NULL)))
+		{
+			assertTrue(r.getEstimatedSize() == 3);
+		}
 	}
 
 	@Test
@@ -113,10 +116,16 @@ public class QueryResultTest extends Assert
 	}
 	
 	@Test
-	public void testOrder()
+	public void testOrder() throws Exception
 	{
-		assertEquals( -123, base.where( new SimpleCondition("name", null, Comparison.IS_NOT_NULL)).order( SimpleOrder.
-				fromSQLString( "age ASC")).findFirst( null ).getAge());
-		assertEquals( 23, base.where( new SimpleCondition("name", null, Comparison.IS_NOT_NULL)).order( new SimpleOrder("age", SimpleOrder.OrderType.DESCENDING)).findFirst( null ).getAge());
+		try(QueryResult<TestInterface> r = base.where( new SimpleCondition("name", null, Comparison.IS_NOT_NULL)).order( SimpleOrder.
+				fromSQLString( "age ASC")))
+		{
+			assertEquals( -123, r.findFirst( null ).getAge());
+		}
+		try(QueryResult<TestInterface> r = base.where( new SimpleCondition("name", null, Comparison.IS_NOT_NULL)).order( new SimpleOrder("age", SimpleOrder.OrderType.DESCENDING)))
+		{
+			assertEquals( 23, r.findFirst( null ).getAge());
+		}
 	}
 }	

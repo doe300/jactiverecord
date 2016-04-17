@@ -93,7 +93,7 @@ public class AssociationHelperTest extends Assert
 		TestInterface i = base.createRecord(), m1 = base.createRecord(), m2 = base.createRecord();
 		base.getStore().setValue( base, m1.getPrimaryKey(), "fk_test_id", i.getPrimaryKey());
 		base.getStore().setValue( base, m2.getPrimaryKey(), "fk_test_id", i.getPrimaryKey());
-		assertTrue( AssociationHelper.getHasMany( i, TestInterface.class, "fk_test_id").count() == 2);
+		assertEquals(2, AssociationHelper.getHasMany( i, TestInterface.class, "fk_test_id").count());
 	}
 
 	@Test
@@ -102,7 +102,7 @@ public class AssociationHelperTest extends Assert
 		TestInterface i = base.createRecord(), m1 = base.createRecord(), m2 = base.createRecord();
 		m1.setName( "Appoloo");
 		m2.setName( "Appl");
-		assertTrue( AssociationHelper.getHasMany( i, TestInterface.class, new SimpleCondition("name", "App%l%", Comparison.LIKE)).count() == 2);
+		assertEquals(2, AssociationHelper.getHasMany( i, TestInterface.class, new SimpleCondition("name", "App%l%", Comparison.LIKE)).count());
 	}
 	
 	@Test
@@ -111,9 +111,9 @@ public class AssociationHelperTest extends Assert
 		TestInterface i = base.createRecord(), m1 = base.createRecord(), m2 = base.createRecord();
 		AssociationHelper.addHasManyThrough(i, m1, "mappingTable", "fk_test1", "fk_test2");
 		AssociationHelper.addHasManyThrough(i, m2, "mappingTable", "fk_test1", "fk_test2");
-		assertTrue( AssociationHelper.getHasManyThrough( i, TestInterface.class, "mappingTable", "fk_test1", "fk_test2").count() == 2);
+		assertEquals(2, AssociationHelper.getHasManyThrough( i, TestInterface.class, "mappingTable", "fk_test1", "fk_test2").count());
 		//negative test
-		assertTrue( AssociationHelper.getHasManyThrough( m1, TestInterface.class, "mappingTable", "fk_test1", "fk_test2").count() == 0);
+		assertEquals(0, AssociationHelper.getHasManyThrough( m1, TestInterface.class, "mappingTable", "fk_test1", "fk_test2").count());
 	}
 
 	@Test
@@ -138,7 +138,7 @@ public class AssociationHelperTest extends Assert
 		TestInterface i = base.createRecord(), m1 = base.createRecord(), m2 = base.createRecord();
 		AssociationHelper.addHasMany( i, m1, "fk_test_id");
 		AssociationHelper.addHasMany( i, m2, "fk_test_id");
-		assertTrue( AssociationHelper.getHasMany( i, TestInterface.class, "fk_test_id").count() == 2);
+		assertEquals(2, AssociationHelper.getHasMany( i, TestInterface.class, "fk_test_id").count());
 	}
 
 	@Test

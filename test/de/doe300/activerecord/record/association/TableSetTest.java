@@ -100,7 +100,10 @@ public class TableSetTest extends Assert
 	@Test
 	public void testIterator()
 	{
-		assertNotNull( set.iterator() );
+		for(TestInterface i : set)
+		{
+			assertTrue( set.contains( i));
+		}
 	}
 
 	@Test(expected = UnsupportedOperationException.class)
