@@ -25,6 +25,7 @@
 package de.doe300.activerecord.jdbc.driver;
 
 import de.doe300.activerecord.migration.constraints.IndexType;
+import java.io.Serializable;
 import javax.annotation.Nonnull;
 
 /**
@@ -71,6 +72,16 @@ public class HSQLDBDriver extends JDBCDriver
 		{
 			//see: http://hsqldb.org/doc/src/org/hsqldb/jdbc/JDBCSQLXML.html
 			return "LONGVARCHAR";
+		}
+//		if(java.util.UUID.class.isAssignableFrom( javaType ))
+//		{
+//			//XXX seems not to work, but documentation specifies such a type
+//			return "UUID";
+//		}
+		if(Serializable.class.isAssignableFrom( javaType) && super.getSQLType( javaType ).equals( super.getSQLType( 
+				Serializable.class)))	//makes sure, no special treatments are overridden
+		{
+			return "VARBINARY(" + Integer.MAX_VALUE + ")";
 		}
 		return super.getSQLType( javaType );
 	}

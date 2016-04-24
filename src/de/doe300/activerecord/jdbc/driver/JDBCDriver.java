@@ -488,23 +488,31 @@ public class JDBCDriver implements DBDriver
 		{
 			return Double.class;
 		}
+		if(sqlTypeUpper.startsWith( "UUID"))
+		{
+			return java.util.UUID.class;
+		}
 		throw new IllegalArgumentException( "Type not mapped: " + sqlTypeUpper );
 	}
 
 	/**
-	 * @param con
 	 * @param term
+	 * @param con
 	 * @return whether the term is a reserved keyword, either in SQL92 or vendor-specific
 	 * @throws SQLException
 	 */
-	public boolean isReservedKeyword(@Nonnull final Connection con, @Nonnull final String term) throws SQLException
+	public boolean isReservedKeyword(@Nonnull final String term, @Nullable final Connection con) throws SQLException
 	{
 		if(Arrays.stream( JDBCDriver.sql92Keywords ).anyMatch( (final String s) -> s.equalsIgnoreCase( term)))
 		{
 			return true;
 		}
-		final String[] keyWords = con.getMetaData().getSQLKeywords().split( "\\s*,\\s*");
-		return Arrays.stream( keyWords ).anyMatch( (final String s) -> s.equalsIgnoreCase( term));
+		if(con != null)
+		{
+			final String[] keyWords = con.getMetaData().getSQLKeywords().split( "\\s*,\\s*");
+			return Arrays.stream( keyWords ).anyMatch( (final String s) -> s.equalsIgnoreCase( term));
+		}
+		return false;
 	}
 
 	@Override

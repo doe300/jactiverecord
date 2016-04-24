@@ -25,6 +25,7 @@
 package de.doe300.activerecord.jdbc.driver;
 
 import de.doe300.activerecord.migration.constraints.IndexType;
+import java.io.Serializable;
 import java.sql.SQLXML;
 import javax.annotation.Nonnull;
 
@@ -102,13 +103,18 @@ public class MySQLDriver extends JDBCDriver
 		}
 		return "LIMIT " + (offset > 0 ? offset +", " : "0, ") + (limit > 0 ? limit+"": "");
 	}
-
+	
 	@Override
 	public String getSQLType(Class<?> javaType ) throws IllegalArgumentException
 	{
 		if(SQLXML.class.isAssignableFrom( javaType ))
 		{
 			return getStringDataType();
+		}
+		if(Serializable.class.isAssignableFrom( javaType) && super.getSQLType( javaType ).equals( super.getSQLType( 
+				Serializable.class)))	//makes sure, no special treatments are overridden
+		{
+			return "VARBINARY(" + Short.MAX_VALUE + ")";
 		}
 		return super.getSQLType( javaType );
 	}

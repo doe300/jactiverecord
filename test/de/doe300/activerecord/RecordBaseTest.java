@@ -60,6 +60,7 @@ public class RecordBaseTest<T extends TestInterface> extends Assert
 	private final Class<T> type;
 	
 	//FIXME validations fail for simple jdbc record-store / memory store /anything without cache??)
+	//but only finder-methods
 	
 	public RecordBaseTest(Class<T> type) throws SQLException
 	{
@@ -258,7 +259,7 @@ public class RecordBaseTest<T extends TestInterface> extends Assert
 	public void testFind() throws Exception
 	{
 		T t = base.createRecord();
-		assertTrue( base.find( new SimpleCondition(base.getPrimaryColumn(), t.getPrimaryKey(), Comparison.IS)).count() == 1);
+		assertEquals(1, base.find( new SimpleCondition(base.getPrimaryColumn(), t.getPrimaryKey(), Comparison.IS)).count());
 	}
 
 	@Test
@@ -270,7 +271,7 @@ public class RecordBaseTest<T extends TestInterface> extends Assert
 	@Test
 	public void testCount()
 	{
-		assertTrue( base.count( new SimpleCondition(base.getPrimaryColumn(), base, Comparison.IS_NOT_NULL)) == base.find( 
+		assertEquals( base.count( new SimpleCondition(base.getPrimaryColumn(), base, Comparison.IS_NOT_NULL)), base.find( 
 				new SimpleCondition(base.getPrimaryColumn(), base, Comparison.TRUE)).count());
 	}
 
@@ -297,7 +298,7 @@ public class RecordBaseTest<T extends TestInterface> extends Assert
 		assertNotNull( t );
 		assertTrue(base.search( "AlexandraEven").count() >= 1);
 		base.search( "AlexandraEven").forEach( (T i) -> i.destroy());
-		assertTrue(base.search( "AlexandraEven").count() == 0);
+		assertEquals(0, base.search( "AlexandraEven").count());
 	}
 
 	@Test

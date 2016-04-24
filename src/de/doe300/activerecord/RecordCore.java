@@ -214,7 +214,10 @@ public final class RecordCore implements AutoCloseable
 	{
 
 		final List<ProxyHandler> proxies = new ArrayList<>(custom != null ? custom.length : 5);
-		proxies.addAll( Arrays.asList( custom));
+		if(custom != null)
+		{
+			proxies.addAll( Arrays.asList( custom));
+		}
 		//add handlers by default, e.g. ValidatedHandler if recordType is ValidatedRecord and annotated with Validate
 		if(ValidatedRecord.class.isAssignableFrom( type ) && (type.isAnnotationPresent( Validate.class) || type.isAnnotationPresent( Validates.class)))
 		{

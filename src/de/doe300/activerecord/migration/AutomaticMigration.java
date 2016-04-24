@@ -423,6 +423,17 @@ public class AutomaticMigration implements Migration
 			if(columnName!=null && attType!=null && !columns.containsKey( columnName))
 			{
 				columns.put(columnName, driver.getSQLType(attType));
+				try
+				{
+					if(driver.isReservedKeyword( columnName, con))
+					{
+						throw new IllegalArgumentException("Column-name is reserved keyword: " + columnName);
+					}
+				}
+				catch (final SQLException ex )
+				{
+					throw new IllegalArgumentException(ex);
+				}
 			}
 		}
 		//4. add timestamps, other features
@@ -435,7 +446,6 @@ public class AutomaticMigration implements Migration
 		//5. mark or add primary key, add constraints
 		final String primaryColumn = getPrimaryColumn( recordType).toLowerCase();
 		columns.putIfAbsent(primaryColumn, driver.getSQLType(Integer.class));
-		//FIXME somehow make sure, reserved keywords are not used as columns or rewrite them
 		columns.put(primaryColumn, driver.getPrimaryKeyKeywords( columns.get( primaryColumn)));
 		return columns;
 	}

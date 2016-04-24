@@ -32,9 +32,13 @@ import de.doe300.activerecord.record.ActiveRecord;
 import de.doe300.activerecord.record.attributes.Attributes;
 import java.io.IOException;
 import java.io.Writer;
+import java.text.DateFormat;
+import java.text.SimpleDateFormat;
+import java.util.Date;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
+import javax.annotation.Generated;
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 import javax.annotation.processing.AbstractProcessor;
@@ -67,6 +71,7 @@ import javax.tools.JavaFileObject;
 public class AttributeGenerator extends AbstractProcessor
 {
 	private final Set<String> processedElements = new HashSet<>(10);
+	private final DateFormat ISO_8601_DATE_FORMAT = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSSZ");
 
 	@Override
 	public boolean process(Set<? extends TypeElement> annotations, RoundEnvironment roundEnv )
@@ -117,10 +122,12 @@ public class AttributeGenerator extends AbstractProcessor
 					writer.append( "import ").append( Nullable.class.getCanonicalName()).append( ";\n");
 				}
 
-				//TODO write @Generated annotation (somehow netbeans can't find it)
-
-				writer.append( "interface ").append( generatedFileName ).append(" extends ").
-						append( ActiveRecord.class.getCanonicalName());
+				writer.append( "import ").append( Generated.class.getCanonicalName()).append( ";\n");
+				writer.append( "\n");
+				
+				writer.append( "@Generated(value = {\"").append( getClass().getCanonicalName()).append( "\"}, date = \"")
+						.append( ISO_8601_DATE_FORMAT.format( new Date())).append( "\")\n");
+				writer.append( "interface ").append( generatedFileName ).append(" extends ").append( ActiveRecord.class.getCanonicalName());
 
 				writer.append(" {\n\n");
 

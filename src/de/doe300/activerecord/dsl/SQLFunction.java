@@ -31,6 +31,7 @@ import java.util.function.Function;
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 import javax.annotation.Syntax;
+import javax.annotation.concurrent.Immutable;
 
 /**
  * Base interface for all kinds of SQL built-in and user-defined functions
@@ -40,6 +41,7 @@ import javax.annotation.Syntax;
  * @param <R> the return-type of this function
  * @since 0.6
  */
+@Immutable
 public interface SQLFunction<T extends ActiveRecord, R> extends Function<T, R>
 {
 	/**

@@ -155,6 +155,9 @@ public class AggregateFunctionTest extends Assert
 		assertEquals( 3L, countDistinct.aggregate( 
 				base.getStore().findAllWithData( base, new String[]{"age"}, Scope.DEFAULT).
 						values().stream()).longValue());
+		
+		AggregateFunction<TestInterface, ?, ?, Number> countDistinct2 = new CountDistinct<>(new Signum<>("age", TestInterface::getAge));
+		assertEquals( 1L, base.aggregate( countDistinct2, null).longValue());
 	}
 
 	@Test

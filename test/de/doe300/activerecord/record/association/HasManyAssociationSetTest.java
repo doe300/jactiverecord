@@ -269,6 +269,12 @@ public class HasManyAssociationSetTest extends Assert
 		assertSame( 1, set.size());
 		subSet.add( a2);
 		assertSame( 2, set.size());
+		
+		assertTrue( subSet.contains( a2));
+		assertTrue( subSet.remove( a2));
+		assertTrue( subSet.add( a2));
+		assertSame( set.getRecordBase(), ((RecordSet)subSet).getRecordBase());
+		assertEquals( subSet.size(), ((RecordSet<TestInterface>)subSet).count( "name", TestInterface::getName));
 	}
 
 	@Test

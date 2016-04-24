@@ -25,6 +25,7 @@
 package de.doe300.activerecord.jdbc.driver;
 
 import de.doe300.activerecord.migration.constraints.IndexType;
+import java.io.Serializable;
 import java.lang.reflect.Array;
 import java.sql.ResultSet;
 import java.sql.SQLException;
@@ -122,11 +123,8 @@ public class PostgreSQLDriver extends JDBCDriver
 		{
 			return "DOUBLE PRECISION";
 		}
-		if( java.io.Serializable.class.isAssignableFrom( javaType ) 
-				&& !String.class.isAssignableFrom( javaType )
-				&& !java.util.Date.class.isAssignableFrom( javaType )
-				&& !Number.class.isAssignableFrom( javaType ))
-			//TODO better filter for all otherwise-supported and serializable types
+		if(Serializable.class.isAssignableFrom( javaType) && super.getSQLType( javaType ).equals( super.getSQLType( 
+				Serializable.class)))	//makes sure, no special treatments are overridden
 		{
 			return "BYTEA";
 		}

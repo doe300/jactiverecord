@@ -80,7 +80,7 @@ public abstract class AggregateFunction<T extends ActiveRecord, C, V extends Agg
 		}
 		else if(tableName != null)
 		{
-			arg =  tableName + "." + (String)column;
+			arg =  tableName + "." + column;
 		}
 		else
 		{

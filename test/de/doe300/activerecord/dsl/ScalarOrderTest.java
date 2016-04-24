@@ -70,9 +70,9 @@ public class ScalarOrderTest extends Assert
 	public void testCompare_Map_Map()
 	{
 		Order o = new ScalarOrder(new String[]{"name", "title", "age"}, new ScalarFunction[]{
-			new LowerCase("name", null),
+			new LowerCase<TestInterface>("name", TestInterface::getName),
 			null,
-			new Absolute("age", null)
+			new Absolute<TestInterface, Integer>("age", TestInterface::getAge)
 		}, null );
 		Map<String, Object> m1 = new HashMap<>(3);
 		m1.put( "name", "A");
@@ -99,9 +99,9 @@ public class ScalarOrderTest extends Assert
 	public void testReversed()
 	{
 		Order o = new ScalarOrder(new String[]{"name", "title", "age"}, new ScalarFunction[]{
-			new LowerCase("name", null),
+			new LowerCase<TestInterface>("name", TestInterface::getName),
 			null,
-			new Absolute("age", null)
+			new Absolute<TestInterface, Integer>("age", TestInterface::getAge)
 		}, null );
 		Map<String, Object> m1 = new HashMap<>(3);
 		m1.put( "name", "A");
@@ -138,8 +138,8 @@ public class ScalarOrderTest extends Assert
 	public void testCompare_ActiveRecord_ActiveRecord()
 	{
 		Order o = new ScalarOrder(new String[]{"name", "age"}, new ScalarFunction[]{
-			new LowerCase("name", null),
-			new Absolute("age", null)
+			new LowerCase<TestInterface>("name", TestInterface::getName),
+			new Absolute<TestInterface, Integer>("age", TestInterface::getAge)
 		}, null );
 		TestInterface i0 = base.createRecord();
 		i0.setName( "adam");
@@ -155,8 +155,8 @@ public class ScalarOrderTest extends Assert
 	public void testToSQL()
 	{
 		Order o = new ScalarOrder(new String[]{"name", "age"}, new ScalarFunction[]{
-			new LowerCase("name", null),
-			new Absolute("age", null)
+			new LowerCase<TestInterface>("name", TestInterface::getName),
+			new Absolute<TestInterface, Integer>("age", TestInterface::getAge)
 		}, null );
 		assertEquals( o.toSQL( JDBCDriver.DEFAULT), "LOWER(name) ASC, CAST(ABS(age) AS BIGINT) ASC");
 	}

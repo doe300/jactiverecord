@@ -304,7 +304,6 @@ public class ConditionSetTest extends Assert
 	@Test
 	public void testFindFirstWithScope()
 	{
-		//XXX fails to close Stream
 		assertNotNull( set.findFirstWithScope( new Scope(null, null, Scope.NO_LIMIT)));
 	}
 

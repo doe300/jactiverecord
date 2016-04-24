@@ -64,7 +64,7 @@ public class ProfilingRecordStoreTest extends Assert
 		this.recordStore = new ProfilingRecordStore(store );
 		final RecordCore core = RecordCore.fromStore( name, recordStore );
 		final RecordBase<TestInterface> origBase = core.getBase( TestInterface.class).getShardBase( ProfilingRecordStoreTest.class.getSimpleName());
-		base = ( ProfilingRecordBase<TestInterface> ) new ProfilingRecordBase<>(origBase);
+		base = new ProfilingRecordBase<>(origBase);
 		if(store instanceof MemoryRecordStore)
 		{
 			recordStore.getDriver().createMigration( TestInterface.class, ProfilingRecordStoreTest.class.getSimpleName(), store).apply();

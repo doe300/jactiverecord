@@ -25,6 +25,7 @@
 package de.doe300.activerecord.jdbc.driver;
 
 import de.doe300.activerecord.migration.constraints.IndexType;
+import java.io.Serializable;
 import javax.annotation.Nonnull;
 
 /**
@@ -113,6 +114,11 @@ public class SQLiteDriver extends JDBCDriver
 		if(Boolean.class.equals( javaType) || Boolean.TYPE.equals( javaType ))
 		{
 			return "TINYINT";
+		}
+		if(Serializable.class.isAssignableFrom( javaType) && super.getSQLType( javaType ).equals( super.getSQLType( 
+				Serializable.class)))	//makes sure, no special treatments are overridden
+		{
+			return "VARBINARY";
 		}
 		return super.getSQLType( javaType );
 	}

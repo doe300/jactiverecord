@@ -192,7 +192,7 @@ public class JDBCDriverTest extends Assert
 	@Test
 	public void testIsReservedKeyword() throws Exception
 	{
-		assertTrue( driver.isReservedKeyword( null, "when"));
+		assertTrue( driver.isReservedKeyword( "when", null));
 	}
 
 	@Test

@@ -123,6 +123,7 @@ public class MemoryTableTest extends Assert
 		assertTrue( table.getValues( row, new String[]{"name", "age"}).get( "name").equals( "Steve"));
 		
 		//failure-test
+		assertTrue(table.getValues( row + 1234, new String[]{"name", "age"} ).isEmpty() );
 		table.getValues( row, new String[]{"name", "noSuchColumn"});
 		table.removeRow( row );
 	}

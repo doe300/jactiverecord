@@ -73,7 +73,7 @@ public abstract class ScalarFunction<T extends ActiveRecord, C, R> implements SQ
 		}
 		else if(tableName != null)
 		{
-			arg =  tableName + "." + (String)column;
+			arg =  tableName + "." + column;
 		}
 		else
 		{
@@ -91,7 +91,10 @@ public abstract class ScalarFunction<T extends ActiveRecord, C, R> implements SQ
 	@Override
 	public R apply(final Map<String, Object> map)
 	{
-		//TODO doesn't work if column is SQLFunction
+		if(column instanceof SQLFunction)
+		{
+			return applySQLFunction( ((SQLFunction<T, C>)column).apply( map));
+		}
 		return applySQLFunction((C) map.get(column));
 	}
 

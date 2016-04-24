@@ -47,6 +47,8 @@ public class MemoryColumnTest extends Assert
 		
 		MemoryColumn column1 = new MemoryColumn("testC", String.class);
 		assertEquals( "5", column1.checkValue(5));
+		
+		assertNull( column.checkValue( null));
 	}
 
 	@Test

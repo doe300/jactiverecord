@@ -143,7 +143,7 @@ public class SimpleCondition implements Condition
 		}
 		else
 		{
-			columnID = tableName != null ? tableName + "." + (String)key : (String)key;
+			columnID = tableName != null ? tableName + "." + key : (String)key;
 		}
 		final String condValue = compValue instanceof SQLFunction ? ((SQLFunction)compValue).toSQL( driver, tableName ) : "?";
 		switch(comp)
