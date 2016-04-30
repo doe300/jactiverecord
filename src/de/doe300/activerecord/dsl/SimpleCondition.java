@@ -139,13 +139,13 @@ public class SimpleCondition implements Condition
 		final String columnID;
 		if(key instanceof SQLFunction)
 		{
-			columnID = ((SQLFunction)key).toSQL( driver, tableName);
+			columnID = ((SQLFunction<?,?>)key).toSQL( driver, tableName);
 		}
 		else
 		{
 			columnID = tableName != null ? tableName + "." + key : (String)key;
 		}
-		final String condValue = compValue instanceof SQLFunction ? ((SQLFunction)compValue).toSQL( driver, tableName ) : "?";
+		final String condValue = compValue instanceof SQLFunction ? ((SQLFunction<?,?>)compValue).toSQL( driver, tableName ) : "?";
 		switch(comp)
 		{
 			case IS:
@@ -204,7 +204,7 @@ public class SimpleCondition implements Condition
 	@Override
 	public boolean test( final Map<String, Object> t )
 	{
-		final Object compValue0 = key instanceof SQLFunction ? ((SQLFunction)key).apply( t) : t.get( (String)key );
+		final Object compValue0 = key instanceof SQLFunction ? ((SQLFunction<?,?>)key).apply( t) : t.get( (String)key );
 		if (compValue instanceof SQLFunction)
 		{
 			return comp.test(compValue0, SQLFunction.class.cast( compValue).apply(t));

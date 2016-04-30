@@ -26,6 +26,7 @@ package de.doe300.activerecord.store;
 
 import de.doe300.activerecord.jdbc.driver.JDBCDriver;
 import java.sql.Connection;
+import java.sql.SQLException;
 import javax.annotation.Nonnull;
 
 /**
@@ -45,4 +46,12 @@ public interface JDBCRecordStore extends RecordStore
 	@Override
 	@Nonnull
 	public JDBCDriver getDriver();
+	
+	/**
+	 * CAUTION: calling this will result in losing all the data in the table!
+	 * @param tableName
+	 * @return whether the table was dropped
+	 * @since 0.8
+	 */
+	public boolean dropTable(@Nonnull final String tableName) throws SQLException;
 }

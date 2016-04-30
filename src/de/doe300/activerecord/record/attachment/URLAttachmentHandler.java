@@ -57,9 +57,13 @@ public class URLAttachmentHandler implements AttachmentHandler
 			{
 				return false;
 			}
-			pathFunc.getAttachmentPath(record ).openConnection().getContentType();
-			//could connect and read content-type
-			return true;
+			final URL attachmentPath = pathFunc.getAttachmentPath(record );
+			if(attachmentPath != null && attachmentPath.openConnection().getContentType() != null)
+			{
+				//could connect and read content-type
+				return true;
+			}
+			return false;
 		}
 		catch ( final IOException ex )
 		{

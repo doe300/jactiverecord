@@ -41,6 +41,9 @@ public class EncryptionHandler implements ProxyHandler
 {
 	private final EncryptionAlgorithm algorithm;
 
+	/**
+	 * @param algorithm the underlying encryption-algorithm
+	 */
 	public EncryptionHandler(@Nonnull final EncryptionAlgorithm algorithm)
 	{
 		this.algorithm = algorithm;
@@ -89,6 +92,10 @@ public class EncryptionHandler implements ProxyHandler
 					}
 					if(String.class.isAssignableFrom( method.getReturnType()))
 					{
+						if(decryptedValue == null)
+						{
+							return null;
+						}
 						//if we return as string, remove all trailing '\0' (zero-bytes) since they most likely are padding
 						int lastIndex = decryptedValue.length;
 						while(lastIndex > 0 && decryptedValue[lastIndex-1] == '\0')

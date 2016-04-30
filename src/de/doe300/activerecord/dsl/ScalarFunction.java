@@ -69,7 +69,7 @@ public abstract class ScalarFunction<T extends ActiveRecord, C, R> implements SQ
 		final String arg;
 		if(column instanceof SQLFunction)
 		{
-			arg = ((SQLFunction)column).toSQL(driver, tableName);
+			arg = ((SQLFunction<?,?>)column).toSQL(driver, tableName);
 		}
 		else if(tableName != null)
 		{

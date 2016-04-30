@@ -30,6 +30,7 @@ import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 
 import de.doe300.activerecord.logging.Logging;
+import java.sql.Statement;
 
 /**
  * This migration is more general than the automatic migration.
@@ -47,9 +48,9 @@ public class ManualMigration implements Migration
 
 	/**
 	 *
-	 * @param command the command for {@link #apply(java.sql.Connection) }
-	 * @param updateCommand the command for {@link #update(java.sql.Connection) }
-	 * @param revertCommand the command for {@link #revert(java.sql.Connection) }
+	 * @param command the command for {@link #apply() }
+	 * @param updateCommand the command for {@link #update(boolean)  }
+	 * @param revertCommand the command for {@link #revert() }
 	 * @param con the underlying connection
 	 */
 	public ManualMigration(@Nonnull final String command, @Nullable final String updateCommand,
@@ -66,7 +67,10 @@ public class ManualMigration implements Migration
 	{
 		Logging.getLogger().info("ManualMigration", "Executing manual migration...");
 		Logging.getLogger().info("ManualMigration", command);
-		return con.createStatement().executeUpdate(command ) >= 0;
+		try(final Statement stmt = con.createStatement())
+		{
+			return stmt.executeUpdate(command ) >= 0;
+		}
 	}
 
 	@Override
@@ -78,7 +82,10 @@ public class ManualMigration implements Migration
 		}
 		Logging.getLogger().info("ManualMigration", "Executing manual revert...");
 		Logging.getLogger().info("ManualMigration", revertedCommand);
-		return con.createStatement().executeUpdate(revertedCommand) >= 0;
+		try(final Statement stmt = con.createStatement())
+		{
+			return stmt.executeUpdate(revertedCommand ) >= 0;
+		}
 	}
 
 	@Override
@@ -90,6 +97,9 @@ public class ManualMigration implements Migration
 		}
 		Logging.getLogger().info("ManualMigration", "Executing manual update...");
 		Logging.getLogger().info("ManualMigration", updateCommand);
-		return con.createStatement().executeUpdate(updateCommand) >= 0;
+		try(final Statement stmt = con.createStatement())
+		{
+			return stmt.executeUpdate(updateCommand ) >= 0;
+		}
 	}
 }

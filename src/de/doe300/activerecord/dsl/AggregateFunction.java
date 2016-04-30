@@ -38,6 +38,7 @@ import javax.annotation.Nullable;
 
 import de.doe300.activerecord.jdbc.driver.JDBCDriver;
 import de.doe300.activerecord.record.ActiveRecord;
+import de.doe300.activerecord.util.MutablePair;
 
 /**
  * An aggregate-function to be applied to a list of record
@@ -48,7 +49,7 @@ import de.doe300.activerecord.record.ActiveRecord;
  * @param <R>
  * @since 0.5
  */
-public abstract class AggregateFunction<T extends ActiveRecord, C, V extends AggregateFunction.ValueHolder<R>, R> implements Collector<T, V, R>, SQLFunction<T, R>
+public abstract class AggregateFunction<T extends ActiveRecord, C, V extends MutablePair<?,?>, R> implements Collector<T, V, R>, SQLFunction<T, R>
 {
 	private final String command;
 	protected final Function<T, C> columnFunction;
@@ -76,7 +77,7 @@ public abstract class AggregateFunction<T extends ActiveRecord, C, V extends Agg
 		final String arg;
 		if(column instanceof SQLFunction)
 		{
-			arg = ((SQLFunction)column).toSQL(driver, tableName);
+			arg = ((SQLFunction<?,?>)column).toSQL(driver, tableName);
 		}
 		else if(tableName != null)
 		{
@@ -105,13 +106,7 @@ public abstract class AggregateFunction<T extends ActiveRecord, C, V extends Agg
 	@Override
 	public Supplier<V> supplier()
 	{
-		return () -> (V)new ValueHolder<R>(null);
-	}
-
-	@Override
-	public Function<V, R> finisher()
-	{
-		return (final V h) -> h.value;
+		return () -> (V) new MutablePair<>( null, null);
 	}
 
 	@Override
@@ -139,30 +134,6 @@ public abstract class AggregateFunction<T extends ActiveRecord, C, V extends Agg
 		{
 			return false;
 		}
-		return equals( (SQLFunction)obj);
+		return equals( (SQLFunction<?,?>)obj);
 	}
-
-	public static class ValueHolder<T>
-	{
-		@Nullable
-		public T value;
-
-		public ValueHolder( @Nullable final T value )
-		{
-			this.value = value;
-		}
-	}
-
-	public static class BiValueHolder<T, U> extends ValueHolder<T>
-	{
-		@Nullable
-		public U secondValue;
-
-		public BiValueHolder(@Nullable final T value, @Nullable final U secondValue)
-		{
-			super(value);
-			this.secondValue = secondValue;
-		}
-	}
-
 }

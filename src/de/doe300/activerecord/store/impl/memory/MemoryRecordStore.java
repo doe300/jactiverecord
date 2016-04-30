@@ -83,7 +83,7 @@ public class MemoryRecordStore implements RecordStore
 		return table;
 	}
 	
-	private void assertColumnsExist(@Nonnull final MemoryTable table, @Nonnull final String... columns) throws IllegalArgumentException
+	private static void assertColumnsExist(@Nonnull final MemoryTable table, @Nonnull final String... columns) throws IllegalArgumentException
 	{
 		for(final String column : columns)
 		{
@@ -94,7 +94,7 @@ public class MemoryRecordStore implements RecordStore
 		}
 	}
 	
-	private void assertColumnsExist(@Nonnull final MemoryTable table, @Nonnull final Iterable<String> columns) throws IllegalArgumentException
+	private static void assertColumnsExist(@Nonnull final MemoryTable table, @Nonnull final Iterable<String> columns) throws IllegalArgumentException
 	{
 		for(final String column : columns)
 		{

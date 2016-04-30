@@ -43,12 +43,23 @@ public class CipherEncryptionWrapper implements EncryptionAlgorithm
 	private final Cipher encryptionCipher;
 	private final Cipher decryptionCipher;
 
+	/**
+	 * Creates a new wrapper on top of the given encryption- and decryption-ciphers
+	 * @param encryptionCipher
+	 * @param decryptionCipher 
+	 */
 	public CipherEncryptionWrapper(@Nonnull final Cipher encryptionCipher, @Nonnull final Cipher decryptionCipher)
 	{
 		this.encryptionCipher = encryptionCipher;
 		this.decryptionCipher = decryptionCipher;
 	}
 
+	/**
+	 * Creates a new wrapper inclusive the encryption-and decryption-cipher from the algorithm and key given
+	 * @param transformation the algorithm to apply
+	 * @param key the key to apply
+	 * @throws GeneralSecurityException 
+	 */
 	public CipherEncryptionWrapper(@Nonnull final String transformation, @Nonnull final Key key) throws GeneralSecurityException
 	{
 		this(Cipher.getInstance( transformation), Cipher.getInstance( transformation));
@@ -56,6 +67,12 @@ public class CipherEncryptionWrapper implements EncryptionAlgorithm
 		decryptionCipher.init( Cipher.DECRYPT_MODE, key);
 	}
 	
+	/**
+	 * Creates a new wrapper from the algorithm and the given certificate
+	 * @param transformation the algorithm to apply
+	 * @param certificate
+	 * @throws GeneralSecurityException 
+	 */
 	public CipherEncryptionWrapper(@Nonnull final String transformation, @Nonnull final Certificate certificate) throws GeneralSecurityException
 	{
 		this(Cipher.getInstance( transformation), Cipher.getInstance( transformation));

@@ -42,7 +42,7 @@ public class ScalarOrder extends SimpleOrder
 	
 	/**
 	 * The order of the <code>columns</code> specifies the priority of the column in the ordering.
-	 * If the <code>types</code>-array is smaller than the <code>columns</code>, the rest will be filled with {@link OrderType#ASCENDING}
+	 * If the <code>types</code>-array is smaller than the <code>columns</code>, the rest will be filled with {@link SimpleOrder.OrderType#ASCENDING}
 	 * allowing for  only the <code>columns</code> to be specified.
 	 * @param columns
 	 * @param mappings the scalar functions to apply to the columns for value-mapping

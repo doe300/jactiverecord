@@ -137,7 +137,7 @@ public class TestServer extends Assert
 		final Map<String, Class<?>> columns = new HashMap<>(2);
 		columns.put( "fk_test1", Integer.class);
 		columns.put( "fk_test2", Integer.class);
-		getTestCore().getStore().getDriver().createMigration( tableName, columns, getTestCore().getStore()).apply();
+		Assert.assertTrue( getTestCore().getStore().getDriver().createMigration( tableName, columns, getTestCore().getStore()).apply());
 	}
 	
 	public static void buildTestTable(@Nonnull final Class<? extends ActiveRecord> type, @Nonnull final String tableName) throws SQLException, Exception
@@ -156,7 +156,7 @@ public class TestServer extends Assert
 		final Map<String, Class<?>> columns = new HashMap<>(2);
 		columns.put( "fk_test1", Integer.class);
 		columns.put( "fk_test2", Integer.class);
-		getTestCore().getStore().getDriver().createMigration( tableName, columns, getTestCore().getStore()).revert();
+		Assert.assertTrue( getTestCore().getStore().getDriver().createMigration( tableName, columns, getTestCore().getStore()).revert());
 	}
 	
 	public static void destroyTestTable(@Nonnull final Class<? extends ActiveRecord> type, @Nonnull final String tableName) throws SQLException, Exception

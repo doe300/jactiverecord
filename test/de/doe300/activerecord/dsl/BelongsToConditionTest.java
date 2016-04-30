@@ -30,7 +30,6 @@ import de.doe300.activerecord.TestServer;
 import de.doe300.activerecord.record.ActiveRecord;
 import java.util.Collections;
 import java.util.HashMap;
-import java.util.Map;
 import java.util.stream.Stream;
 import org.junit.AfterClass;
 import org.junit.Assert;
@@ -132,7 +131,6 @@ public class BelongsToConditionTest extends Assert
 	public void testTest_Map()
 	{
 		TestInterface t4 = base.createRecord();
-		assertFalse( cond1.test( (Map<String, Object>)null));
 		assertFalse( cond1.test( new HashMap<String, Object>(0) ));
 		assertFalse( cond2.test( t4));
 		assertTrue( cond2.test( Collections.singletonMap( "fk_test_id", t3.getPrimaryKey())));

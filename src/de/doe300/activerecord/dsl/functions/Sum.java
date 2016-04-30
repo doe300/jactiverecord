@@ -30,10 +30,10 @@ import java.util.function.Function;
 import java.util.stream.Stream;
 
 import de.doe300.activerecord.dsl.AggregateFunction;
-import de.doe300.activerecord.dsl.AggregateFunction.ValueHolder;
 import de.doe300.activerecord.dsl.SQLFunction;
 import de.doe300.activerecord.jdbc.driver.JDBCDriver;
 import de.doe300.activerecord.record.ActiveRecord;
+import de.doe300.activerecord.util.MutablePair;
 import javax.annotation.Nonnull;
 
 /**
@@ -46,7 +46,7 @@ import javax.annotation.Nonnull;
  * 
  * @since 0.6
  */
-public class Sum<T extends ActiveRecord, C extends Number> extends AggregateFunction<T, C, ValueHolder<Number>, Number>
+public class Sum<T extends ActiveRecord, C extends Number> extends AggregateFunction<T, C, MutablePair<Number, Void>, Number>
 {
 	/**
 	 * @param columnName
@@ -59,45 +59,54 @@ public class Sum<T extends ActiveRecord, C extends Number> extends AggregateFunc
 		super(JDBCDriver.AGGREGATE_SUM, columnName, columnFunc);
 	}
 	
+	/**
+	 * @param sqlFunction the SQL-function which results to sum
+	 */
 	public Sum(@Nonnull final SQLFunction<T, C> sqlFunction)
 	{
 		super(JDBCDriver.AGGREGATE_SUM, sqlFunction);
 	}
 
 	@Override
-	public BiConsumer<ValueHolder<Number>, T> accumulator()
+	public BiConsumer<MutablePair<Number, Void>, T> accumulator()
 	{
-		return (final ValueHolder<Number> holder, final T record) -> {
+		return (final MutablePair<Number, Void> holder, final T record) -> {
 			final C colVal = columnFunction.apply(record);
 			if (colVal != null)
 			{
-				if (holder.value != null)
+				if (holder.hasFirst())
 				{
-					holder.value = holder.value.longValue() + colVal.longValue();
+					holder.setFirst( holder.getFirstOrThrow().longValue() + colVal.longValue());
 				}
 				else
 				{
-					holder.value = colVal.longValue();
+					holder.setFirst( colVal);
 				}
 			}
 		};
 	}
 
 	@Override
-	public BinaryOperator<AggregateFunction.ValueHolder<Number>> combiner()
+	public BinaryOperator<MutablePair<Number, Void>> combiner()
 	{
-		return (final ValueHolder<Number> h1, final ValueHolder<Number> h2) -> {
-			if (h1.value == null)
+		return (final MutablePair<Number, Void> h1, final MutablePair<Number, Void> h2) -> {
+			if (!h1.hasFirst())
 			{
 				return h2;
 			}
-			if (h2.value == null)
+			if (!h2.hasFirst())
 			{
 				return h1;
 			}
-			h1.value = h1.value.longValue() + h2.value.longValue();
+			h1.setFirst( h1.getFirstOrThrow().longValue() + h2.getFirstOrThrow().longValue());
 			return h1;
 		};
+	}
+
+	@Override
+	public Function<MutablePair<Number, Void>, Number> finisher()
+	{
+		return MutablePair::getFirst;
 	}
 
 	@Override

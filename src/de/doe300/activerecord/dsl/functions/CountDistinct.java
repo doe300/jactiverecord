@@ -29,14 +29,13 @@ import java.util.Set;
 import java.util.function.BiConsumer;
 import java.util.function.BinaryOperator;
 import java.util.function.Function;
-import java.util.function.Supplier;
 import java.util.stream.Stream;
 
 import de.doe300.activerecord.dsl.AggregateFunction;
-import de.doe300.activerecord.dsl.AggregateFunction.BiValueHolder;
 import de.doe300.activerecord.dsl.SQLFunction;
 import de.doe300.activerecord.jdbc.driver.JDBCDriver;
 import de.doe300.activerecord.record.ActiveRecord;
+import de.doe300.activerecord.util.MutablePair;
 import javax.annotation.Nonnull;
 
 /**
@@ -49,7 +48,7 @@ import javax.annotation.Nonnull;
  * 
  * @since 0.6
  */
-public class CountDistinct<T extends ActiveRecord, C> extends AggregateFunction<T, C, BiValueHolder<Number, Set<C>>, Number>
+public class CountDistinct<T extends ActiveRecord, C> extends AggregateFunction<T, C, MutablePair<Number, Set<C>>, Number>
 {
 	/**
 	 * @param columnName
@@ -72,52 +71,51 @@ public class CountDistinct<T extends ActiveRecord, C> extends AggregateFunction<
 	}
 
 	@Override
-	public Supplier<BiValueHolder<Number, Set<C>>> supplier()
+	public BiConsumer<MutablePair<Number, Set<C>>, T> accumulator()
 	{
-		return () -> new AggregateFunction.BiValueHolder<Number, Set<C>>(null, null);
-	}
-
-	@Override
-	public BiConsumer<BiValueHolder<Number, Set<C>>, T> accumulator()
-	{
-		return (final BiValueHolder<Number, Set<C>> holder, final T record) ->
+		return (final MutablePair<Number, Set<C>> holder, final T record) ->
 		{
 			final C colVal = columnFunction.apply( record );
 			if(colVal != null)
 			{
-				if(holder.value == null)
+				if(!holder.hasFirst())
 				{
-					holder.value = 1L;
-					holder.secondValue = new HashSet<>(10);
-					holder.secondValue.add( colVal );
+					holder.setFirst( 1L);
+					holder.setSecond( new HashSet<>(10));
+					holder.getSecondOrThrow().add( colVal);
 				}
 				else
 				{
-					holder.secondValue.add( colVal );
-					holder.value = (long)holder.secondValue.size();
-					holder.secondValue.add( colVal );
+					holder.getSecondOrThrow().add( colVal);
+					holder.setFirst( holder.getSecondOrThrow().size());
 				}
 			}
 		};
 	}
 
 	@Override
-	public BinaryOperator<BiValueHolder<Number, Set<C>>> combiner()
+	public BinaryOperator<MutablePair<Number, Set<C>>> combiner()
 	{
-		return (final BiValueHolder<Number, Set<C>> h1, final BiValueHolder<Number, Set<C>> h2) ->
+		return (final MutablePair<Number, Set<C>> h1, final MutablePair<Number, Set<C>> h2) ->
 		{
-			if(h1.value == null)
+			if(!h1.hasFirst())
 			{
 				return h2;
 			}
-			if(h2.value == null)
+			if(!h2.hasFirst())
 			{
 				return h1;
 			}
-			h1.secondValue.addAll(h2.secondValue);
-			h1.value = (long)h1.secondValue.size();
+			h1.getSecondOrThrow().addAll( h2.getSecondOrThrow());
+			h1.setFirst( h1.getSecondOrThrow().size());
 			return h1;
 		};
+	}
+
+	@Override
+	public Function<MutablePair<Number, Set<C>>, Number> finisher()
+	{
+		return MutablePair::getFirst;
 	}
 
 	@Override

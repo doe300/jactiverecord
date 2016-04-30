@@ -30,10 +30,10 @@ import java.util.function.Function;
 import java.util.stream.Stream;
 
 import de.doe300.activerecord.dsl.AggregateFunction;
-import de.doe300.activerecord.dsl.AggregateFunction.ValueHolder;
 import de.doe300.activerecord.dsl.SQLFunction;
 import de.doe300.activerecord.jdbc.driver.JDBCDriver;
 import de.doe300.activerecord.record.ActiveRecord;
+import de.doe300.activerecord.util.MutablePair;
 import javax.annotation.Nonnull;
 
 /**
@@ -46,7 +46,7 @@ import javax.annotation.Nonnull;
  * 
  * @since 0.6
  */
-public class Maximum<T extends ActiveRecord, C extends Comparable<? super C>> extends AggregateFunction<T, C, ValueHolder<C>, C>
+public class Maximum<T extends ActiveRecord, C extends Comparable<? super C>> extends AggregateFunction<T, C, MutablePair<C, Void>, C>
 {
 
 	/**
@@ -60,46 +60,55 @@ public class Maximum<T extends ActiveRecord, C extends Comparable<? super C>> ex
 		super(JDBCDriver.AGGREGATE_MAXIMUM, columnName, columnFunc);
 	}
 	
+	/**
+	 * @param sqlFunction the SQL-function to select the maximum of the results
+	 */
 	public Maximum(@Nonnull final SQLFunction<T, C> sqlFunction)
 	{
 		super(JDBCDriver.AGGREGATE_MAXIMUM, sqlFunction);
 	}
 
 	@Override
-	public BiConsumer<ValueHolder<C>, T> accumulator()
+	public BiConsumer<MutablePair<C, Void>, T> accumulator()
 	{
-		return (final ValueHolder<C> holder, final T record) -> {
+		return (final MutablePair<C, Void> holder, final T record) -> {
 			final C colVal = columnFunction.apply(record);
 			if (colVal != null)
 			{
-				if (holder.value != null)
+				if (holder.hasFirst())
 				{
-					holder.value = colVal.compareTo(holder.value) > 0 ? colVal : holder.value;
+					holder.setFirst( colVal.compareTo( holder.getFirst()) > 0 ? colVal : holder.getFirst());
 				}
 				else
 				{
-					holder.value = colVal;
+					holder.setFirst( colVal );
 				}
 			}
 		};
 	}
 
 	@Override
-	public BinaryOperator<ValueHolder<C>> combiner()
+	public BinaryOperator<MutablePair<C, Void>> combiner()
 	{
-		return (final ValueHolder<C> h1, final ValueHolder<C> h2) -> {
-			if (h1.value == null)
+		return (final MutablePair<C, Void> h1, final MutablePair<C, Void> h2) -> {
+			if (!h1.hasFirst())
 			{
 				return h2;
 			}
-			if (h2.value == null)
+			if (!h2.hasFirst())
 			{
 				return h1;
 			}
-			return h1.value.compareTo(h2.value) > 0 ? h1 : h2;
+			return h1.getFirstOrThrow().compareTo(h2.getFirstOrThrow()) > 0 ? h1 : h2;
 		};
 	}
 
+	@Override
+	public Function<MutablePair<C, Void>, C> finisher()
+	{
+		return MutablePair::getFirst;
+	}
+	
 	@Override
 	protected C aggregateValues( final Stream<C> valueStream )
 	{

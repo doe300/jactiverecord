@@ -38,7 +38,6 @@ public interface RecordCallbacks extends ActiveRecord
 	 * Use this callback to initialize default-values.
 	 * @see RecordBase#createRecord()
 	 * @see RecordBase#createRecord(java.util.Map)
-	 * @see RecordBase#newRecord(int)
 	 */
 	public default void afterCreate()
 	{

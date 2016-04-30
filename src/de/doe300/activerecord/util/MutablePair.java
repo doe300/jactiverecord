@@ -27,50 +27,29 @@ package de.doe300.activerecord.util;
 import java.util.Objects;
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
-import javax.annotation.concurrent.Immutable;
 
 /**
  *
  * @author doe300
  * @param <T>
  * @param <U>
- * @since 0.7
+ * @since 0.8
  */
-@Immutable
-public class Pair<T, U>
+public class MutablePair<T, U>
 {
-	/**
-	 * A {@link Pair} without any of the two variables set
-	 */
-	public static final Pair EMPTY = new Pair<>(null, null );
-	
-	private final T first;
-	private final U second;
+	private T first;
+	private U second;
 
-	private Pair(@Nullable final T first, @Nullable final  U second )
+	/**
+	 * @param first
+	 * @param second 
+	 */
+	public MutablePair(@Nullable final T first, @Nullable final  U second )
 	{
 		this.first = first;
 		this.second = second;
 	}
 	
-	/**
-	 * Creates a new Pair from the two variables
-	 * @param <T>
-	 * @param <U>
-	 * @param first
-	 * @param second
-	 * @return the new immutable pair
-	 */
-	@Nonnull
-	public static <T,U> Pair<T,U> createPair(@Nullable final T first, @Nullable final  U second )
-	{
-		if(first == null && second == null)
-		{
-			return EMPTY;
-		}
-		return new Pair<>(first,second);
-	}
-
 	/**
 	 * @return the first
 	 */
@@ -122,13 +101,29 @@ public class Pair<T, U>
 	{
 		return Objects.requireNonNull( second);
 	}
+	
+	/**
+	 * @param value the new first value
+	 */
+	public void setFirst(@Nullable final T value)
+	{
+		this.first = value;
+	}
+	
+	/**
+	 * @param value the new second value
+	 */
+	public void setSecond(@Nullable final U value)
+	{
+		this.second = value;
+	}
 
 	@Override
 	public boolean equals( Object o )
 	{
-		return (o instanceof Pair) &&
-				Objects.equals(first, ((Pair<?,?>)o).first) &&
-				Objects.equals( second, ((Pair<?,?>)o).second);
+		return (o instanceof MutablePair) &&
+				Objects.equals(first, ((MutablePair<?,?>)o).first) &&
+				Objects.equals(second, ((MutablePair<?,?>)o).second);
 	}
 
 	@Override

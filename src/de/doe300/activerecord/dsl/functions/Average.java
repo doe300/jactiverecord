@@ -27,14 +27,13 @@ package de.doe300.activerecord.dsl.functions;
 import java.util.function.BiConsumer;
 import java.util.function.BinaryOperator;
 import java.util.function.Function;
-import java.util.function.Supplier;
 import java.util.stream.Stream;
 
 import de.doe300.activerecord.dsl.AggregateFunction;
-import de.doe300.activerecord.dsl.AggregateFunction.BiValueHolder;
 import de.doe300.activerecord.dsl.SQLFunction;
 import de.doe300.activerecord.jdbc.driver.JDBCDriver;
 import de.doe300.activerecord.record.ActiveRecord;
+import de.doe300.activerecord.util.MutablePair;
 import javax.annotation.Nonnull;
 
 /**
@@ -46,7 +45,7 @@ import javax.annotation.Nonnull;
  * 
  * @since 0.6
  */
-public class Average<T extends ActiveRecord, C extends Number> extends AggregateFunction<T, C, BiValueHolder<Number, Long>, Number>
+public class Average<T extends ActiveRecord, C extends Number> extends AggregateFunction<T, C, MutablePair<Number, Long>, Number>
 {
 	/**
 	 * @param columnName
@@ -69,63 +68,57 @@ public class Average<T extends ActiveRecord, C extends Number> extends Aggregate
 	}
 
 	@Override
-	public Supplier<BiValueHolder<Number, Long>> supplier()
+	public BiConsumer<MutablePair<Number, Long>, T> accumulator()
 	{
-		return () -> new BiValueHolder<Number, Long>(null, null);
-	}
-
-	@Override
-	public BiConsumer<BiValueHolder<Number, Long>, T> accumulator()
-	{
-		return (final BiValueHolder<Number, Long> holder, final T record) -> {
+		return (final MutablePair<Number, Long> holder, final T record) -> {
 			final C colVal = columnFunction.apply(record);
 			if (colVal != null)
 			{
-				if (holder.value != null)
+				if (holder.hasFirst())
 				{
-					holder.value =  holder.value.longValue() + colVal.doubleValue();
-					holder.secondValue += 1L;
+					holder.setFirst( holder.getFirstOrThrow().longValue() + colVal.doubleValue());
+					holder.setSecond( holder.getSecondOrThrow() + 1L);
 				}
 				else
 				{
-					holder.value = colVal.doubleValue();
-					holder.secondValue =  1L;
+					holder.setFirst( colVal.doubleValue());
+					holder.setSecond( 1L);
 				}
 			}
 		};
 	}
 
 	@Override
-	public BinaryOperator<BiValueHolder<Number, Long>> combiner()
+	public BinaryOperator<MutablePair<Number, Long>> combiner()
 	{
-		return (final BiValueHolder<Number, Long> h1, final BiValueHolder<Number, Long> h2) -> {
-			if (h1.value == null)
+		return (final MutablePair<Number, Long> h1, final MutablePair<Number, Long> h2) -> {
+			if (!h1.hasFirst())
 			{
 				return h2;
 			}
-			if (h2.value == null)
+			if (!h2.hasFirst())
 			{
 				return h1;
 			}
-			h1.value = h1.value.doubleValue() + h2.value.doubleValue();
-			h1.secondValue += h2.secondValue;
+			h1.setFirst( h1.getFirstOrThrow().doubleValue() + h2.getFirstOrThrow().doubleValue());
+			h1.setSecond( h1.getSecondOrThrow() + h2.getSecondOrThrow());
 			return h1;
 		};
 	}
-
+	
 	@Override
-	public Function<BiValueHolder<Number, Long>, Number> finisher()
+	public Function<MutablePair<Number, Long>, Number> finisher()
 	{
-		return (final BiValueHolder<Number, Long> holder) -> holder.value.doubleValue() / holder.secondValue;
+		return (final MutablePair<Number, Long> holder) -> holder.getFirstOrThrow().doubleValue() / holder.getSecondOrThrow().doubleValue();
 	}
 
 	@Override
 	protected Double aggregateValues( final Stream<C> valueStream )
 	{
-		return valueStream.parallel().map( (final C c) -> new AggregateFunction.BiValueHolder<Double, Long>(c.doubleValue(), 1L)).
-			reduce( (final AggregateFunction.BiValueHolder<Double, Long> b1, final AggregateFunction.BiValueHolder<Double, Long> b2) ->
+		return valueStream.parallel().map( (final C c) -> new MutablePair<>( c.doubleValue(), 1L)).
+			reduce( (final MutablePair<Double, Long> b1, final MutablePair<Double, Long> b2) ->
 			{
-				return new AggregateFunction.BiValueHolder<>(b1.value+b2.value, b1.secondValue + b2.secondValue);
-			}).map( (final AggregateFunction.BiValueHolder<Double, Long> b) -> b.value / b.secondValue).orElse( null);
+				return new MutablePair<>( b1.getFirstOrThrow() + b2.getFirstOrThrow(), b1.getSecondOrThrow() + b2.getSecondOrThrow());
+			}).map( (final MutablePair<Double, Long> b) -> b.getFirstOrThrow() / b.getSecondOrThrow()).orElse( null);
 	}
 }

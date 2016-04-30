@@ -201,7 +201,7 @@ public class SimpleJDBCRecordStore implements JDBCRecordStore
 				}
 				else
 				{
-					mig = new AutomaticMigration(base.getRecordType(), base.getTableName(), con, driver);
+					mig = new AutomaticMigration(base.getRecordType(), base.getTableName(), this, driver);
 				}
 				try
 				{
@@ -872,5 +872,28 @@ public class SimpleJDBCRecordStore implements JDBCRecordStore
 			Logging.getLogger().error( "JDBCStore", ex);
 			throw new IllegalArgumentException("Failed to insert new row",ex);
 		}
+	}
+
+	@Override
+	public boolean dropTable( String tableName ) throws SQLException
+	{
+		final String sql = "DROP TABLE "+tableName;
+		Logging.getLogger().info("JDBCStore", "Executing automatic table-drop...");
+		Logging.getLogger().info("JDBCStore", sql);
+		try(Statement stm = con.createStatement( ))
+		{
+			if(stm.executeUpdate(sql) < 0)
+			{
+				Logging.getLogger().error("JDBCStore", "Automatic table-drop failed!");
+				return false;
+			}
+		}
+		catch(final SQLException e)
+		{
+			Logging.getLogger().error( "JDBCStore", "Automatic table-drop failed with error!");
+			Logging.getLogger().error( "JDBCStore", e);
+			throw e;
+		}
+		return true;
 	}
 }

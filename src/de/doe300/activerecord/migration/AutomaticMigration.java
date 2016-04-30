@@ -26,7 +26,6 @@ package de.doe300.activerecord.migration;
 
 import java.lang.reflect.Method;
 import java.lang.reflect.Modifier;
-import java.sql.Connection;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
@@ -50,6 +49,7 @@ import de.doe300.activerecord.record.association.RecordSet;
 import de.doe300.activerecord.record.attributes.AttributeGetter;
 import de.doe300.activerecord.record.attributes.AttributeSetter;
 import de.doe300.activerecord.record.attributes.Attributes;
+import de.doe300.activerecord.store.JDBCRecordStore;
 import javax.annotation.Nonnull;
 
 /**
@@ -62,17 +62,17 @@ import javax.annotation.Nonnull;
  *	<li>If the method is annotated by {@link Attribute}, the {@link Attribute#name() } is used as name:
  *		<ol>
  *			<li>Use the {@link Attribute#typeName() } as type, if set, and finish</li>
- *			<li>Use the {@link Attribute#type() }, map it via {@link #getSQLType(int) } and finish</li>
+ *			<li>Use the {@link Attribute#type() }, map it via {@link JDBCDriver#getSQLType(Class) } and finish</li>
  *		</ol>
  *	</li>
  *	<li>Ignore method, if it is <code>static</code> or <code>default</code>.</li>
  *	<li>If the method is annotated by {@link AttributeGetter}, use {@link AttributeGetter#name() } as column-name<br>
- *		Use the methods return-type, map it via {@link #getSQLType(int) } and finish
+ *		Use the methods return-type, map it via {@link JDBCDriver#getSQLType(Class) } and finish
  *	</li>
  *	<li>If the method is annotated by {@link AttributeSetter}, use {@link AttributeSetter#name() } as column-name<br>
- *		Use the methods only parameter, map it via {@link #getSQLType(int) } and finish
+ *		Use the methods only parameter, map it via {@link JDBCDriver#getSQLType(Class) } and finish
  *	</li>
- *	<li>Use the methods property-name as column-name and its return-type (or only parameter) as data-type, map it via {@link #getSQLType(int) } and finish</li>
+ *	<li>Use the methods property-name as column-name and its return-type (or only parameter) as data-type, map it via {@link JDBCDriver#getSQLType(Class) } and finish</li>
  * </ol>
  *
  * NOTE: The resulting columns may be inaccurate due to type discrepancies in mapping java-types to SQL-types.
@@ -85,34 +85,34 @@ public class AutomaticMigration implements Migration
 {
 	protected final Class<? extends ActiveRecord> recordType;
 	protected final String tableName;
-	protected final Connection con;
+	protected final JDBCRecordStore store;
 	protected final JDBCDriver driver;
 
 	/**
 	 * @param recordType the type to create and drop the table for
-	 * @param con the SQL-Connection
+	 * @param store the SQL-store
 	 * @param driver the vendor-specific driver for the vendor used (if known)
 	 */
-	public AutomaticMigration(@Nonnull final Class<? extends ActiveRecord> recordType, @Nullable final Connection con, @Nonnull final JDBCDriver driver )
+	public AutomaticMigration(@Nonnull final Class<? extends ActiveRecord> recordType, @Nullable final JDBCRecordStore store, @Nonnull final JDBCDriver driver )
 	{
 		this.recordType = recordType;
 		this.tableName = getTableName( recordType );
-		this.con = con;
+		this.store = store;
 		this.driver = driver;
 	}
 
 	/**
 	 * @param recordType the type to create and drop the table for
 	 * @param tableName the table-name to use
-	 * @param con the SQL-Connection
+	 * @param store the SQL-store
 	 * @param driver the vendor-specific driver for the vendor used (if known)
 	 * @since 0.7
 	 */
-	public AutomaticMigration(@Nonnull final Class<? extends ActiveRecord> recordType, @Nonnull final String tableName, @Nullable final Connection con, @Nonnull final JDBCDriver driver )
+	public AutomaticMigration(@Nonnull final Class<? extends ActiveRecord> recordType, @Nonnull final String tableName, @Nullable final JDBCRecordStore store, @Nonnull final JDBCDriver driver )
 	{
 		this.recordType = recordType;
 		this.tableName = tableName;
-		this.con = con;
+		this.store = store;
 		this.driver = driver;
 	}
 
@@ -120,7 +120,7 @@ public class AutomaticMigration implements Migration
 	public boolean apply() throws SQLException
 	{
 		//1. check if table exists
-		if(structureExists( con, tableName))
+		if(store.exists( tableName))
 		{
 			return false;
 		}
@@ -128,12 +128,12 @@ public class AutomaticMigration implements Migration
 		final Map<String,String> columns = getColumnsFromModel( recordType );
 		//3. execute statement
 		final String sql = "CREATE TABLE "+tableName+" ("
-			+columns.entrySet().stream().map( (final Map.Entry<String,String> e) -> JDBCDriver.convertIdentifier( e.getKey(), con)+" "+e.getValue())
+			+columns.entrySet().stream().map( (final Map.Entry<String,String> e) -> JDBCDriver.convertIdentifier( e.getKey(), store.getConnection())+" "+e.getValue())
 			.collect( Collectors.joining(", "))
 			+" )";
 		Logging.getLogger().info( recordType.getSimpleName(), "Executing automatic table-creation...");
 		Logging.getLogger().info( recordType.getSimpleName(), sql);
-		try(Statement stm = con.createStatement())
+		try(Statement stm = store.getConnection().createStatement())
 		{
 			if(stm.executeUpdate(sql)<0)
 			{
@@ -147,9 +147,12 @@ public class AutomaticMigration implements Migration
 				final String indicesSQL = Arrays.stream( indices ).map( (final Index index)-> index.type().toSQL(driver, tableName, index.name(), index.columns())).collect( Collectors.joining( "; "));
 				Logging.getLogger().info( recordType.getSimpleName(), "Adding indices...");
 				Logging.getLogger().info( recordType.getSimpleName(), indicesSQL);
-				if(con.createStatement().executeUpdate( indicesSQL) < 0)
+				try(final Statement indicesStm = store.getConnection().createStatement())
 				{
-					Logging.getLogger().error( recordType.getSimpleName(), "Adding indices failed!");
+					if(indicesStm.executeUpdate( indicesSQL) < 0)
+					{
+						Logging.getLogger().error( recordType.getSimpleName(), "Adding indices failed!");
+					}
 				}
 			}
 		}
@@ -176,13 +179,13 @@ public class AutomaticMigration implements Migration
 	public boolean update(final boolean dropColumns) throws SQLException
 	{
 		//1. check if table exists
-		if(structureExists( con, tableName))
+		if(store.exists( tableName ))
 		{
 			return false;
 		}
 		//2. get existing columns
 		final Map<String,String> hasColumns = new HashMap<>(10);
-		try(ResultSet set = con.getMetaData().getColumns( con.getCatalog(), con.getSchema(), tableName, null))
+		try(ResultSet set = store.getConnection().getMetaData().getColumns( store.getConnection().getCatalog(), store.getConnection().getSchema(), tableName, null))
 		{
 			while(set.next())
 			{
@@ -203,11 +206,11 @@ public class AutomaticMigration implements Migration
 		{
 			final String sql = "ALTER TABLE "+tableName+" ("+
 				"DROP COLUMN "+
-				removeColumns.entrySet().stream().map( (final Map.Entry<String,String> e) -> JDBCDriver.convertIdentifier( e.getKey(), con)).collect( Collectors.joining( ", "))+
+				removeColumns.entrySet().stream().map( (final Map.Entry<String,String> e) -> JDBCDriver.convertIdentifier( e.getKey(), store.getConnection())).collect( Collectors.joining( ", "))+
 				")";
 			Logging.getLogger().info(recordType.getSimpleName(), "Executing automatic table-update...");
 			Logging.getLogger().info(recordType.getSimpleName(), sql);
-			try(Statement stm = con.createStatement())
+			try(Statement stm = store.getConnection().createStatement())
 			{
 				changed = stm.executeUpdate(sql) >= 0;
 			}
@@ -216,11 +219,11 @@ public class AutomaticMigration implements Migration
 		{
 			final String sql = "ALTER TABLE "+tableName+" ("+
 				"ADD "+
-				addColumns.entrySet().stream().map( (final Map.Entry<String,String> e) -> JDBCDriver.convertIdentifier( e.getKey(), con)+" "+e.getValue()).collect( Collectors.joining( ", "))+
+				addColumns.entrySet().stream().map( (final Map.Entry<String,String> e) -> JDBCDriver.convertIdentifier( e.getKey(), store.getConnection())+" "+e.getValue()).collect( Collectors.joining( ", "))+
 				")";
 			Logging.getLogger().info(recordType.getSimpleName(), "Executing automatic table-update...");
 			Logging.getLogger().info(recordType.getSimpleName(), sql);
-			try(Statement stm = con.createStatement())
+			try(Statement stm = store.getConnection().createStatement())
 			{
 				changed = changed || stm.executeUpdate(sql) >= 0;
 			}
@@ -241,29 +244,12 @@ public class AutomaticMigration implements Migration
 	public boolean revert() throws SQLException
 	{
 		//1. check if table exists
-		if(!structureExists( con, tableName))
+		if(!store.exists( tableName ))
 		{
 			return false;
 		}
 		//2. drop table
-		final String sql = "DROP TABLE "+tableName;
-		Logging.getLogger().info(recordType.getSimpleName(), "Executing automatic table-drop...");
-		Logging.getLogger().info(recordType.getSimpleName(), sql);
-		try(Statement stm = con.createStatement( ))
-		{
-			if(stm.executeUpdate(sql) < 0)
-			{
-				Logging.getLogger().error(recordType.getSimpleName(), "Automatic table-drop failed!");
-				return false;
-			}
-		}
-		catch(final SQLException e)
-		{
-			Logging.getLogger().error( recordType.getSimpleName(), "Automatic table-drop failed with error!");
-			Logging.getLogger().error( recordType.getSimpleName(), e);
-			throw e;
-		}
-		return true;
+		return store.dropTable( tableName );
 	}
 
 	private static String getTableName(final Class<? extends ActiveRecord> type)
@@ -425,7 +411,7 @@ public class AutomaticMigration implements Migration
 				columns.put(columnName, driver.getSQLType(attType));
 				try
 				{
-					if(driver.isReservedKeyword( columnName, con))
+					if(driver.isReservedKeyword( columnName, store == null ? null : store.getConnection()))
 					{
 						throw new IllegalArgumentException("Column-name is reserved keyword: " + columnName);
 					}
@@ -450,28 +436,4 @@ public class AutomaticMigration implements Migration
 		return columns;
 	}
 
-	/**
-	 * @param con
-	 * @param name
-	 * @return whether the structure already exists
-	 * @deprecated Use {@link RecordStore#exists(String)}
-	 */
-	private static boolean structureExists(@Nonnull final Connection con, @Nonnull final String name)
-	{
-		try (ResultSet set = con.getMetaData().getTables(con.getCatalog(), con.getSchema(), null, null))
-		{
-			while(set.next())
-			{
-				if(set.getString( "TABLE_NAME").equalsIgnoreCase(name))
-				{
-					return true;
-				}
-			}
-			return false;
-		}
-		catch ( final SQLException ex )
-		{
-			return false;
-		}
-	}
 }

@@ -393,4 +393,11 @@ public class CachedJDBCRecordStore extends SimpleJDBCRecordStore
 		//required to touch data in DB
 		save( base, primaryKey );
 	}
+
+	@Override
+	public boolean dropTable( String tableName ) throws SQLException
+	{
+		tableExistsCache.remove( tableName);
+		return super.dropTable( tableName );
+	}
 }

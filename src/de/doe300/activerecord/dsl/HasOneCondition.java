@@ -106,7 +106,7 @@ public class HasOneCondition implements Condition
 	@Override
 	public boolean test( final Map<String, Object> map )
 	{
-		if (map == null || map.isEmpty())
+		if (map.isEmpty())
 		{
 			return false;
 		}

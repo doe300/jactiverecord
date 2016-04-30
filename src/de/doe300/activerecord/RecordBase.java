@@ -61,6 +61,7 @@ import de.doe300.activerecord.record.validation.ValidationFailed;
 import de.doe300.activerecord.store.JDBCRecordStore;
 import java.util.Objects;
 import java.util.SortedMap;
+import java.util.function.Function;
 import javax.annotation.Nonnegative;
 
 /**
@@ -140,7 +141,7 @@ public abstract class RecordBase<T extends ActiveRecord> implements ReadOnlyReco
 	/**
 	 * @param shardTable the name of the table-shard
 	 * @return the record-base for the shard
-	 * @sicne 0.7
+	 * @since 0.7
 	 */
 	@Nonnull
 	public RecordBase<T> getShardBase(@Nonnull final String shardTable)
@@ -297,8 +298,7 @@ public abstract class RecordBase<T extends ActiveRecord> implements ReadOnlyReco
 	}
 
 	/**
-	 * Unlike {@link #newRecord(int)}, this method creates a new entry in the
-	 * underlying record-store
+	 * This method creates a new entry in the underlying record-store
 	 *
 	 * @return the newly created record
 	 * @throws RecordException
@@ -324,8 +324,7 @@ public abstract class RecordBase<T extends ActiveRecord> implements ReadOnlyReco
 	}
 
 	/**
-	 * Unlike {@link #newRecord(int)}, this method creates a new entry in the
-	 * underlying record-store.
+	 * This method creates a new entry in the underlying record-store.
 	 * <p>
 	 * If <code>onCreation</code> is not <code>null</code>, it will be called with the newly created record
 	 * before any {@link RecordCallbacks#afterCreate() callbacks} or {@link RecordListener} are called.
@@ -593,7 +592,9 @@ public abstract class RecordBase<T extends ActiveRecord> implements ReadOnlyReco
 			{
 				//search for non character-based columns
 				Logging.getLogger().debug( recordType.getSimpleName(), "Converting column '"+column+"' to string-type for searching");
-				conds[i] = new SimpleCondition(new CastType<>(column, null, String.class, null), "%" + term + "%", Comparison.IS);
+				final Function<T, ?> valueFunc = (final T record) -> getStore().getValue( this, record.getPrimaryKey(), column);
+				//XXX converter-function #toString() is not very specific -> improve. Is it even used?
+				conds[i] = new SimpleCondition(new CastType<>(column, valueFunc, String.class, Object::toString), "%" + term + "%", Comparison.IS);
 			}
 			else
 			{
@@ -682,9 +683,9 @@ public abstract class RecordBase<T extends ActiveRecord> implements ReadOnlyReco
 	{
 		//two record-bases are the same if they represent the same table(shard) in the same core
 		return (o instanceof RecordBase) 
-				&& core.equals( ((RecordBase)o).core)
-				&& recordType.equals( ((RecordBase)o).recordType)
-				&& getTableName().equals( ((RecordBase)o).getTableName());
+				&& core.equals( ((RecordBase<?>)o).core)
+				&& recordType.equals( ((RecordBase<?>)o).recordType)
+				&& getTableName().equals( ((RecordBase<?>)o).getTableName());
 	}
 
 	@Override
