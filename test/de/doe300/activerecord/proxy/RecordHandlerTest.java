@@ -129,4 +129,9 @@ public class RecordHandlerTest extends Assert
 			assertTrue( ex instanceof IllegalArgumentException);
 		}
 	}
+
+	public void testGetRecordType()
+	{
+		assertEquals( TestInterface.class, handler.getRecordType());
+	}
 }

@@ -51,6 +51,7 @@ public interface JDBCRecordStore extends RecordStore
 	 * CAUTION: calling this will result in losing all the data in the table!
 	 * @param tableName
 	 * @return whether the table was dropped
+	 * @throws SQLException 
 	 * @since 0.8
 	 */
 	public boolean dropTable(@Nonnull final String tableName) throws SQLException;

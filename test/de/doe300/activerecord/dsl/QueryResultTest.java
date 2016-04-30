@@ -27,6 +27,7 @@ package de.doe300.activerecord.dsl;
 import de.doe300.activerecord.RecordBase;
 import de.doe300.activerecord.TestInterface;
 import de.doe300.activerecord.TestServer;
+import de.doe300.activerecord.scope.Scope;
 import org.junit.AfterClass;
 import org.junit.Assert;
 import org.junit.BeforeClass;
@@ -86,7 +87,7 @@ public class QueryResultTest extends Assert
 	}
 
 	@Test
-	public void testSize() throws Exception
+	public void testGetEstimatedSize() throws Exception
 	{
 		try(final QueryResult<TestInterface> r = base.where( new SimpleCondition("name", base, Comparison.IS_NOT_NULL)))
 		{
@@ -126,6 +127,15 @@ public class QueryResultTest extends Assert
 		try(QueryResult<TestInterface> r = base.where( new SimpleCondition("name", null, Comparison.IS_NOT_NULL)).order( new SimpleOrder("age", SimpleOrder.OrderType.DESCENDING)))
 		{
 			assertEquals( 23, r.findFirst( null ).getAge());
+		}
+	}
+
+	@Test
+	public void testWithScope() throws Exception
+	{
+		try(final QueryResult<TestInterface> r = base.where( new SimpleCondition("name", base, Comparison.IS_NOT_NULL)))
+		{
+			assertEquals( 1, r.withScope( new Scope(new SimpleCondition("age", 20, Comparison.IS), null, Scope.NO_LIMIT)).count( null));
 		}
 	}
 }	

@@ -69,7 +69,7 @@ public class RecordBaseTest<T extends TestInterface> extends Assert
 	}
 	
 	@Parameterized.Parameters
-	public static Collection<Object[]> getParameters() throws SQLException
+	public static Collection<Object[]> getParameters()
 	{
 		return Arrays.asList(
 			new Object[]{TestInterface.class},

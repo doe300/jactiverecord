@@ -29,6 +29,7 @@ import de.doe300.activerecord.TestInterface;
 import de.doe300.activerecord.TestServer;
 import de.doe300.activerecord.dsl.Comparison;
 import de.doe300.activerecord.dsl.SimpleCondition;
+import de.doe300.activerecord.dsl.functions.CountNotNull;
 import de.doe300.activerecord.scope.Scope;
 import org.junit.AfterClass;
 import org.junit.Assert;
@@ -184,6 +185,20 @@ public class CachedRecordSetTest extends Assert
 	public void testFindFirstWithScope()
 	{
 		assertSame( a2, set.findFirstWithScope( new Scope(new SimpleCondition("name", "Hans", Comparison.IS), null, Scope.NO_LIMIT )));
+	}
+
+	@Test
+	public void testAggregate()
+	{
+		final CountNotNull<TestInterface, String> count = new CountNotNull<>("name", TestInterface::getName);
+		assertEquals( base.aggregate( count, null ), base.getAll().cached().aggregate( count, null));
+	}
+
+	@Test
+	public void testCached()
+	{
+		final RecordSet<TestInterface> set = base.getAll().cached();
+		assertEquals( set, set.cached());
 	}
 	
 }

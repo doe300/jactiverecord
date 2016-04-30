@@ -32,6 +32,7 @@ import de.doe300.activerecord.dsl.SimpleCondition;
 import de.doe300.activerecord.dsl.functions.Maximum;
 import de.doe300.activerecord.jdbc.driver.JDBCDriver;
 import de.doe300.activerecord.scope.Scope;
+import java.sql.Timestamp;
 import java.util.Collections;
 import java.util.Map;
 import java.util.Set;
@@ -219,5 +220,15 @@ public class MemoryRecordStoreTest extends Assert
 	{
 		store.setValue( base, primaryKey, "name", "Steve");
 		assertEquals( "Steve", store.aggregate( base, new Maximum<TestInterface, String>("name", TestInterface::getName), null));
+	}
+
+	@Test
+	public void testTouch()
+	{
+		int key = base.createRecord().getPrimaryKey();
+		final Timestamp orig = base.getRecord( key).getUpdatedAt();
+		store.touch( base, key);
+		final Timestamp newTime = base.getRecord( key).getUpdatedAt();
+		assertTrue( newTime.compareTo( orig) >= 0 );
 	}
 }

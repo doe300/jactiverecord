@@ -33,8 +33,6 @@ import java.io.InputStream;
 import java.net.URI;
 import org.junit.AfterClass;
 import org.junit.Assert;
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertTrue;
 import org.junit.BeforeClass;
 import org.junit.Test;
 

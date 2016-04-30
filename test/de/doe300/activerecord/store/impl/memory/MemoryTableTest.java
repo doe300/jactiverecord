@@ -168,5 +168,22 @@ public class MemoryTableTest extends Assert
 				anyMatch( (Map.Entry<Integer, MemoryRow> e) -> Objects.equals( e.getValue().getRowValue( "age"), -123) ));
 		table.removeRow( row );
 	}
+
+	@Test
+	public void testGetColumnTypes()
+	{
+		assertEquals( 2, table.getColumnTypes().size());
+		assertTrue( table.getColumnTypes().get( "name").equals( String.class));
+	}
+
+	@Test
+	public void testContainsValue()
+	{
+		int row = table.insertRow();
+		table.putValue( row, "age", -123);
+		assertTrue( table.containsValue( row, "age"));
+		assertFalse(table.containsValue( row, "no_such_column"));
+		table.removeRow( row );
+	}
 	
 }

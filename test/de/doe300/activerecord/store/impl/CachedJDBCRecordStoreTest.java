@@ -41,7 +41,6 @@ import java.util.Objects;
 import java.util.stream.Stream;
 import org.junit.AfterClass;
 import org.junit.Assert;
-import static org.junit.Assert.assertTrue;
 import org.junit.BeforeClass;
 import org.junit.Test;
 
@@ -256,5 +255,5 @@ public class CachedJDBCRecordStoreTest extends Assert
 	{
 		assertTrue(0 <= store.aggregate( base, new Sum<TestInterface, Integer>("age", TestInterface::getAge), null ).intValue());
 	}
-	
+
 }

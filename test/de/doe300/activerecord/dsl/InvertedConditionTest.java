@@ -90,7 +90,7 @@ public class InvertedConditionTest extends Assert
 	}
 	
 	@Test(expected = IllegalArgumentException.class)
-	public void testInvertedCondition()
+	public void testInvertCondition()
 	{
 		//matches t1
 		Condition cond = InvertedCondition.invertCondition(new SimpleCondition("age", 913, Comparison.IS));

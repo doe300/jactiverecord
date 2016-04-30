@@ -35,7 +35,6 @@ import java.util.Arrays;
 import java.util.SortedSet;
 import org.junit.AfterClass;
 import org.junit.Assert;
-import static org.junit.Assert.assertSame;
 import org.junit.Before;
 import org.junit.BeforeClass;
 import org.junit.Test;

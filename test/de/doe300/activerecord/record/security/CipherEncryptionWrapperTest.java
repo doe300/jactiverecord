@@ -24,6 +24,7 @@
  */
 package de.doe300.activerecord.record.security;
 
+import java.nio.charset.Charset;
 import java.security.GeneralSecurityException;
 import javax.crypto.SecretKeyFactory;
 import javax.crypto.spec.DESKeySpec;
@@ -35,7 +36,7 @@ import org.junit.Test;
  * @author doe300
  * @since 0.6
  */
-public class CipherEncryptionWrapperTest
+public class CipherEncryptionWrapperTest extends Assert
 {
 	private final CipherEncryptionWrapper wrapper;
 	
@@ -51,7 +52,7 @@ public class CipherEncryptionWrapperTest
 		final byte[] temporaryValue = wrapper.encryptValue( originalValue.getBytes() );
 		final String result = new String(wrapper.decryptValue( temporaryValue ));
 		
-		Assert.assertEquals( originalValue, result);
+		assertEquals( originalValue, result);
 	}
 	
 	@Test
@@ -61,7 +62,7 @@ public class CipherEncryptionWrapperTest
 		final byte[] temporaryValue = wrapper.encryptValue( originalValue.getBytes() );
 		final String result = new String(wrapper.decryptValue( temporaryValue ));
 		
-		Assert.assertEquals( originalValue, result);
+		assertEquals( originalValue, result);
 	}
 	
 	@Test
@@ -70,6 +71,22 @@ public class CipherEncryptionWrapperTest
 		final byte[] temporaryValue = wrapper.encryptValue( null );
 		final byte[] result = wrapper.decryptValue( temporaryValue );
 		
-		Assert.assertNull(result);
+		assertNull(result);
+	}
+
+	@Test
+	public void testEncryptValue() throws Exception
+	{
+		assertNotNull( wrapper.encryptValue( "Dummy Text!".getBytes(Charset.defaultCharset())));
+		assertNull( wrapper.encryptValue( null));
+		assertNotNull( wrapper.encryptValue( new byte[0]));
+	}
+
+	@Test
+	public void testDecryptValue() throws Exception
+	{
+		assertNotNull( wrapper.decryptValue("Dummy Text!".getBytes(Charset.defaultCharset())));
+		assertNull( wrapper.decryptValue( null));
+		assertNotNull( wrapper.decryptValue( new byte[0]));
 	}
 }

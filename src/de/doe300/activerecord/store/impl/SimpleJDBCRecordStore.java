@@ -61,6 +61,7 @@ import de.doe300.activerecord.record.RecordType;
 import de.doe300.activerecord.record.TimestampedRecord;
 import de.doe300.activerecord.scope.Scope;
 import de.doe300.activerecord.store.JDBCRecordStore;
+import java.util.Optional;
 
 /**
  * Simple non-caching implementation of the RecordStore backed by a JDBC-Connection.
@@ -106,11 +107,7 @@ public class SimpleJDBCRecordStore implements JDBCRecordStore
 	@Nonnull
 	protected Order toOrder(@Nonnull final RecordBase<?> base, @Nonnull final Scope scope)
 	{
-		if(scope.getOrder()!=null)
-		{
-			return scope.getOrder();
-		}
-		return base.getDefaultOrder();
+		return Optional.ofNullable( scope.getOrder()).orElse( base.getDefaultOrder());
 	}
 
 	@Nonnull
@@ -537,7 +534,7 @@ public class SimpleJDBCRecordStore implements JDBCRecordStore
 	}
 
 	@Nonnull
-	private Stream<Map<String, Object>> allWithDataStream(@Nonnull final Set<String> columns, @Nonnull final ResultSet res)
+	private static Stream<Map<String, Object>> allWithDataStream(@Nonnull final Set<String> columns, @Nonnull final ResultSet res)
 	{
 		return StreamSupport.stream( new Spliterator<Map<String,Object>>()
 		{
@@ -747,7 +744,7 @@ public class SimpleJDBCRecordStore implements JDBCRecordStore
 
 	@Nonnull
 	@WillNotClose
-	private Stream<Object> valuesStream(@Nonnull final ResultSet res)
+	private static Stream<Object> valuesStream(@Nonnull final ResultSet res)
 	{
 		return StreamSupport.stream( new Spliterator<Object>()
 		{

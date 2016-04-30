@@ -151,6 +151,7 @@ public final class Validations
 	 * @param validate
 	 * @return the BiPredicate for validation
 	 */
+	@Nonnull
 	public static BiPredicate<ActiveRecord, Object> getValidationMethod(@Nonnull final Validate validate)
 	{
 		switch(validate.type())

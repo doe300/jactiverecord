@@ -26,6 +26,7 @@ package de.doe300.activerecord.jdbc.driver;
 
 import de.doe300.activerecord.migration.constraints.IndexType;
 import de.doe300.activerecord.record.ActiveRecord;
+import java.lang.reflect.Array;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.HashSet;
@@ -187,6 +188,7 @@ public class JDBCDriverTest extends Assert
 		assertEquals( String.class, driver.getJavaType( driver.getStringDataType()));
 		assertTrue( Number.class.isAssignableFrom( driver.getJavaType( driver.getSQLType( ActiveRecord.class))));
 		assertTrue(java.sql.Date.class.isAssignableFrom( driver.getJavaType( driver.getSQLType( java.sql.Date.class))));
+		assertEquals( Array.newInstance( Byte.TYPE, 0).getClass(), driver.getJavaType( driver.getSQLType( java.io.Serializable.class)));
 	}
 
 	@Test
@@ -216,5 +218,10 @@ public class JDBCDriverTest extends Assert
 		//falls back to associated-table, already in set
 		assertFalse(identifiers.add( JDBCDriver.getNextTableIdentifier( lastIdentifier)));
 	}
-	
+
+	@Test
+	public void testGetParametersLimit()
+	{
+		assertTrue( driver.getParametersLimit() > 0 );
+	}
 }

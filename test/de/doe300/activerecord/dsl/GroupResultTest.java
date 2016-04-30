@@ -27,6 +27,7 @@ package de.doe300.activerecord.dsl;
 import de.doe300.activerecord.RecordBase;
 import de.doe300.activerecord.TestInterface;
 import de.doe300.activerecord.TestServer;
+import de.doe300.activerecord.scope.Scope;
 import org.junit.AfterClass;
 import org.junit.Assert;
 import org.junit.BeforeClass;
@@ -108,7 +109,7 @@ public class GroupResultTest extends Assert
 		}
 	}
 	
-	private GroupResult<Object, TestInterface> getGroup()
+	private static GroupResult<Object, TestInterface> getGroup()
 	{
 		return base.where( new SimpleCondition("name", null, Comparison.IS_NOT_NULL) ).groupBy( "name").filter( (GroupResult<Object,TestInterface> r) -> r.getKey().equals( "Adam5")).findAny().get();
 	}
@@ -129,5 +130,21 @@ public class GroupResultTest extends Assert
 		{
 			assertTrue( res.getEstimatedSize() == GroupResult.SIZE_UNKNOWN);
 		}
+	}
+
+	@Test
+	public void testWithScope() throws Exception
+	{
+		try(GroupResult<String,TestInterface> res = new GroupResult<String,TestInterface>("Adam5", base.find( new SimpleCondition("name", "Adam5", Comparison.IS)), GroupResult.SIZE_UNKNOWN, base.getDefaultOrder()))
+		{
+			assertEquals( 1, res.withScope( new Scope(new SimpleCondition("age", 145, Comparison.IS), null, Scope.NO_LIMIT)).count( null));
+		}
+	}
+
+	@Test
+	public void testGetEstimatedSize()
+	{
+		assertEquals( 3, base.where( null).groupBy( "age").count());
+		base.where( null).groupBy( "age").forEach( (GroupResult<Object, TestInterface> res) -> assertEquals(1, res.getEstimatedSize()));
 	}
 }

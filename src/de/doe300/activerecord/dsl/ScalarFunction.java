@@ -112,6 +112,18 @@ public abstract class ScalarFunction<T extends ActiveRecord, C, R> implements SQ
 		{
 			return false;
 		}
-		return equals( (SQLFunction)obj);
+		return equals( (SQLFunction<?,?>)obj);
+	}
+
+	@Override
+	public String toString()
+	{
+		return toSQL( JDBCDriver.DEFAULT, null );
+	}
+	
+	@Override
+	public int hashCode()
+	{
+		return toString().hashCode();
 	}
 }
