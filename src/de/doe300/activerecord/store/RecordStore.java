@@ -67,7 +67,7 @@ public interface RecordStore extends AutoCloseable
 	 * @throws java.lang.IllegalArgumentException if the table for the given name was not found
 	 */
 	@Nonnull
-	public default Set<String> getAllColumnNames(@Nonnull final String tableName) throws IllegalArgumentException
+	public default Set<String> getAllColumnNames(@Nonnull final String tableName) throws NoSuchDataSetException
 	{
 		return getAllColumnTypes( tableName ).keySet();
 	}
@@ -81,53 +81,65 @@ public interface RecordStore extends AutoCloseable
 	 * @since 0.5
 	 */
 	@Nonnull
-	public Map<String, Class<?>> getAllColumnTypes(@Nonnull final String tableName) throws IllegalArgumentException;
+	public Map<String, Class<?>> getAllColumnTypes(@Nonnull final String tableName) throws NoSuchDataSetException;
 
 	/**
 	 * @param base
 	 * @param primaryKey
-	 * @param name
-	 * @param value
-	 * @throws IllegalArgumentException
+	 * @param name the attribute-/column name to set
+	 * @param value the new value to store
+	 * @throws IllegalArgumentException if the data-set for the given {@link RecordBase} does not exist
 	 */
-	public void setValue(@Nonnull final RecordBase<?> base, @Nonnegative int primaryKey, @Nonnull final String name, @Nullable final Object value) throws IllegalArgumentException;
+	public void setValue(@Nonnull final RecordBase<?> base, @Nonnegative int primaryKey, @Nonnull final String name, @Nullable final Object value) throws NoSuchDataSetException, NoSuchAttributeException;
 
 	/**
 	 * @param base
 	 * @param primaryKey
 	 * @param names
 	 * @param values
-	 * @throws IllegalArgumentException
+	 * @throws IllegalArgumentException if the data-set for the given {@link RecordBase} does not exist
 	 */
-	public void setValues(@Nonnull final RecordBase<?> base, @Nonnegative int primaryKey, @Nonnull final String[] names, @Nonnull final Object[] values) throws IllegalArgumentException;
+	public void setValues(@Nonnull final RecordBase<?> base, @Nonnegative int primaryKey, @Nonnull final String[] names, @Nonnull final Object[] values) throws NoSuchDataSetException, NoSuchAttributeException;
 
 	/**
 	 * @param base
 	 * @param primaryKey
 	 * @param values
-	 * @throws IllegalArgumentException
+	 * @throws IllegalArgumentException if the data-set for the given {@link RecordBase} does not exist
 	 */
-	public void setValues(@Nonnull final RecordBase<?> base, @Nonnegative int primaryKey, @Nonnull final Map<String,Object> values) throws IllegalArgumentException;
+	public void setValues(@Nonnull final RecordBase<?> base, @Nonnegative int primaryKey, @Nonnull final Map<String,Object> values) throws NoSuchDataSetException, NoSuchAttributeException;
 
 	/**
 	 * @param base
 	 * @param primaryKey
 	 * @param name
-	 * @return the value or <code>null</code>
-	 * @throws IllegalArgumentException
+	 * @return the value or <code>null</code> if there is no entry matching the <code>primaryKey</code>
+	 * @throws IllegalArgumentException if the data-set for the given {@link RecordBase} does not exist
 	 */
 	@Nullable
-	public Object getValue(@Nonnull final RecordBase<?> base, @Nonnegative int primaryKey, @Nonnull final String name) throws IllegalArgumentException;
+	public Object getValue(@Nonnull final RecordBase<?> base, @Nonnegative int primaryKey, @Nonnull final String name) throws NoSuchDataSetException, NoSuchAttributeException;
 
 	/**
+	 * NOTE: to retrieve all columns for a single row, use {@link #getAllValues(de.doe300.activerecord.RecordBase, int) }
 	 * @param base
 	 * @param primaryKey
 	 * @param columns
 	 * @return the values or an empty map, if the <code>primaryKey</code> was not found
-	 * @throws IllegalArgumentException
+	 * @throws IllegalArgumentException if the data-set for the given {@link RecordBase} does not exist
 	 */
 	@Nonnull
-	public Map<String,Object> getValues(@Nonnull final RecordBase<?> base, @Nonnegative int primaryKey, @Nonnull final String[] columns) throws IllegalArgumentException;
+	public Map<String,Object> getValues(@Nonnull final RecordBase<?> base, @Nonnegative int primaryKey, @Nonnull final String[] columns) throws NoSuchDataSetException, NoSuchAttributeException;
+	
+	/**
+	 * 
+	 * @param base
+	 * @param primaryKey
+	 * @return all values for the given entry or an empty map, if the entry does not exists
+	 * @throws NoSuchDataSetException  if the data-set for the given {@link RecordBase} does not exist
+	 * @since 0.8
+	 */
+	@Nonnull
+	public Map<String, Object> getAllValues(@Nonnull final RecordBase<?> base, @Nonnegative final int primaryKey) throws NoSuchDataSetException;
 
 	/**
 	 * This method is for usage only if the table has no mapped model, i.e. for association-tables.
@@ -139,11 +151,12 @@ public interface RecordStore extends AutoCloseable
 	 * @param column the column to retrieve
 	 * @param condColumn the column to match to the <code>condValue</code>
 	 * @param condValue the value to search for
-	 * @return the values for the given <code>column</code> or <code>null</code>
-	 * @throws IllegalArgumentException if the <code>tableName</code> does not exist or the <code>condValue</code> does not match the type for <code>condColumn</code>
+	 * @return the values for the given <code>column</code>
+	 * @throws IllegalArgumentException if the <code>tableName</code> does not exist or the <code>condValue</code> does not match the type for <code>condColumn</code>.
+	 *			Also throws if the column-names are not present in the given data-set
 	 */
 	@Nonnull
-	public Stream<Object> getValues(@Nonnull final String tableName, @Nonnull final String column, @Nonnull final String condColumn, Object condValue) throws IllegalArgumentException;
+	public Stream<Object> getValues(@Nonnull final String tableName, @Nonnull final String column, @Nonnull final String condColumn, Object condValue) throws NoSuchDataSetException, NoSuchAttributeException;
 
 	/**
 	 * This method is for usage only if the table has no mapped model, i.e. for association-tables.
@@ -153,10 +166,11 @@ public interface RecordStore extends AutoCloseable
 	 * @param columns
 	 * @param values
 	 * @return whether the row was added
-	 * @throws IllegalArgumentException if the <code>tableName</code> does not exist or the <code>condValue</code> does not match the type for <code>condColumn</code>
+	 * @throws IllegalArgumentException if the <code>tableName</code> does not exist or the <code>condValue</code> does not match the type for <code>condColumn</code>.
+	 *			Also throws if the column-names are not present in the given data-set
 	 */
 	@CheckReturnValue
-	public boolean addRow(@Nonnull final String tableName, @Nonnull final String[] columns, @Nonnull final Object[] values) throws IllegalArgumentException;
+	public boolean addRow(@Nonnull final String tableName, @Nonnull final String[] columns, @Nonnull final Object[] values) throws NoSuchDataSetException, NoSuchAttributeException;
 
 	/**
 	 * This method is for usage only if the table has no mapped model, i.e. for association-tables.
@@ -164,10 +178,10 @@ public interface RecordStore extends AutoCloseable
 	 * @param tableName
 	 * @param cond the condition to match
 	 * @return whether the row was removed
-	 * @throws IllegalArgumentException if the <code>tableName</code> does not exist or the <code>condValue</code> does not match the type for <code>condColumn</code>
+	 * @throws IllegalArgumentException if the <code>tableName</code> does not exist
 	 */
 	@CheckReturnValue
-	public boolean removeRow(@Nonnull final String tableName, @Nullable final Condition cond) throws IllegalArgumentException;
+	public boolean removeRow(@Nonnull final String tableName, @Nullable final Condition cond) throws NoSuchDataSetException, NoSuchAttributeException;
 
 	/**
 	 * This method is only necessary for caching RecordStores
@@ -204,8 +218,9 @@ public interface RecordStore extends AutoCloseable
 	 * @param base
 	 * @param primaryKey
 	 * @see TimestampedRecord
+	 * @throws IllegalArgumentException if there is no data-set for the given <code>base</code>
 	 */
-	public default void touch(@Nonnull final RecordBase<?> base, @Nonnegative final int primaryKey)
+	public default void touch(@Nonnull final RecordBase<?> base, @Nonnegative final int primaryKey) throws NoSuchDataSetException
 	{
 		setValue( base, primaryKey, TimestampedRecord.COLUMN_UPDATED_AT, new Timestamp(System.currentTimeMillis()));
 	}
@@ -217,8 +232,9 @@ public interface RecordStore extends AutoCloseable
 	 * @param columnData the data to insert, may be <code>null</code>
 	 * @return the ID of the new record
 	 * @see RecordBase#isAutoCreate()
+	 * @throws IllegalArgumentException if there is no data-set for the given <code>base</code> or any of the column is not present in the data-set
 	 */
-	public int insertNewRecord(@Nonnull final RecordBase<?> base, @Nullable final Map<String,Object> columnData);
+	public int insertNewRecord(@Nonnull final RecordBase<?> base, @Nullable final Map<String,Object> columnData) throws NoSuchDataSetException, NoSuchAttributeException;
 
 	/**
 	 * A record may be non-synchronized if the record-store uses caches or the record was not yet saved to the underlying resource
@@ -250,9 +266,10 @@ public interface RecordStore extends AutoCloseable
 	 * @param base
 	 * @param scope
 	 * @return the primaryKey of the first match or <code>null</code>
+	 * @throws IllegalArgumentException if there is no data-set for the given <code>base</code>
 	 */
 	@Nullable
-	public default Integer findFirst(@Nonnull final RecordBase<?> base, @Nonnull final Scope scope)
+	public default Integer findFirst(@Nonnull final RecordBase<?> base, @Nonnull final Scope scope) throws NoSuchDataSetException, NoSuchAttributeException
 	{
 		final Map<String, Object> data = findFirstWithData(base, new String[]{base.getPrimaryColumn()}, scope);
 		return ( Integer ) data.get( base.getPrimaryColumn());
@@ -262,9 +279,10 @@ public interface RecordStore extends AutoCloseable
 	 * @param base
 	 * @param scope
 	 * @return the primary keys of all matches or an empty Set
+	 * @throws IllegalArgumentException if there is no data-set for the given <code>base</code>
 	 */
 	@Nonnull
-	public default Set<Integer> findAll(@Nonnull final RecordBase<?> base, @Nonnull final Scope scope)
+	public default Set<Integer> findAll(@Nonnull final RecordBase<?> base, @Nonnull final Scope scope) throws NoSuchDataSetException, NoSuchAttributeException
 	{
 		return streamAll(base, scope).collect( Collectors.toSet());
 	}
@@ -273,9 +291,10 @@ public interface RecordStore extends AutoCloseable
 	 * @param base
 	 * @param scope
 	 * @return all matching primary keys or an empty Stream
+	 * @throws IllegalArgumentException if there is no data-set for the given <code>base</code>
 	 */
 	@Nonnull
-	public default Stream<Integer> streamAll(@Nonnull final RecordBase<?> base, @Nonnull final Scope scope)
+	public default Stream<Integer> streamAll(@Nonnull final RecordBase<?> base, @Nonnull final Scope scope) throws NoSuchDataSetException, NoSuchAttributeException
 	{
 		return streamAllWithData( base, new String[]{base.getPrimaryColumn()}, scope).map( (final Map<String,Object> map)->
 		{
@@ -288,18 +307,20 @@ public interface RecordStore extends AutoCloseable
 	 * @param columns
 	 * @param scope
 	 * @return the data for the first match or an empty map
+	 * @throws IllegalArgumentException if there is no data-set for the given <code>base</code> or any of the <code>columns</code> does not exist in the data-set
 	 */
 	@Nonnull
-	public Map<String, Object> findFirstWithData(@Nonnull final RecordBase<?> base, @Nonnull final String[] columns, @Nonnull final Scope scope);
+	public Map<String, Object> findFirstWithData(@Nonnull final RecordBase<?> base, @Nonnull final String[] columns, @Nonnull final Scope scope) throws NoSuchDataSetException, NoSuchAttributeException;
 
 	/**
 	 * @param base
 	 * @param columns
 	 * @param scope
 	 * @return the data for all matches or an empty map
+	 * @throws IllegalArgumentException if there is no data-set for the given <code>base</code> or any of the <code>columns</code> does not exist in the data-set
 	 */
 	@Nonnull
-	public default Map<Integer, Map<String, Object>> findAllWithData(@Nonnull final RecordBase<?> base, @Nonnull final String[] columns, @Nonnull final Scope scope)
+	public default Map<Integer, Map<String, Object>> findAllWithData(@Nonnull final RecordBase<?> base, @Nonnull final String[] columns, @Nonnull final Scope scope) throws NoSuchDataSetException, NoSuchAttributeException
 	{
 		return streamAllWithData( base, columns, scope ).collect( Collectors.toMap( (final Map<String,Object> map) ->
 		{
@@ -312,9 +333,10 @@ public interface RecordStore extends AutoCloseable
 	 * @param columns
 	 * @param scope
 	 * @return the requested data for all matches or an empty Stream
+	 * @throws IllegalArgumentException if there is no data-set for the given <code>base</code> or any of the <code>columns</code> does not exist in the data-set
 	 */
 	@Nonnull
-	public Stream<Map<String, Object>> streamAllWithData(@Nonnull final RecordBase<?> base, @Nonnull final String[] columns, @Nonnull final Scope scope);
+	public Stream<Map<String, Object>> streamAllWithData(@Nonnull final RecordBase<?> base, @Nonnull final String[] columns, @Nonnull final Scope scope) throws NoSuchDataSetException, NoSuchAttributeException;
 
 	////
 	// COUNT
@@ -324,9 +346,10 @@ public interface RecordStore extends AutoCloseable
 	 * @param base
 	 * @param condition
 	 * @return the number of records matching the given <code>condition</code>
+	 * @throws IllegalArgumentException if there is no data-set for the given <code>base</code>
 	 */
 	@Nonnegative
-	public default int count(@Nonnull final RecordBase<?> base, @Nullable final Condition condition)
+	public default int count(@Nonnull final RecordBase<?> base, @Nullable final Condition condition) throws NoSuchDataSetException, NoSuchAttributeException
 	{
 		return ( int ) streamAll( base, new Scope(condition, null, Scope.NO_LIMIT) ).count();
 	}
@@ -340,7 +363,8 @@ public interface RecordStore extends AutoCloseable
 	 * @param aggregateFunction the {@link AggregateFunction aggregation-function}
 	 * @param condition the condition to filter the aggregated values
 	 * @return the aggregated value
+	 * @throws IllegalArgumentException if there is no data-set for the given <code>base</code>
 	 */
 	@Nullable
-	public <R> R aggregate(@Nonnull final RecordBase<?> base, @Nonnull final AggregateFunction<?, ?, ?, R> aggregateFunction, @Nullable final Condition condition);
+	public <R> R aggregate(@Nonnull final RecordBase<?> base, @Nonnull final AggregateFunction<?, ?, ?, R> aggregateFunction, @Nullable final Condition condition) throws NoSuchDataSetException, NoSuchAttributeException;
 }

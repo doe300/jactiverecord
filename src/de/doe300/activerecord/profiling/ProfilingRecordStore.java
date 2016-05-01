@@ -33,6 +33,7 @@ import de.doe300.activerecord.dsl.AggregateFunction;
 import de.doe300.activerecord.dsl.Condition;
 import de.doe300.activerecord.scope.Scope;
 import de.doe300.activerecord.store.DBDriver;
+import de.doe300.activerecord.store.NoSuchDataSetException;
 import de.doe300.activerecord.store.RecordStore;
 
 /**
@@ -108,6 +109,12 @@ public class ProfilingRecordStore implements RecordStore
 	public Map<String, Object> getValues(final RecordBase<?> base, final int primaryKey, final String[] columns ) throws IllegalArgumentException
 	{
 		return profiler.profile( "getValuesMap", () -> store.getValues( base, primaryKey, columns));
+	}
+
+	@Override
+	public Map<String, Object> getAllValues(RecordBase<?> base, int primaryKey ) throws NoSuchDataSetException
+	{
+		return profiler.profile( "getAlLValues", () -> store.getAllValues( base, primaryKey));
 	}
 
 	@Override

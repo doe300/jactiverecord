@@ -104,14 +104,14 @@ public class CachedJDBCRecordStoreTest extends Assert
 		assertSame( 13, store.getValue( base, primaryKey, "age"));
 	}
 
-	@Test(expected = IllegalArgumentException.class)
+	@Test
 	public void testGetValue()
 	{
 		assertEquals( primaryKey, store.getValue( base, primaryKey, base.getPrimaryColumn()));
-		store.getValue( base, 100000, "name");
+		assertNull( store.getValue( base, 100000, "name"));
 	}
 
-	@Test(expected = IllegalArgumentException.class)
+	@Test
 	public void testGetValues()
 	{
 		store.setValue( base, primaryKey, "name", "Tom");
@@ -119,7 +119,7 @@ public class CachedJDBCRecordStoreTest extends Assert
 		assertEquals( "Tom", m.get( "name"));
 		assertEquals( primaryKey, m.get( base.getPrimaryColumn()));
 		
-		store.getValues( base, primaryKey + 1110, new String[]{base.getPrimaryColumn(), "name"} );
+		assertEquals( 0, store.getValues( base, primaryKey + 1110, new String[]{base.getPrimaryColumn(), "name"} ).size());
 	}
 
 	@Test

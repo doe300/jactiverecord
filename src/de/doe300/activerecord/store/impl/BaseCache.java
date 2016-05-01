@@ -31,6 +31,7 @@ import java.util.Set;
 import java.util.TreeMap;
 
 import javax.annotation.Nonnull;
+import javax.annotation.Nullable;
 
 import de.doe300.activerecord.RecordBase;
 
@@ -45,7 +46,7 @@ class BaseCache
 
 	private final Set<RowCache> modifiedRows;
 
-	BaseCache(final RecordBase<?> base)
+	BaseCache(@Nonnull final RecordBase<?> base)
 	{
 		this.cachedRows = Collections.synchronizedSortedMap( new TreeMap<>());
 		this.base = base;
@@ -56,11 +57,13 @@ class BaseCache
 	 * @param primaryKey
 	 * @return the row or <code>null</code>
 	 */
+	@Nullable
 	public RowCache getRow(final int primaryKey)
 	{
 		return cachedRows.get( primaryKey );
 	}
 
+	@Nonnull
 	private RowCache createRow(final int primaryKey)
 	{
 		final RowCache cache = new RowCache(this, base.getPrimaryColumn(), base.isTimestamped() );
@@ -74,6 +77,7 @@ class BaseCache
 	 * @param primaryKey
 	 * @return the existing or newly created row
 	 */
+	@Nonnull
 	public RowCache getOrCreateRow(final int primaryKey)
 	{
 		if(cachedRows.containsKey( primaryKey))
@@ -116,7 +120,7 @@ class BaseCache
 	 * @param store
 	 * @return whether some data was written
 	 */
-	public boolean writeAllBack(final CachedJDBCRecordStore store)
+	public boolean writeAllBack(@Nonnull final CachedJDBCRecordStore store)
 	{
 		if(modifiedRows.isEmpty())
 		{

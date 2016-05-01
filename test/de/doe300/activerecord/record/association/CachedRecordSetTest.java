@@ -191,7 +191,7 @@ public class CachedRecordSetTest extends Assert
 	public void testAggregate()
 	{
 		final CountNotNull<TestInterface, String> count = new CountNotNull<>("name", TestInterface::getName);
-		assertEquals( base.aggregate( count, null ), base.getAll().cached().aggregate( count, null));
+		assertEquals( base.aggregate( count, null ).longValue(), base.getAll().cached().aggregate( count, null).longValue());
 	}
 
 	@Test

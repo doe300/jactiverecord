@@ -27,6 +27,7 @@ package de.doe300.activerecord.store.impl.memory;
 import de.doe300.activerecord.dsl.Condition;
 import de.doe300.activerecord.dsl.Order;
 import de.doe300.activerecord.scope.Scope;
+import de.doe300.activerecord.store.NoSuchAttributeException;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashMap;
@@ -100,7 +101,7 @@ class MemoryTable
 	{
 		if(!columns.containsKey( columnName))
 		{
-			throw new IllegalArgumentException("Invalid column-name: "+ columnName);
+			throw new NoSuchAttributeException("MemoryTable", columnName);
 		}
 		return columns.get( columnName).checkValue( value );
 	}
@@ -152,7 +153,7 @@ class MemoryTable
 	{
 		if(!columns.containsKey( columnName))
 		{
-			throw new IllegalArgumentException("Invalid column-name: "+ columnName);
+			throw new NoSuchAttributeException("MemoryTable", columnName);
 		}
 		if(!data.containsKey( primaryKey))
 		{

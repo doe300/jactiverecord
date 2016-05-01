@@ -40,6 +40,8 @@ import de.doe300.activerecord.dsl.Condition;
 import de.doe300.activerecord.record.TimestampedRecord;
 import de.doe300.activerecord.scope.Scope;
 import de.doe300.activerecord.store.DBDriver;
+import de.doe300.activerecord.store.NoSuchAttributeException;
+import de.doe300.activerecord.store.NoSuchDataSetException;
 import de.doe300.activerecord.store.RecordStore;
 import javax.annotation.Nonnegative;
 
@@ -78,7 +80,7 @@ public class MemoryRecordStore implements RecordStore
 		final MemoryTable table = tables.get( tableName);
 		if(table == null)
 		{
-			throw new IllegalArgumentException("No such table");
+			throw new NoSuchDataSetException(tableName);
 		}
 		return table;
 	}
@@ -89,7 +91,7 @@ public class MemoryRecordStore implements RecordStore
 		{
 			if(!table.getColumnNames().contains( column))
 			{
-				throw new IllegalArgumentException("Invalid column: " +column);
+				throw new NoSuchAttributeException("MemoryTable", column);
 			}
 		}
 	}
@@ -100,7 +102,7 @@ public class MemoryRecordStore implements RecordStore
 		{
 			if(!table.getColumnNames().contains( column))
 			{
-				throw new IllegalArgumentException("Invalid column: " +column);
+				throw new NoSuchAttributeException("MemoryTable", column);
 			}
 		}
 	}
@@ -119,7 +121,7 @@ public class MemoryRecordStore implements RecordStore
 				}
 				throw new IllegalArgumentException("Failed to create memory-table for: " + recordBase.getTableName());
 			}
-			throw new IllegalArgumentException("No such table: " + recordBase.getTableName());
+			throw new NoSuchDataSetException(recordBase.getTableName());
 		}
 		return table;
 	}
@@ -184,6 +186,14 @@ public class MemoryRecordStore implements RecordStore
 		final MemoryTable table = assertTableExists( base.getTableName() );
 		assertColumnsExist( table, columns);
 		return table.getValues( primaryKey, columns);
+	}
+
+	@Override
+	public Map<String, Object> getAllValues(RecordBase<?> base, int primaryKey ) throws NoSuchDataSetException
+	{
+		final MemoryTable table = assertTableExists( base.getTableName() );
+		final Set<String> allColumnNames = table.getColumnNames();
+		return table.getValues( primaryKey, allColumnNames.toArray( new String[allColumnNames.size()]));
 	}
 
 	@Override

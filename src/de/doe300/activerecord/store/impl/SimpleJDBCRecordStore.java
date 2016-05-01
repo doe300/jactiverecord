@@ -61,6 +61,7 @@ import de.doe300.activerecord.record.RecordType;
 import de.doe300.activerecord.record.TimestampedRecord;
 import de.doe300.activerecord.scope.Scope;
 import de.doe300.activerecord.store.JDBCRecordStore;
+import de.doe300.activerecord.store.NoSuchDataSetException;
 import java.util.Optional;
 
 /**
@@ -181,9 +182,9 @@ public class SimpleJDBCRecordStore implements JDBCRecordStore
 	 * If the base is {@link RecordBase#isAutoCreate() auto-create}, the table is created, if necessary
 	 *
 	 * @param base
-	 * @throws IllegalStateException
+	 * @throws IllegalArgumentException
 	 */
-	protected void checkTableExists(@Nonnull final RecordBase<?> base) throws IllegalStateException
+	protected void checkTableExists(@Nonnull final RecordBase<?> base) throws IllegalArgumentException
 	{
 		if(!exists( base.getTableName()))
 		{
@@ -216,7 +217,7 @@ public class SimpleJDBCRecordStore implements JDBCRecordStore
 			}
 			else
 			{
-				throw new IllegalStateException("Table doesn't exists: "+base.getTableName());
+				throw new NoSuchDataSetException(base.getTableName());
 			}
 		}
 	}
@@ -374,6 +375,35 @@ public class SimpleJDBCRecordStore implements JDBCRecordStore
 		}
 	}
 
+	@Override
+	public Map<String, Object> getAllValues(final RecordBase<?> base, int primaryKey ) throws NoSuchDataSetException
+	{
+		final String sql = "SELECT * FROM " + base.getTableName() + " WHERE " + base.getPrimaryColumn() + " = " + primaryKey;
+		Logging.getLogger().debug("JDBCStore", sql);
+		try (Statement stm = con.createStatement(); final ResultSet res = stm.executeQuery(sql))
+		{
+			if(res.next())
+			{
+				final int columnCount = res.getMetaData().getColumnCount();
+				final Map<String,Object> values=new HashMap<>(columnCount);
+				for(int i = 1; i <= columnCount; ++i)
+				{
+					values.put( res.getMetaData().getColumnName( i), res.getObject( i ));
+				}
+				return values;
+			}
+			Logging.getLogger().debug( "JDBCStore", "no values found");
+			return Collections.emptyMap();
+		}
+		catch ( final SQLException ex )
+		{
+			Logging.getLogger().error( "JDBCStore", "Failed to get values!");
+			Logging.getLogger().error( "JDBCStore", sql);
+			Logging.getLogger().error( "JDBCStore", ex);
+			throw new IllegalArgumentException(ex);
+		}
+	}
+	
 	@Override
 	public boolean isSynchronized( final RecordBase<?> base, final int primaryKey)
 	{
@@ -614,12 +644,6 @@ public class SimpleJDBCRecordStore implements JDBCRecordStore
 			Logging.getLogger().error( "JDBCStore", ex);
 			return false;
 		}
-	}
-
-	@Override
-	public Set<String> getAllColumnNames( final String tableName )
-	{
-		return getAllColumnTypes( tableName ).keySet();
 	}
 
 	@Override

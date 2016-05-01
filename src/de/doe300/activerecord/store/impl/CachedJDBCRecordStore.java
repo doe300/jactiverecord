@@ -44,7 +44,10 @@ import de.doe300.activerecord.dsl.Condition;
 import de.doe300.activerecord.jdbc.driver.JDBCDriver;
 import de.doe300.activerecord.logging.Logging;
 import de.doe300.activerecord.scope.Scope;
+import de.doe300.activerecord.store.NoSuchAttributeException;
+import de.doe300.activerecord.store.NoSuchDataSetException;
 import java.util.Arrays;
+import java.util.Optional;
 
 /**
  * Uses write-back cache
@@ -78,11 +81,11 @@ public class CachedJDBCRecordStore extends SimpleJDBCRecordStore
 		tableExistsCache = Collections.synchronizedSortedMap( new TreeMap<>());
 	}
 
-	private RowCache getCache(final RecordBase<?> base, final Integer primaryKey)
+	private Optional<RowCache> getCache(final RecordBase<?> base, final Integer primaryKey)
 	{
 		if(!super.containsRecord( base, primaryKey ))
 		{
-			throw new IllegalArgumentException("Invalid row ID: " + primaryKey);
+			return Optional.empty();
 		}
 		BaseCache tableCache = cache.get( base);
 		if(tableCache == null)
@@ -92,7 +95,7 @@ public class CachedJDBCRecordStore extends SimpleJDBCRecordStore
 		}
 		//FIXME currently, if a record is created and data is set before read the cache can't check if the data was modified
 		//because it is not yet filled with the DB-data
-		return tableCache.getOrCreateRow(primaryKey);
+		return Optional.of( tableCache.getOrCreateRow(primaryKey));
 	}
 
 	private boolean hasCache(final RecordBase<?> base, final int primaryKey)
@@ -127,9 +130,9 @@ public class CachedJDBCRecordStore extends SimpleJDBCRecordStore
 	{
 		if(!getAllColumnNames( base.getTableName()).contains( name))
 		{
-			throw new IllegalArgumentException("No such column for the name: " + name);
+			throw new NoSuchAttributeException(base.getTableName(), name);
 		}
-		getCache(base, primaryKey ).setData( name, value, true);
+		getCache(base, primaryKey ).ifPresent( (final RowCache c) -> c.setData( name, value, true));
 	}
 
 	@Override
@@ -141,9 +144,9 @@ public class CachedJDBCRecordStore extends SimpleJDBCRecordStore
 		}
 		if(!getAllColumnNames( base.getTableName()).containsAll( Arrays.asList( names)))
 		{
-			throw new IllegalArgumentException("No such columns for the names: " + Arrays.toString( names));
+			throw new NoSuchAttributeException(base.getTableName(), Arrays.toString( names));
 		}
-		getCache(base, primaryKey ).setData( names, values );
+		getCache(base, primaryKey ).ifPresent( (final RowCache c) -> c.setData( names, values));
 	}
 
 	@Override
@@ -151,15 +154,24 @@ public class CachedJDBCRecordStore extends SimpleJDBCRecordStore
 	{
 		if(!getAllColumnNames( base.getTableName()).containsAll( values.keySet()))
 		{
-			throw new IllegalArgumentException("No such columns for the names: " + values.keySet());
+			throw new NoSuchAttributeException(base.getTableName(), values.keySet().toString());
 		}
-		getCache( base, primaryKey ).update( values, true );
+		getCache(base, primaryKey ).ifPresent( (final RowCache c) -> c.update( values, true ));
 	}
 
 	@Override
 	public Object getValue( final RecordBase<?> base, final int primaryKey, final String name ) throws IllegalArgumentException
 	{
-		final RowCache c = getCache(base, primaryKey );
+		if(!getAllColumnNames( base.getTableName()).contains( name))
+		{
+			throw new NoSuchAttributeException(base.getTableName(), name);
+		}
+		final Optional<RowCache> opt = getCache( base, primaryKey );
+		if(!opt.isPresent())
+		{
+			return null;
+		}
+		final RowCache c = opt.get();
 		if(c.hasData( name ))
 		{
 			return c.getData( name );
@@ -175,8 +187,17 @@ public class CachedJDBCRecordStore extends SimpleJDBCRecordStore
 	@Override
 	public Map<String, Object> getValues( final RecordBase<?> base, final int primaryKey, final String[] columns ) throws IllegalArgumentException
 	{
+		if(!getAllColumnNames( base.getTableName()).containsAll( Arrays.asList( columns)))
+		{
+			throw new NoSuchAttributeException(base.getTableName(), Arrays.toString( columns));
+		}
 		final Map<String,Object> result = new HashMap<>(columns.length);
-		final RowCache c = getCache( base,primaryKey );
+		final Optional<RowCache> opt = getCache( base, primaryKey );
+		if(!opt.isPresent())
+		{
+			return Collections.emptyMap();
+		}
+		final RowCache c = opt.get();
 		for(final String col:columns)
 		{
 			if(c.hasData( col ))
@@ -198,6 +219,13 @@ public class CachedJDBCRecordStore extends SimpleJDBCRecordStore
 			}
 		}
 		return result;
+	}
+
+	@Override
+	public Map<String, Object> getAllValues(RecordBase<?> base, int primaryKey ) throws NoSuchDataSetException
+	{
+		final Set<String> allColumnNames = getAllColumnNames( base.getTableName() );
+		return getValues( base, primaryKey, allColumnNames.toArray( new String[allColumnNames.size()]) );
 	}
 
 	@Override
@@ -250,7 +278,7 @@ public class CachedJDBCRecordStore extends SimpleJDBCRecordStore
 		//is write-back cache, so synchronization needs to be called explicitely
 		if(hasCache( base, primaryKey ))
 		{
-			final RowCache c = getCache(base, primaryKey );
+			final RowCache c = getCache(base, primaryKey ).get();
 			if(c.writeBack( this, base ))
 			{
 				return true;
@@ -290,7 +318,7 @@ public class CachedJDBCRecordStore extends SimpleJDBCRecordStore
 	@Override
 	public boolean isSynchronized( final RecordBase<?> base, final int primaryKey )
 	{
-		return !hasCache( base, primaryKey ) || getCache( base, primaryKey ).isSynchronized();
+		return !hasCache( base, primaryKey ) || getCache( base, primaryKey ).get().isSynchronized();
 	}
 
 	@Override
@@ -314,7 +342,7 @@ public class CachedJDBCRecordStore extends SimpleJDBCRecordStore
 		//2. store in cache
 		if (!map.isEmpty())
 		{
-			getCache(base, ( Integer ) map.get( base.getPrimaryColumn())).update( map, false );
+			getCache(base, ( Integer ) map.get( base.getPrimaryColumn())).ifPresent( (final RowCache c) -> c.update( map, false ));
 		}
 		return map;
 	}
@@ -327,7 +355,7 @@ public class CachedJDBCRecordStore extends SimpleJDBCRecordStore
 		saveAll( base );
 		return super.streamAllWithData( base, columns, scope ).peek( (final Map<String,Object> map )->
 		{
-			getCache(base, ( Integer ) map.get( base.getPrimaryColumn())).update( map, false );
+			getCache(base, ( Integer ) map.get( base.getPrimaryColumn())).ifPresent( (final RowCache c) -> c.update( map, false ));
 		});
 	}
 
