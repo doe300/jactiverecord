@@ -120,11 +120,11 @@ public class RecordStoreTest extends Assert implements AssertException
 		assertEquals( "Eve", store.getValue( base, primaryKey, "name"));
 		
 		//no such column
-		assertThrows( () -> store.setValue( base, primaryKey, "no_such_column", "Value"), IllegalArgumentException.class );
+		assertThrows( IllegalArgumentException.class, () -> store.setValue( base, primaryKey, "no_such_column", "Value") );
 		//no such primary key
 		store.setValue( base, primaryKey + 10000, "name", "Value");
 		//no such table
-		assertThrows( () -> store.setValue( no_such_table, primaryKey, "name", "Value"), IllegalArgumentException.class );
+		assertThrows( IllegalArgumentException.class,() -> store.setValue( no_such_table, primaryKey, "name", "Value") );
 	}
 
 	@Test
@@ -135,11 +135,11 @@ public class RecordStoreTest extends Assert implements AssertException
 		assertEquals( 10000, store.getValue( base, primaryKey, "age"));
 		
 		//no such column
-		assertThrows( () -> store.setValues( base, primaryKey, new String[]{"no_such_column", "no_column"}, new Object[]{"valu1", 1000}), IllegalArgumentException.class );
+		assertThrows( IllegalArgumentException.class, () -> store.setValues( base, primaryKey, new String[]{"no_such_column", "no_column"}, new Object[]{"valu1", 1000}) );
 		//no such primary key
 		store.setValues( base, primaryKey + 100000, new String[]{"name"}, new Object[]{"Adam"} );
 		//no such table
-		assertThrows( () -> store.setValues( no_such_table, primaryKey, new String[]{"name"}, new Object[]{"Adam"} ), IllegalArgumentException.class);
+		assertThrows( IllegalArgumentException.class,() -> store.setValues( no_such_table, primaryKey, new String[]{"name"}, new Object[]{"Adam"} ));
 	}
 
 	@Test
@@ -155,11 +155,11 @@ public class RecordStoreTest extends Assert implements AssertException
 		assertEquals( 13, store.getValue( base, primaryKey, "age"));
 		
 		//no such column
-		assertThrows( () -> store.setValues( base, primaryKey, Collections.singletonMap( "no_column", base) ), IllegalArgumentException.class );
+		assertThrows( IllegalArgumentException.class,() -> store.setValues( base, primaryKey, Collections.singletonMap( "no_column", base) ));
 		//no such primary key
 		store.setValues( base, primaryKey + 10000, Collections.singletonMap( "age", 123) );
 		//no such table
-		assertThrows( () -> store.setValues( no_such_table, primaryKey, Collections.singletonMap( "age", 123) ), IllegalArgumentException.class );
+		assertThrows( IllegalArgumentException.class,() -> store.setValues( no_such_table, primaryKey, Collections.singletonMap( "age", 123) ) );
 	}
 
 	@Test
@@ -168,11 +168,11 @@ public class RecordStoreTest extends Assert implements AssertException
 		assertEquals( primaryKey, store.getValue( base, primaryKey, base.getPrimaryColumn()));
 		
 		//no such column
-		assertThrows( () -> store.getValue( base, primaryKey, "no_column"), IllegalArgumentException.class );
+		assertThrows( IllegalArgumentException.class,() -> store.getValue( base, primaryKey, "no_column"));
 		//no such primary key
 		assertNull( store.getValue( base, primaryKey+1000, base.getPrimaryColumn()) );
 		//no such table
-		assertThrows( () -> store.getValue( no_such_table, primaryKey, "age"), IllegalArgumentException.class );
+		assertThrows( IllegalArgumentException.class,() -> store.getValue( no_such_table, primaryKey, "age"));
 	}
 
 	@Test
@@ -185,11 +185,11 @@ public class RecordStoreTest extends Assert implements AssertException
 		assertTrue( store.getValues( base, primaryKey, new String[]{"age", "name", "id"} ).size() >= 3);
 		
 		//no such column
-		assertThrows( () ->store.getValues( base, primaryKey, new String[]{"no_column"}), IllegalArgumentException.class);
+		assertThrows( IllegalArgumentException.class, () ->store.getValues( base, primaryKey, new String[]{"no_column"}));
 		//no such primary key
 		assertEquals(0, store.getValues( base, primaryKey+1000, base.getDefaultColumns() ).size());
 		//no such table
-		assertThrows( () ->store.getValues( no_such_table, primaryKey, new String[]{"age"}), IllegalArgumentException.class);
+		assertThrows( IllegalArgumentException.class, () ->store.getValues( no_such_table, primaryKey, new String[]{"age"}));
 	}
 	
 	@Test
@@ -199,7 +199,7 @@ public class RecordStoreTest extends Assert implements AssertException
 		//no such primary key
 		assertEquals(0, store.getAllValues(base, primaryKey+1000).size());
 		//no such table
-		assertThrows( () ->store.getAllValues(no_such_table, primaryKey), IllegalArgumentException.class);
+		assertThrows(IllegalArgumentException.class, () ->store.getAllValues(no_such_table, primaryKey));
 	}
 	
 	@Test
@@ -214,11 +214,11 @@ public class RecordStoreTest extends Assert implements AssertException
 		assertEquals( 0, store.getValues( base.getTableName(), "name", base.getPrimaryColumn(), primaryKey+1000 ).count());
 		
 		//no such search-column
-		assertThrows( () -> store.getValues( base.getTableName(), "age", "no_column", primaryKey).close(), IllegalArgumentException.class );
+		assertThrows(IllegalArgumentException.class, () -> store.getValues( base.getTableName(), "age", "no_column", primaryKey).close());
 		//no such result-column
-		assertThrows( () -> store.getValues( base.getTableName(), "no_column", base.getPrimaryColumn(), primaryKey).close(), IllegalArgumentException.class );
+		assertThrows( IllegalArgumentException.class,() -> store.getValues( base.getTableName(), "no_column", base.getPrimaryColumn(), primaryKey).close());
 		//no such table-name
-		assertThrows( () -> store.getValues( "no_such_table", "age", base.getPrimaryColumn(), primaryKey).close(), IllegalArgumentException.class );
+		assertThrows( IllegalArgumentException.class, () -> store.getValues( "no_such_table", "age", base.getPrimaryColumn(), primaryKey).close());
 	}
 
 	@Test
@@ -273,10 +273,10 @@ public class RecordStoreTest extends Assert implements AssertException
 		
 		//no such column
 		final Scope failScope  = new Scope(new SimpleCondition("no_column", "112", Comparison.IS), null, Scope.NO_LIMIT);
-		assertThrows( () ->store.findFirstWithData( base, base.getDefaultColumns(), failScope), IllegalArgumentException.class);
+		assertThrows( IllegalArgumentException.class,() ->store.findFirstWithData( base, base.getDefaultColumns(), failScope));
 		//no such table
 		final Scope failScope2  = new Scope(new SimpleCondition("age", 112, Comparison.IS), null, Scope.NO_LIMIT);
-		assertThrows( () ->store.findFirstWithData( no_such_table, base.getDefaultColumns(), failScope2), IllegalArgumentException.class);
+		assertThrows( IllegalArgumentException.class,() ->store.findFirstWithData( no_such_table, base.getDefaultColumns(), failScope2));
 	}
 
 	@Test
@@ -315,9 +315,9 @@ public class RecordStoreTest extends Assert implements AssertException
 		}
 		
 		//no such column
-		assertThrows( () ->store.streamAllWithData( base, new String[]{"id", "no_colunm"}, scope), IllegalArgumentException.class);
+		assertThrows( IllegalArgumentException.class, () ->store.streamAllWithData( base, new String[]{"id", "no_colunm"}, scope));
 		//no such table
-		assertThrows( () ->store.streamAllWithData( no_such_table, new String[]{"id", "name"}, scope), IllegalArgumentException.class);
+		assertThrows( IllegalArgumentException.class, () ->store.streamAllWithData( no_such_table, new String[]{"id", "name"}, scope));
 	}
 
 	@Test
@@ -333,7 +333,7 @@ public class RecordStoreTest extends Assert implements AssertException
 		assertTrue( Arrays.asList( new String[]{"id", "name", "age", "fk_test_id", "other", "created_at", "updated_at", "test_enum"}).containsAll( store.getAllColumnNames( base.getTableName()) ) );
 		assertTrue( ( store.getAllColumnNames( base.getTableName()) ).containsAll( Arrays.asList( new String[]{"id", "name", "age", "fk_test_id", "other", "created_at", "updated_at", "test_enum"})) );
 		
-		assertThrows( () -> store.getAllColumnNames( "no_such_table" ), IllegalArgumentException.class );
+		assertThrows( IllegalArgumentException.class, () -> store.getAllColumnNames( "no_such_table" ) );
 	}
 
 	@Test
@@ -356,9 +356,9 @@ public class RecordStoreTest extends Assert implements AssertException
 	{
 		assertTrue( store.insertNewRecord(base, null ) > 0);
 		//no such column
-		assertThrows( ()->store.insertNewRecord( base, Collections.singletonMap( "no_column", "Dummy")), IllegalArgumentException.class);
+		assertThrows( IllegalArgumentException.class, ()->store.insertNewRecord( base, Collections.singletonMap( "no_column", "Dummy")));
 		//no such talbe
-		assertThrows( () -> store.insertNewRecord( no_such_table, Collections.singletonMap( "name", "Adam")), IllegalArgumentException.class);
+		assertThrows( IllegalArgumentException.class, () -> store.insertNewRecord( no_such_table, Collections.singletonMap( "name", "Adam")));
 	}
 
 	@Test
@@ -369,9 +369,9 @@ public class RecordStoreTest extends Assert implements AssertException
 		assertEquals( 0, store.count( base, new SimpleCondition(base.getPrimaryColumn(), null, Comparison.IS_NULL)));
 		
 		//no such column
-		assertThrows( () ->store.count( base, new SimpleCondition("no_column", base, Comparison.IS)), IllegalArgumentException.class);
+		assertThrows( IllegalArgumentException.class, () ->store.count( base, new SimpleCondition("no_column", base, Comparison.IS)));
 		//no such table
-		assertThrows( () -> store.count( no_such_table, new SimpleCondition("age", 112, Comparison.IS)), IllegalArgumentException.class );
+		assertThrows( IllegalArgumentException.class, () -> store.count( no_such_table, new SimpleCondition("age", 112, Comparison.IS)) );
 	}
 
 	@Test
@@ -381,11 +381,11 @@ public class RecordStoreTest extends Assert implements AssertException
 		
 		//FIXME cosistent handling for already eyisting row
 		//adding already existing row
-		mayThrow( () -> assertFalse( store.addRow( base.getTableName(), new String[]{"id", "name"}, new Object[]{primaryKey,"Test"} )), IllegalArgumentException.class);
+		mayThrow(IllegalArgumentException.class, () -> assertFalse( store.addRow( base.getTableName(), new String[]{"id", "name"}, new Object[]{primaryKey,"Test"} )));
 		//no such colums
-		assertThrows( () -> store.addRow( base.getTableName(), new String[]{"id", "no_such_column"}, new Object[]{primaryKey,"Test"} ), IllegalArgumentException.class );
+		assertThrows( IllegalArgumentException.class, () -> store.addRow( base.getTableName(), new String[]{"id", "no_such_column"}, new Object[]{primaryKey,"Test"} ));
 		//no such table
-		assertThrows( () -> store.addRow( "no_such_table", new String[]{"id", "name"}, new Object[]{primaryKey,"Test"} ), IllegalArgumentException.class );
+		assertThrows( IllegalArgumentException.class, () -> store.addRow( "no_such_table", new String[]{"id", "name"}, new Object[]{primaryKey,"Test"} ) );
 	}
 
 	@Test
@@ -396,7 +396,7 @@ public class RecordStoreTest extends Assert implements AssertException
 		//removing not existing row
 		assertFalse( store.removeRow( mappingTableName, new SimpleCondition("fk_test1", primaryKey, Comparison.IS)));
 		//negative test - throws exception
-		assertThrows( () ->store.removeRow( "noSuchTable", new SimpleCondition("fk_test1", primaryKey, Comparison.IS)), IllegalArgumentException.class);
+		assertThrows( IllegalArgumentException.class, () ->store.removeRow( "noSuchTable", new SimpleCondition("fk_test1", primaryKey, Comparison.IS)));
 	}
 
 	@Test
@@ -413,9 +413,9 @@ public class RecordStoreTest extends Assert implements AssertException
 		assertTrue(conditional < total);
 		
 		//no such column
-		assertThrows( () ->store.aggregate( base, new Sum<TestInterface, Integer>("no_such_row", TestInterface::getAge), null ), IllegalArgumentException.class) ;
+		assertThrows( IllegalArgumentException.class, () ->store.aggregate( base, new Sum<TestInterface, Integer>("no_such_row", TestInterface::getAge), null ));
 		//no such table
-		assertThrows( () ->store.aggregate( no_such_table, new Sum<TestInterface, Integer>("age", TestInterface::getAge), null ), IllegalArgumentException.class) ;
+		assertThrows( IllegalArgumentException.class, () ->store.aggregate( no_such_table, new Sum<TestInterface, Integer>("age", TestInterface::getAge), null ));
 	}
 
 	@Test
@@ -426,7 +426,7 @@ public class RecordStoreTest extends Assert implements AssertException
 		Timestamp end = base.getRecord( primaryKey ).getUpdatedAt();
 		assertTrue( end.compareTo( start) >= 0);
 		
-		assertThrows( () -> store.touch( no_such_table, primaryKey), IllegalArgumentException.class );
+		assertThrows( IllegalArgumentException.class, () -> store.touch( no_such_table, primaryKey));
 	}
 
 	@Test
@@ -435,6 +435,6 @@ public class RecordStoreTest extends Assert implements AssertException
 		assertEquals( store.getAllColumnNames( base.getTableName()).size(), store.getAllColumnTypes( base.getTableName()).size());
 		assertTrue( store.getAllColumnTypes( base.getTableName()).get( "name").equals( String.class));
 		//fails
-		assertThrows( () ->store.getAllColumnTypes( "no_such_table"), IllegalArgumentException.class);
+		assertThrows( IllegalArgumentException.class, () ->store.getAllColumnTypes( "no_such_table"));
 	}
 }

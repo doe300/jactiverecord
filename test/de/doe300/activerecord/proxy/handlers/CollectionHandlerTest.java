@@ -24,6 +24,7 @@
  */
 package de.doe300.activerecord.proxy.handlers;
 
+import de.doe300.activerecord.AssertException;
 import de.doe300.activerecord.RecordBase;
 import de.doe300.activerecord.TestInterface;
 import de.doe300.activerecord.TestServer;
@@ -40,7 +41,7 @@ import org.junit.Test;
  *
  * @author daniel
  */
-public class CollectionHandlerTest extends Assert
+public class CollectionHandlerTest extends Assert implements AssertException
 {
 	private static RecordBase<TestCollectionInterface> base;
 	private static CollectionHandler handler;
@@ -104,16 +105,16 @@ public class CollectionHandlerTest extends Assert
 		assertSame( record.toArray(arr), arr);
 	}
 
-	@Test(expected = RuntimeException.class)
+	@Test
 	public void testAdd()
 	{
-		record.add( "Test");
+		assertThrows( RuntimeException.class, () -> record.add( "Test"));
 	}
 
-	@Test(expected = RuntimeException.class)
+	@Test
 	public void testRemove( )
 	{
-		record.remove( "Tes");
+		assertThrows( RuntimeException.class, () -> record.remove( "Test"));
 	}
 
 	@Test
@@ -126,28 +127,28 @@ public class CollectionHandlerTest extends Assert
 		assertFalse( record.containsAll( col));
 	}
 
-	@Test(expected = RuntimeException.class)
+	@Test
 	public void testAddAll()
 	{
-		record.addAll( Arrays.asList( record.getPrimaryKey(), "Name1" ) );
+		assertThrows( RuntimeException.class, () -> record.addAll( Arrays.asList( record.getPrimaryKey(), "Name1" ) ));
 	}
 
-	@Test(expected = RuntimeException.class)
+	@Test
 	public void testRetainAll()
 	{
-		record.retainAll(Arrays.asList( record.getPrimaryKey(), "Name1" ) );
+		assertThrows( RuntimeException.class, () -> record.retainAll(Arrays.asList( record.getPrimaryKey(), "Name1" ) ));
 	}
 
-	@Test(expected = RuntimeException.class)
+	@Test
 	public void testRemoveAll()
 	{
-		record.removeAll( Arrays.asList( record.getPrimaryKey(), "Name1" ) );
+		assertThrows( RuntimeException.class, () -> record.removeAll( Arrays.asList( record.getPrimaryKey(), "Name1" ) ));
 	}
 
-	@Test(expected = RuntimeException.class)
+	@Test
 	public void testClear()
 	{
-		record.clear();
+		assertThrows( RuntimeException.class, () -> record.clear());
 	}
 	
 	@RecordType(typeName = "TESTTABLE", primaryKey = "id", defaultColumns = {"id", "name", "age"})

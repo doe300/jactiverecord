@@ -24,6 +24,7 @@
  */
 package de.doe300.activerecord.store.impl.memory;
 
+import de.doe300.activerecord.AssertException;
 import de.doe300.activerecord.dsl.Comparison;
 import de.doe300.activerecord.dsl.SimpleCondition;
 import de.doe300.activerecord.dsl.SimpleOrder;
@@ -38,7 +39,7 @@ import org.junit.Test;
  *
  * @author doe300
  */
-public class MemoryTableTest extends Assert
+public class MemoryTableTest extends Assert implements AssertException
 {
 	private static final MemoryTable table = new MemoryTable("id", new MemoryColumn[]{
 		new MemoryColumn("name", String.class),
@@ -56,7 +57,7 @@ public class MemoryTableTest extends Assert
 		assertFalse( table.getColumnNames().contains( "noSuchColumn"));
 	}
 
-	@Test(expected = IllegalArgumentException.class)
+	@Test
 	public void testPutValue()
 	{
 		int row = table.insertRow();
@@ -65,11 +66,11 @@ public class MemoryTableTest extends Assert
 		
 		//failure-tests
 		assertFalse( table.putValue( 120431230, "name", "Adam"));
-		table.putValue( row, "noSuchColumn", "Steve");
+		assertThrows( IllegalArgumentException.class, () -> table.putValue( row, "noSuchColumn", "Steve"));
 		table.removeRow( row );
 	}
 
-	@Test(expected = IllegalArgumentException.class)
+	@Test
 	public void testPutValues_3args()
 	{
 		int row = table.insertRow();
@@ -78,11 +79,11 @@ public class MemoryTableTest extends Assert
 		
 		assertFalse( table.putValues( row + 2000, new String[]{"name", "age"}, new Object[]{"Eve", 42} ));
 		//failure-test
-		table.putValues( row, new String[]{"name", "noSuchColumn"}, new Object[]{"Eve", "42"} );
+		assertThrows( IllegalArgumentException.class, () ->table.putValues( row, new String[]{"name", "noSuchColumn"}, new Object[]{"Eve", "42"} ));
 		table.removeRow( row );
 	}
 
-	@Test(expected = IllegalArgumentException.class)
+	@Test
 	public void testPutValues_int_Map()
 	{
 		int row = table.insertRow();
@@ -91,7 +92,7 @@ public class MemoryTableTest extends Assert
 		
 		//failure tests
 		assertFalse( table.putValues( 10112203, Collections.singletonMap( "name", "Adam")));
-		table.putValues( row, Collections.singletonMap( "age", "Eve"));
+		assertThrows( IllegalArgumentException.class, () ->table.putValues( row, Collections.singletonMap( "age", "Eve")));
 		table.removeRow( row );
 	}
 
@@ -114,7 +115,7 @@ public class MemoryTableTest extends Assert
 		table.removeRow( row );
 	}
 
-	@Test(expected = IllegalArgumentException.class)
+	@Test
 	public void testGetValues_int_StringArr()
 	{
 		int row = table.insertRow();
@@ -124,7 +125,7 @@ public class MemoryTableTest extends Assert
 		
 		//failure-test
 		assertTrue(table.getValues( row + 1234, new String[]{"name", "age"} ).isEmpty() );
-		table.getValues( row, new String[]{"name", "noSuchColumn"});
+		assertThrows( IllegalArgumentException.class, () ->table.getValues( row, new String[]{"name", "noSuchColumn"}));
 		table.removeRow( row );
 	}
 

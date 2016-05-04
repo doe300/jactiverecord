@@ -34,14 +34,14 @@ import org.junit.Assert;
  */
 public interface AssertException
 {
-	public default void assertThrows(@Nonnull final ThrowingCall call, @Nonnull final Class<? extends Exception> exceptionType)
+	public default void assertThrows(@Nonnull final Class<? extends Throwable> exceptionType, @Nonnull final Executable call)
 	{
 		try
 		{
 			call.call();
 			Assert.fail( "Expected Exception not thrown: " + exceptionType.getCanonicalName());
 		}
-		catch(final Exception e)
+		catch(final Throwable e)
 		{
 			if(!exceptionType.isInstance( e))
 			{
@@ -50,13 +50,13 @@ public interface AssertException
 		}
 	}
 	
-	public default void mayThrow(@Nonnull final ThrowingCall call, @Nonnull final Class<? extends Exception> exceptionType)
+	public default void mayThrow(@Nonnull final Class<? extends Throwable> exceptionType, @Nonnull final Executable call)
 	{
 		try
 		{
 			call.call();
 		}
-		catch(final Exception e)
+		catch(final Throwable e)
 		{
 			if(!exceptionType.isInstance( e))
 			{
@@ -65,8 +65,8 @@ public interface AssertException
 		}
 	}
 	
-	public interface ThrowingCall
+	public interface Executable
 	{
-		public void call() throws Exception;
+		public void call() throws Throwable;
 	}
 }

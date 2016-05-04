@@ -24,6 +24,7 @@
  */
 package de.doe300.activerecord.dsl;
 
+import de.doe300.activerecord.AssertException;
 import de.doe300.activerecord.RecordBase;
 import de.doe300.activerecord.TestInterface;
 import de.doe300.activerecord.TestServer;
@@ -36,7 +37,7 @@ import org.junit.Test;
 
 
 
-public class InvertedConditionTest extends Assert
+public class InvertedConditionTest extends Assert implements AssertException
 {
 	private static RecordBase<TestInterface> base;
 	private static TestInterface t1, t2,t3;
@@ -89,7 +90,7 @@ public class InvertedConditionTest extends Assert
 		}
 	}
 	
-	@Test(expected = IllegalArgumentException.class)
+	@Test
 	public void testInvertCondition()
 	{
 		//matches t1
@@ -101,7 +102,7 @@ public class InvertedConditionTest extends Assert
 			assertFalse( s.anyMatch( (TestInterface i) -> i.equals( t1)));
 		}
 		
-		InvertedCondition.invertCondition( null);
+		assertThrows( IllegalArgumentException.class, () -> InvertedCondition.invertCondition( null));
 	}
 
 	@Test

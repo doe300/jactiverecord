@@ -62,6 +62,7 @@ import javax.annotation.concurrent.Immutable;
  * @author doe300
  * @since 0.5
  * @see "https://en.wikibooks.org/wiki/SQL_Dialects_Reference"
+ * @see "http://troels.arvin.dk/db/rdbms/"
  */
 @Immutable
 public class JDBCDriver implements DBDriver

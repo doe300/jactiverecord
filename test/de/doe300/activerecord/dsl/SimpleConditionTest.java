@@ -24,6 +24,7 @@
  */
 package de.doe300.activerecord.dsl;
 
+import de.doe300.activerecord.AssertException;
 import de.doe300.activerecord.RecordBase;
 import de.doe300.activerecord.TestInterface;
 import de.doe300.activerecord.TestServer;
@@ -44,7 +45,7 @@ import org.junit.Test;
  * But Predicate is already tested in {@link ComparisonTest}
  * @author doe300
  */
-public class SimpleConditionTest extends Assert
+public class SimpleConditionTest extends Assert implements AssertException
 {
 	private static RecordBase<TestInterface> base;
 	private static TestInterface t1, t2,t3, t4;
@@ -233,10 +234,10 @@ public class SimpleConditionTest extends Assert
 		t1.destroy();
 	}
 	
-	@Test(expected = IllegalArgumentException.class)
+	@Test
 	public void testInConditionError()
 	{
-		assertNotNull( new SimpleCondition("id", "Dummy", Comparison.IN));
+		assertThrows( IllegalArgumentException.class, () -> new SimpleCondition("id", "Dummy", Comparison.IN));
 	}
 	
 	@Test

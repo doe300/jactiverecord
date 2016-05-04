@@ -24,6 +24,7 @@
  */
 package de.doe300.activerecord.jdbc;
 
+import de.doe300.activerecord.AssertException;
 import de.doe300.activerecord.RecordBase;
 import de.doe300.activerecord.RecordCore;
 import de.doe300.activerecord.TestServer;
@@ -51,7 +52,7 @@ import org.junit.runner.RunWith;
 import org.junit.runners.Parameterized;
 
 @RunWith(Parameterized.class)
-public class TypeMappingsTest extends Assert
+public class TypeMappingsTest extends Assert implements AssertException
 {
 	private final RecordBase<TestTypesInterface> base;
 	
@@ -128,7 +129,7 @@ public class TypeMappingsTest extends Assert
 		assertEquals( path, record.getPath());
 	}
 
-	@Test(expected = IllegalArgumentException.class)
+	@Test
 	public void testEnumValue()
 	{
 		TestTypesInterface record = base.createRecord();
@@ -141,7 +142,8 @@ public class TypeMappingsTest extends Assert
 		assertEquals( mode, record.getEnumOrdinal());
 		//error-test
 		base.getStore().setValue( base, record.getPrimaryKey(), "enum", "no such entry");
-		record.getEnum();
+		
+		assertThrows( IllegalArgumentException.class, () -> record.getEnum());
 	}
 	
 	@Test

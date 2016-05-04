@@ -24,6 +24,7 @@
  */
 package de.doe300.activerecord.proxy.handlers;
 
+import de.doe300.activerecord.AssertException;
 import de.doe300.activerecord.RecordBase;
 import de.doe300.activerecord.TestInterface;
 import de.doe300.activerecord.TestServer;
@@ -39,7 +40,7 @@ import org.junit.Test;
  *
  * @author daniel
  */
-public class MapHandlerTest extends Assert
+public class MapHandlerTest extends Assert implements AssertException
 {
 	private static RecordBase<TestMapInterface> base;
 	private static MapHandler handler;
@@ -97,7 +98,7 @@ public class MapHandlerTest extends Assert
 		assertEquals(record.getName(), record.get( "name"));
 	}
 
-	@Test(expected = RuntimeException.class)
+	@Test
 	public void testPut()
 	{
 		record.put( "age", 112);
@@ -105,13 +106,14 @@ public class MapHandlerTest extends Assert
 		int key = record.getPrimaryKey();
 		record.put( base.getPrimaryColumn(), 01);
 		assertEquals(key, record.getPrimaryKey());
-		record.put( "some_key", 34);
+		
+		assertThrows( RuntimeException.class, () -> record.put( "some_key", 34));
 	}
 
-	@Test(expected = RuntimeException.class)
+	@Test
 	public void testRemove()
 	{
-		record.remove( "name");
+		assertThrows( RuntimeException.class, () -> record.remove( "name"));
 	}
 
 	@Test
@@ -125,10 +127,10 @@ public class MapHandlerTest extends Assert
 		assertEquals(m.get( "age"), record.getAge());
 	}
 
-	@Test(expected = RuntimeException.class)
+	@Test
 	public void testClear()
 	{
-		record.clear();
+		assertThrows( RuntimeException.class, () -> record.clear());
 	}
 
 	@Test

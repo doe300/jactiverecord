@@ -24,6 +24,7 @@
  */
 package de.doe300.activerecord.proxy;
 
+import de.doe300.activerecord.AssertException;
 import de.doe300.activerecord.RecordBase;
 import de.doe300.activerecord.TestInterface;
 import de.doe300.activerecord.TestServer;
@@ -40,7 +41,7 @@ import org.junit.Test;
  *
  * @author daniel
  */
-public class RecordHandlerTest extends Assert
+public class RecordHandlerTest extends Assert implements AssertException
 {
 	private static RecordHandler<TestInterface> handler;
 	private static RecordBase<TestInterface> base;
@@ -92,13 +93,13 @@ public class RecordHandlerTest extends Assert
 		handler.invoke( testI, df2, null);
 	}
 	
-	@Test(expected = InvocationTargetException.class)
+	@Test 
 	public void testInvokeAttributeAccessor() throws NoSuchMethodException, Throwable
 	{
 		Method m1 = TestInterface.class.getMethod( "setName", String.class);
 		Method m2 = TestInterface.class.getMethod( "getOther");
-		handler.invoke( testI, m1, new Object[]{null});
-		handler.invoke( testI, m2, null);
+		assertThrows( InvocationTargetException.class, () -> handler.invoke( testI, m1, new Object[]{null}));
+		assertThrows( InvocationTargetException.class, () -> handler.invoke( testI, m2, null));
 	}
 	
 	@Test
@@ -110,11 +111,11 @@ public class RecordHandlerTest extends Assert
 		assertEquals( 12, handler.invoke( testI, m2, null));
 	}
 	
-	@Test(expected = NoSuchMethodException.class)
+	@Test
 	public void testInvokeMethodNotHandled() throws NoSuchMethodException, Throwable
 	{
 		Method m = String.class.getMethod( "length");
-		handler.invoke( testI, m, null );
+		assertThrows( NoSuchMethodException.class, () -> handler.invoke( testI, m, null ));
 	}
 	
 	@Test

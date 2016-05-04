@@ -24,6 +24,7 @@
  */
 package de.doe300.activerecord.record.association;
 
+import de.doe300.activerecord.AssertException;
 import de.doe300.activerecord.RecordBase;
 import de.doe300.activerecord.TestInterface;
 import de.doe300.activerecord.TestServer;
@@ -47,7 +48,7 @@ import org.junit.Test;
  */
 
 
-public class ConditionSetTest extends Assert
+public class ConditionSetTest extends Assert implements AssertException
 {
 	private static RecordBase<TestInterface> base;
 	private static RecordSet<TestInterface> set;
@@ -96,12 +97,12 @@ public class ConditionSetTest extends Assert
 		n2.setAge( 24);
 	}
 	
-	@Test(expected = UnsupportedOperationException.class)
+	@Test
 	public void testUnmodifiableSet()
 	{
 		RecordSet<TestInterface> set1 = new ConditionSet<TestInterface>(base, new SimpleCondition("age", 23,Comparison.IS), null);
 		assertTrue( set1.containsAll( Arrays.asList( a1,a2,a3)) );
-		set1.remove( a1 );
+		assertThrows( UnsupportedOperationException.class, () -> set1.remove( a1 ));
 	}
 
 	@Test

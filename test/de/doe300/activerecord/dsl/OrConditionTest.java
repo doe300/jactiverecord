@@ -24,6 +24,7 @@
  */
 package de.doe300.activerecord.dsl;
 
+import de.doe300.activerecord.AssertException;
 import de.doe300.activerecord.RecordBase;
 import de.doe300.activerecord.TestInterface;
 import de.doe300.activerecord.TestServer;
@@ -40,7 +41,7 @@ import org.junit.Test;
  *
  * @author daniel
  */
-public class OrConditionTest extends Assert
+public class OrConditionTest extends Assert implements AssertException
 {
 	
 	private static RecordBase<TestInterface> base;
@@ -73,13 +74,13 @@ public class OrConditionTest extends Assert
 		TestServer.destroyTestTable( TestInterface.class, OrConditionTest.class.getSimpleName());
 	}
 	
-	@Test(expected = IllegalArgumentException.class)
+	@Test
 	public void testOrError()
 	{
-		assertNotNull( OrCondition.orConditions( new Condition[0]));
+		assertThrows(IllegalArgumentException.class, () -> OrCondition.orConditions( new Condition[0]));
 	}
 	
-	@Test(expected = IllegalArgumentException.class)
+	@Test
 	public void testOrConditions()
 	{
 		Condition c1 = OrCondition.orConditions(cond);
@@ -99,7 +100,7 @@ public class OrConditionTest extends Assert
 		//test skip nulls
 		assertSame( s1, OrCondition.orConditions( s1, null, null, null));
 		
-		OrCondition.orConditions( new Condition[0]);
+		assertThrows( IllegalArgumentException.class, () -> OrCondition.orConditions( new Condition[0]));
 	}
 
 	@Test

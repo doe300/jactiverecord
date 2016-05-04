@@ -24,6 +24,7 @@
  */
 package de.doe300.activerecord.record.association;
 
+import de.doe300.activerecord.AssertException;
 import de.doe300.activerecord.RecordBase;
 import de.doe300.activerecord.TestInterface;
 import de.doe300.activerecord.TestServer;
@@ -40,7 +41,7 @@ import org.junit.Test;
  *
  * @author doe300
  */
-public class CachedRecordSetTest extends Assert
+public class CachedRecordSetTest extends Assert implements AssertException
 {
 	private static RecordBase<TestInterface> base;
 	private static RecordSet<TestInterface> set;
@@ -132,16 +133,16 @@ public class CachedRecordSetTest extends Assert
 		assertTrue( set.contains( a1));
 	}
 
-	@Test(expected = UnsupportedOperationException.class)
+	@Test
 	public void testAdd()
 	{
-		set.add( a3);
+		assertThrows( UnsupportedOperationException.class, () -> set.add( a3));
 	}
 
-	@Test(expected = UnsupportedOperationException.class)
+	@Test
 	public void testRemove()
 	{
-		set.remove( a1 );
+		assertThrows( UnsupportedOperationException.class, () -> set.remove( a1 ));
 	}
 
 	@Test
@@ -151,28 +152,28 @@ public class CachedRecordSetTest extends Assert
 		assertTrue( new TableSet<TestInterface>(base, null).containsAll(set ));
 	}
 
-	@Test(expected = UnsupportedOperationException.class)
+	@Test
 	public void testAddAll()
 	{
-		set.addAll( new TableSet<TestInterface>(base, null ));
+		assertThrows( UnsupportedOperationException.class, () -> set.addAll( new TableSet<TestInterface>(base, null )));
 	}
 
-	@Test(expected = UnsupportedOperationException.class)
+	@Test
 	public void testRetainAll()
 	{
-		set.retainAll(new TableSet<TestInterface>(base, null ));
+		assertThrows( UnsupportedOperationException.class, () -> set.retainAll(new TableSet<TestInterface>(base, null )));
 	}
 
-	@Test(expected = UnsupportedOperationException.class)
+	@Test
 	public void testRemoveAll()
 	{
-		set.removeAll(new TableSet<TestInterface>(base, null ));
+		assertThrows( UnsupportedOperationException.class, () -> set.removeAll(new TableSet<TestInterface>(base, null )));
 	}
 
-	@Test(expected = UnsupportedOperationException.class)
+	@Test
 	public void testClear()
 	{
-		set.clear();
+		assertThrows( UnsupportedOperationException.class, () -> set.clear());
 	}
 
 	@Test

@@ -24,6 +24,7 @@
  */
 package de.doe300.activerecord.store.impl.memory;
 
+import de.doe300.activerecord.AssertException;
 import de.doe300.activerecord.RecordBase;
 import de.doe300.activerecord.RecordCore;
 import de.doe300.activerecord.TestInterface;
@@ -46,7 +47,7 @@ import org.junit.Test;
  * @author doe300
  */
 @Deprecated
-public class MemoryRecordStoreTest extends Assert
+public class MemoryRecordStoreTest extends Assert implements AssertException
 {
 	private static MemoryRecordStore store;
 	private static RecordBase<TestInterface> base;
@@ -132,12 +133,12 @@ public class MemoryRecordStoreTest extends Assert
 		assertTrue( store.getValues( base.getTableName(), base.getPrimaryColumn(), "name", "Adam").count() >= 1);
 	}
 
-	@Test(expected = IllegalArgumentException.class)
+	@Test
 	public void testAddRow()
 	{
 		assertTrue( store.addRow( base.getTableName(), new String[]{"name", "age"}, new Object[]{"Adam", 123} ));
 		//throws exception
-		store.addRow( base.getTableName(), new String[]{"name", "age"}, new Object[]{"Adam", "Age"} );
+		assertThrows( IllegalArgumentException.class, () -> store.addRow( base.getTableName(), new String[]{"name", "age"}, new Object[]{"Adam", "Age"} ));
 	}
 
 	@Test

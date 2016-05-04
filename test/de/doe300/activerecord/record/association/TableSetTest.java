@@ -24,6 +24,7 @@
  */
 package de.doe300.activerecord.record.association;
 
+import de.doe300.activerecord.AssertException;
 import de.doe300.activerecord.RecordBase;
 import de.doe300.activerecord.TestInterface;
 import de.doe300.activerecord.TestServer;
@@ -44,7 +45,7 @@ import org.junit.Test;
  */
 
 
-public class TableSetTest extends Assert
+public class TableSetTest extends Assert implements AssertException
 {
 	private static RecordBase<TestInterface> base;
 	private static RecordSet<TestInterface> set;
@@ -101,20 +102,16 @@ public class TableSetTest extends Assert
 		}
 	}
 
-	@Test(expected = UnsupportedOperationException.class)
+	@Test
 	public void testAdd()
 	{
-		assertFalse( set.add( a2));
-		assertTrue( set.add( a4));
-		assertTrue( set.remove( a4));
+		assertThrows(UnsupportedOperationException.class, () -> set.add( a2));
 	}
 
-	@Test(expected = UnsupportedOperationException.class)
+	@Test
 	public void testRemove()
 	{
-		assertFalse( set.remove( a5));
-		assertTrue( set.remove( a3));
-		assertTrue( set.add( a3));
+		assertThrows(UnsupportedOperationException.class, () -> set.remove( a5));
 	}
 
 	@Test
@@ -123,36 +120,29 @@ public class TableSetTest extends Assert
 		assertTrue( set.containsAll( Arrays.asList( a1,a2,a3)) );
 	}
 
-	@Test(expected = UnsupportedOperationException.class)
+	@Test
 	public void testAddAll()
 	{
-		assertTrue( set.addAll( Arrays.asList( a4,a5)));
-		assertFalse( set.addAll( Arrays.asList( a1,a2,a3)));
-		assertTrue( set.removeAll( Arrays.asList( a4,a5)));
+		assertThrows(UnsupportedOperationException.class, () -> set.addAll( Arrays.asList( a4,a5)));
 	}
 
-	@Test(expected = UnsupportedOperationException.class)
+	@Test
 	public void testRetainAll()
 	{
-		assertTrue( set.retainAll( Arrays.asList( a4,a2,a5)));
-		assertFalse( set.retainAll( Arrays.asList( a1,a2,a3)));
-		assertTrue( set.addAll( Arrays.asList( a1,a2,a3)));
+		assertThrows(UnsupportedOperationException.class,  () -> set.retainAll( Arrays.asList( a4,a2,a5)));
 	}
 
-	@Test(expected = UnsupportedOperationException.class)
+	@Test
 	public void testRemoveAll()
 	{
-		assertTrue( set.removeAll( Arrays.asList( a1,a2,a3)));
-		assertTrue( set.isEmpty());
-		assertTrue( set.addAll( Arrays.asList( a1,a2,a3)));
+		assertThrows(UnsupportedOperationException.class, () -> set.removeAll( Arrays.asList( a1,a2,a3)));
 	}
 
-	@Test(expected = UnsupportedOperationException.class)
+	@Test
 	public void testClear()
 	{
+		assertThrows( UnsupportedOperationException.class, () -> set.clear());
 		assertFalse( set.isEmpty());
-		set.clear();
-		assertTrue( set.isEmpty());
 	}
 
 	@Test
@@ -204,14 +194,14 @@ public class TableSetTest extends Assert
 		assertSame( a5, tailSet.last());
 	}
 	
-	@Test(expected = UnsupportedOperationException.class)
+	@Test
 	public void testSubSet()
 	{
 		SortedSet<TestInterface> subSet = set.subSet(a2, a4);
 		assertSame( 2, subSet.size());
 		assertSame( a2, subSet.first());
 		assertSame( a3, subSet.last());
-		subSet.clear();
+		assertThrows( UnsupportedOperationException.class, () -> subSet.clear());
 	}
 	
 	@Test

@@ -24,6 +24,7 @@
  */
 package de.doe300.activerecord.record.attributes;
 
+import de.doe300.activerecord.AssertException;
 import de.doe300.activerecord.RecordBase;
 import de.doe300.activerecord.TestInterface;
 import de.doe300.activerecord.TestServer;
@@ -31,11 +32,7 @@ import de.doe300.activerecord.record.TimestampedRecord;
 import de.doe300.activerecord.record.validation.ValidatedRecord;
 import java.lang.reflect.Method;
 import org.junit.AfterClass;
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertNotSame;
-import static org.junit.Assert.assertNull;
-import static org.junit.Assert.assertTrue;
+import org.junit.Assert;
 import org.junit.BeforeClass;
 import org.junit.Test;
 
@@ -43,7 +40,7 @@ import org.junit.Test;
  *
  * @author daniel
  */
-public class AttributesTest
+public class AttributesTest extends Assert implements AssertException
 {
 	private static RecordBase<TestInterface> base;
 	
@@ -151,10 +148,11 @@ public class AttributesTest
 		assertEquals( 42, Attributes.getLength( i, "fk_test_id", (Object obj) -> (obj instanceof Number) ? 42 : -1, null));
 	}
 
-	@Test(expected = IllegalArgumentException.class)
+	@Test
 	public void testToCamelCase()
 	{
 		assertEquals( "AttributeWithCamelCase", Attributes.toCamelCase( "attribute_with_camel_case"));
-		Attributes.toCamelCase( " no such attribute");
+		
+		assertThrows( IllegalArgumentException.class, () ->Attributes.toCamelCase( " no such attribute"));
 	}	
 }

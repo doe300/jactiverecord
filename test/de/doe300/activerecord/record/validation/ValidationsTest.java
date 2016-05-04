@@ -24,6 +24,7 @@
  */
 package de.doe300.activerecord.record.validation;
 
+import de.doe300.activerecord.AssertException;
 import de.doe300.activerecord.record.ActiveRecord;
 import java.util.Collections;
 import java.util.UUID;
@@ -35,14 +36,14 @@ import org.junit.Test;
  *
  * @author daniel
  */
-public class ValidationsTest extends Assert
+public class ValidationsTest extends Assert implements AssertException
 {
 	
 	public ValidationsTest()
 	{
 	}
 
-	@Test(expected = IllegalArgumentException.class)
+	@Test
 	public void testNotEmpty()
 	{
 		assertTrue( Validations.notEmpty("aa"));
@@ -58,16 +59,16 @@ public class ValidationsTest extends Assert
 		assertTrue( Validations.notEmpty(5L));
 		
 		//throws error
-		Validations.notEmpty( new UUID(2, 2));
+		assertThrows( IllegalArgumentException.class, () -> Validations.notEmpty( new UUID(2, 2)));
 	}
 
-	@Test(expected = ValidationFailed.class)
+	@Test
 	public void testValidate()
 	{
 		//succeeds
 		Validations.validate( "name", "Adam", Validations::notEmpty, "is wrong1");
 		//fails
-		Validations.validate("name", null, (Object obj) -> obj != null, "is null");
+		assertThrows( ValidationFailed.class, () -> Validations.validate("name", null, (Object obj) -> obj != null, "is null"));
 	}
 
 	@Test
@@ -82,22 +83,22 @@ public class ValidationsTest extends Assert
 		assertFalse( Validations.isEmpty( Collections.singleton( "")));
 	}
 
-	@Test(expected = IllegalArgumentException.class)
+	@Test
 	public void testPositiveNumber()
 	{
 		assertTrue( Validations.positiveNumber( 3));
 		assertFalse( Validations.positiveNumber( -5));
 		assertFalse( Validations.positiveNumber( null));
-		Validations.positiveNumber( "23");
+		assertThrows( IllegalArgumentException.class, () -> Validations.positiveNumber( "23"));
 	}
 
-	@Test(expected = IllegalArgumentException.class)
+	@Test
 	public void testNegativeNumber()
 	{
 		assertTrue( Validations.negativeNumber( -4346.4));
 		assertFalse( Validations.negativeNumber( 345));
 		assertFalse( Validations.negativeNumber( null));
-		Validations.negativeNumber( 'c' );
+		assertThrows( IllegalArgumentException.class, () -> Validations.negativeNumber( 'c' ));
 	}
 
 	@Test

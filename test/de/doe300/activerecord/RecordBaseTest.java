@@ -54,7 +54,7 @@ import org.junit.runners.Parameterized;
  * @param <T>
  */
 @RunWith(Parameterized.class)
-public class RecordBaseTest<T extends TestInterface> extends Assert
+public class RecordBaseTest<T extends TestInterface> extends Assert implements AssertException
 {
 	private final RecordBase<T> base;
 	private final Class<T> type;
@@ -102,11 +102,12 @@ public class RecordBaseTest<T extends TestInterface> extends Assert
 		assertNotNull( base.getCore());
 	}
 	
-	@Test(expected = IllegalStateException.class)
+	@Test
 	public void testGetShardBase() throws Exception
 	{
 		assertEquals(base, base.getCore().getBase( type ).getShardBase( RecordBaseTest.class.getSimpleName()));
-		base.getShardBase( "dummyShard");
+		
+		assertThrows( IllegalStateException.class, () ->base.getShardBase( "dummyShard"));
 	}
 
 	@Test
@@ -329,13 +330,14 @@ public class RecordBaseTest<T extends TestInterface> extends Assert
 		assertFalse( base.isValid(t));
 	}
 
-	@Test(expected = ValidationFailed.class)
+	@Test
 	public void testValidate() throws Exception
 	{
 		T t = base.createRecord();
 		t.setName( "Name");
 		assertNotNull( t.getName());
 		base.validate( t);
+		mayThrow(ValidationFailed.class, () -> {
 		try{
 			t.setName( null );
 		}
@@ -343,8 +345,8 @@ public class RecordBaseTest<T extends TestInterface> extends Assert
 		{
 			//TODO fix, so ValidationFailed is thrown
 			throw new ValidationFailed("name", t);
-		}
-		base.validate( t);
+		}} );
+		mayThrow(ValidationFailed.class, () -> base.validate( t));
 	}
 	
 	@Test
@@ -403,7 +405,7 @@ public class RecordBaseTest<T extends TestInterface> extends Assert
 		
 	}
 	
-	@Test(expected = RecordException.class)
+	@Test
 	public void testCreateRecord_Map_Consumer()
 	{
 		T record = base.createRecord( Collections.singletonMap( "name", "Afam"), 
@@ -412,9 +414,9 @@ public class RecordBaseTest<T extends TestInterface> extends Assert
 				}
 		);
 		assertNotNull( record);
-		base.createRecord( null, (final T t) -> {
+		assertThrows( RecordException.class, () ->base.createRecord( null, (final T t) -> {
 			throw new IllegalArgumentException("Dummy error");
-		});
+		}));
 	}
 
 	@Test

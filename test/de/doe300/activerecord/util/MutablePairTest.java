@@ -24,6 +24,7 @@
  */
 package de.doe300.activerecord.util;
 
+import de.doe300.activerecord.AssertException;
 import org.junit.Assert;
 import org.junit.Test;
 
@@ -32,7 +33,7 @@ import org.junit.Test;
  * @author doe300
  * @since 0.8
  */
-public class MutablePairTest extends Assert
+public class MutablePairTest extends Assert implements AssertException
 {
 	private static final MutablePair<String, String> firstNull = new MutablePair<>(null, "Dummy");
 	private static final MutablePair<String, String> secondNull = new MutablePair<>("Dummy", null);
@@ -69,18 +70,18 @@ public class MutablePairTest extends Assert
 		assertFalse( secondNull.hasSecond());
 	}
 
-	@Test(expected = NullPointerException.class)
+	@Test
 	public void testGetFirstOrThrow()
 	{
 		assertNotNull( secondNull.getFirstOrThrow());
-		firstNull.getFirstOrThrow();
+		assertThrows( NullPointerException.class, () -> firstNull.getFirstOrThrow());
 	}
 
-	@Test(expected = NullPointerException.class)
+	@Test
 	public void testGetSecondOrThrow()
 	{
 		assertNotNull( firstNull.getSecondOrThrow());
-		secondNull.getSecondOrThrow();
+		assertThrows( NullPointerException.class, () -> secondNull.getSecondOrThrow());
 	}
 
 	@Test

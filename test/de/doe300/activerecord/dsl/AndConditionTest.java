@@ -24,6 +24,7 @@
  */
 package de.doe300.activerecord.dsl;
 
+import de.doe300.activerecord.AssertException;
 import de.doe300.activerecord.RecordBase;
 import de.doe300.activerecord.TestInterface;
 import de.doe300.activerecord.TestServer;
@@ -36,7 +37,7 @@ import org.junit.Assert;
 import org.junit.BeforeClass;
 import org.junit.Test;
 
-public class AndConditionTest extends Assert
+public class AndConditionTest extends Assert implements AssertException
 {
 	private static RecordBase<TestInterface> base;
 	private static TestInterface t1, t2,t3;
@@ -67,13 +68,13 @@ public class AndConditionTest extends Assert
 		TestServer.destroyTestTable(TestInterface.class, AndConditionTest.class.getSimpleName());
 	}
 	
-	@Test(expected = IllegalArgumentException.class)
+	@Test
 	public void testAndError()
 	{
-		assertNotNull( AndCondition.andConditions( new Condition[0]));
+		assertThrows( IllegalArgumentException.class, () -> AndCondition.andConditions( new Condition[0]) );
 	}
 	
-	@Test(expected = IllegalArgumentException.class)
+	@Test
 	public void testAndConditions()
 	{
 		Condition simpleCond = new SimpleCondition(base.getPrimaryColumn(), 3, Comparison.SMALLER_EQUALS);
@@ -92,7 +93,7 @@ public class AndConditionTest extends Assert
 		Condition c5 = AndCondition.andConditions( simpleCond, simpleCond, simpleCond, simpleCond2, c1);
 		assertSame( c5, simpleCond);
 		//error-test
-		AndCondition.andConditions( new Condition[0]);
+		assertThrows( IllegalArgumentException.class, () -> AndCondition.andConditions( new Condition[0]));
 	}
 	
 	@Test
