@@ -32,76 +32,18 @@ import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
 import javax.annotation.Nonnull;
-import javax.annotation.Nullable;
 
 /**
  * Grouped Condition, returning <code>true</code> if any of the children conditions returns <code>true</code>
  * @author doe300
  */
-public class OrCondition implements Condition
+class OrCondition implements Condition
 {
 	private final Condition[] conditions;
 
-	private OrCondition( Condition[] conditions )
+	OrCondition( Condition[] conditions )
 	{
 		this.conditions = conditions;
-	}
-	
-	/**
-	 * Combines the <code>conds</code> and optimizes according to the following rules:
-	 * <ul>
-	 * <li>Removes all <code>null</code>-conditions</li>
-	 * <li>Unrolls all children OR-conditions, because <code>a OR (b OR c)</code> is the same as <code>a OR b OR c</code></li>
-	 * <li>If any condition produces the SQL-symbol <code>TRUE</code> this condition will always be <code>true</code> and therefore any other condition can be discarded</li>
-	 * <li>Skips conditions which are already in the list</li>
-	 * <li>Returns the single condition, if only one passes all other tests</li>
-	 * </ul>
-	 * @param conds
-	 * @return the combined Condition
-	 */
-	@Nonnull
-	public static Condition orConditions(@Nullable Condition... conds)
-	{
-		if(conds == null || conds.length == 0)
-		{
-			throw new IllegalArgumentException();
-		}
-		ArrayList<Condition> list = new ArrayList<>(conds.length);
-		for(Condition cond: conds)
-		{
-			//clears nulls
-			if(cond == null)
-			{
-				continue;
-			}
-			//unrolls or-conditions
-			if(cond instanceof OrCondition)
-			{
-				list.addAll( Arrays.asList( ((OrCondition)cond).conditions));
-				continue;
-			}
-			//check for non-false condition
-			if(cond instanceof SimpleCondition && ((SimpleCondition)cond).getComparison() == Comparison.TRUE)
-			{
-				//this condition is non-false, no other conditions matter
-				return cond;
-			}
-			//if condition is already in list, skip
-			if(list.contains( cond ))
-			{
-				continue;
-			}
-			list.add( cond );
-		}
-		if(list.isEmpty())
-		{
-			throw new IllegalArgumentException("Can't OR null conditions");
-		}
-		if(list.size() == 1)
-		{
-			return list.get( 0);
-		}
-		return new OrCondition(list.toArray( new Condition[list.size()]));
 	}
 	
 	@Override
@@ -177,5 +119,11 @@ public class OrCondition implements Condition
 	public int hashCode()
 	{
 		return toSQL( JDBCDriver.DEFAULT, null ).hashCode();
+	}
+	
+	@Nonnull
+	Condition[] getConditions()
+	{
+		return conditions;
 	}
 }

@@ -91,7 +91,7 @@ public class ScalarFunctionTest extends Assert
 		ScalarFunction<TestInterface, String, String> lower = new LowerCase<TestInterface>( "name", TestInterface::getName);
 		//test direct #apply
 		assertEquals( "123name1", lower.apply( t1));
-		Condition cond = new SimpleCondition(lower, "123name1", Comparison.IS);
+		Condition cond = Conditions.is( lower, "123name1");
 		assertTrue( cond.test( t1 ));
 		assertEquals( 2, base.count( cond));
 		
@@ -105,7 +105,7 @@ public class ScalarFunctionTest extends Assert
 		ScalarFunction<TestInterface, String, String> upper = new UpperCase<>("name", TestInterface::getName);
 		//test direct #apply
 		assertEquals( "123NAME1", upper.apply( t1));
-		Condition cond = new SimpleCondition(upper, "123NAME1", Comparison.IS);
+		Condition cond = Conditions.is( upper, "123NAME1");
 		assertTrue( cond.test( t1 ));
 		assertEquals( 2, base.count( cond));
 		
@@ -119,13 +119,13 @@ public class ScalarFunctionTest extends Assert
 		ScalarFunction<TestInterface, Integer, Long> abs = new Absolute<>( "age", TestInterface::getAge);
 		//test direct #apply
 		assertEquals( Long.valueOf( 913), abs.apply( t2));
-		Condition cond = new SimpleCondition(abs, 913, Comparison.IS_NOT);
+		Condition cond = Conditions.isNot( abs, 913);
 		assertTrue( cond.test( t1 ));
 		assertEquals( 2, base.count( cond));
 		
 		ScalarFunction<TestInterface, Number, Long> absFunc = new Absolute<>(new StringLength<>("name", TestInterface::getName));
 		assertEquals( Long.valueOf( 8), absFunc.apply( t2));
-		Condition condFunc = new SimpleCondition(absFunc, 8, Comparison.IS_NOT);
+		Condition condFunc = Conditions.isNot( absFunc, 8);
 		assertTrue( condFunc.test( t4 ));
 		assertEquals( 1, base.count( condFunc));
 	}
@@ -136,7 +136,7 @@ public class ScalarFunctionTest extends Assert
 		ScalarFunction<TestInterface, Integer, Double> abs = new AbsoluteDouble<>("age", TestInterface::getAge);
 		//test direct #apply
 		assertEquals( Double.valueOf( 913), abs.apply( t2));
-		Condition cond = new SimpleCondition(abs, 913, Comparison.IS_NOT);
+		Condition cond = Conditions.isNot( abs, 913);
 		assertTrue( cond.test( t1 ));
 		assertEquals( 2, base.count( cond));
 		
@@ -150,7 +150,7 @@ public class ScalarFunctionTest extends Assert
 		ScalarFunction<TestInterface, Integer, Integer> sign = new Signum<>("age", TestInterface::getAge);
 		//test direct #apply
 		assertEquals( Integer.valueOf( -1), sign.apply( t2));
-		Condition cond = new SimpleCondition(sign, -1, Comparison.IS_NOT);
+		Condition cond = Conditions.isNot( sign, -1);
 		assertFalse(cond.test( t1 ));
 		assertEquals(0, base.count( cond));
 		
@@ -164,7 +164,7 @@ public class ScalarFunctionTest extends Assert
 		ScalarFunction<TestInterface, Integer, Long> floor = new Floor<>("age", TestInterface::getAge);
 		//test direct #apply
 		assertEquals( Long.valueOf( t2.getAge()), floor.apply( t2));
-		Condition cond = new SimpleCondition(floor, -1, Comparison.IS_NOT);
+		Condition cond = Conditions.isNot( floor, -1);
 		assertTrue(cond.test( t1 ));
 		assertEquals(4, base.count( cond));
 		
@@ -179,7 +179,7 @@ public class ScalarFunctionTest extends Assert
 		ScalarFunction<TestInterface, Integer, Long> ceil = new Ceiling<>("age", TestInterface::getAge);
 		//test direct #apply
 		assertEquals( Long.valueOf( t2.getAge()), ceil.apply( t2));
-		Condition cond = new SimpleCondition(ceil, -1, Comparison.IS_NOT);
+		Condition cond = Conditions.isNot( ceil, -1);
 		assertTrue(cond.test( t1 ));
 		assertEquals(4, base.count( cond));
 		
@@ -193,7 +193,7 @@ public class ScalarFunctionTest extends Assert
 		ScalarFunction<TestInterface, Integer, Long> round = new Round<>("age", TestInterface::getAge);
 		//test direct #apply
 		assertEquals( Long.valueOf( t2.getAge()), round.apply( t2));
-		Condition cond = new SimpleCondition(round, -1, Comparison.IS_NOT);
+		Condition cond = Conditions.isNot( round, -1);
 		assertTrue(cond.test( t1 ));
 		assertEquals(4, base.count( cond));
 		
@@ -207,7 +207,7 @@ public class ScalarFunctionTest extends Assert
 		ScalarFunction<TestInterface, Long, Double> sqrt = new SquareRoot<>(new Absolute<>("age", TestInterface::getAge));
 		//test direct #apply
 		assertEquals( Math.sqrt( Math.abs(t2.getAge())), sqrt.apply( t2), 0.00001);
-		Condition cond = new SimpleCondition(sqrt, -1, Comparison.IS_NOT);
+		Condition cond = Conditions.isNot( sqrt, -1);
 		assertTrue(cond.test( t1 ));
 		if(!(base.getStore().getDriver() instanceof SQLiteDriver))
 		{
@@ -222,7 +222,7 @@ public class ScalarFunctionTest extends Assert
 		ScalarFunction<TestInterface, Integer, Integer> value = new Value<>("age", TestInterface::getAge);
 		//test direct #apply
 		assertEquals( t2.getAge(), value.apply( t2).longValue());
-		Condition cond = new SimpleCondition(value, -1, Comparison.IS_NOT);
+		Condition cond = Conditions.isNot( value, -1);
 		assertTrue(cond.test( t1 ));
 		assertEquals(4, base.count( cond));
 	}
@@ -233,7 +233,7 @@ public class ScalarFunctionTest extends Assert
 		ScalarFunction<TestInterface, String, Number> length = new StringLength<>("name", TestInterface::getName);
 		//test direct #apply
 		assertEquals( "123Name4".length(), length.apply( t3));
-		Condition cond = new SimpleCondition(length, 8, Comparison.IS);
+		Condition cond = Conditions.is( length, 8);
 		assertTrue( cond.test( t3));
 		assertEquals( 3, base.count( cond));
 		
@@ -250,7 +250,7 @@ public class ScalarFunctionTest extends Assert
 		ScalarFunction<TestInterface, String, String> trim = new TrimString<>("name", TestInterface::getName);
 		//test direct #apply
 		assertEquals( "SomeName", trim.apply( t4));
-		Condition cond = new SimpleCondition(trim, "SomeName", Comparison.IS);
+		Condition cond = Conditions.is( trim, "SomeName");
 		assertTrue( cond.test( t4));
 		assertEquals( 1, base.count( cond));
 		
@@ -265,7 +265,7 @@ public class ScalarFunctionTest extends Assert
 		ScalarFunction<TestInterface, Integer, String> cast = new CastType<TestInterface, Integer, String>("age", TestInterface::getAge, String.class, (Integer i) -> Integer.toString( i ));
 		//test direct #apply
 		assertEquals( "-913", cast.apply( t4));
-		Condition cond = new SimpleCondition(cast, "-913", Comparison.IS);
+		Condition cond = Conditions.is( cast, "-913");
 		assertTrue( cond.test( t4));
 		assertEquals( 2, base.count( cond));
 		

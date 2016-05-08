@@ -36,8 +36,8 @@ import javax.annotation.Nullable;
 import de.doe300.activerecord.ReadOnlyRecordBase;
 import de.doe300.activerecord.RecordBase;
 import de.doe300.activerecord.dsl.AggregateFunction;
-import de.doe300.activerecord.dsl.AndCondition;
 import de.doe300.activerecord.dsl.Condition;
+import de.doe300.activerecord.dsl.Conditions;
 import de.doe300.activerecord.dsl.Order;
 import de.doe300.activerecord.record.ActiveRecord;
 import de.doe300.activerecord.scope.Scope;
@@ -193,26 +193,26 @@ public class ConditionSet<T extends ActiveRecord> extends AbstractSet<T> impleme
 	@Override
 	public Stream<T> findWithScope( final Scope scope )
 	{
-		final Scope newScope = new Scope(AndCondition.andConditions(condition, scope.getCondition()), scope.getOrder() != null ? scope.getOrder() : order, scope.getLimit());
+		final Scope newScope = new Scope(Conditions.and(condition, scope.getCondition()), scope.getOrder() != null ? scope.getOrder() : order, scope.getLimit());
 		return base.findWithScope(newScope );
 	}
 
 	@Override
 	public T findFirstWithScope( final Scope scope )
 	{
-		final Scope newScope = new Scope(AndCondition.andConditions(condition, scope.getCondition()), scope.getOrder() != null ? scope.getOrder() : order, scope.getLimit());
+		final Scope newScope = new Scope(Conditions.and(condition, scope.getCondition()), scope.getOrder() != null ? scope.getOrder() : order, scope.getLimit());
 		return base.findFirstWithScope( newScope );
 	}
 
 	@Override
 	public RecordSet<T> getForCondition( final Condition cond, @Nullable final Order order )
 	{
-		return new ConditionSet<T>(base, AndCondition.andConditions(cond, condition), order != null ? order : this.order, setConditionFunc, unsetConditionFunc);
+		return new ConditionSet<T>(base, Conditions.and(cond, condition), order != null ? order : this.order, setConditionFunc, unsetConditionFunc);
 	}
 
 	@Override
 	public <C, R> R aggregate( final AggregateFunction<T, C, ?, R> aggregateFunction, @Nullable final Condition condition )
 	{
-		return ((RecordBase<T>) base).aggregate( aggregateFunction, AndCondition.andConditions( this.condition, condition));
+		return ((RecordBase<T>) base).aggregate(aggregateFunction, Conditions.and( this.condition, condition));
 	}
 }

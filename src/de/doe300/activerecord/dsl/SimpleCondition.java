@@ -88,7 +88,14 @@ public class SimpleCondition implements Condition
 			}
 			throw new IllegalArgumentException("Invalid list-type: "+val.getClass());
 		}
-
+		//check for LARGER/SMALLER
+		if(comp == Comparison.LARGER || comp == Comparison.LARGER_EQUALS || comp == Comparison.SMALLER || comp == Comparison.SMALLER_EQUALS)
+		{
+			if(!(val instanceof Comparable))
+			{
+				throw new IllegalArgumentException("Type must be comparable: " + val.getClass());
+			}
+		}
 		return val;
 	}
 

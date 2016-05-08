@@ -36,12 +36,10 @@ import javax.annotation.CheckReturnValue;
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 
-import de.doe300.activerecord.dsl.Comparison;
 import de.doe300.activerecord.dsl.Condition;
-import de.doe300.activerecord.dsl.OrCondition;
+import de.doe300.activerecord.dsl.Conditions;
 import de.doe300.activerecord.dsl.Order;
 import de.doe300.activerecord.dsl.QueryResult;
-import de.doe300.activerecord.dsl.SimpleCondition;
 import de.doe300.activerecord.dsl.SimpleOrder;
 import de.doe300.activerecord.dsl.functions.CastType;
 import de.doe300.activerecord.jdbc.driver.JDBCDriver;
@@ -594,14 +592,14 @@ public abstract class RecordBase<T extends ActiveRecord> implements ReadOnlyReco
 				Logging.getLogger().debug( recordType.getSimpleName(), "Converting column '"+column+"' to string-type for searching");
 				final Function<T, ?> valueFunc = (final T record) -> getStore().getValue( this, record.getPrimaryKey(), column);
 				//XXX converter-function #toString() is not very specific -> improve. Is it even used?
-				conds[i] = new SimpleCondition(new CastType<>(column, valueFunc, String.class, Object::toString), "%" + term + "%", Comparison.IS);
+				conds[i] = Conditions.is( new CastType<>(column, valueFunc, String.class, Object::toString), "%" + term + "%");
 			}
 			else
 			{
-				conds[i] = new SimpleCondition(column, "%" + term + "%", Comparison.LIKE);
+				conds[i] = Conditions.isLike( column, "%" + term + "%");
 			}
 		}
-		return OrCondition.orConditions(conds );
+		return Conditions.or(conds );
 	}
 
 	////

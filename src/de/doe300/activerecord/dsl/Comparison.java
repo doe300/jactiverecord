@@ -121,6 +121,10 @@ public enum Comparison implements BiPredicate<Object, Object>
 		@Override
 		public boolean test( final Object value, final Object compareValue )
 		{
+			if(value == null || compareValue == null)
+			{
+				return false;
+			}
 			return Comparable.class.cast(value).compareTo(compareValue) > 0;
 		}
 	},
@@ -133,6 +137,10 @@ public enum Comparison implements BiPredicate<Object, Object>
 		@Override
 		public boolean test( final Object value, final Object compareValue )
 		{
+			if(value == null || compareValue == null)
+			{
+				return false;
+			}
 			return Comparable.class.cast(value).compareTo(compareValue) >= 0;
 		}
 	},
@@ -145,6 +153,10 @@ public enum Comparison implements BiPredicate<Object, Object>
 		@Override
 		public boolean test( final Object value, final Object compareValue )
 		{
+			if(value == null || compareValue == null)
+			{
+				return false;
+			}
 			return Comparable.class.cast(value).compareTo(compareValue) < 0;
 		}
 	},
@@ -157,6 +169,10 @@ public enum Comparison implements BiPredicate<Object, Object>
 		@Override
 		public boolean test( final Object value, final Object compareValue )
 		{
+			if(value == null || compareValue == null)
+			{
+				return false;
+			}
 			return Comparable.class.cast(value).compareTo(compareValue) <= 0;
 		}
 	},

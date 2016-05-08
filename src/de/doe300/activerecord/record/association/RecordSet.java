@@ -34,11 +34,9 @@ import javax.annotation.Nullable;
 
 import de.doe300.activerecord.FinderMethods;
 import de.doe300.activerecord.ReadOnlyRecordBase;
-import de.doe300.activerecord.dsl.AndCondition;
-import de.doe300.activerecord.dsl.Comparison;
 import de.doe300.activerecord.dsl.Condition;
+import de.doe300.activerecord.dsl.Conditions;
 import de.doe300.activerecord.dsl.Order;
-import de.doe300.activerecord.dsl.SimpleCondition;
 import de.doe300.activerecord.record.ActiveRecord;
 
 /**
@@ -111,23 +109,23 @@ public interface RecordSet<T extends ActiveRecord> extends SortedSet<T>, FinderM
 	@Nonnull
 	public default RecordSet<T> headSet(final T toElement)
 	{
-		return getForCondition( new SimpleCondition(getRecordBase().getPrimaryColumn(), toElement.getPrimaryKey(), Comparison.SMALLER), getOrder() );
+		return getForCondition( Conditions.isSmaller( getRecordBase().getPrimaryColumn(), toElement.getPrimaryKey()), getOrder() );
 	}
 
 	@Override
 	@Nonnull
 	public default RecordSet<T> tailSet(final T fromElement)
 	{
-		return getForCondition( new SimpleCondition(getRecordBase().getPrimaryColumn(), fromElement.getPrimaryKey(), Comparison.LARGER), getOrder());
+		return getForCondition( Conditions.isLarger(getRecordBase().getPrimaryColumn(), fromElement.getPrimaryKey()), getOrder());
 	}
 
 	@Override
 	@Nonnull
 	public default RecordSet<T> subSet(final T fromElement, final T toElement)
 	{
-		return getForCondition( AndCondition.andConditions(
-			new SimpleCondition(getRecordBase().getPrimaryColumn(), fromElement.getPrimaryKey(), Comparison.LARGER_EQUALS),
-			new SimpleCondition(getRecordBase().getPrimaryColumn(), toElement.getPrimaryKey(), Comparison.SMALLER)
+		return getForCondition(Conditions.and(
+				Conditions.isLargerEquals( getRecordBase().getPrimaryColumn(), fromElement.getPrimaryKey()),
+				Conditions.isSmaller( getRecordBase().getPrimaryColumn(), toElement.getPrimaryKey())
 			), getOrder());
 	}
 

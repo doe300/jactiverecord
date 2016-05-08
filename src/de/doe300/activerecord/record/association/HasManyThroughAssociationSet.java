@@ -36,11 +36,9 @@ import javax.annotation.Nonnull;
 import de.doe300.activerecord.ReadOnlyRecordBase;
 import de.doe300.activerecord.RecordBase;
 import de.doe300.activerecord.dsl.AggregateFunction;
-import de.doe300.activerecord.dsl.AndCondition;
-import de.doe300.activerecord.dsl.Comparison;
 import de.doe300.activerecord.dsl.Condition;
+import de.doe300.activerecord.dsl.Conditions;
 import de.doe300.activerecord.dsl.Order;
-import de.doe300.activerecord.dsl.SimpleCondition;
 import de.doe300.activerecord.record.ActiveRecord;
 import de.doe300.activerecord.scope.Scope;
 import javax.annotation.Nullable;
@@ -130,9 +128,9 @@ public class HasManyThroughAssociationSet<T extends ActiveRecord> extends Abstra
 
 	boolean remove0(final Integer key)
 	{
-		final Condition cond = AndCondition.andConditions(
-			new SimpleCondition(thisMappingKey, thisPrimaryKey, Comparison.IS),
-			new SimpleCondition(foreignMappingKey, key, Comparison.IS)
+		final Condition cond = Conditions.and(
+				Conditions.is( thisMappingKey, thisPrimaryKey),
+				Conditions.is( foreignMappingKey, key)
 			);
 		return destBase.getStore().removeRow( mappingTableName, cond );
 	}
@@ -181,7 +179,7 @@ public class HasManyThroughAssociationSet<T extends ActiveRecord> extends Abstra
 	public Stream<T> findWithScope( final Scope scope)
 	{
 		final Set<Integer> keys = getAssocationKeys().collect( Collectors.toSet());
-		final Scope newScope = new Scope(AndCondition.andConditions(new SimpleCondition(destBase.getPrimaryColumn(), keys, Comparison.IN), scope.getCondition()), scope.getOrder() != null ? scope.getOrder() : order, scope.getLimit());
+		final Scope newScope = new Scope(Conditions.and(Conditions.isIn( destBase.getPrimaryColumn(), keys), scope.getCondition()), scope.getOrder() != null ? scope.getOrder() : order, scope.getLimit());
 		return destBase.findWithScope( newScope );
 	}
 
@@ -189,7 +187,7 @@ public class HasManyThroughAssociationSet<T extends ActiveRecord> extends Abstra
 	public T findFirstWithScope( final Scope scope)
 	{
 		final Set<Integer> keys = getAssocationKeys().collect( Collectors.toSet());
-		final Scope newScope = new Scope(AndCondition.andConditions(new SimpleCondition(destBase.getPrimaryColumn(), keys, Comparison.IN), scope.getCondition()), scope.getOrder() != null ? scope.getOrder() : order, scope.getLimit());
+		final Scope newScope = new Scope(Conditions.and(Conditions.isIn( destBase.getPrimaryColumn(), keys), scope.getCondition()), scope.getOrder() != null ? scope.getOrder() : order, scope.getLimit());
 		return destBase.findFirstWithScope( newScope);
 	}
 
@@ -302,7 +300,7 @@ public class HasManyThroughAssociationSet<T extends ActiveRecord> extends Abstra
 		public Stream<T> findWithScope( final Scope scope)
 		{
 			final Scope newScope = new Scope(
-				AndCondition.andConditions(subCondition, scope.getCondition()),
+				Conditions.and(subCondition, scope.getCondition()),
 				scope.getOrder() != null ? scope.getOrder() : order, scope.getLimit());
 			return destBase.findWithScope( newScope );
 		}
@@ -311,7 +309,7 @@ public class HasManyThroughAssociationSet<T extends ActiveRecord> extends Abstra
 		public T findFirstWithScope( final Scope scope)
 		{
 			final Scope newScope = new Scope(
-				AndCondition.andConditions(subCondition,scope.getCondition()),
+				Conditions.and(subCondition,scope.getCondition()),
 				scope.getOrder() != null ? scope.getOrder() : order, scope.getLimit());
 			return destBase.findFirstWithScope( newScope);
 		}
@@ -319,7 +317,7 @@ public class HasManyThroughAssociationSet<T extends ActiveRecord> extends Abstra
 		@Override
 		public RecordSet<T> getForCondition( final Condition cond, final Order order )
 		{
-			return new HasManyThroughSubSet(AndCondition.andConditions(subCondition,cond), order != null ? order : this.order);
+			return new HasManyThroughSubSet(Conditions.and(subCondition,cond), order != null ? order : this.order);
 		}
 
 		@Override

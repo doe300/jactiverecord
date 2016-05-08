@@ -69,46 +69,41 @@ public class AndConditionTest extends Assert implements AssertException
 	}
 	
 	@Test
-	public void testAndError()
-	{
-		assertThrows( IllegalArgumentException.class, () -> AndCondition.andConditions( new Condition[0]) );
-	}
-	
-	@Test
 	public void testAndConditions()
 	{
 		Condition simpleCond = new SimpleCondition(base.getPrimaryColumn(), 3, Comparison.SMALLER_EQUALS);
-		Condition c1 = AndCondition.andConditions(simpleCond );
-		Condition c2 = AndCondition.andConditions(c1);
+		Condition c1 = Conditions.and(simpleCond );
+		Condition c2 = Conditions.and(c1);
 		//unrolls inner ANDs
 		assertEquals( c1.toSQL( JDBCDriver.guessDriver( null ), null), c2.toSQL( JDBCDriver.guessDriver( null ), null));
 		//removes non-false conditions
 		Condition simpleCond2 = new SimpleCondition("id", null, Comparison.TRUE);
-		Condition c3 = AndCondition.andConditions( simpleCond, simpleCond2);
+		Condition c3 = Conditions.and( simpleCond, simpleCond2);
 		assertSame( c3, simpleCond);
 		//removes nulls
-		Condition c4 = AndCondition.andConditions( simpleCond, null, null, null);
+		Condition c4 = Conditions.and( simpleCond, null, null, null);
 		assertSame( c4, simpleCond);
 		//removes duplicates
-		Condition c5 = AndCondition.andConditions( simpleCond, simpleCond, simpleCond, simpleCond2, c1);
+		Condition c5 = Conditions.and( simpleCond, simpleCond, simpleCond, simpleCond2, c1);
 		assertSame( c5, simpleCond);
-		//error-test
-		assertThrows( IllegalArgumentException.class, () -> AndCondition.andConditions( new Condition[0]));
+		//error-tests
+		assertThrows( IllegalArgumentException.class, () -> Conditions.and( new Condition[0]));
+		assertThrows( IllegalArgumentException.class, () -> Conditions.and( new Condition[0]) );
 	}
 	
 	@Test
 	public void testHasWildcards()
 	{
-		Condition condition = AndCondition.andConditions(new SimpleCondition("age", null, Comparison.IS_NOT_NULL), new SimpleCondition("name", null, Comparison.IS_NOT_NULL));
+		Condition condition = Conditions.and(new SimpleCondition("age", null, Comparison.IS_NOT_NULL), new SimpleCondition("name", null, Comparison.IS_NOT_NULL));
 		assertFalse( condition.hasWildcards());
-		Condition condition1 = AndCondition.andConditions(condition, new SimpleCondition("name", "123Name1", Comparison.IS));
+		Condition condition1 = Conditions.and(condition, new SimpleCondition("name", "123Name1", Comparison.IS));
 		assertTrue( condition1.hasWildcards());
 	}
 
 	@Test
 	public void testGetValues()
 	{
-		Condition condition = AndCondition.andConditions(
+		Condition condition = Conditions.and(
 				new SimpleCondition("age", 913, Comparison.IS),
 				new SimpleCondition("name", "123Name1", Comparison.IS));
 		assertArrayEquals( new Object[]{913, "123Name1"}, condition.getValues() );
@@ -117,7 +112,7 @@ public class AndConditionTest extends Assert implements AssertException
 	@Test
 	public void testTest_ActiveRecord()
 	{
-		Condition condition = AndCondition.andConditions(
+		Condition condition = Conditions.and(
 				new SimpleCondition("age", 913, Comparison.IS),
 				new SimpleCondition("name", "123Name1", Comparison.IS));
 		assertFalse( condition.test( t1));
@@ -127,7 +122,7 @@ public class AndConditionTest extends Assert implements AssertException
 	@Test
 	public void testTest_Map()
 	{
-		Condition condition = AndCondition.andConditions(
+		Condition condition = Conditions.and(
 				new SimpleCondition("age", 913, Comparison.IS),
 				new SimpleCondition("name", "123Name1", Comparison.IS));
 		Map<String,Object> map = new HashMap<>(2);
@@ -140,7 +135,7 @@ public class AndConditionTest extends Assert implements AssertException
 	@Test
 	public void testNegate()
 	{
-		Condition condition = AndCondition.andConditions(
+		Condition condition = Conditions.and(
 				new SimpleCondition("age", 913, Comparison.IS),
 				new SimpleCondition("name", "123Name1", Comparison.IS));
 		condition = condition.negate();
@@ -151,10 +146,10 @@ public class AndConditionTest extends Assert implements AssertException
 	@Test
 	public void testEquals()
 	{
-		Condition con1 = AndCondition.andConditions(
+		Condition con1 = Conditions.and(
 				new SimpleCondition("age", 913, Comparison.IS),
 				new SimpleCondition("name", "123Name1", Comparison.IS));
-		Condition con2 = AndCondition.andConditions(con1);
+		Condition con2 = Conditions.and(con1);
 		
 		assertEquals( con1, con2);
 	}

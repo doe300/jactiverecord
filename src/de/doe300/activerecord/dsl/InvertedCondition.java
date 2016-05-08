@@ -30,7 +30,6 @@ import javax.annotation.Nonnull;
 
 import de.doe300.activerecord.jdbc.driver.JDBCDriver;
 import de.doe300.activerecord.record.ActiveRecord;
-import javax.annotation.Nullable;
 
 /**
  * Inverts the given condition (returns <code>false</code> if the condition returns <code>true</code>).
@@ -38,36 +37,14 @@ import javax.annotation.Nullable;
  *
  * @author doe300
  */
-public class InvertedCondition implements Condition
+class InvertedCondition implements Condition
 {
 	@Nonnull
 	private final Condition invertedCondition;
 
-	private InvertedCondition(@Nonnull final Condition invertedCondition)
+	InvertedCondition(@Nonnull final Condition invertedCondition)
 	{
 		this.invertedCondition = invertedCondition;
-	}
-
-	/**
-	 * Inverts the <code>cond</code>.
-	 *
-	 * This method optimizes by unwrapping a twice inverted condition, because <code>NOT(NOT(a))</code> is the same as <code>a</code>
-	 *
-	 * @param cond
-	 * @return the inverted Condition
-	 */
-	@Nonnull
-	public static Condition invertCondition(@Nullable final Condition cond)
-	{
-		if(cond == null)
-		{
-			throw new IllegalArgumentException();
-		}
-		if(cond instanceof InvertedCondition)
-		{
-			return cond.negate();
-		}
-		return new InvertedCondition(cond );
 	}
 
 	@Override

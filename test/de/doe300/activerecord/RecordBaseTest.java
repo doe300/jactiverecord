@@ -59,9 +59,6 @@ public class RecordBaseTest<T extends TestInterface> extends Assert implements A
 	private final RecordBase<T> base;
 	private final Class<T> type;
 	
-	//FIXME validations fail for simple jdbc record-store / memory store /anything without cache??)
-	//but only finder-methods
-	
 	public RecordBaseTest(Class<T> type) throws SQLException
 	{
 		this.type = type;

@@ -109,8 +109,8 @@ public class SimpleConditionTest extends Assert implements AssertException
 		//test "a = null" optimization
 		assertSame( Comparison.IS_NULL, new SimpleCondition("id", null, Comparison.IS).getComparison());
 		//test SQLFunction
-		assertTrue( new SimpleCondition(new Absolute<>( "age", TestInterface::getAge), 912, Comparison.IS).test( t1));
-		assertSame( t1, base.findFirst( new SimpleCondition(new Absolute<>( "age", TestInterface::getAge), 912, Comparison.IS)));
+		assertTrue( Conditions.is( new Absolute<>("age", TestInterface::getAge), 912).test( t1));
+		assertSame( t1, base.findFirst(Conditions.is( new Absolute<>("age", TestInterface::getAge), 912)));
 	}
 	
 	@Test
@@ -123,8 +123,8 @@ public class SimpleConditionTest extends Assert implements AssertException
 		//test "a != null" optimization
 		assertSame( Comparison.IS_NOT_NULL, new SimpleCondition("id", null, Comparison.IS_NOT).getComparison());
 		//test SQLFunction
-		assertTrue( new SimpleCondition(new Absolute<>( "age", TestInterface::getAge), 912, Comparison.IS_NOT).test( t2));
-		assertSame(t2, base.findFirst( new SimpleCondition(new Absolute<>( "age", TestInterface::getAge), 912, Comparison.IS_NOT)));
+		assertTrue( Conditions.isNot( new Absolute<>("age", TestInterface::getAge), 912).test( t2));
+		assertSame(t2, base.findFirst( Conditions.isNot( new Absolute<>("age", TestInterface::getAge), 912)));
 	}
 	
 	@Test
@@ -214,7 +214,7 @@ public class SimpleConditionTest extends Assert implements AssertException
 	public void testSQLFunction()
 	{
 		//key is SQL function
-		final Condition cond = new SimpleCondition(new LowerCase<>("name", TestInterface::getName), "adam", Comparison.IS);
+		final Condition cond = Conditions.is( new LowerCase<>("name", TestInterface::getName), "adam");
 		TestInterface t = base.createRecord();
 		t.setName( "Adam");
 		assertTrue( cond.hasWildcards());
@@ -223,7 +223,7 @@ public class SimpleConditionTest extends Assert implements AssertException
 		assertEquals( base.findFirst( cond ), t );
 		
 		//value is SQL function
-		final Condition cond1 = new SimpleCondition("name", new LowerCase<>("name", TestInterface::getName), Comparison.IS);
+		final Condition cond1 = Conditions.is( "name", new LowerCase<>("name", TestInterface::getName));
 		assertFalse( cond1.hasWildcards());
 		assertFalse( cond1.test( t));
 		TestInterface t1 = base.createRecord();

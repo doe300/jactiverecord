@@ -64,7 +64,7 @@ public class OrConditionTest extends Assert implements AssertException
 		t3.setName( "123Name4");
 		t3.setAge( -913);
 		
-		cond = OrCondition.orConditions(new SimpleCondition("name", "123Name4", Comparison.IS), new SimpleCondition("age",
+		cond = Conditions.or(new SimpleCondition("name", "123Name4", Comparison.IS), new SimpleCondition("age",
 				-913, Comparison.SMALLER_EQUALS));
 	}
 	
@@ -77,37 +77,37 @@ public class OrConditionTest extends Assert implements AssertException
 	@Test
 	public void testOrError()
 	{
-		assertThrows(IllegalArgumentException.class, () -> OrCondition.orConditions( new Condition[0]));
+		assertThrows(IllegalArgumentException.class, () -> Conditions.or( new Condition[0]));
 	}
 	
 	@Test
 	public void testOrConditions()
 	{
-		Condition c1 = OrCondition.orConditions(cond);
+		Condition c1 = Conditions.or(cond);
 		//test OR-unrolling
 		assertEquals( cond.toSQL( JDBCDriver.guessDriver( null ), null), c1.toSQL( JDBCDriver.guessDriver( null ), null ));
 		//test skip duplicates
 		Condition s1 = new SimpleCondition("test", "dummy", Comparison.IS);
-		Condition c2 = OrCondition.orConditions(s1, s1);
+		Condition c2 = Conditions.or(s1, s1);
 		assertSame( s1, c2);
 		//test skip non-false
 		Condition s2 = new SimpleCondition("test", null, Comparison.TRUE);
-		Condition c3 = OrCondition.orConditions(s1, s2);
+		Condition c3 = Conditions.or(s1, s2);
 		assertSame( s2, c3);
 		//test unwrap single condition
-		Condition c4 = OrCondition.orConditions(s2);
+		Condition c4 = Conditions.or(s2);
 		assertSame( s2, c4);
 		//test skip nulls
-		assertSame( s1, OrCondition.orConditions( s1, null, null, null));
+		assertSame(s1, Conditions.or( s1, null, null, null));
 		
-		assertThrows( IllegalArgumentException.class, () -> OrCondition.orConditions( new Condition[0]));
+		assertThrows( IllegalArgumentException.class, () -> Conditions.or( new Condition[0]));
 	}
 
 	@Test
 	public void testHasWildcards()
 	{
 		assertTrue( cond.hasWildcards());
-		Condition c = OrCondition.orConditions(new SimpleCondition("name", null, Comparison.IS_NOT_NULL), new SimpleCondition("age", null, Comparison.IS_NULL));
+		Condition c = Conditions.or(new SimpleCondition("name", null, Comparison.IS_NOT_NULL), new SimpleCondition("age", null, Comparison.IS_NULL));
 		assertFalse( c.hasWildcards());
 	}
 
@@ -147,7 +147,7 @@ public class OrConditionTest extends Assert implements AssertException
 	@Test
 	public void testEquals()
 	{
-		final Condition cond1 = OrCondition.orConditions( cond);
+		final Condition cond1 = Conditions.or( cond);
 		assertEquals( cond, cond1 );
 		
 		assertNotEquals( cond, new Object());

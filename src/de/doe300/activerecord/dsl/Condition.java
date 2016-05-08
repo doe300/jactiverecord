@@ -68,7 +68,7 @@ public interface Condition extends Predicate<ActiveRecord>
 	 * @return whether the <code>record</code> matches this condition
 	 */
 	@Override
-	public boolean test(final ActiveRecord record);
+	public boolean test(@Nonnull final ActiveRecord record);
 
 	/**
 	 * NOTE: This method is not required to be supported
@@ -82,7 +82,7 @@ public interface Condition extends Predicate<ActiveRecord>
 	@Nonnull
 	public default Condition negate()
 	{
-		return InvertedCondition.invertCondition(this );
+		return Conditions.invert(this );
 	}
 	
 	/**
@@ -94,7 +94,7 @@ public interface Condition extends Predicate<ActiveRecord>
 	@Nonnull
 	public default Condition and(@Nullable final Condition other)
 	{
-		return AndCondition.andConditions( this, other);
+		return Conditions.and( this, other);
 	}
 	
 	/**
@@ -106,7 +106,19 @@ public interface Condition extends Predicate<ActiveRecord>
 	@Nonnull
 	public default Condition or(@Nullable final Condition other)
 	{
-		return OrCondition.orConditions( this, other);
+		return Conditions.or( this, other);
+	}
+	
+	/**
+	 * Combines the two conditions with XOR
+	 * @param other
+	 * @return the combined condition
+	 * @since 0.8
+	 */
+	@Nonnull
+	public default Condition xor(@Nullable final Condition other)
+	{
+		return Conditions.xor( this, other);
 	}
 
 	/**

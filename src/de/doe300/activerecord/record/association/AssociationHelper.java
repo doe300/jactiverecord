@@ -32,10 +32,8 @@ import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 
 import de.doe300.activerecord.RecordBase;
-import de.doe300.activerecord.dsl.AndCondition;
-import de.doe300.activerecord.dsl.Comparison;
 import de.doe300.activerecord.dsl.Condition;
-import de.doe300.activerecord.dsl.SimpleCondition;
+import de.doe300.activerecord.dsl.Conditions;
 import de.doe300.activerecord.record.ActiveRecord;
 import javax.annotation.Nonnegative;
 
@@ -139,7 +137,7 @@ public final class AssociationHelper
 	public static <T extends ActiveRecord> T getHasOne(@Nonnull final Object thisAssociationValue, @Nonnull final ReadOnlyRecordBase<T> otherBase,
 		@Nonnull final String foreignKeyColumn)
 	{
-		return otherBase.findFirst( new SimpleCondition(foreignKeyColumn, thisAssociationValue, Comparison.IS));
+		return otherBase.findFirst( Conditions.is( foreignKeyColumn, thisAssociationValue));
 	}
 
 	/**
@@ -182,7 +180,7 @@ public final class AssociationHelper
 		@Nonnull final Class<T> type, @Nonnull final String foreignKeyColumn)
 	{
 		final RecordBase<T> base = record.getBase().getCore().getBase( type);
-		return base.find( new SimpleCondition(foreignKeyColumn, record.getPrimaryKey(), Comparison.IS));
+		return base.find( Conditions.is( foreignKeyColumn, record.getPrimaryKey()));
 	}
 
 	/**
@@ -214,7 +212,7 @@ public final class AssociationHelper
 	public static <T extends ActiveRecord> RecordSet<T> getHasManySet(@Nonnull final ActiveRecord record,
 		@Nonnull final RecordBase<T> base, @Nonnull final String foreignKeyColumn)
 	{
-		final Condition cond = new SimpleCondition(foreignKeyColumn, record.getPrimaryKey(), Comparison.IS);
+		final Condition cond = Conditions.is( foreignKeyColumn, record.getPrimaryKey());
 		final Consumer<T> setAssoc = (final T t) -> base.getStore().setValue( base, t.getPrimaryKey(), foreignKeyColumn, record.getPrimaryKey() );
 		final Consumer<T> unsetAssoc = (final T t) -> base.getStore().setValue( base, t.getPrimaryKey(), foreignKeyColumn, null );
 		return new HasManyAssociationSet<T>(base, cond, null, setAssoc, unsetAssoc );
@@ -364,9 +362,9 @@ public final class AssociationHelper
 		@Nonnull final ActiveRecord otherRecord, @Nonnull final String associationTable,
 		@Nonnull final String thisForeignKeyColumn, @Nonnull final String otherForeignKeyColumn)
 	{
-		final Condition cond = AndCondition.andConditions(
-				new SimpleCondition(thisForeignKeyColumn, record.getPrimaryKey(), Comparison.IS),
-				new SimpleCondition(otherForeignKeyColumn, otherRecord.getPrimaryKey(), Comparison.IS)
+		final Condition cond = Conditions.and(
+				Conditions.is( thisForeignKeyColumn, record.getPrimaryKey()),
+				Conditions.is( otherForeignKeyColumn, otherRecord.getPrimaryKey())
 		);
 		return record.getBase().getStore().removeRow( associationTable, cond );
 	}
@@ -390,7 +388,7 @@ public final class AssociationHelper
 		final Consumer<T> unsetCondFunc = (final T t) -> {
 			base.getStore().setValue( base, t.getPrimaryKey(), conditionColumn, resetValue);
 		};
-		final Condition cond = new SimpleCondition(conditionColumn, conditionValue, Comparison.IS);
+		final Condition cond = Conditions.is( conditionColumn, conditionValue);
 		return new ConditionSet<T>(base, cond, base.getDefaultOrder(), setCondFunc, unsetCondFunc);
 	}
 

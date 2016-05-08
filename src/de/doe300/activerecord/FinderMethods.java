@@ -31,10 +31,8 @@ import java.util.stream.Stream;
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 
-import de.doe300.activerecord.dsl.AndCondition;
-import de.doe300.activerecord.dsl.Comparison;
 import de.doe300.activerecord.dsl.Condition;
-import de.doe300.activerecord.dsl.SimpleCondition;
+import de.doe300.activerecord.dsl.Conditions;
 import de.doe300.activerecord.record.ActiveRecord;
 import de.doe300.activerecord.scope.Scope;
 import javax.annotation.Nonnegative;
@@ -76,7 +74,7 @@ public interface FinderMethods<T extends ActiveRecord>
 	@Nonnull
 	public default Stream<T> findFor(@Nonnull final String column, @Nullable final Object value)
 	{
-		return find( new SimpleCondition(column, value, Comparison.IS));
+		return find( Conditions.is( column, value));
 	}
 
 	/**
@@ -87,7 +85,7 @@ public interface FinderMethods<T extends ActiveRecord>
 	@Nullable
 	public default T findFirstFor(@Nonnull final String column, @Nullable final Object value)
 	{
-		return findFirst( new SimpleCondition(column, value, Comparison.IS));
+		return findFirst( Conditions.is( column, value));
 	}
 
 	/**
@@ -100,13 +98,13 @@ public interface FinderMethods<T extends ActiveRecord>
 		final ArrayList<Condition> conds = new ArrayList<>(data.size());
 		for(final Map.Entry<String,Object> e :data.entrySet())
 		{
-			conds.add( new SimpleCondition(e.getKey(), e.getValue(), Comparison.IS));
+			conds.add( Conditions.is( e.getKey(), e.getValue()));
 		}
 		if(conds.size()==1)
 		{
 			return find( conds.get( 0));
 		}
-		return find( AndCondition.andConditions( conds.toArray( new Condition[conds.size()])) );
+		return find(Conditions.and( conds.toArray( new Condition[conds.size()])) );
 	}
 
 	/**
@@ -119,13 +117,13 @@ public interface FinderMethods<T extends ActiveRecord>
 		final ArrayList<Condition> conds = new ArrayList<>(data.size());
 		for(final Map.Entry<String,Object> e :data.entrySet())
 		{
-			conds.add( new SimpleCondition(e.getKey(), e.getValue(), Comparison.IS));
+			conds.add( Conditions.is( e.getKey(), e.getValue()));
 		}
 		if(conds.size()==1)
 		{
 			return findFirst( conds.get( 0));
 		}
-		return findFirst( AndCondition.andConditions(conds.toArray( new Condition[conds.size()]) ));
+		return findFirst(Conditions.and(conds.toArray( new Condition[conds.size()]) ));
 	}
 
 	/**
