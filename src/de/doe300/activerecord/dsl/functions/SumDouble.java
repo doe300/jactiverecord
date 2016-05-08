@@ -34,6 +34,7 @@ import de.doe300.activerecord.dsl.SQLFunction;
 import de.doe300.activerecord.jdbc.driver.JDBCDriver;
 import de.doe300.activerecord.record.ActiveRecord;
 import de.doe300.activerecord.util.MutablePair;
+import java.util.Optional;
 import javax.annotation.Nonnull;
 
 /**
@@ -111,8 +112,8 @@ public class SumDouble<T extends ActiveRecord, C extends Number> extends Aggrega
 	}
 
 	@Override
-	protected Double aggregateValues( final Stream<C> valueStream )
+	protected Double aggregateValues( final Stream<Optional<C>> valueStream )
 	{
-		return valueStream.parallel().reduce( 0d, (final Double d, final C c) -> d + c.doubleValue(), (final Double d1, final Double d2) -> d1 + d2);
+		return valueStream.parallel().filter( Optional::isPresent ).reduce( 0d, (final Double d, final Optional<C> c) -> d + c.get().doubleValue(), (final Double d1, final Double d2) -> d1 + d2);
 	}
 }

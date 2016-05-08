@@ -34,6 +34,7 @@ import de.doe300.activerecord.dsl.SQLFunction;
 import de.doe300.activerecord.jdbc.driver.JDBCDriver;
 import de.doe300.activerecord.record.ActiveRecord;
 import de.doe300.activerecord.util.MutablePair;
+import java.util.Optional;
 import javax.annotation.Nonnull;
 
 /**
@@ -109,8 +110,8 @@ public class CountNotNull<T extends ActiveRecord, C> extends AggregateFunction<T
 	}
 
 	@Override
-	protected Long aggregateValues( final Stream<C> valueStream )
+	protected Long aggregateValues( final Stream<Optional<C>> valueStream )
 	{
-		return valueStream.parallel().count();
+		return valueStream.parallel().filter( Optional::isPresent).count();
 	}
 }

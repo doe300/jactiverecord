@@ -34,6 +34,7 @@ import de.doe300.activerecord.dsl.SQLFunction;
 import de.doe300.activerecord.jdbc.driver.JDBCDriver;
 import de.doe300.activerecord.record.ActiveRecord;
 import de.doe300.activerecord.util.MutablePair;
+import java.util.Optional;
 import javax.annotation.Nonnull;
 
 /**
@@ -110,8 +111,8 @@ public class Maximum<T extends ActiveRecord, C extends Comparable<? super C>> ex
 	}
 	
 	@Override
-	protected C aggregateValues( final Stream<C> valueStream )
+	protected C aggregateValues( final Stream<Optional<C>> valueStream )
 	{
-		return valueStream.parallel().max(new NullSkippingComparator<C>(false)).orElse( null);
+		return valueStream.parallel().filter(Optional::isPresent).map(Optional::get).max(C::compareTo).orElse( null);
 	}
 }

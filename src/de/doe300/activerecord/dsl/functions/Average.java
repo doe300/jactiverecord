@@ -34,6 +34,7 @@ import de.doe300.activerecord.dsl.SQLFunction;
 import de.doe300.activerecord.jdbc.driver.JDBCDriver;
 import de.doe300.activerecord.record.ActiveRecord;
 import de.doe300.activerecord.util.MutablePair;
+import java.util.Optional;
 import javax.annotation.Nonnull;
 
 /**
@@ -113,9 +114,9 @@ public class Average<T extends ActiveRecord, C extends Number> extends Aggregate
 	}
 
 	@Override
-	protected Double aggregateValues( final Stream<C> valueStream )
+	protected Double aggregateValues( final Stream<Optional<C>> valueStream )
 	{
-		return valueStream.parallel().map( (final C c) -> new MutablePair<>( c.doubleValue(), 1L)).
+		return valueStream.parallel().filter(Optional::isPresent).map( (final Optional<C> c) -> new MutablePair<>( c.get().doubleValue(), 1L)).
 			reduce( (final MutablePair<Double, Long> b1, final MutablePair<Double, Long> b2) ->
 			{
 				return new MutablePair<>( b1.getFirstOrThrow() + b2.getFirstOrThrow(), b1.getSecondOrThrow() + b2.getSecondOrThrow());

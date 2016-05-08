@@ -31,6 +31,7 @@ import de.doe300.activerecord.store.NoSuchAttributeException;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.Iterator;
 import java.util.Map;
 import java.util.Objects;
@@ -276,7 +277,7 @@ class MemoryTable
 	{
 		return StreamSupport.stream( new Spliterator<Map.Entry<Integer, MemoryRow>>()
 		{
-			private final Iterator<Map.Entry<Integer, MemoryRow>> rowKeys = data.entrySet().iterator();
+			private final Iterator<Map.Entry<Integer, MemoryRow>> rowKeys = new HashSet<>(data.entrySet()).iterator();
 			@Override
 			public boolean tryAdvance(final Consumer<? super Map.Entry<Integer, MemoryRow>> action )
 			{
@@ -286,6 +287,7 @@ class MemoryTable
 					currentRow = rowKeys.next();
 					//FIXME fails to throw exception if column in condition is not in map
 					//but how to test??
+					//FIXME also fails for e.g. "age > X" when age is NULL, but works for SQL (where age = NULL is skipped)
 					if(cond == null || cond.test( currentRow.getValue().getRowMap()))
 					{
 						action.accept( currentRow );

@@ -39,6 +39,7 @@ import javax.annotation.Nullable;
 import de.doe300.activerecord.jdbc.driver.JDBCDriver;
 import de.doe300.activerecord.record.ActiveRecord;
 import de.doe300.activerecord.util.MutablePair;
+import java.util.Optional;
 
 /**
  * An aggregate-function to be applied to a list of record
@@ -95,13 +96,13 @@ public abstract class AggregateFunction<T extends ActiveRecord, C, V extends Mut
 	 * @return the aggregated result
 	 */
 	@Nullable
-	public R aggregate(final Stream<Map<String, Object>> dataMaps)
+	public R aggregate(@Nonnull final Stream<Map<String, Object>> dataMaps)
 	{
-		return aggregateValues(dataMaps.map((final Map<String, Object> map) -> (C) map.get(column)));
+		return aggregateValues(dataMaps.map((final Map<String, Object> map) -> Optional.ofNullable((C) map.get(column))));
 	}
 
 	@Nullable
-	protected abstract R aggregateValues(Stream<C> valueStream);
+	protected abstract R aggregateValues(@Nonnull final Stream<Optional<C>> valueStream);
 
 	@Override
 	public Supplier<V> supplier()
@@ -124,7 +125,7 @@ public abstract class AggregateFunction<T extends ActiveRecord, C, V extends Mut
 	@Override
 	public R apply( final T t )
 	{
-		return aggregateValues( Stream.of( columnFunction.apply( t)));
+		return aggregateValues( Stream.of( Optional.ofNullable( columnFunction.apply( t))));
 	}
 	
 	@Override

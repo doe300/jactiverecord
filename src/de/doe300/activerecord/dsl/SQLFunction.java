@@ -59,6 +59,7 @@ public interface SQLFunction<T extends ActiveRecord, R> extends Function<T, R>
 	 * @return the return-value for this function
 	 * @throws UnsupportedOperationException if the method is not supported
 	 */
+	@Nullable
 	public R apply(@Nonnull final Map<String, Object> map);
 	
 	/**

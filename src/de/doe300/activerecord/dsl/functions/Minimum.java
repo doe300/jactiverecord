@@ -34,6 +34,7 @@ import de.doe300.activerecord.dsl.SQLFunction;
 import de.doe300.activerecord.jdbc.driver.JDBCDriver;
 import de.doe300.activerecord.record.ActiveRecord;
 import de.doe300.activerecord.util.MutablePair;
+import java.util.Optional;
 import javax.annotation.Nonnull;
 
 /**
@@ -112,8 +113,8 @@ public class Minimum<T extends ActiveRecord, C extends Comparable<? super C>> ex
 	}
 
 	@Override
-	protected C aggregateValues( final Stream<C> valueStream )
+	protected C aggregateValues( final Stream<Optional<C>> valueStream )
 	{
-		return valueStream.parallel().min(new NullSkippingComparator<C>(true ) ).orElse( null);
+		return valueStream.parallel().filter(Optional::isPresent).map(Optional::get).min(C::compareTo).orElse( null);
 	}
 }

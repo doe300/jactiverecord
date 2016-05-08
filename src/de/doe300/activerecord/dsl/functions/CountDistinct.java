@@ -36,6 +36,7 @@ import de.doe300.activerecord.dsl.SQLFunction;
 import de.doe300.activerecord.jdbc.driver.JDBCDriver;
 import de.doe300.activerecord.record.ActiveRecord;
 import de.doe300.activerecord.util.MutablePair;
+import java.util.Optional;
 import javax.annotation.Nonnull;
 
 /**
@@ -119,8 +120,8 @@ public class CountDistinct<T extends ActiveRecord, C> extends AggregateFunction<
 	}
 
 	@Override
-	protected Long aggregateValues( final Stream<C> valueStream )
+	protected Long aggregateValues( final Stream<Optional<C>> valueStream )
 	{
-		return valueStream.parallel().distinct().count();
+		return valueStream.parallel().map((final Optional<C> c) -> c.orElse( null)).distinct().count();
 	}
 }

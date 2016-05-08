@@ -103,6 +103,7 @@ public abstract class ScalarFunction<T extends ActiveRecord, C, R> implements SQ
 	 * @param columnValue
 	 * @return the result
 	 */
+	@Nullable
 	protected abstract R applySQLFunction(@Nullable final C columnValue);
 
 	@Override
