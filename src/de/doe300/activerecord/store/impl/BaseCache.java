@@ -120,7 +120,7 @@ class BaseCache
 	 * @param store
 	 * @return whether some data was written
 	 */
-	public boolean writeAllBack(@Nonnull final CachedJDBCRecordStore store)
+	public boolean writeAllBack(@Nonnull final WriteBack container)
 	{
 		if(modifiedRows.isEmpty())
 		{
@@ -129,10 +129,9 @@ class BaseCache
 		boolean changed = false;
 		synchronized(modifiedRows)
 		{
-			//TODO write with batched simple/prepared statements
 			for(final RowCache cache : modifiedRows)
 			{
-				if(cache.writeBack( store, base ))
+				if(cache.writeBack( container ))
 				{
 					changed = true;
 				}

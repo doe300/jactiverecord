@@ -47,6 +47,7 @@ import de.doe300.activerecord.scope.Scope;
 import de.doe300.activerecord.store.NoSuchAttributeException;
 import de.doe300.activerecord.store.NoSuchDataSetException;
 import java.util.Arrays;
+import java.util.Iterator;
 import java.util.Optional;
 
 /**
@@ -85,6 +86,8 @@ public class CachedJDBCRecordStore extends SimpleJDBCRecordStore
 	{
 		if(!super.containsRecord( base, primaryKey ))
 		{
+			//FIXME rewrite, so super.containsRecord is not called so often
+			//but needs to test existence in database
 			return Optional.empty();
 		}
 		BaseCache tableCache = cache.get( base);
@@ -238,7 +241,10 @@ public class CachedJDBCRecordStore extends SimpleJDBCRecordStore
 			{
 				if(c.getValue() != null)
 				{
-					c.getValue().writeAllBack( this );
+					final WriteBack container = new WriteBack(c.getKey() );
+					c.getValue().writeAllBack( container );
+					writeBack( container );
+					break;
 				}
 			}
 		}
@@ -279,8 +285,10 @@ public class CachedJDBCRecordStore extends SimpleJDBCRecordStore
 		if(hasCache( base, primaryKey ))
 		{
 			final RowCache c = getCache(base, primaryKey ).get();
-			if(c.writeBack( this, base ))
+			final WriteBack container = new WriteBack(base );
+			if(c.writeBack( container ))
 			{
+				writeBack( container );
 				return true;
 			}
 		}
@@ -295,9 +303,11 @@ public class CachedJDBCRecordStore extends SimpleJDBCRecordStore
 		{
 			return false;
 		}
-		final boolean changed = baseCache.writeAllBack( this );
+		final WriteBack container = new WriteBack(base );
+		final boolean changed = baseCache.writeAllBack( container );
 		if(changed)
 		{
+			writeBack( container );
 			Logging.getLogger().debug( "CachedJDBCStore", "Cache entries saved!");
 		}
 		return changed;
@@ -310,9 +320,26 @@ public class CachedJDBCRecordStore extends SimpleJDBCRecordStore
 	 * @param primaryKey
 	 * @param values
 	 */
-	void setDBValues(@Nonnull final RecordBase<?> base, final int primaryKey, @Nonnull final Map<String, Object> values)
+	@Deprecated
+	void writeDBValues(@Nonnull final RecordBase<?> base, final int primaryKey, @Nonnull final Map<String, Object> values)
 	{
 		super.setValues( base, primaryKey, values );
+	}
+	
+	/**
+	 * This method is only to be used to write cache back to the DB
+	 *
+	 * @param container the container containing the data to be written back
+	 */
+	void writeBack(@Nonnull final WriteBack container)
+	{
+		//TODO how to write them all back at once? the columns to write back differ too much
+		final Iterator<Pair<Integer, Map<String, Object>>> it = container.iterator();
+		while(it.hasNext())
+		{
+			final Pair<Integer, Map<String, Object>> p = it.next();
+			super.setValues( container.getBase(), p.getFirstOrThrow(),p.getSecondOrThrow() );
+		}
 	}
 	
 	@Override

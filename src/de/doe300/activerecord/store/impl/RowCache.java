@@ -34,7 +34,6 @@ import java.util.Objects;
 
 import javax.annotation.Nonnull;
 
-import de.doe300.activerecord.RecordBase;
 import de.doe300.activerecord.record.TimestampedRecord;
 
 /**
@@ -184,13 +183,13 @@ class RowCache implements Comparable<RowCache>
 		}
 	}
 
-	public synchronized boolean writeBack(@Nonnull final CachedJDBCRecordStore store, @Nonnull final RecordBase<?> base)
+	public synchronized boolean writeBack(@Nonnull final WriteBack container)
 	{
 		if(modifiedData.isEmpty())
 		{
 			return false;
 		}
-		store.setDBValues(base, getPrimaryKey(), modifiedData );
+		container.addRow( getPrimaryKey(), modifiedData);
 		modifiedData.clear();
 		return true;
 	}
