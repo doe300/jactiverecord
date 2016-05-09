@@ -70,26 +70,25 @@ public class QueryResultTest extends Assert
 	@Test
 	public void testStream()
 	{
-		assertTrue( base.where( new SimpleCondition("name", base, Comparison.IS_NOT_NULL)).stream().count() == 3);
+		assertTrue( base.where( Conditions.isNotNull("name")).stream().count() == 3);
 	}
 
 	@Test
 	public void testWhere()
 	{
-		assertEquals(2, base.where( new SimpleCondition("age", base, Comparison.IS_NOT_NULL)).where( new SimpleCondition("age", 20,
-				Comparison.SMALLER_EQUALS)).stream().count());
+		assertEquals(2, base.where( Conditions.isNotNull("age")).where( Conditions.isSmallerEquals( "age", 20)).stream().count());
 	}
 
 	@Test
 	public void testLimit()
 	{
-		assertTrue( base.where( new SimpleCondition("name", base, Comparison.IS_NOT_NULL)).limit( 2).stream().count() <= 2);
+		assertTrue( base.where( Conditions.isNotNull("name")).limit( 2).stream().count() <= 2);
 	}
 
 	@Test
 	public void testGetEstimatedSize() throws Exception
 	{
-		try(final QueryResult<TestInterface> r = base.where( new SimpleCondition("name", base, Comparison.IS_NOT_NULL)))
+		try(final QueryResult<TestInterface> r = base.where( Conditions.isNotNull("name")))
 		{
 			assertTrue(r.getEstimatedSize() == 3);
 		}
@@ -98,19 +97,19 @@ public class QueryResultTest extends Assert
 	@Test
 	public void testGroupBy_String()
 	{
-		assertTrue( base.where( new SimpleCondition("name", base, Comparison.IS_NOT_NULL)).groupBy( "name").count() == 3);
+		assertTrue( base.where( Conditions.isNotNull("name")).groupBy( "name").count() == 3);
 	}
 
 	@Test
 	public void testGroupBy_Function()
 	{
-		assertTrue( base.where( new SimpleCondition("name", base, Comparison.IS_NOT_NULL)).groupBy( (TestInterface i )-> i.getName()).count() == 3);
+		assertTrue( base.where( Conditions.isNotNull("name")).groupBy( (TestInterface i )-> i.getName()).count() == 3);
 	}
 
 	@Test
 	public void testGetOrder() throws Exception
 	{
-		try(final QueryResult<TestInterface> res = base.where( new SimpleCondition("name", null, Comparison.IS_NOT_NULL)))
+		try(final QueryResult<TestInterface> res = base.where( Conditions.isNotNull("name")))
 		{
 			assertSame( base.getDefaultOrder(), res.getOrder());
 		}
@@ -119,12 +118,12 @@ public class QueryResultTest extends Assert
 	@Test
 	public void testOrder() throws Exception
 	{
-		try(QueryResult<TestInterface> r = base.where( new SimpleCondition("name", null, Comparison.IS_NOT_NULL)).order( SimpleOrder.
+		try(QueryResult<TestInterface> r = base.where( Conditions.isNotNull("name")).order( SimpleOrder.
 				fromSQLString( "age ASC")))
 		{
 			assertEquals( -123, r.findFirst( null ).getAge());
 		}
-		try(QueryResult<TestInterface> r = base.where( new SimpleCondition("name", null, Comparison.IS_NOT_NULL)).order( new SimpleOrder("age", SimpleOrder.OrderType.DESCENDING)))
+		try(QueryResult<TestInterface> r = base.where( Conditions.isNotNull("name")).order( new SimpleOrder("age", SimpleOrder.OrderType.DESCENDING)))
 		{
 			assertEquals( 23, r.findFirst( null ).getAge());
 		}
@@ -133,9 +132,9 @@ public class QueryResultTest extends Assert
 	@Test
 	public void testWithScope() throws Exception
 	{
-		try(final QueryResult<TestInterface> r = base.where( new SimpleCondition("name", base, Comparison.IS_NOT_NULL)))
+		try(final QueryResult<TestInterface> r = base.where( Conditions.isNotNull("name")))
 		{
-			assertEquals( 1, r.withScope( new Scope(new SimpleCondition("age", 20, Comparison.IS), null, Scope.NO_LIMIT)).count( null));
+			assertEquals( 1, r.withScope( new Scope(Conditions.is("age", 20), null, Scope.NO_LIMIT)).count( null));
 		}
 	}
 }	

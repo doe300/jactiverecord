@@ -74,7 +74,7 @@ public class XorConditionTest extends Assert
 	public void testHasWildcards()
 	{
 		final Condition cond1 = Conditions.xor( Conditions.is( "name", "Adam"), Conditions.is( "age", 12));
-		final Condition cond2 = Conditions.xor( Conditions.isNull( "name"), Conditions.isTrue( "age"));
+		final Condition cond2 = Conditions.xor( Conditions.isNull( "name"), Conditions.isTrue());
 		
 		assertTrue( cond1.hasWildcards());
 		assertFalse( cond2.hasWildcards());
@@ -138,5 +138,7 @@ public class XorConditionTest extends Assert
 		
 		assertTrue( cond1.equals( cond2));
 		assertFalse( cond1.equals( cond3));
+		
+		assertFalse( cond1.equals( new Object()));
 	}
 }

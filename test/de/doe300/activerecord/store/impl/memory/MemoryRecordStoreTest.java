@@ -28,8 +28,7 @@ import de.doe300.activerecord.AssertException;
 import de.doe300.activerecord.RecordBase;
 import de.doe300.activerecord.RecordCore;
 import de.doe300.activerecord.TestInterface;
-import de.doe300.activerecord.dsl.Comparison;
-import de.doe300.activerecord.dsl.SimpleCondition;
+import de.doe300.activerecord.dsl.Conditions;
 import de.doe300.activerecord.dsl.functions.Maximum;
 import de.doe300.activerecord.jdbc.driver.JDBCDriver;
 import de.doe300.activerecord.scope.Scope;
@@ -145,8 +144,8 @@ public class MemoryRecordStoreTest extends Assert implements AssertException
 	public void testRemoveRow()
 	{
 		int key = base.createRecord().getPrimaryKey();
-		assertTrue( store.removeRow( base.getTableName(), new SimpleCondition(base.getPrimaryColumn(), key, Comparison.IS)));
-		assertFalse( store.removeRow( base.getTableName(), new SimpleCondition(base.getPrimaryColumn(), key, Comparison.IS)));
+		assertTrue( store.removeRow( base.getTableName(), Conditions.is(base.getPrimaryColumn(), key)));
+		assertFalse( store.removeRow( base.getTableName(), Conditions.is(base.getPrimaryColumn(), key)));
 	}
 
 	@Test
@@ -211,8 +210,8 @@ public class MemoryRecordStoreTest extends Assert implements AssertException
 	@Test
 	public void testFindFirstWithData()
 	{
-		assertEquals("Adam", store.findFirstWithData( base, new String[]{"name"}, new Scope(new SimpleCondition("name", "Adam", Comparison.IS), null, Scope.NO_LIMIT )).get( "name"));
-		final Scope noMatch = new Scope(new SimpleCondition("name", "Stevenson", Comparison.IS), null, Scope.NO_LIMIT);
+		assertEquals("Adam", store.findFirstWithData( base, new String[]{"name"}, new Scope(Conditions.is("name", "Adam"), null, Scope.NO_LIMIT )).get( "name"));
+		final Scope noMatch = new Scope(Conditions.is("name", "Stevenson"), null, Scope.NO_LIMIT);
 		assertTrue( store.findFirstWithData( base, new String[]{"name"}, noMatch).isEmpty());
 	}
 

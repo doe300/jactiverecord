@@ -27,7 +27,8 @@ package de.doe300.activerecord.record.association.generation;
 import de.doe300.activerecord.RecordBase;
 import de.doe300.activerecord.annotations.ProcessorUtils;
 import de.doe300.activerecord.dsl.Comparison;
-import de.doe300.activerecord.dsl.SimpleCondition;
+import de.doe300.activerecord.dsl.Condition;
+import de.doe300.activerecord.dsl.Conditions;
 import de.doe300.activerecord.migration.Attribute;
 import de.doe300.activerecord.record.ActiveRecord;
 import de.doe300.activerecord.record.association.AssociationHelper;
@@ -151,7 +152,8 @@ public class AssociationGenerator extends AbstractProcessor
 				}
 				writer.append( "import ").append( Generated.class.getCanonicalName()).append( ";\n");
 				writer.append( "import ").append( RecordBase.class.getCanonicalName()).append( ";\n");
-				writer.append( "import ").append( SimpleCondition.class.getCanonicalName()).append( ";\n");
+				writer.append( "import ").append( Condition.class.getCanonicalName()).append( ";\n");
+				writer.append( "import ").append( Conditions.class.getCanonicalName()).append( ";\n");
 				writer.append( "import ").append( Comparison.class.getCanonicalName()).append( ";\n");
 				writer.append( "import ").append( AssociationHelper.class.getCanonicalName()).append( ";\n");
 				writer.append( "import ").append( RecordSet.class.getCanonicalName()).append( ";\n");
@@ -395,9 +397,8 @@ public class AssociationGenerator extends AbstractProcessor
 			//final Object foreignKey = getBase().getStore().getValue( getBase(), getPrimaryKey(), <association-foreign-key>);
 			code.append( "\t\tfinal Object foreignKey = getBase().getStore().getValue( getBase(), getPrimaryKey(), \"").
 					append( annotation.associationForeignKey()).append( "\");\n");
-			//final Condition cond = new SimpleCondition(<association-key>, foreignKey, Comparison.IS);
-			code.append( "\t\tfinal SimpleCondition cond = new SimpleCondition(\"").append(annotation.associationKey()).
-					append("\", foreignKey, Comparison.IS);\n");
+			//final Condition cond = Conditions.is(<association-key>, foreignKey);
+			code.append( "\t\tfinal Condition cond = Conditions.is(\"").append(annotation.associationKey()).append("\", foreignKey);\n");
 			//final Consumer<<record-type>> setAssoc = (final <record-type> t) -> otherBase.getStore().setValue( otherBase, t.getPrimaryKey(), <association-key>, foreignKey );
 			code.append( "\t\tfinal Consumer<").append( typeName).append( "> setAssoc = (final ").
 					append( typeName).append( " t) -> otherBase.getStore().setValue( otherBase, t.getPrimaryKey(), \"").

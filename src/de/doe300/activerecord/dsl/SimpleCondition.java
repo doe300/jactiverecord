@@ -53,7 +53,7 @@ public class SimpleCondition implements Condition
 	 * @param compValue
 	 * @param comp
 	 */
-	public SimpleCondition(@Nonnull final String key, @Nullable final Object compValue, @Nonnull final Comparison comp)
+	SimpleCondition(@Nonnull final String key, @Nullable final Object compValue, @Nonnull final Comparison comp)
 	{
 		this.key = key;
 		this.compValue = SimpleCondition.checkValue( compValue, comp );
@@ -66,7 +66,7 @@ public class SimpleCondition implements Condition
 	 * @param comp
 	 * @since 0.6
 	 */
-	public SimpleCondition(@Nonnull final SQLFunction<?,?> key, @Nullable final Object compValue, @Nonnull final Comparison comp)
+	SimpleCondition(@Nonnull final SQLFunction<?,?> key, @Nullable final Object compValue, @Nonnull final Comparison comp)
 	{
 		this.key = key;
 		this.compValue = SimpleCondition.checkValue( compValue, comp );

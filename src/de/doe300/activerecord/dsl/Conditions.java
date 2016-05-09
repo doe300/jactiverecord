@@ -35,18 +35,12 @@ import javax.annotation.Nullable;
  * @since 0.8
  * @see Condition
  */
-public class Conditions
+public final class Conditions
 {
 	@Nonnull
-	public static Condition isTrue(@Nonnull final String attributeName)
+	public static Condition isTrue()
 	{
-		return new SimpleCondition(attributeName, null, Comparison.TRUE);
-	}
-	
-	@Nonnull
-	public static Condition isTrue(@Nonnull final SQLFunction<?, ?> attributeFunc)
-	{
-		return new SimpleCondition(attributeFunc, null, Comparison.TRUE);
+		return new SimpleCondition("", null, Comparison.TRUE);
 	}
 	
 	@Nonnull

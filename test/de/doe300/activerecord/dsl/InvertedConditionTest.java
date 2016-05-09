@@ -72,7 +72,7 @@ public class InvertedConditionTest extends Assert implements AssertException
 	public void testSimpleCondition()
 	{
 		//matches t2 and t3
-		Condition cond = new SimpleCondition("age", 913, Comparison.IS);
+		Condition cond = Conditions.is("age", 913);
 		//matches t1
 		assertSame( t1, base.findFirst(Conditions.invert(cond )));
 	}
@@ -81,7 +81,7 @@ public class InvertedConditionTest extends Assert implements AssertException
 	public void testAndCondition()
 	{
 		//matches t3
-		Condition cond = Conditions.and(new SimpleCondition("age", 913, Comparison.IS), new SimpleCondition("name", "123Name4", Comparison.IS) );
+		Condition cond = Conditions.and(Conditions.is("age", 913), Conditions.is("name", "123Name4") );
 		//matches t1 and t2
 		assertTrue( base.find(Conditions.invert(cond)).count() >= 2 );
 		try(final Stream<TestInterface> s = base.find(Conditions.invert(cond)))
@@ -94,7 +94,7 @@ public class InvertedConditionTest extends Assert implements AssertException
 	public void testInvertCondition()
 	{
 		//matches t1
-		Condition cond = Conditions.invert(new SimpleCondition("age", 913, Comparison.IS));
+		Condition cond = Conditions.invert(Conditions.is("age", 913));
 		//matches t2 and t3
 		assertTrue( base.find(Conditions.invert(cond)).count() >= 2 );
 		try(final Stream<TestInterface> s = base.find(Conditions.invert(cond)))
@@ -108,7 +108,7 @@ public class InvertedConditionTest extends Assert implements AssertException
 	@Test
 	public void testTest_ActiveRecord()
 	{
-		Condition cond = Conditions.invert(new SimpleCondition("age", 913, Comparison.IS));
+		Condition cond = Conditions.invert(Conditions.is("age", 913));
 		//t1 has age of non-913
 		assertTrue( cond.test( t1));
 		assertFalse( cond.test( t2));
@@ -117,7 +117,7 @@ public class InvertedConditionTest extends Assert implements AssertException
 	@Test
 	public void testTest_Map()
 	{
-		Condition cond = Conditions.invert(new SimpleCondition("age", 913, Comparison.IS));
+		Condition cond = Conditions.invert(Conditions.is("age", 913));
 		assertTrue( cond.test( Collections.singletonMap( "age", 912)));
 		assertFalse( cond.test( Collections.singletonMap( "age", 913)));
 	}
@@ -125,7 +125,7 @@ public class InvertedConditionTest extends Assert implements AssertException
 	@Test
 	public void testNegate()
 	{
-		Condition cond = new SimpleCondition("age", 913, Comparison.IS);
+		Condition cond = Conditions.is("age", 913);
 		Condition invCond = Conditions.invert(cond);
 		assertSame( cond, invCond.negate());
 	}

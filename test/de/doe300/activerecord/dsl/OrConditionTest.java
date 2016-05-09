@@ -64,8 +64,7 @@ public class OrConditionTest extends Assert implements AssertException
 		t3.setName( "123Name4");
 		t3.setAge( -913);
 		
-		cond = Conditions.or(new SimpleCondition("name", "123Name4", Comparison.IS), new SimpleCondition("age",
-				-913, Comparison.SMALLER_EQUALS));
+		cond = Conditions.or(Conditions.is("name", "123Name4"), Conditions.isSmallerEquals( "age",-913));
 	}
 	
 	@AfterClass
@@ -87,11 +86,11 @@ public class OrConditionTest extends Assert implements AssertException
 		//test OR-unrolling
 		assertEquals( cond.toSQL( JDBCDriver.guessDriver( null ), null), c1.toSQL( JDBCDriver.guessDriver( null ), null ));
 		//test skip duplicates
-		Condition s1 = new SimpleCondition("test", "dummy", Comparison.IS);
+		Condition s1 = Conditions.is("test", "dummy");
 		Condition c2 = Conditions.or(s1, s1);
 		assertSame( s1, c2);
 		//test skip non-false
-		Condition s2 = new SimpleCondition("test", null, Comparison.TRUE);
+		Condition s2 = Conditions.isTrue();
 		Condition c3 = Conditions.or(s1, s2);
 		assertSame( s2, c3);
 		//test unwrap single condition
@@ -107,7 +106,7 @@ public class OrConditionTest extends Assert implements AssertException
 	public void testHasWildcards()
 	{
 		assertTrue( cond.hasWildcards());
-		Condition c = Conditions.or(new SimpleCondition("name", null, Comparison.IS_NOT_NULL), new SimpleCondition("age", null, Comparison.IS_NULL));
+		Condition c = Conditions.or(Conditions.isNotNull("name"), Conditions.isNull("age"));
 		assertFalse( c.hasWildcards());
 	}
 

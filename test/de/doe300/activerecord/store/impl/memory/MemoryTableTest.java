@@ -25,8 +25,7 @@
 package de.doe300.activerecord.store.impl.memory;
 
 import de.doe300.activerecord.AssertException;
-import de.doe300.activerecord.dsl.Comparison;
-import de.doe300.activerecord.dsl.SimpleCondition;
+import de.doe300.activerecord.dsl.Conditions;
 import de.doe300.activerecord.dsl.SimpleOrder;
 import de.doe300.activerecord.scope.Scope;
 import java.util.Collections;
@@ -154,8 +153,8 @@ public class MemoryTableTest extends Assert implements AssertException
 	{
 		int row = table.insertRow();
 		table.putValue( row, "age", -123);
-		assertEquals( row, table.findFirstRow( new Scope(new SimpleCondition("age", -123, Comparison.IS), null, Scope.NO_LIMIT)).getKey().intValue());
-		assertEquals( row, table.findFirstRow( new Scope(new SimpleCondition("age", -123, Comparison.IS), SimpleOrder.fromSQLString( "age DESC"), Scope.NO_LIMIT)).getKey().intValue());
+		assertEquals( row, table.findFirstRow( new Scope(Conditions.is("age", -123), null, Scope.NO_LIMIT)).getKey().intValue());
+		assertEquals( row, table.findFirstRow( new Scope(Conditions.is("age", -123), SimpleOrder.fromSQLString( "age DESC"), Scope.NO_LIMIT)).getKey().intValue());
 		table.removeRow( row );
 	}
 
@@ -165,7 +164,7 @@ public class MemoryTableTest extends Assert implements AssertException
 		int row = table.insertRow();
 		table.putValue( row, "age", -123);
 		table.putValue( row, "name", "Steve");
-		assertTrue( table.findAllRows( new Scope(new SimpleCondition("name", "Steve", Comparison.IS), SimpleOrder.fromSQLString( "name ASC"), row)).
+		assertTrue( table.findAllRows( new Scope(Conditions.is("name", "Steve"), SimpleOrder.fromSQLString( "name ASC"), row)).
 				anyMatch( (Map.Entry<Integer, MemoryRow> e) -> Objects.equals( e.getValue().getRowValue( "age"), -123) ));
 		table.removeRow( row );
 	}

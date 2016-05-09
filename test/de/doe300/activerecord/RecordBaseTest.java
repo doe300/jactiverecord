@@ -24,9 +24,8 @@
  */
 package de.doe300.activerecord;
 
-import de.doe300.activerecord.dsl.Comparison;
+import de.doe300.activerecord.dsl.Conditions;
 import de.doe300.activerecord.dsl.QueryResult;
-import de.doe300.activerecord.dsl.SimpleCondition;
 import de.doe300.activerecord.dsl.SimpleOrder;
 import de.doe300.activerecord.dsl.functions.Absolute;
 import de.doe300.activerecord.dsl.functions.Sum;
@@ -182,7 +181,7 @@ public class RecordBaseTest<T extends TestInterface> extends Assert implements A
 	public void testSaveAll()
 	{
 		//make sure all records are savable(validated)
-		base.find( new SimpleCondition("name", null, Comparison.IS_NULL)).forEach( (T t) -> t.setName( "Dummy"));
+		base.find( Conditions.isNull("name")).forEach( (T t) -> t.setName( "Dummy"));
 		base.saveAll();
 		//no data has changed since last save
 		assertFalse( base.saveAll() );
@@ -257,26 +256,25 @@ public class RecordBaseTest<T extends TestInterface> extends Assert implements A
 	public void testFind() throws Exception
 	{
 		T t = base.createRecord();
-		assertEquals(1, base.find( new SimpleCondition(base.getPrimaryColumn(), t.getPrimaryKey(), Comparison.IS)).count());
+		assertEquals(1, base.find( Conditions.is(base.getPrimaryColumn(), t.getPrimaryKey())).count());
 	}
 
 	@Test
 	public void testFindFirst()
 	{
-		assertNotNull( base.findFirst( new SimpleCondition(base.getPrimaryColumn(), null, Comparison.IS_NOT_NULL) ));
+		assertNotNull( base.findFirst( Conditions.isNotNull(base.getPrimaryColumn()) ));
 	}
 
 	@Test
 	public void testCount()
 	{
-		assertEquals( base.count( new SimpleCondition(base.getPrimaryColumn(), base, Comparison.IS_NOT_NULL)), base.find( 
-				new SimpleCondition(base.getPrimaryColumn(), base, Comparison.TRUE)).count());
+		assertEquals( base.count( Conditions.isNotNull(base.getPrimaryColumn())), base.find( Conditions.isTrue()).count());
 	}
 
 	@Test
 	public void testWhere() throws Exception
 	{
-		try(QueryResult<T> res = base.where( new SimpleCondition("name", base, Comparison.TRUE)))
+		try(QueryResult<T> res = base.where( Conditions.isTrue()))
 		{
 			assertNotNull( res );
 			assertEquals( base.getDefaultOrder(), res.getOrder());
@@ -423,8 +421,8 @@ public class RecordBaseTest<T extends TestInterface> extends Assert implements A
 		assertNotNull( record);
 		T dup = base.duplicate( record );
 		assertNotNull( dup);
-		assertTrue( base.find( new SimpleCondition("name", "Alex", Comparison.IS)).count() >= 2);
-		assertTrue( base.count( new SimpleCondition("name", "Alex", Comparison.IS)) >= 2);
+		assertTrue( base.find( Conditions.is("name", "Alex")).count() >= 2);
+		assertTrue( base.count( Conditions.is("name", "Alex")) >= 2);
 	}
 
 	@Test
@@ -436,21 +434,21 @@ public class RecordBaseTest<T extends TestInterface> extends Assert implements A
 	@Test
 	public void testFindWithScope()
 	{
-		Scope scope = new Scope(new SimpleCondition(base.getPrimaryColumn(), null, Comparison.IS_NOT_NULL), null, Scope.NO_LIMIT );
+		Scope scope = new Scope(Conditions.isNotNull(base.getPrimaryColumn()), null, Scope.NO_LIMIT );
 		assertNotNull( base.findFirstWithScope( scope ));
 	}
 
 	@Test
 	public void testFindFirstWithScope()
 	{
-		Scope scope = new Scope(new SimpleCondition(base.getPrimaryColumn(), null, Comparison.IS_NOT_NULL), null, Scope.NO_LIMIT );
+		Scope scope = new Scope(Conditions.isNotNull(base.getPrimaryColumn()), null, Scope.NO_LIMIT );
 		assertNotNull( base.findFirstWithScope( scope ));
 	}
 
 	@Test
 	public void testQueryWithScope() throws Exception
 	{
-		Scope scope = new Scope(new SimpleCondition("name", base, Comparison.TRUE), null, Scope.NO_LIMIT );
+		Scope scope = new Scope(Conditions.isTrue(), null, Scope.NO_LIMIT );
 		try(QueryResult<T> res = base.withScope(scope))
 		{
 			assertNotNull( res );
@@ -491,10 +489,10 @@ public class RecordBaseTest<T extends TestInterface> extends Assert implements A
 	@Test
 	public void testWithScope() throws Exception
 	{
-		try(QueryResult<T> r = base.where( new SimpleCondition("age", 12, Comparison.LARGER)))
+		try(QueryResult<T> r = base.where( Conditions.isLarger( "age", 12)))
 		{
 			assertEquals( r.getEstimatedSize(), base.withScope( 
-				new Scope(new SimpleCondition("age", 12, Comparison.LARGER), SimpleOrder.fromSQLString( "age DESC"), Scope.NO_LIMIT )).stream().count() );
+				new Scope(Conditions.isLarger("age", 12), SimpleOrder.fromSQLString( "age DESC"), Scope.NO_LIMIT )).stream().count() );
 		}
 	}
 

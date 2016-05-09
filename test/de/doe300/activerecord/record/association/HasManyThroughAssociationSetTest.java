@@ -27,8 +27,7 @@ package de.doe300.activerecord.record.association;
 import de.doe300.activerecord.RecordBase;
 import de.doe300.activerecord.TestInterface;
 import de.doe300.activerecord.TestServer;
-import de.doe300.activerecord.dsl.Comparison;
-import de.doe300.activerecord.dsl.SimpleCondition;
+import de.doe300.activerecord.dsl.Conditions;
 import de.doe300.activerecord.dsl.SimpleOrder;
 import de.doe300.activerecord.dsl.functions.CountDistinct;
 import de.doe300.activerecord.scope.Scope;
@@ -177,13 +176,13 @@ public class HasManyThroughAssociationSetTest extends Assert
 	@Test
 	public void testFind()
 	{
-		assertTrue(set.find( new SimpleCondition(a2.getBase().getPrimaryColumn(), a2.getPrimaryKey(), Comparison.IS)).allMatch( (TestInterface i) -> i.equals( a2)));
+		assertTrue(set.find( Conditions.is(a2.getBase().getPrimaryColumn(), a2.getPrimaryKey())).allMatch( (TestInterface i) -> i.equals( a2)));
 	}
 
 	@Test
 	public void testFindFirst()
 	{
-		assertEquals( a2, set.findFirst( new SimpleCondition(a2.getBase().getPrimaryColumn(), a2.getPrimaryKey(), Comparison.IS)));
+		assertEquals( a2, set.findFirst( Conditions.is(a2.getBase().getPrimaryColumn(), a2.getPrimaryKey())));
 	}
 
 	@Test
@@ -246,7 +245,7 @@ public class HasManyThroughAssociationSetTest extends Assert
 	@Test
 	public void testGetForCondition()
 	{
-		SortedSet<TestInterface> subSet = set.getForCondition( new SimpleCondition("name", "Hans", Comparison.IS) );
+		SortedSet<TestInterface> subSet = set.getForCondition( Conditions.is("name", "Hans") );
 		assertSame( 2, subSet.size());
 		assertSame( a2, subSet.first());
 		assertSame( a3, subSet.last());
@@ -276,6 +275,6 @@ public class HasManyThroughAssociationSetTest extends Assert
 	public void testAggregate()
 	{
 		assertEquals(1L, set.aggregate( new CountDistinct<>("name", TestInterface::getName), null ).longValue() );
-		assertEquals(1, set.count(new SimpleCondition("name", null, Comparison.IS_NULL) ));
+		assertEquals(1, set.count(Conditions.isNull("name") ));
 	}
 }

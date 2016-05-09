@@ -28,8 +28,7 @@ import de.doe300.activerecord.AssertException;
 import de.doe300.activerecord.RecordBase;
 import de.doe300.activerecord.TestInterface;
 import de.doe300.activerecord.TestServer;
-import de.doe300.activerecord.dsl.Comparison;
-import de.doe300.activerecord.dsl.SimpleCondition;
+import de.doe300.activerecord.dsl.Conditions;
 import de.doe300.activerecord.dsl.functions.CountNotNull;
 import de.doe300.activerecord.scope.Scope;
 import org.junit.AfterClass;
@@ -90,7 +89,7 @@ public class CachedRecordSetTest extends Assert implements AssertException
 	@Test
 	public void testGetForCondition()
 	{
-		assertSame( 2, set.getForCondition( new SimpleCondition("name", "Hans", Comparison.IS)).size());
+		assertSame( 2, set.getForCondition( Conditions.is("name", "Hans")).size());
 	}
 
 	@Test
@@ -179,13 +178,13 @@ public class CachedRecordSetTest extends Assert implements AssertException
 	@Test
 	public void testFindWithScope()
 	{
-		assertEquals( 1, set.findWithScope( new Scope(new SimpleCondition("name", "Hans", Comparison.IS), null, 1 )).count());
+		assertEquals( 1, set.findWithScope( new Scope(Conditions.is("name", "Hans"), null, 1 )).count());
 	}
 
 	@Test
 	public void testFindFirstWithScope()
 	{
-		assertSame( a2, set.findFirstWithScope( new Scope(new SimpleCondition("name", "Hans", Comparison.IS), null, Scope.NO_LIMIT )));
+		assertSame( a2, set.findFirstWithScope( new Scope(Conditions.is("name", "Hans"), null, Scope.NO_LIMIT )));
 	}
 
 	@Test

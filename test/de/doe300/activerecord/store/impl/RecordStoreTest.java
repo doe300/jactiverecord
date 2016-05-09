@@ -29,8 +29,7 @@ import de.doe300.activerecord.RecordBase;
 import de.doe300.activerecord.RecordCore;
 import de.doe300.activerecord.TestInterface;
 import de.doe300.activerecord.TestServer;
-import de.doe300.activerecord.dsl.Comparison;
-import de.doe300.activerecord.dsl.SimpleCondition;
+import de.doe300.activerecord.dsl.Conditions;
 import de.doe300.activerecord.dsl.SimpleOrder;
 import de.doe300.activerecord.dsl.functions.Sum;
 import de.doe300.activerecord.scope.Scope;
@@ -265,27 +264,27 @@ public class RecordStoreTest extends Assert implements AssertException
 	@Test
 	public void testFindFirstWithData()
 	{
-		Scope scope = new Scope(new SimpleCondition(base.getPrimaryColumn(), primaryKey, Comparison.IS), null, Scope.NO_LIMIT );
+		Scope scope = new Scope(Conditions.is(base.getPrimaryColumn(), primaryKey), null, Scope.NO_LIMIT );
 		assertTrue(store.findFirstWithData( base, base.getDefaultColumns(), scope).size()>=base.getDefaultColumns().length);
 		//test for empty results
-		scope = new Scope(new SimpleCondition(base.getPrimaryColumn(), null, Comparison.IS_NULL), null, Scope.NO_LIMIT);
+		scope = new Scope(Conditions.isNull(base.getPrimaryColumn()), null, Scope.NO_LIMIT);
 		assertEquals( 0, store.findFirstWithData( base, new String[]{base.getPrimaryColumn()}, scope).size());
 		
 		//no such column
-		final Scope failScope  = new Scope(new SimpleCondition("no_column", "112", Comparison.IS), null, Scope.NO_LIMIT);
+		final Scope failScope  = new Scope(Conditions.is("no_column", "112"), null, Scope.NO_LIMIT);
 		assertThrows( IllegalArgumentException.class,() ->store.findFirstWithData( base, base.getDefaultColumns(), failScope));
 		//no such table
-		final Scope failScope2  = new Scope(new SimpleCondition("age", 112, Comparison.IS), null, Scope.NO_LIMIT);
+		final Scope failScope2  = new Scope(Conditions.is("age", 112), null, Scope.NO_LIMIT);
 		assertThrows( IllegalArgumentException.class,() ->store.findFirstWithData( no_such_table, base.getDefaultColumns(), failScope2));
 	}
 
 	@Test
 	public void testStreamAllWithData()
 	{
-		Scope scope = new Scope(new SimpleCondition(base.getPrimaryColumn(), primaryKey, Comparison.IS), null, 2 );
+		Scope scope = new Scope(Conditions.is(base.getPrimaryColumn(), primaryKey), null, 2 );
 		assertTrue( store.streamAllWithData( base, new String[]{base.getPrimaryColumn()}, scope).count() == 1);
 		
-		Scope scope2 = new Scope(new SimpleCondition("name", "Failes", Comparison.IS), SimpleOrder.fromSQLString( "id DESC"), 2 );
+		Scope scope2 = new Scope(Conditions.is("name", "Failes"), SimpleOrder.fromSQLString( "id DESC"), 2 );
 		//Tests streaming with data in cache but not in store
 		TestInterface i = base.createRecord();
 		i.setName( "Failes");
@@ -298,7 +297,7 @@ public class RecordStoreTest extends Assert implements AssertException
 		}
 
 		//Test Limit
-		Scope scope4 = new Scope(new SimpleCondition("age", 123, Comparison.IS), null, 2 );
+		Scope scope4 = new Scope(Conditions.is("age", 123), null, 2 );
 		base.createRecord().setAge( 123);
 		base.createRecord().setAge( 123);
 		base.createRecord().setAge( 123);
@@ -364,14 +363,14 @@ public class RecordStoreTest extends Assert implements AssertException
 	@Test
 	public void testCount()
 	{
-		assertTrue( store.count( base, new SimpleCondition(base.getPrimaryColumn(), primaryKey, Comparison.IS)) == 1);
+		assertTrue( store.count( base, Conditions.is(base.getPrimaryColumn(), primaryKey)) == 1);
 		//test no results
-		assertEquals( 0, store.count( base, new SimpleCondition(base.getPrimaryColumn(), null, Comparison.IS_NULL)));
+		assertEquals( 0, store.count( base, Conditions.isNull(base.getPrimaryColumn())));
 		
 		//no such column
-		assertThrows( IllegalArgumentException.class, () ->store.count( base, new SimpleCondition("no_column", base, Comparison.IS)));
+		assertThrows( IllegalArgumentException.class, () ->store.count( base, Conditions.is("no_column", base)));
 		//no such table
-		assertThrows( IllegalArgumentException.class, () -> store.count( no_such_table, new SimpleCondition("age", 112, Comparison.IS)) );
+		assertThrows( IllegalArgumentException.class, () -> store.count( no_such_table, Conditions.is("age", 112)) );
 	}
 
 	@Test
@@ -392,11 +391,11 @@ public class RecordStoreTest extends Assert implements AssertException
 	public void testRemoveRow()
 	{
 		assertTrue( store.addRow( mappingTableName, new String[]{"fk_test1", "fk_test2"}, new Object[]{primaryKey,primaryKey} ));
-		assertTrue( store.removeRow( mappingTableName, new SimpleCondition("fk_test1", primaryKey, Comparison.IS)));
+		assertTrue( store.removeRow( mappingTableName, Conditions.is("fk_test1", primaryKey)));
 		//removing not existing row
-		assertFalse( store.removeRow( mappingTableName, new SimpleCondition("fk_test1", primaryKey, Comparison.IS)));
+		assertFalse( store.removeRow( mappingTableName, Conditions.is("fk_test1", primaryKey)));
 		//negative test - throws exception
-		assertThrows( IllegalArgumentException.class, () ->store.removeRow( "noSuchTable", new SimpleCondition("fk_test1", primaryKey, Comparison.IS)));
+		assertThrows( IllegalArgumentException.class, () ->store.removeRow( "noSuchTable", Conditions.is("fk_test1", primaryKey)));
 	}
 
 	@Test
@@ -409,7 +408,7 @@ public class RecordStoreTest extends Assert implements AssertException
 		store.insertNewRecord( base, values );
 		int total = store.aggregate( base, new Sum<TestInterface, Integer>("age", TestInterface::getAge), null ).intValue();
 		assertTrue(21 <= total);
-		int conditional = store.aggregate( base, new Sum<TestInterface, Integer>("age", TestInterface::getAge), new SimpleCondition("name", null, Comparison.IS_NOT_NULL) ).intValue();
+		int conditional = store.aggregate( base, new Sum<TestInterface, Integer>("age", TestInterface::getAge), Conditions.isNotNull("name") ).intValue();
 		assertTrue(conditional < total);
 		
 		//no such column

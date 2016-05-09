@@ -56,7 +56,7 @@ public final class Scope
 	@Nullable
 	private final Order order;
 	private final int limit;
-
+	
 	/**
 	 *
 	 * @param condition the condition to narrow the results, may be <code>null</code>

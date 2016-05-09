@@ -26,8 +26,7 @@ package de.doe300.activerecord;
 
 import java.sql.SQLException;
 
-import de.doe300.activerecord.dsl.Comparison;
-import de.doe300.activerecord.dsl.SimpleCondition;
+import de.doe300.activerecord.dsl.Conditions;
 
 /**
  * Just some code to test the feeling of the syntax
@@ -58,6 +57,6 @@ public class TestActiveRecordSyntax
 		base.findFor( "age", 23).forEach( (final TestInterface i)-> System.err.println( i.getName() ));
 
 		//6. query
-		base.where( new SimpleCondition("name", "Max", Comparison.IS));
+		base.where( Conditions.is("name", "Max"));
 	}
 }

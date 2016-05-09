@@ -66,11 +66,11 @@ public class BelongsToConditionTest extends Assert
 		t3.setDirectionOne( t3);
 		
 		//has no entries
-		cond1 = new BelongsToCondition("fk_test_id", base, new SimpleCondition("name", null, Comparison.IS_NULL));
+		cond1 = new BelongsToCondition("fk_test_id", base, Conditions.isNull("name"));
 		//matches all
-		cond2 = new BelongsToCondition("fk_test_id", base, new SimpleCondition("age", -913, Comparison.IS));
+		cond2 = new BelongsToCondition("fk_test_id", base, Conditions.is("age", -913));
 		//matches t2 and t3
-		cond3 = new BelongsToCondition("fk_test_id", base, new SimpleCondition("id", t3.getPrimaryKey(), Comparison.IS));
+		cond3 = new BelongsToCondition("fk_test_id", base, Conditions.is("id", t3.getPrimaryKey()));
 	}
 	
 	@AfterClass

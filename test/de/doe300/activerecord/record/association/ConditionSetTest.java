@@ -28,8 +28,7 @@ import de.doe300.activerecord.AssertException;
 import de.doe300.activerecord.RecordBase;
 import de.doe300.activerecord.TestInterface;
 import de.doe300.activerecord.TestServer;
-import de.doe300.activerecord.dsl.Comparison;
-import de.doe300.activerecord.dsl.SimpleCondition;
+import de.doe300.activerecord.dsl.Conditions;
 import de.doe300.activerecord.dsl.functions.Sum;
 import de.doe300.activerecord.scope.Scope;
 import java.util.Arrays;
@@ -100,7 +99,7 @@ public class ConditionSetTest extends Assert implements AssertException
 	@Test
 	public void testUnmodifiableSet()
 	{
-		RecordSet<TestInterface> set1 = new ConditionSet<TestInterface>(base, new SimpleCondition("age", 23,Comparison.IS), null);
+		RecordSet<TestInterface> set1 = new ConditionSet<TestInterface>(base, Conditions.is("age", 23), null);
 		assertTrue( set1.containsAll( Arrays.asList( a1,a2,a3)) );
 		assertThrows( UnsupportedOperationException.class, () -> set1.remove( a1 ));
 	}
@@ -197,13 +196,13 @@ public class ConditionSetTest extends Assert implements AssertException
 	@Test
 	public void testFind()
 	{
-		assertTrue(set.find( new SimpleCondition(a2.getBase().getPrimaryColumn(), a2.getPrimaryKey(), Comparison.IS)).allMatch( (TestInterface i) -> i.equals( a2)));
+		assertTrue(set.find( Conditions.is(a2.getBase().getPrimaryColumn(), a2.getPrimaryKey())).allMatch( (TestInterface i) -> i.equals( a2)));
 	}
 
 	@Test
 	public void testFindFirst()
 	{
-		assertEquals( a2, set.findFirst( new SimpleCondition(a2.getBase().getPrimaryColumn(), a2.getPrimaryKey(), Comparison.IS)));
+		assertEquals( a2, set.findFirst( Conditions.is(a2.getBase().getPrimaryColumn(), a2.getPrimaryKey())));
 	}
 
 	@Test
@@ -270,7 +269,7 @@ public class ConditionSetTest extends Assert implements AssertException
 	@Test
 	public void testGetForCondition()
 	{
-		SortedSet<TestInterface> subSet = set.getForCondition(new SimpleCondition("name", "Hans", Comparison.IS ));
+		SortedSet<TestInterface> subSet = set.getForCondition(Conditions.is("name", "Hans"));
 		assertSame( 2, subSet.size());
 		assertSame( a2, subSet.first());
 		assertSame( a3, subSet.last());

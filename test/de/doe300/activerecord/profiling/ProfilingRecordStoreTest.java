@@ -28,8 +28,7 @@ import de.doe300.activerecord.RecordBase;
 import de.doe300.activerecord.RecordCore;
 import de.doe300.activerecord.TestInterface;
 import de.doe300.activerecord.TestServer;
-import de.doe300.activerecord.dsl.SimpleCondition;
-import de.doe300.activerecord.dsl.Comparison;
+import de.doe300.activerecord.dsl.Conditions;
 import de.doe300.activerecord.record.association.AssociationHelper;
 import de.doe300.activerecord.store.RecordStore;
 import de.doe300.activerecord.store.impl.CachedJDBCRecordStore;
@@ -129,10 +128,10 @@ public class ProfilingRecordStoreTest extends Assert
 			assertEquals(t, AssociationHelper.getBelongsTo( t, base, "fk_test_id"));
 			assertEquals(t, AssociationHelper.getHasOne( t.getPrimaryKey(), base, "fk_test_id"));
 			t.validate();
-			assertEquals(1, t.getBase().count( new SimpleCondition(base.getPrimaryColumn(), t.getPrimaryKey(), Comparison.IS)));
+			assertEquals(1, t.getBase().count( Conditions.is(base.getPrimaryColumn(), t.getPrimaryKey())));
 			
 			assertNotNull(t.getBase().findFirstFor( "name", "NextName"));
-			base.find( new SimpleCondition("age", 212, Comparison.IS)).forEach( (TestInterface ti) -> ti.touch());
+			base.find( Conditions.is("age", 212)).forEach( (TestInterface ti) -> ti.touch());
 			
 			assertSame( t, base.getRecord( t.getPrimaryKey()));
 			assertTrue( t.getBase().hasRecord( t.getPrimaryKey()));

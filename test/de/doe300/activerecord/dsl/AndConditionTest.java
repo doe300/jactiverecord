@@ -71,13 +71,13 @@ public class AndConditionTest extends Assert implements AssertException
 	@Test
 	public void testAndConditions()
 	{
-		Condition simpleCond = new SimpleCondition(base.getPrimaryColumn(), 3, Comparison.SMALLER_EQUALS);
+		Condition simpleCond = Conditions.isSmallerEquals( base.getPrimaryColumn(), 3);
 		Condition c1 = Conditions.and(simpleCond );
 		Condition c2 = Conditions.and(c1);
 		//unrolls inner ANDs
 		assertEquals( c1.toSQL( JDBCDriver.guessDriver( null ), null), c2.toSQL( JDBCDriver.guessDriver( null ), null));
 		//removes non-false conditions
-		Condition simpleCond2 = new SimpleCondition("id", null, Comparison.TRUE);
+		Condition simpleCond2 = Conditions.isTrue();
 		Condition c3 = Conditions.and( simpleCond, simpleCond2);
 		assertSame( c3, simpleCond);
 		//removes nulls
@@ -94,9 +94,9 @@ public class AndConditionTest extends Assert implements AssertException
 	@Test
 	public void testHasWildcards()
 	{
-		Condition condition = Conditions.and(new SimpleCondition("age", null, Comparison.IS_NOT_NULL), new SimpleCondition("name", null, Comparison.IS_NOT_NULL));
+		Condition condition = Conditions.and(Conditions.isNotNull("age"), Conditions.isNotNull("name"));
 		assertFalse( condition.hasWildcards());
-		Condition condition1 = Conditions.and(condition, new SimpleCondition("name", "123Name1", Comparison.IS));
+		Condition condition1 = Conditions.and(condition, Conditions.is("name", "123Name1"));
 		assertTrue( condition1.hasWildcards());
 	}
 
@@ -104,8 +104,8 @@ public class AndConditionTest extends Assert implements AssertException
 	public void testGetValues()
 	{
 		Condition condition = Conditions.and(
-				new SimpleCondition("age", 913, Comparison.IS),
-				new SimpleCondition("name", "123Name1", Comparison.IS));
+				Conditions.is("age", 913),
+				Conditions.is("name", "123Name1"));
 		assertArrayEquals( new Object[]{913, "123Name1"}, condition.getValues() );
 	}
 
@@ -113,8 +113,8 @@ public class AndConditionTest extends Assert implements AssertException
 	public void testTest_ActiveRecord()
 	{
 		Condition condition = Conditions.and(
-				new SimpleCondition("age", 913, Comparison.IS),
-				new SimpleCondition("name", "123Name1", Comparison.IS));
+				Conditions.is("age", 913),
+				Conditions.is("name", "123Name1"));
 		assertFalse( condition.test( t1));
 		assertTrue( condition.test( t2));
 	}
@@ -123,8 +123,8 @@ public class AndConditionTest extends Assert implements AssertException
 	public void testTest_Map()
 	{
 		Condition condition = Conditions.and(
-				new SimpleCondition("age", 913, Comparison.IS),
-				new SimpleCondition("name", "123Name1", Comparison.IS));
+				Conditions.is("age", 913),
+				Conditions.is("name", "123Name1"));
 		Map<String,Object> map = new HashMap<>(2);
 		map.put( "age", 913);
 		map.put( "name", "123Name1");
@@ -136,8 +136,8 @@ public class AndConditionTest extends Assert implements AssertException
 	public void testNegate()
 	{
 		Condition condition = Conditions.and(
-				new SimpleCondition("age", 913, Comparison.IS),
-				new SimpleCondition("name", "123Name1", Comparison.IS));
+				Conditions.is("age", 913),
+				Conditions.is("name", "123Name1"));
 		condition = condition.negate();
 		assertTrue( condition.test( t1));
 		assertFalse( condition.test( t2));
@@ -147,8 +147,8 @@ public class AndConditionTest extends Assert implements AssertException
 	public void testEquals()
 	{
 		Condition con1 = Conditions.and(
-				new SimpleCondition("age", 913, Comparison.IS),
-				new SimpleCondition("name", "123Name1", Comparison.IS));
+				Conditions.is("age", 913),
+				Conditions.is("name", "123Name1"));
 		Condition con2 = Conditions.and(con1);
 		
 		assertEquals( con1, con2);

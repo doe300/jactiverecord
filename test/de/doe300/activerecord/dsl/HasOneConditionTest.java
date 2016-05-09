@@ -73,11 +73,11 @@ public class HasOneConditionTest
 		t3.setDirectionOther( t3);
 		
 		//has no entries
-		cond1 = new HasOneCondition("id", base, "fk_test_id", new SimpleCondition("name", null, Comparison.IS_NULL));
+		cond1 = new HasOneCondition("id", base, "fk_test_id", Conditions.isNull("name"));
 		//matches t1 and t3
-		cond2 = new HasOneCondition("id", base, "fk_test_id", new SimpleCondition("age", -913, Comparison.IS));
+		cond2 = new HasOneCondition("id", base, "fk_test_id", Conditions.is("age", -913));
 		//matches t3
-		cond3 = new HasOneCondition("id", base, "fk_test_id", new SimpleCondition("id", t3.getPrimaryKey(), Comparison.IS));
+		cond3 = new HasOneCondition("id", base, "fk_test_id", Conditions.is("id", t3.getPrimaryKey()));
 	}
 	
 	@AfterClass

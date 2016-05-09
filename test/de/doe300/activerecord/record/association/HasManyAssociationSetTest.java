@@ -27,8 +27,7 @@ package de.doe300.activerecord.record.association;
 import de.doe300.activerecord.RecordBase;
 import de.doe300.activerecord.TestInterface;
 import de.doe300.activerecord.TestServer;
-import de.doe300.activerecord.dsl.Comparison;
-import de.doe300.activerecord.dsl.SimpleCondition;
+import de.doe300.activerecord.dsl.Conditions;
 import de.doe300.activerecord.dsl.functions.CountNotNull;
 import de.doe300.activerecord.scope.Scope;
 import java.util.Arrays;
@@ -182,13 +181,13 @@ public class HasManyAssociationSetTest extends Assert
 	@Test
 	public void testFind()
 	{
-		assertTrue(set.find( new SimpleCondition(a2.getBase().getPrimaryColumn(), a2.getPrimaryKey(), Comparison.IS)).allMatch( (TestInterface i) -> i.equals( a2)));
+		assertTrue(set.find( Conditions.is(a2.getBase().getPrimaryColumn(), a2.getPrimaryKey())).allMatch( (TestInterface i) -> i.equals( a2)));
 	}
 
 	@Test
 	public void testFindFirst()
 	{
-		assertEquals( a2, set.findFirst( new SimpleCondition(a2.getBase().getPrimaryColumn(), a2.getPrimaryKey(), Comparison.IS)));
+		assertEquals( a2, set.findFirst( Conditions.is(a2.getBase().getPrimaryColumn(), a2.getPrimaryKey())));
 	}
 
 	@Test
@@ -255,7 +254,7 @@ public class HasManyAssociationSetTest extends Assert
 	@Test
 	public void testGetForCondition()
 	{
-		SortedSet<TestInterface> subSet = set.getForCondition(new SimpleCondition("name", "Hans", Comparison.IS));
+		SortedSet<TestInterface> subSet = set.getForCondition(Conditions.is("name", "Hans"));
 		assertSame( 2, subSet.size());
 		assertSame( a2, subSet.first());
 		assertSame( a3, subSet.last());
@@ -285,7 +284,7 @@ public class HasManyAssociationSetTest extends Assert
 	@Test
 	public void testFindFirstWithScope()
 	{
-		assertEquals(a2, set.findFirstWithScope( new Scope(new SimpleCondition(base.getPrimaryColumn(), a2.getPrimaryKey(), Comparison.IS), null, Scope.NO_LIMIT)));
+		assertEquals(a2, set.findFirstWithScope( new Scope(Conditions.is(base.getPrimaryColumn(), a2.getPrimaryKey()), null, Scope.NO_LIMIT)));
 	}
 
 	@Test

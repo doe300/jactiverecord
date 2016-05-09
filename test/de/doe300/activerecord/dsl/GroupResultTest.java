@@ -76,14 +76,15 @@ public class GroupResultTest extends Assert
 	@Test
 	public void testWhere()
 	{
-		GroupResult<String,TestInterface> res = new GroupResult<String,TestInterface>("Adam5", base.find( new SimpleCondition("name", "Adam5", Comparison.IS)), base.count( new SimpleCondition("name", "Adam5", Comparison.IS)), base.getDefaultOrder());
-		assertTrue( res.where( new SimpleCondition("name", "Adam5", Comparison.IS)).stream().count() == 3);
+		GroupResult<String,TestInterface> res = new GroupResult<String,TestInterface>("Adam5", base.find( Conditions.is("name", "Adam5")), 
+				base.count( Conditions.is("name", "Adam5")), base.getDefaultOrder());
+		assertTrue( res.where( Conditions.is("name", "Adam5")).stream().count() == 3);
 	}
 
 	@Test
 	public void testLimit()
 	{
-		GroupResult<String,TestInterface> res = new GroupResult<String,TestInterface>("Adam5", base.find( new SimpleCondition("name", "Adam5", Comparison.IS)), GroupResult.SIZE_UNKNOWN, base.getDefaultOrder());
+		GroupResult<String,TestInterface> res = new GroupResult<String,TestInterface>("Adam5", base.find( Conditions.is("name", "Adam5")), GroupResult.SIZE_UNKNOWN, base.getDefaultOrder());
 		assertTrue( res.limit( 2).stream().count() <= 2);
 	}
 
@@ -111,13 +112,13 @@ public class GroupResultTest extends Assert
 	
 	private static GroupResult<Object, TestInterface> getGroup()
 	{
-		return base.where( new SimpleCondition("name", null, Comparison.IS_NOT_NULL) ).groupBy( "name").filter( (GroupResult<Object,TestInterface> r) -> r.getKey().equals( "Adam5")).findAny().get();
+		return base.where( Conditions.isNotNull("name") ).groupBy( "name").filter( (GroupResult<Object,TestInterface> r) -> r.getKey().equals( "Adam5")).findAny().get();
 	}
 
 	@Test
 	public void testGetKey() throws Exception
 	{
-		try(GroupResult<String,TestInterface> res = new GroupResult<String,TestInterface>("Adam5", base.find( new SimpleCondition("name", "Adam5", Comparison.IS)), GroupResult.SIZE_UNKNOWN, base.getDefaultOrder()))
+		try(GroupResult<String,TestInterface> res = new GroupResult<String,TestInterface>("Adam5", base.find( Conditions.is("name", "Adam5")), GroupResult.SIZE_UNKNOWN, base.getDefaultOrder()))
 		{
 			assertEquals( "Adam5", res.getKey());
 		}
@@ -126,7 +127,7 @@ public class GroupResultTest extends Assert
 	@Test
 	public void testSize() throws Exception
 	{
-		try(GroupResult<String,TestInterface> res = new GroupResult<String,TestInterface>("Adam5", base.find( new SimpleCondition("name", "Adam5", Comparison.IS)), GroupResult.SIZE_UNKNOWN, base.getDefaultOrder()))
+		try(GroupResult<String,TestInterface> res = new GroupResult<String,TestInterface>("Adam5", base.find( Conditions.is("name", "Adam5")), GroupResult.SIZE_UNKNOWN, base.getDefaultOrder()))
 		{
 			assertTrue( res.getEstimatedSize() == GroupResult.SIZE_UNKNOWN);
 		}
@@ -135,9 +136,9 @@ public class GroupResultTest extends Assert
 	@Test
 	public void testWithScope() throws Exception
 	{
-		try(GroupResult<String,TestInterface> res = new GroupResult<String,TestInterface>("Adam5", base.find( new SimpleCondition("name", "Adam5", Comparison.IS)), GroupResult.SIZE_UNKNOWN, base.getDefaultOrder()))
+		try(GroupResult<String,TestInterface> res = new GroupResult<String,TestInterface>("Adam5", base.find( Conditions.is("name", "Adam5")), GroupResult.SIZE_UNKNOWN, base.getDefaultOrder()))
 		{
-			assertEquals( 1, res.withScope( new Scope(new SimpleCondition("age", 145, Comparison.IS), null, Scope.NO_LIMIT)).count( null));
+			assertEquals( 1, res.withScope( new Scope(Conditions.is("age", 145), null, Scope.NO_LIMIT)).count( null));
 		}
 	}
 

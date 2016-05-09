@@ -75,11 +75,11 @@ public class HasManyThroughConditionTest extends Assert
 		base.getStore().addRow( mappingTable, new String[]{"fk_test1", "fk_test2"}, new Object[]{t3.getPrimaryKey(), t3.getPrimaryKey()} );
 		
 		//has no entries
-		cond1 = new HasManyThroughCondition(base, mappingTable, "fk_test1", "fk_test2", "id", base, new SimpleCondition("age", 200, Comparison.IS));
+		cond1 = new HasManyThroughCondition(base, mappingTable, "fk_test1", "fk_test2", "id", base, Conditions.is("age", 200));
 		//matches all
-		cond2 = new HasManyThroughCondition(base, mappingTable, "fk_test1", "fk_test2", "id", base, new SimpleCondition("name", null, Comparison.IS_NOT_NULL));
+		cond2 = new HasManyThroughCondition(base, mappingTable, "fk_test1", "fk_test2", "id", base, Conditions.isNotNull("name"));
 		//matches t2 and t3
-		cond3 = new HasManyThroughCondition(base, mappingTable, "fk_test1", "fk_test2", "id", base, new SimpleCondition("name", "123Name4", Comparison.IS));
+		cond3 = new HasManyThroughCondition(base, mappingTable, "fk_test1", "fk_test2", "id", base, Conditions.is("name", "123Name4"));
 	}
 	
 	@AfterClass
