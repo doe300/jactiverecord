@@ -66,17 +66,17 @@ public class SimpleOrderTest extends Assert
 	public void testFromSQLString()
 	{
 		String src = "name DESC, age ASC, title ASC";
-		Order o = SimpleOrder.fromSQLString( src );
+		Order o = Orders.fromSQLString( src );
 		assertEquals( src, o.toSQL(JDBCDriver.DEFAULT) );
-		assertNull( SimpleOrder.fromSQLString(null ) );
-		assertNull( SimpleOrder.fromSQLString("" ) );
-		assertEquals( o, SimpleOrder.fromSQLString( "ORDER BY name DESC, age ASC, title ASC"));
+		assertNull(Orders.fromSQLString(null ) );
+		assertNull(Orders.fromSQLString("" ) );
+		assertEquals(o, Orders.fromSQLString( "ORDER BY name DESC, age ASC, title ASC"));
 	}
 
 	@Test
 	public void testCompare_Map_Map()
 	{
-		Order o = SimpleOrder.fromSQLString( "name ASC, title DESC, age");
+		Order o = Orders.fromSQLString( "name ASC, title DESC, age");
 		Map<String, Object> m1 = new HashMap<>(3);
 		m1.put( "name", "A");
 		m1.put( "title", "A");
@@ -116,7 +116,7 @@ public class SimpleOrderTest extends Assert
 	@Test
 	public void testReversed()
 	{
-		Order o = SimpleOrder.fromSQLString( "name ASC, title DESC, age");
+		Order o = Orders.fromSQLString( "name ASC, title DESC, age");
 		Map<String, Object> m1 = new HashMap<>(3);
 		m1.put( "name", "A");
 		m1.put( "title", "A");
@@ -151,7 +151,7 @@ public class SimpleOrderTest extends Assert
 	@Test
 	public void testCompare_ActiveRecord_ActiveRecord()
 	{
-		Order o = SimpleOrder.fromSQLString( "name ASC, age DESC");
+		Order o = Orders.fromSQLString( "name ASC, age DESC");
 		TestInterface i0 = base.createRecord();
 		i0.setName( "Adam");
 		i0.setAge( 23);

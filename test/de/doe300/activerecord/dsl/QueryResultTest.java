@@ -118,12 +118,12 @@ public class QueryResultTest extends Assert
 	@Test
 	public void testOrder() throws Exception
 	{
-		try(QueryResult<TestInterface> r = base.where( Conditions.isNotNull("name")).order( SimpleOrder.
+		try(QueryResult<TestInterface> r = base.where( Conditions.isNotNull("name")).order(Orders.
 				fromSQLString( "age ASC")))
 		{
 			assertEquals( -123, r.findFirst( null ).getAge());
 		}
-		try(QueryResult<TestInterface> r = base.where( Conditions.isNotNull("name")).order( new SimpleOrder("age", SimpleOrder.OrderType.DESCENDING)))
+		try(QueryResult<TestInterface> r = base.where( Conditions.isNotNull("name")).order( Orders.sortDescending( "age")))
 		{
 			assertEquals( 23, r.findFirst( null ).getAge());
 		}

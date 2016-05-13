@@ -35,7 +35,7 @@ import javax.annotation.Nullable;
  * @author doe300
  * @since 0.7
  */
-public class ScalarOrder extends SimpleOrder
+class ScalarOrder extends SimpleOrder
 {
 	@Nonnull
 	private final ScalarFunction<?, ?, ?>[] mappings;
@@ -48,7 +48,7 @@ public class ScalarOrder extends SimpleOrder
 	 * @param mappings the scalar functions to apply to the columns for value-mapping
 	 * @param types the order-types, may be <code>null</code>
 	 */
-	public ScalarOrder(@Nonnull final String[] columns, @Nullable final ScalarFunction<?, ?, ?>[] mappings, @Nullable final OrderType[] types)
+	ScalarOrder(@Nonnull final String[] columns, @Nullable final ScalarFunction<?, ?, ?>[] mappings, @Nullable final OrderType[] types)
 	{
 		super( columns, types );
 		if(mappings == null)
@@ -71,7 +71,7 @@ public class ScalarOrder extends SimpleOrder
 	 * @param mapping
 	 * @param type
 	 */
-	public ScalarOrder(@Nonnull final String column, @Nullable final ScalarFunction<?, ?, ?> mapping, @Nonnull final OrderType type)
+	ScalarOrder(@Nonnull final String column, @Nullable final ScalarFunction<?, ?, ?> mapping, @Nonnull final OrderType type)
 	{
 		super( column, type );
 		this.mappings = new ScalarFunction[]{mapping};

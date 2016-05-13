@@ -41,7 +41,7 @@ import de.doe300.activerecord.record.ActiveRecord;
  * @since 0.7
  */
 @Immutable
-public class SimpleOrder implements Order
+class SimpleOrder implements Order
 {
 	@Nonnull
 	protected final String[] columns;
@@ -55,7 +55,7 @@ public class SimpleOrder implements Order
 	 * @param columns
 	 * @param types the order-types, may be <code>null</code>
 	 */
-	public SimpleOrder(@Nonnull final String[] columns, @Nullable final OrderType[] types)
+	SimpleOrder(@Nonnull final String[] columns, @Nullable final OrderType[] types)
 	{
 		this.columns = columns;
 		this.types = SimpleOrder.levelTypes( columns.length, types );
@@ -66,44 +66,12 @@ public class SimpleOrder implements Order
 	 * @param column
 	 * @param type
 	 */
-	public SimpleOrder(@Nonnull final String column, @Nonnull final OrderType type)
+	SimpleOrder(@Nonnull final String column, @Nonnull final OrderType type)
 	{
 		this.columns = new String[]{column};
 		this.types = new OrderType[]{type};
 	}
 
-	/**
-	 * @param sqlOrderBy
-	 * @return a new order from the SQL ORDER BY-Statement
-	 */
-	@Nullable
-	public static Order fromSQLString(@Nullable final String sqlOrderBy)
-	{
-		if(sqlOrderBy==null|| sqlOrderBy.isEmpty())
-		{
-			return null;
-		}
-		final String stmt = sqlOrderBy.contains( "ORDER BY") ? sqlOrderBy.substring( sqlOrderBy.indexOf( "ORDER BY")+"ORDER BY".length()) : sqlOrderBy;
-		final String[] parts = stmt.trim().split( "\\,");
-		final String[] columns = new String[parts.length];
-		final OrderType[] types = new OrderType[parts.length];
-		String[] tmp;
-		for(int i=0;i<parts.length;i++)
-		{
-			tmp = parts[i].trim().split( "\\s+");
-			if(tmp.length > 1)
-			{
-				columns[i] = tmp[0];
-				types[i] = tmp[1].equalsIgnoreCase( "DESC") ? OrderType.DESCENDING : OrderType.ASCENDING;
-			}
-			else
-			{
-				columns[i] = tmp[0];
-				types[i] = OrderType.ASCENDING;
-			}
-		}
-		return new SimpleOrder(columns, types );
-	}
 
 	@Nonnull
 	private static OrderType[] levelTypes(final int num, @Nullable final OrderType[] types)

@@ -25,8 +25,8 @@
 package de.doe300.activerecord;
 
 import de.doe300.activerecord.dsl.Conditions;
+import de.doe300.activerecord.dsl.Orders;
 import de.doe300.activerecord.dsl.QueryResult;
-import de.doe300.activerecord.dsl.SimpleOrder;
 import de.doe300.activerecord.dsl.functions.Absolute;
 import de.doe300.activerecord.dsl.functions.Sum;
 import de.doe300.activerecord.record.RecordType;
@@ -492,7 +492,7 @@ public class RecordBaseTest<T extends TestInterface> extends Assert implements A
 		try(QueryResult<T> r = base.where( Conditions.isLarger( "age", 12)))
 		{
 			assertEquals( r.getEstimatedSize(), base.withScope( 
-				new Scope(Conditions.isLarger("age", 12), SimpleOrder.fromSQLString( "age DESC"), Scope.NO_LIMIT )).stream().count() );
+				new Scope(Conditions.isLarger("age", 12), Orders.fromSQLString( "age DESC"), Scope.NO_LIMIT )).stream().count() );
 		}
 	}
 

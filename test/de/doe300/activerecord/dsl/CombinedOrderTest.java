@@ -44,32 +44,32 @@ public class CombinedOrderTest extends Assert
 	@Test
 	public void testCombine()
 	{
-		Order o = SimpleOrder.fromSQLString( "name ASC, age DESC");
+		Order o = Orders.fromSQLString( "name ASC, age DESC");
 		
-		assertEquals( o, CombinedOrder.combine( o, o, o, o));
-		assertEquals( o, CombinedOrder.combine( o));
-		assertEquals( o, CombinedOrder.combine( o, null));
-		assertNotSame(o, CombinedOrder.combine( o, new SimpleOrder("age", SimpleOrder.OrderType.ASCENDING)));
+		assertEquals(o, Orders.combine( o, o, o, o));
+		assertEquals(o, Orders.combine( o));
+		assertEquals(o, Orders.combine( o, null));
+		assertNotSame(o, Orders.combine( o, Orders.sortAscending( "age")));
 	}
 
 	@Test
 	public void testToSQL()
 	{
-		Order o = CombinedOrder.combine(SimpleOrder.fromSQLString( "name ASC"), SimpleOrder.fromSQLString( "age DESC") );
+		Order o = Orders.combine(Orders.fromSQLString( "name ASC"), Orders.fromSQLString( "age DESC") );
 		assertEquals( o.toSQL( JDBCDriver.DEFAULT), "name ASC, age DESC");
 	}
 
 	@Test
 	public void testReversed()
 	{
-		Order o = CombinedOrder.combine(SimpleOrder.fromSQLString( "name ASC"), SimpleOrder.fromSQLString( "age DESC") );
-		assertEquals( o.reversed(), SimpleOrder.fromSQLString( "name DESC, age asc"));
+		Order o = Orders.combine(Orders.fromSQLString( "name ASC"), Orders.fromSQLString( "age DESC") );
+		assertEquals(o.reversed(), Orders.fromSQLString( "name DESC, age asc"));
 	}
 
 	@Test
 	public void testCompare_Map_Map()
 	{
-		Order o = CombinedOrder.combine(SimpleOrder.fromSQLString( "name ASC"), SimpleOrder.fromSQLString( "age DESC") );
+		Order o = Orders.combine(Orders.fromSQLString( "name ASC"), Orders.fromSQLString( "age DESC") );
 		final Map<String, Object> obj1 = new HashMap<>(2);
 		obj1.put( "name", "Adam");
 		obj1.put( "age", 112);
@@ -88,8 +88,8 @@ public class CombinedOrderTest extends Assert
 	@Test
 	public void testEquals()
 	{
-		Order o1 = CombinedOrder.combine(SimpleOrder.fromSQLString( "name ASC"), SimpleOrder.fromSQLString( "age DESC") );
-		Order o2 = CombinedOrder.combine(SimpleOrder.fromSQLString( "name ASC, age DESC"));
+		Order o1 = Orders.combine(Orders.fromSQLString( "name ASC"), Orders.fromSQLString( "age DESC") );
+		Order o2 = Orders.combine(Orders.fromSQLString( "name ASC, age DESC"));
 		
 		assertEquals( o1, o2);
 	}

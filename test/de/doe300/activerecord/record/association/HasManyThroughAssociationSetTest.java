@@ -28,7 +28,7 @@ import de.doe300.activerecord.RecordBase;
 import de.doe300.activerecord.TestInterface;
 import de.doe300.activerecord.TestServer;
 import de.doe300.activerecord.dsl.Conditions;
-import de.doe300.activerecord.dsl.SimpleOrder;
+import de.doe300.activerecord.dsl.Orders;
 import de.doe300.activerecord.dsl.functions.CountDistinct;
 import de.doe300.activerecord.scope.Scope;
 import java.util.Arrays;
@@ -259,7 +259,7 @@ public class HasManyThroughAssociationSetTest extends Assert
 	@Test
 	public void testFindWithScope()
 	{
-		try(final Stream<TestInterface> s = set.findWithScope( new Scope(null, new SimpleOrder(base.getPrimaryColumn(), SimpleOrder.OrderType.DESCENDING), 5)))
+		try(final Stream<TestInterface> s = set.findWithScope( new Scope(null, Orders.sortDescending( base.getPrimaryColumn()), 5)))
 		{
 			assertSame( a3, s.findFirst().get());
 		}
@@ -268,7 +268,7 @@ public class HasManyThroughAssociationSetTest extends Assert
 	@Test
 	public void testFindFirstWithScope()
 	{
-		assertSame( a3, set.findFirstWithScope( new Scope(null, new SimpleOrder(base.getPrimaryColumn(), SimpleOrder.OrderType.DESCENDING), 5)));
+		assertSame( a3, set.findFirstWithScope( new Scope(null, Orders.sortDescending(base.getPrimaryColumn()), 5)));
 	}
 
 	@Test

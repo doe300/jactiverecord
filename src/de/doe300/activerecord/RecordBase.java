@@ -39,8 +39,8 @@ import javax.annotation.Nullable;
 import de.doe300.activerecord.dsl.Condition;
 import de.doe300.activerecord.dsl.Conditions;
 import de.doe300.activerecord.dsl.Order;
+import de.doe300.activerecord.dsl.Orders;
 import de.doe300.activerecord.dsl.QueryResult;
-import de.doe300.activerecord.dsl.SimpleOrder;
 import de.doe300.activerecord.dsl.functions.CastType;
 import de.doe300.activerecord.jdbc.driver.JDBCDriver;
 import de.doe300.activerecord.logging.Logging;
@@ -239,11 +239,11 @@ public abstract class RecordBase<T extends ActiveRecord> implements ReadOnlyReco
 		{
 			if(recordType.isAnnotationPresent(RecordType.class))
 			{
-				defaultOrder = SimpleOrder.fromSQLString(recordType.getAnnotation(RecordType.class).defaultOrder());
+				defaultOrder = Orders.fromSQLString(recordType.getAnnotation(RecordType.class).defaultOrder());
 			}
 			if(defaultOrder == null)
 			{
-				defaultOrder = new SimpleOrder(getPrimaryColumn(), SimpleOrder.OrderType.ASCENDING);
+				defaultOrder = Orders.sortAscending( getPrimaryColumn());
 			}
 			Logging.getLogger().debug( recordType.getSimpleName(), "Using default order: "+defaultOrder.toSQL(JDBCDriver.DEFAULT));
 		}

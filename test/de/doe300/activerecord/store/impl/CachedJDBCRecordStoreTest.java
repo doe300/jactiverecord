@@ -29,7 +29,7 @@ import de.doe300.activerecord.RecordCore;
 import de.doe300.activerecord.TestInterface;
 import de.doe300.activerecord.TestServer;
 import de.doe300.activerecord.dsl.Conditions;
-import de.doe300.activerecord.dsl.SimpleOrder;
+import de.doe300.activerecord.dsl.Orders;
 import de.doe300.activerecord.dsl.functions.Sum;
 import de.doe300.activerecord.scope.Scope;
 import java.sql.Timestamp;
@@ -175,7 +175,7 @@ public class CachedJDBCRecordStoreTest extends Assert
 		Scope scope = new Scope(Conditions.is(base.getPrimaryColumn(), primaryKey), null, 2 );
 		assertEquals(1, store.streamAllWithData( base, new String[]{base.getPrimaryColumn()}, scope).count());
 		
-		Scope scope2 = new Scope(Conditions.is("name", "Failes"), SimpleOrder.fromSQLString( "id DESC"), 2 );
+		Scope scope2 = new Scope(Conditions.is("name", "Failes"), Orders.fromSQLString( "id DESC"), 2 );
 		//Tests streaming with data in cache but not in store
 		TestInterface i = base.createRecord();
 		i.setName( "Failes");

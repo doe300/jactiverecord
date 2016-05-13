@@ -26,9 +26,7 @@ package de.doe300.activerecord.dsl;
 
 import de.doe300.activerecord.jdbc.driver.JDBCDriver;
 import de.doe300.activerecord.record.ActiveRecord;
-import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
 import javax.annotation.Nonnull;
@@ -38,7 +36,7 @@ import javax.annotation.Nonnull;
  * @author doe300
  * @since 0.7
  */
-public class CombinedOrder implements Order
+class CombinedOrder implements Order
 {
 	private final Order[] orders;
 
@@ -46,38 +44,11 @@ public class CombinedOrder implements Order
 	/**
 	 * @param orders the list of orders
 	 */
-	private CombinedOrder( @Nonnull final Order... orders )
+	CombinedOrder( @Nonnull final Order... orders )
 	{
 		this.orders = orders;
 	}
 	
-	/**
-	 * Combines and optimized the orders by removing all duplicates and returning the single order, if only one is passed
-	 * @param orders
-	 * @return the combined order
-	 */
-	@Nonnull
-	public static Order combine(@Nonnull final Order... orders)
-	{
-		if(orders.length == 1)
-		{
-			return orders[0];
-		}
-		final List<Order> newOrders = new ArrayList<>(orders.length);
-		for(Order order :orders)
-		{
-			if(order != null && !newOrders.contains( order ))
-			{
-				newOrders.add( order );
-			}
-		}
-		if(newOrders.size() == 1)
-		{
-			return newOrders.get( 0);
-		}
-		return new CombinedOrder(newOrders.toArray( new Order[newOrders.size()]));
-	}
-
 	@Override
 	public String toSQL( JDBCDriver driver )
 	{

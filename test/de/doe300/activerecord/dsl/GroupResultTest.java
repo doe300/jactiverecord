@@ -102,11 +102,11 @@ public class GroupResultTest extends Assert
 	{
 		try(GroupResult<Object, TestInterface> res = getGroup())
 		{
-			assertEquals(122, res.order( SimpleOrder.fromSQLString( "age ASC")).findFirst( null ).getAge() );
+			assertEquals(122, res.order(Orders.fromSQLString( "age ASC")).findFirst( null ).getAge() );
 		}
 		try(GroupResult<Object, TestInterface> res = getGroup())
 		{
-			assertEquals(145, res.order( SimpleOrder.fromSQLString( "age DESC")).findFirst( null ).getAge() );
+			assertEquals(145, res.order(Orders.fromSQLString( "age DESC")).findFirst( null ).getAge() );
 		}
 	}
 	
