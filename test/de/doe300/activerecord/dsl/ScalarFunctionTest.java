@@ -25,6 +25,8 @@
 package de.doe300.activerecord.dsl;
 
 import de.doe300.activerecord.RecordBase;
+import de.doe300.activerecord.RecordCore;
+import de.doe300.activerecord.TestBase;
 import de.doe300.activerecord.TestInterface;
 import de.doe300.activerecord.TestServer;
 import de.doe300.activerecord.dsl.functions.Absolute;
@@ -41,8 +43,8 @@ import de.doe300.activerecord.dsl.functions.TrimString;
 import de.doe300.activerecord.dsl.functions.UpperCase;
 import de.doe300.activerecord.dsl.functions.Value;
 import de.doe300.activerecord.jdbc.driver.SQLiteDriver;
+import de.doe300.activerecord.record.ActiveRecord;
 import org.junit.AfterClass;
-import org.junit.Assert;
 import org.junit.BeforeClass;
 import org.junit.Test;
 
@@ -50,16 +52,29 @@ import org.junit.Test;
  *
  * @author doe300
  */
-public class ScalarFunctionTest extends Assert
+public class ScalarFunctionTest extends TestBase
 {
-	private static RecordBase<TestInterface> base;
-	private static TestInterface t1, t2,t3, t4;
+	private final RecordBase<TestInterface> base;
+	private final TestInterface t1, t2,t3, t4;
 	
 	@BeforeClass
 	public static void setUpClass() throws Exception
 	{
-		TestServer.buildTestTable( TestInterface.class, ScalarFunctionTest.class.getSimpleName());
-		base = TestServer.getTestCore().getBase( TestInterface.class).getShardBase( ScalarFunctionTest.class.getSimpleName());
+		TestServer.buildTestTables( TestInterface.class, ScalarFunctionTest.class.getSimpleName());
+	}
+	
+	@AfterClass
+	public static void destroyTables() throws Exception
+	{
+		TestServer.destroyTestTables( TestInterface.class, ScalarFunctionTest.class.getSimpleName());
+	}
+	
+	public ScalarFunctionTest(final RecordCore core)
+	{
+		super(core);
+		
+		base =core.getBase( TestInterface.class).getShardBase( ScalarFunctionTest.class.getSimpleName());
+		base.findAll().forEach( ActiveRecord::destroy);
 		t1 = base.createRecord();
 		t1.setName( "123Name1");
 		t1.setAge( -912);
@@ -73,16 +88,6 @@ public class ScalarFunctionTest extends Assert
 		t4 = base.createRecord();
 		t4.setName( "  SomeName  ");
 		t4.setAge( -913);
-	}
-	
-	@AfterClass
-	public static void destroyTables() throws Exception
-	{
-		TestServer.destroyTestTable( TestInterface.class, ScalarFunctionTest.class.getSimpleName());
-	}
-	
-	public ScalarFunctionTest()
-	{
 	}
 
 	@Test

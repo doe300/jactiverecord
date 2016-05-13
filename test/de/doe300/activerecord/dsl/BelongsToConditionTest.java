@@ -25,6 +25,8 @@
 package de.doe300.activerecord.dsl;
 
 import de.doe300.activerecord.RecordBase;
+import de.doe300.activerecord.RecordCore;
+import de.doe300.activerecord.TestBase;
 import de.doe300.activerecord.TestInterface;
 import de.doe300.activerecord.TestServer;
 import de.doe300.activerecord.record.ActiveRecord;
@@ -32,25 +34,21 @@ import java.util.Collections;
 import java.util.HashMap;
 import java.util.stream.Stream;
 import org.junit.AfterClass;
-import org.junit.Assert;
 import org.junit.BeforeClass;
 import org.junit.Test;
 
-
-
-public class BelongsToConditionTest extends Assert
+public class BelongsToConditionTest extends TestBase
 {
 	
-	private static RecordBase<TestInterface> base;
-	private static TestInterface t1, t2,t3;
-	private static Condition cond1, cond2, cond3;
+	private RecordBase<TestInterface> base;
+	private TestInterface t1, t2,t3;
+	private Condition cond1, cond2, cond3;
 	
-	@BeforeClass
-	public static void createTables() throws Exception
+	public BelongsToConditionTest(final RecordCore core)
 	{
-		TestServer.buildTestTable(TestInterface.class, BelongsToConditionTest.class.getSimpleName());
-		
-		base = TestServer.getTestCore().getBase( TestInterface.class).getShardBase( BelongsToConditionTest.class.getSimpleName());
+		super(core);
+		base = core.getBase( TestInterface.class).getShardBase( BelongsToConditionTest.class.getSimpleName());
+		base.getAll().forEach( ActiveRecord::destroy);
 		t1 = base.createRecord();
 		t1.setName( "123Name1");
 		t1.setAge( -912);
@@ -73,14 +71,16 @@ public class BelongsToConditionTest extends Assert
 		cond3 = new BelongsToCondition("fk_test_id", base, Conditions.is("id", t3.getPrimaryKey()));
 	}
 	
+	@BeforeClass
+	public static void createTables() throws Exception
+	{
+		TestServer.buildTestTables(TestInterface.class, BelongsToConditionTest.class.getSimpleName());
+	}
+	
 	@AfterClass
 	public static void destroyTables() throws Exception
 	{
-		TestServer.destroyTestTable(TestInterface.class, BelongsToConditionTest.class.getSimpleName());
-	}
-
-	public BelongsToConditionTest()
-	{
+		TestServer.destroyTestTables(TestInterface.class, BelongsToConditionTest.class.getSimpleName());
 	}
 
 	@Test

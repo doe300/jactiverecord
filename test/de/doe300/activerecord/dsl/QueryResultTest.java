@@ -25,11 +25,13 @@
 package de.doe300.activerecord.dsl;
 
 import de.doe300.activerecord.RecordBase;
+import de.doe300.activerecord.RecordCore;
+import de.doe300.activerecord.TestBase;
 import de.doe300.activerecord.TestInterface;
 import de.doe300.activerecord.TestServer;
+import de.doe300.activerecord.record.ActiveRecord;
 import de.doe300.activerecord.scope.Scope;
 import org.junit.AfterClass;
-import org.junit.Assert;
 import org.junit.BeforeClass;
 import org.junit.Test;
 
@@ -37,19 +39,16 @@ import org.junit.Test;
  *
  * @author daniel
  */
-public class QueryResultTest extends Assert
+public class QueryResultTest extends TestBase
 {
-	private static RecordBase<TestInterface> base;
+	private final RecordBase<TestInterface> base;
 	
-	public QueryResultTest()
+	public QueryResultTest(final RecordCore core)
 	{
-	}
-	
-	@BeforeClass
-	public static void createTables() throws Exception
-	{
-		TestServer.buildTestTable(TestInterface.class, QueryResultTest.class.getSimpleName());
-		base = TestServer.getTestCore().getBase( TestInterface.class).getShardBase( QueryResultTest.class.getSimpleName());
+		super(core);
+		
+		base = core.getBase( TestInterface.class).getShardBase( QueryResultTest.class.getSimpleName());
+		base.findAll().forEach( ActiveRecord::destroy);
 		TestInterface i = base.createRecord();
 		i.setName( "Alfons");
 		i.setAge( 20);
@@ -61,10 +60,16 @@ public class QueryResultTest extends Assert
 		i.setAge( -123);
 	}
 	
+	@BeforeClass
+	public static void createTables() throws Exception
+	{
+		TestServer.buildTestTables(TestInterface.class, QueryResultTest.class.getSimpleName());
+	}
+	
 	@AfterClass
 	public static void destroyTables() throws Exception
 	{
-		TestServer.destroyTestTable(TestInterface.class, QueryResultTest.class.getSimpleName());
+		TestServer.destroyTestTables(TestInterface.class, QueryResultTest.class.getSimpleName());
 	}
 	
 	@Test

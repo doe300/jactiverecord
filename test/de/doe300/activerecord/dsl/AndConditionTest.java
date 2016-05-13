@@ -26,6 +26,8 @@ package de.doe300.activerecord.dsl;
 
 import de.doe300.activerecord.AssertException;
 import de.doe300.activerecord.RecordBase;
+import de.doe300.activerecord.RecordCore;
+import de.doe300.activerecord.TestBase;
 import de.doe300.activerecord.TestInterface;
 import de.doe300.activerecord.TestServer;
 import de.doe300.activerecord.jdbc.driver.JDBCDriver;
@@ -33,24 +35,18 @@ import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
 import org.junit.AfterClass;
-import org.junit.Assert;
 import org.junit.BeforeClass;
 import org.junit.Test;
 
-public class AndConditionTest extends Assert implements AssertException
+public class AndConditionTest extends TestBase implements AssertException
 {
-	private static RecordBase<TestInterface> base;
-	private static TestInterface t1, t2,t3;
+	private RecordBase<TestInterface> base;
+	private TestInterface t1, t2,t3;
 	
-	public AndConditionTest()
+	public AndConditionTest(final RecordCore core)
 	{
-	}
-	
-	@BeforeClass
-	public static void setUpClass() throws Exception
-	{
-		TestServer.buildTestTable(TestInterface.class, AndConditionTest.class.getSimpleName());
-		base = TestServer.getTestCore().getBase( TestInterface.class).getShardBase( AndConditionTest.class.getSimpleName() );
+		super(core);
+		base = core.getBase( TestInterface.class).getShardBase( AndConditionTest.class.getSimpleName() );
 		t1 = base.createRecord();
 		t1.setName( "123Name1");
 		t1.setAge( 912);
@@ -62,10 +58,16 @@ public class AndConditionTest extends Assert implements AssertException
 		t3.setAge( 914);
 	}
 	
+	@BeforeClass
+	public static void setUpClass() throws Exception
+	{
+		TestServer.buildTestTables(TestInterface.class, AndConditionTest.class.getSimpleName());
+	}
+	
 	@AfterClass
 	public static void destroyTables() throws Exception
 	{
-		TestServer.destroyTestTable(TestInterface.class, AndConditionTest.class.getSimpleName());
+		TestServer.destroyTestTables(TestInterface.class, AndConditionTest.class.getSimpleName());
 	}
 	
 	@Test

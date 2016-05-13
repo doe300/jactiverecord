@@ -25,6 +25,8 @@
 package de.doe300.activerecord.dsl;
 
 import de.doe300.activerecord.RecordBase;
+import de.doe300.activerecord.RecordCore;
+import de.doe300.activerecord.TestBase;
 import de.doe300.activerecord.TestInterface;
 import de.doe300.activerecord.TestServer;
 import de.doe300.activerecord.record.ActiveRecord;
@@ -43,20 +45,30 @@ import org.junit.Test;
  *
  * @author doe300
  */
-
-
-public class HasOneConditionTest
+public class HasOneConditionTest extends TestBase
 {
-	private static RecordBase<TestInterface> base;
-	private static TestInterface t1, t2,t3;
-	private static Condition cond1, cond2, cond3;
+	private final RecordBase<TestInterface> base;
+	private final TestInterface t1, t2,t3;
+	private final Condition cond1, cond2, cond3;
 	
 	@BeforeClass
 	public static void createTables() throws Exception
 	{
-		TestServer.buildTestTable(TestInterface.class, HasOneConditionTest.class.getSimpleName());
+		TestServer.buildTestTables(TestInterface.class, HasOneConditionTest.class.getSimpleName());
+	}
+	
+	@AfterClass
+	public static void destroyTables() throws Exception
+	{
+		TestServer.destroyTestTables(TestInterface.class, HasOneConditionTest.class.getSimpleName());
+	}
+	
+	public HasOneConditionTest(final RecordCore core)
+	{
+		super(core);
 		
-		base = TestServer.getTestCore().getBase( TestInterface.class).getShardBase( HasOneConditionTest.class.getSimpleName());
+		base = core.getBase( TestInterface.class).getShardBase( HasOneConditionTest.class.getSimpleName());
+		base.getAll().forEach( ActiveRecord::destroy);
 		t1 = base.createRecord();
 		t1.setName( "123Name1");
 		t1.setAge( -912);
@@ -78,16 +90,6 @@ public class HasOneConditionTest
 		cond2 = new HasOneCondition("id", base, "fk_test_id", Conditions.is("age", -913));
 		//matches t3
 		cond3 = new HasOneCondition("id", base, "fk_test_id", Conditions.is("id", t3.getPrimaryKey()));
-	}
-	
-	@AfterClass
-	public static void destroyTables() throws Exception
-	{
-		TestServer.destroyTestTable(TestInterface.class, HasOneConditionTest.class.getSimpleName());
-	}
-	
-	public HasOneConditionTest()
-	{
 	}
 	
 	@Before

@@ -26,6 +26,8 @@ package de.doe300.activerecord.proxy;
 
 import de.doe300.activerecord.AssertException;
 import de.doe300.activerecord.RecordBase;
+import de.doe300.activerecord.RecordCore;
+import de.doe300.activerecord.TestBase;
 import de.doe300.activerecord.TestInterface;
 import de.doe300.activerecord.TestServer;
 import de.doe300.activerecord.record.ActiveRecord;
@@ -33,7 +35,6 @@ import de.doe300.activerecord.record.validation.ValidatedRecord;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import org.junit.AfterClass;
-import org.junit.Assert;
 import org.junit.BeforeClass;
 import org.junit.Test;
 
@@ -41,29 +42,31 @@ import org.junit.Test;
  *
  * @author daniel
  */
-public class RecordHandlerTest extends Assert implements AssertException
+public class RecordHandlerTest extends TestBase implements AssertException
 {
-	private static RecordHandler<TestInterface> handler;
-	private static RecordBase<TestInterface> base;
-	private static TestInterface testI;
+	private final RecordHandler<TestInterface> handler;
+	private final RecordBase<TestInterface> base;
+	private final TestInterface testI;
 	
-	public RecordHandlerTest()
+	public RecordHandlerTest(final RecordCore core)
 	{
+		super(core);
+		
+		base = core.getBase( TestInterface.class).getShardBase( RecordHandlerTest.class.getSimpleName());
+		testI = base.createRecord();
+		handler = new RecordHandler<TestInterface>(testI.getPrimaryKey(), base);
 	}
 	
 	@BeforeClass
 	public static void createTables() throws Exception
 	{
-		TestServer.buildTestTable(TestInterface.class, RecordHandlerTest.class.getSimpleName());
-		base = TestServer.getTestCore().getBase( TestInterface.class).getShardBase( RecordHandlerTest.class.getSimpleName());
-		testI = base.createRecord();
-		handler = new RecordHandler<TestInterface>(testI.getPrimaryKey(), base);
+		TestServer.buildTestTables(TestInterface.class, RecordHandlerTest.class.getSimpleName());
 	}
 	
 	@AfterClass
 	public static void destroyTables() throws Exception
 	{
-		TestServer.destroyTestTable(TestInterface.class, RecordHandlerTest.class.getSimpleName());
+		TestServer.destroyTestTables(TestInterface.class, RecordHandlerTest.class.getSimpleName());
 	}
 	
 	@Test

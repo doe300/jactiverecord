@@ -25,15 +25,17 @@
 package de.doe300.activerecord.record.association;
 
 import de.doe300.activerecord.RecordBase;
+import de.doe300.activerecord.RecordCore;
+import de.doe300.activerecord.TestBase;
 import de.doe300.activerecord.TestInterface;
 import de.doe300.activerecord.TestServer;
 import de.doe300.activerecord.dsl.Conditions;
 import de.doe300.activerecord.dsl.functions.CountNotNull;
+import de.doe300.activerecord.record.ActiveRecord;
 import de.doe300.activerecord.scope.Scope;
 import java.util.Arrays;
 import java.util.SortedSet;
 import org.junit.AfterClass;
-import org.junit.Assert;
 import org.junit.Before;
 import org.junit.BeforeClass;
 import org.junit.Test;
@@ -42,23 +44,19 @@ import org.junit.Test;
  *
  * @author daniel
  */
-public class HasManyAssociationSetTest extends Assert
+public class HasManyAssociationSetTest extends TestBase
 {
-	private static RecordSet<TestInterface> set;
-	private static RecordBase<TestInterface> base;
-	private static TestInterface assocI;
-	private static TestInterface a1, a2, a3;
-	private static TestInterface n1, n2;
+	private final RecordSet<TestInterface> set;
+	private final RecordBase<TestInterface> base;
+	private final TestInterface assocI;
+	private final TestInterface a1, a2, a3;
+	private final TestInterface n1, n2;
 	
-	public HasManyAssociationSetTest()
+	public HasManyAssociationSetTest(final RecordCore core)
 	{
-	}
-	
-	@BeforeClass
-	public static void createTables() throws Exception
-	{
-		TestServer.buildTestTable(TestInterface.class, HasManyAssociationSetTest.class.getSimpleName());
-		base = TestServer.getTestCore().getBase( TestInterface.class ).getShardBase( HasManyAssociationSetTest.class.getSimpleName());
+		super(core);
+		base = core.getBase( TestInterface.class ).getShardBase( HasManyAssociationSetTest.class.getSimpleName());
+		base.findAll().forEach( ActiveRecord::destroy);
 		assocI = base.createRecord();
 		set = AssociationHelper.getHasManySet( assocI, base, "fk_test_id" );
 		
@@ -75,10 +73,16 @@ public class HasManyAssociationSetTest extends Assert
 		n2 = base.createRecord();
 	}
 	
+	@BeforeClass
+	public static void createTables() throws Exception
+	{
+		TestServer.buildTestTables(TestInterface.class, HasManyAssociationSetTest.class.getSimpleName());
+	}
+	
 	@AfterClass
 	public static void destroyTables() throws Exception
 	{
-		TestServer.destroyTestTable(TestInterface.class, HasManyAssociationSetTest.class.getSimpleName());;
+		TestServer.destroyTestTables(TestInterface.class, HasManyAssociationSetTest.class.getSimpleName());;
 	}
 	
 	@Before

@@ -25,11 +25,12 @@
 package de.doe300.activerecord.mapping;
 
 import de.doe300.activerecord.RecordBase;
+import de.doe300.activerecord.RecordCore;
+import de.doe300.activerecord.TestBase;
 import de.doe300.activerecord.TestServer;
 import java.util.HashMap;
 import java.util.Map;
 import org.junit.AfterClass;
-import org.junit.Assert;
 import org.junit.BeforeClass;
 import org.junit.Test;
 
@@ -37,23 +38,29 @@ import org.junit.Test;
  *
  * @author doe300
  */
-public class MappableRecordTest extends Assert
+public class MappableRecordTest extends TestBase
 {
-	private static RecordBase<TestMappableRecord> base;
-	private static TestMappableRecord record;
+	private final RecordBase<TestMappableRecord> base;
+	private final TestMappableRecord record;
+	
+	public MappableRecordTest(final RecordCore core)
+	{
+		super(core);
+		
+		base = core.getBase( TestMappableRecord.class);
+		record = base.createRecord();
+	}
 	
 	@BeforeClass
 	public static void createTables() throws Exception
 	{
-		base = TestServer.getTestCore().getBase( TestMappableRecord.class);
-		base.getCore().createTable( TestMappableRecord.class);
-		record = base.createRecord();
+		TestServer.buildTestTables( TestMappableRecord.class, "TestMappableRecord");
 	}
 	
 	@AfterClass
 	public static void destroyTables() throws Exception
 	{
-		base.getCore().dropTable( TestMappableRecord.class);
+		TestServer.destroyTestTables(TestMappableRecord.class, "TestMappableRecord");
 	}
 	
 	public static interface TestMappableRecord extends MappableRecord

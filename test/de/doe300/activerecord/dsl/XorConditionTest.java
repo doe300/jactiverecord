@@ -24,13 +24,15 @@
 package de.doe300.activerecord.dsl;
 
 import de.doe300.activerecord.RecordBase;
+import de.doe300.activerecord.RecordCore;
+import de.doe300.activerecord.TestBase;
 import de.doe300.activerecord.TestInterface;
 import de.doe300.activerecord.TestServer;
 import de.doe300.activerecord.jdbc.driver.JDBCDriver;
+import de.doe300.activerecord.record.ActiveRecord;
 import java.util.HashMap;
 import java.util.Map;
 import org.junit.AfterClass;
-import org.junit.Assert;
 import org.junit.BeforeClass;
 import org.junit.Test;
 
@@ -39,20 +41,17 @@ import org.junit.Test;
  * @author doe300
  * @since 0.8
  */
-public class XorConditionTest extends Assert
+public class XorConditionTest extends TestBase
 {
-	private static RecordBase<TestInterface> base;
-	private static TestInterface t1, t2,t3;
+	private final RecordBase<TestInterface> base;
+	private final TestInterface t1, t2,t3;
 	
-	public XorConditionTest()
+	public XorConditionTest(final RecordCore core)
 	{
-	}
-	
-	@BeforeClass
-	public static void setUpClass() throws Exception
-	{
-		TestServer.buildTestTable(TestInterface.class, XorConditionTest.class.getSimpleName());
-		base = TestServer.getTestCore().getBase( TestInterface.class).getShardBase( XorConditionTest.class.getSimpleName() );
+		super(core);
+		
+		base = core.getBase( TestInterface.class).getShardBase( XorConditionTest.class.getSimpleName() );
+		base.findAll().forEach( ActiveRecord::destroy);
 		t1 = base.createRecord();
 		t1.setName( "123Name1");
 		t1.setAge( 912);
@@ -64,10 +63,16 @@ public class XorConditionTest extends Assert
 		t3.setAge( 914);
 	}
 	
+	@BeforeClass
+	public static void setUpClass() throws Exception
+	{
+		TestServer.buildTestTables(TestInterface.class, XorConditionTest.class.getSimpleName());
+	}
+	
 	@AfterClass
 	public static void tearDownClass() throws Exception
 	{
-		TestServer.destroyTestTable(TestInterface.class, XorConditionTest.class.getSimpleName());
+		TestServer.destroyTestTables(TestInterface.class, XorConditionTest.class.getSimpleName());
 	}
 
 	@Test

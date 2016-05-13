@@ -26,13 +26,14 @@ package de.doe300.activerecord.proxy.handlers;
 
 import de.doe300.activerecord.AssertException;
 import de.doe300.activerecord.RecordBase;
+import de.doe300.activerecord.RecordCore;
+import de.doe300.activerecord.TestBase;
 import de.doe300.activerecord.TestInterface;
 import de.doe300.activerecord.TestServer;
 import de.doe300.activerecord.record.RecordType;
 import java.util.HashMap;
 import java.util.Map;
 import org.junit.AfterClass;
-import org.junit.Assert;
 import org.junit.BeforeClass;
 import org.junit.Test;
 
@@ -40,29 +41,31 @@ import org.junit.Test;
  *
  * @author daniel
  */
-public class MapHandlerTest extends Assert implements AssertException
+public class MapHandlerTest extends TestBase implements AssertException
 {
-	private static RecordBase<TestMapInterface> base;
-	private static MapHandler handler;
-	private static TestMapInterface record;
+	private final RecordBase<TestMapInterface> base;
+	private final MapHandler handler;
+	private final TestMapInterface record;
 	
-	public MapHandlerTest()
+	public MapHandlerTest(final RecordCore core)
 	{
+		super(core);
+		
+		handler = new MapHandler();
+		base = core.getBase( TestMapInterface.class, handler).getShardBase( MapHandlerTest.class.getSimpleName());
+		record = base.createRecord();
 	}
 	
 	@BeforeClass
 	public static void createTables() throws Exception
 	{
-		TestServer.buildTestTable(TestMapInterface.class, MapHandlerTest.class.getSimpleName());
-		handler = new MapHandler();
-		base = TestServer.getTestCore().getBase( TestMapInterface.class, handler).getShardBase( MapHandlerTest.class.getSimpleName());
-		record = base.createRecord();
+		TestServer.buildTestTables(TestMapInterface.class, MapHandlerTest.class.getSimpleName());
 	}
 	
 	@AfterClass
 	public static void destroyTables() throws Exception
 	{
-		TestServer.destroyTestTable(TestMapInterface.class, MapHandlerTest.class.getSimpleName());
+		TestServer.destroyTestTables(TestMapInterface.class, MapHandlerTest.class.getSimpleName());
 	}
 	
 	@Test

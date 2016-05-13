@@ -26,13 +26,15 @@ package de.doe300.activerecord.record.association;
 
 import de.doe300.activerecord.AssertException;
 import de.doe300.activerecord.RecordBase;
+import de.doe300.activerecord.RecordCore;
+import de.doe300.activerecord.TestBase;
 import de.doe300.activerecord.TestInterface;
 import de.doe300.activerecord.TestServer;
 import de.doe300.activerecord.dsl.Conditions;
 import de.doe300.activerecord.dsl.functions.CountNotNull;
+import de.doe300.activerecord.record.ActiveRecord;
 import de.doe300.activerecord.scope.Scope;
 import org.junit.AfterClass;
-import org.junit.Assert;
 import org.junit.BeforeClass;
 import org.junit.Test;
 
@@ -40,18 +42,30 @@ import org.junit.Test;
  *
  * @author doe300
  */
-public class CachedRecordSetTest extends Assert implements AssertException
+public class CachedRecordSetTest extends TestBase implements AssertException
 {
-	private static RecordBase<TestInterface> base;
-	private static RecordSet<TestInterface> set;
-	private static TestInterface a1, a2, a3;
-	private static TestInterface a4, a5;
+	private final RecordBase<TestInterface> base;
+	private final RecordSet<TestInterface> set;
+	private final TestInterface a1, a2, a3;
+	private final TestInterface a4, a5;
 	
 	@BeforeClass
 	public static void createTables() throws Exception
 	{
-		TestServer.buildTestTable(TestInterface.class, CachedRecordSetTest.class.getSimpleName());
-		base = TestServer.getTestCore().getBase( TestInterface.class ).getShardBase( CachedRecordSetTest.class.getSimpleName());
+		TestServer.buildTestTables(TestInterface.class, CachedRecordSetTest.class.getSimpleName());
+	}
+	
+	@AfterClass
+	public static void dropTables() throws Exception
+	{
+		TestServer.destroyTestTables(TestInterface.class, CachedRecordSetTest.class.getSimpleName());
+	}
+	
+	public CachedRecordSetTest(final RecordCore core)
+	{
+		super(core);
+		base = core.getBase( TestInterface.class ).getShardBase( CachedRecordSetTest.class.getSimpleName());
+		base.findAll().forEach( ActiveRecord::destroy);
 		set = new CachedRecordSet<>(new TableSet<TestInterface>(base, null ));
 		
 		//fill set
@@ -62,16 +76,6 @@ public class CachedRecordSetTest extends Assert implements AssertException
 		a3.setName( "Hans");
 		a4 = base.createRecord();
 		a5 = base.createRecord();
-	}
-	
-	@AfterClass
-	public static void dropTables() throws Exception
-	{
-		TestServer.destroyTestTable(TestInterface.class, CachedRecordSetTest.class.getSimpleName());
-	}
-	
-	public CachedRecordSetTest()
-	{
 	}
 
 	@Test

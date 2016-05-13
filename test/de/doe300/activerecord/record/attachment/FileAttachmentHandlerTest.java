@@ -25,6 +25,8 @@
 package de.doe300.activerecord.record.attachment;
 
 import de.doe300.activerecord.RecordBase;
+import de.doe300.activerecord.RecordCore;
+import de.doe300.activerecord.TestBase;
 import de.doe300.activerecord.TestServer;
 import de.doe300.activerecord.migration.Attribute;
 import de.doe300.activerecord.pojo.AbstractActiveRecord;
@@ -33,7 +35,6 @@ import java.io.InputStream;
 import java.io.OutputStream;
 import java.nio.file.Paths;
 import org.junit.AfterClass;
-import org.junit.Assert;
 import org.junit.BeforeClass;
 import org.junit.Test;
 
@@ -41,27 +42,27 @@ import org.junit.Test;
  *
  * @author doe300
  */
-public class FileAttachmentHandlerTest extends Assert
+public class FileAttachmentHandlerTest extends TestBase
 {
-	private static RecordBase<TestFileAttachmentRecord> base;
+	private final RecordBase<TestFileAttachmentRecord> base;
 	
-	public FileAttachmentHandlerTest()
+	public FileAttachmentHandlerTest(final RecordCore core)
 	{
+		super(core);
+		base = core.getBase( TestFileAttachmentRecord.class);
 	}
 	
 	@BeforeClass
 	public static void createTables() throws Exception
 	{
+		TestServer.buildTestTables( TestFileAttachmentRecord.class, "TestFileAttachmentRecord" );
 		Attachments.registerHandler( TestFileAttachmentRecord.class, new FileAttachmentHandler(Paths.get( System.getProperty("java.io.tmpdir"))));
-		
-		base = TestServer.getTestCore().getBase( TestFileAttachmentRecord.class);
-		base.getCore().createTable( TestFileAttachmentRecord.class);
 	}
 	
 	@AfterClass
 	public static void destroyTables() throws Exception
 	{
-		base.getCore().dropTable( TestFileAttachmentRecord.class);
+		TestServer.destroyTestTables(TestFileAttachmentRecord.class, "TestFileAttachmentRecord" );
 	}
 
 	@Test

@@ -25,6 +25,8 @@
 package de.doe300.activerecord.record.attachment;
 
 import de.doe300.activerecord.RecordBase;
+import de.doe300.activerecord.RecordCore;
+import de.doe300.activerecord.TestBase;
 import de.doe300.activerecord.TestServer;
 import de.doe300.activerecord.migration.Attribute;
 import de.doe300.activerecord.pojo.AbstractActiveRecord;
@@ -32,7 +34,6 @@ import de.doe300.activerecord.pojo.POJOBase;
 import java.io.InputStream;
 import java.net.URI;
 import org.junit.AfterClass;
-import org.junit.Assert;
 import org.junit.BeforeClass;
 import org.junit.Test;
 
@@ -40,28 +41,28 @@ import org.junit.Test;
  *
  * @author doe300
  */
-public class URLAttachmentHandlerTest extends Assert
+public class URLAttachmentHandlerTest extends TestBase
 {
-	private static RecordBase<TestURLAttachmentRecord> base;
+	private final RecordBase<TestURLAttachmentRecord> base;
 	
-	public URLAttachmentHandlerTest()
+	public URLAttachmentHandlerTest(final RecordCore core)
 	{
+		super(core);
+		base = core.getBase( TestURLAttachmentRecord.class);
 	}
 	
 	@BeforeClass
 	public static void createTables() throws Exception
 	{
+		TestServer.buildTestTables( TestURLAttachmentRecord.class, "TestURLAttachmentRecord");
 		Attachments.registerHandler( TestURLAttachmentRecord.class, new URLAttachmentHandler((HasAttachment record) ->
 				((TestURLAttachmentRecord)record).getAttachment() == null ? null : URI.create( ((TestURLAttachmentRecord)record).getAttachment()).toURL()));
-		
-		base = TestServer.getTestCore().getBase( TestURLAttachmentRecord.class);
-		base.getCore().createTable( TestURLAttachmentRecord.class);
 	}
 	
 	@AfterClass
 	public static void destroyTables() throws Exception
 	{
-		base.getCore().dropTable( TestURLAttachmentRecord.class);
+		TestServer.destroyTestTables(TestURLAttachmentRecord.class, "TestURLAttachmentRecord");
 	}
 
 	@Test

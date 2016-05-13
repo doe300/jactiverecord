@@ -26,13 +26,13 @@ package de.doe300.activerecord.dsl;
 
 import de.doe300.activerecord.RecordBase;
 import de.doe300.activerecord.RecordCore;
+import de.doe300.activerecord.TestBase;
 import de.doe300.activerecord.TestInterface;
 import de.doe300.activerecord.TestServer;
 import de.doe300.activerecord.jdbc.driver.JDBCDriver;
 import java.util.HashMap;
 import java.util.Map;
 import org.junit.AfterClass;
-import org.junit.Assert;
 import org.junit.BeforeClass;
 import org.junit.Test;
 
@@ -40,26 +40,26 @@ import org.junit.Test;
  *
  * @author daniel
  */
-public class SimpleOrderTest extends Assert
+public class SimpleOrderTest extends TestBase
 {
-	private static RecordBase<TestInterface> base;
+	private final RecordBase<TestInterface> base;
 	
-	public SimpleOrderTest()
+	public SimpleOrderTest(final RecordCore core)
 	{
+		super(core);
+		base = core.getBase( TestInterface.class).getShardBase( SimpleOrderTest.class.getSimpleName());
 	}
 
 	@BeforeClass
 	public static void setUpClass() throws Exception
 	{
-		TestServer.buildTestTable(TestInterface.class, SimpleOrderTest.class.getSimpleName());
-		RecordCore core = TestServer.getTestCore();
-		base = core.getBase( TestInterface.class).getShardBase( SimpleOrderTest.class.getSimpleName());
+		TestServer.buildTestTables(TestInterface.class, SimpleOrderTest.class.getSimpleName());
 	}
 
 	@AfterClass
 	public static void tearDownClass() throws Exception
 	{
-		TestServer.destroyTestTable(TestInterface.class, SimpleOrderTest.class.getSimpleName());
+		TestServer.destroyTestTables(TestInterface.class, SimpleOrderTest.class.getSimpleName());
 	}
 
 	@Test

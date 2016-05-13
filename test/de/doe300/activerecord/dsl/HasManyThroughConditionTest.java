@@ -25,14 +25,16 @@
 package de.doe300.activerecord.dsl;
 
 import de.doe300.activerecord.RecordBase;
+import de.doe300.activerecord.RecordCore;
+import de.doe300.activerecord.TestBase;
 import de.doe300.activerecord.TestInterface;
 import de.doe300.activerecord.TestServer;
 import de.doe300.activerecord.record.ActiveRecord;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.stream.Stream;
+import javax.annotation.Nonnull;
 import org.junit.AfterClass;
-import org.junit.Assert;
 import org.junit.BeforeClass;
 import org.junit.Test;
 
@@ -40,26 +42,18 @@ import org.junit.Test;
  *
  * @author doe300
  */
-
-
-public class HasManyThroughConditionTest extends Assert
+public class HasManyThroughConditionTest extends TestBase
 {
 	private static final String mappingTable = "mappingTable" + HasManyThroughConditionTest.class.getSimpleName();
-	private static RecordBase<TestInterface> base;
-	private static TestInterface t1, t2, t3;
-	private static Condition cond1, cond2, cond3;
+	private RecordBase<TestInterface> base;
+	private TestInterface t1, t2, t3;
+	private Condition cond1, cond2, cond3;
 	
-	public HasManyThroughConditionTest()
+	public HasManyThroughConditionTest(@Nonnull final RecordCore core)
 	{
-	}
-	
-	@BeforeClass
-	public static void createTables() throws Exception
-	{
-		TestServer.buildTestMappingTable( mappingTable );
-		TestServer.buildTestTable(TestInterface.class, HasManyThroughConditionTest.class.getSimpleName());
-		
-		base = TestServer.getTestCore().getBase( TestInterface.class).getShardBase( HasManyThroughConditionTest.class.getSimpleName());
+		super(core);
+		base = core.getBase( TestInterface.class).getShardBase( HasManyThroughConditionTest.class.getSimpleName());
+		base.getAll().forEach( ActiveRecord::destroy);
 		t1 = base.createRecord();
 		t1.setName( "123Name1");
 		t1.setAge( -912);
@@ -82,11 +76,18 @@ public class HasManyThroughConditionTest extends Assert
 		cond3 = new HasManyThroughCondition(base, mappingTable, "fk_test1", "fk_test2", "id", base, Conditions.is("name", "123Name4"));
 	}
 	
+	@BeforeClass
+	public static void createTables() throws Exception
+	{
+		TestServer.buildTestMappingTables( mappingTable );
+		TestServer.buildTestTables(TestInterface.class, HasManyThroughConditionTest.class.getSimpleName());
+	}
+	
 	@AfterClass
 	public static void destroyTables() throws Exception
 	{
-		TestServer.destroyTestTable(TestInterface.class, HasManyThroughConditionTest.class.getSimpleName());
-		TestServer.destroyTestMappingTable( mappingTable);
+		TestServer.destroyTestTables(TestInterface.class, HasManyThroughConditionTest.class.getSimpleName());
+		TestServer.destroyTestMappingTables( mappingTable);
 	}
 
 	@Test

@@ -26,15 +26,17 @@ package de.doe300.activerecord.record.association;
 
 import de.doe300.activerecord.AssertException;
 import de.doe300.activerecord.RecordBase;
+import de.doe300.activerecord.RecordCore;
+import de.doe300.activerecord.TestBase;
 import de.doe300.activerecord.TestInterface;
 import de.doe300.activerecord.TestServer;
 import de.doe300.activerecord.dsl.Conditions;
 import de.doe300.activerecord.dsl.functions.CountNotNull;
+import de.doe300.activerecord.record.ActiveRecord;
 import de.doe300.activerecord.scope.Scope;
 import java.util.Arrays;
 import java.util.SortedSet;
 import org.junit.AfterClass;
-import org.junit.Assert;
 import org.junit.BeforeClass;
 import org.junit.Test;
 
@@ -44,22 +46,19 @@ import org.junit.Test;
  */
 
 
-public class TableSetTest extends Assert implements AssertException
+public class TableSetTest extends TestBase implements AssertException
 {
-	private static RecordBase<TestInterface> base;
-	private static RecordSet<TestInterface> set;
-	private static TestInterface a1, a2, a3;
-	private static TestInterface a4, a5;
+	private final RecordBase<TestInterface> base;
+	private final RecordSet<TestInterface> set;
+	private final TestInterface a1, a2, a3;
+	private final TestInterface a4, a5;
 	
-	public TableSetTest()
+	public TableSetTest(final RecordCore core)
 	{
-	}
-	
-	@BeforeClass
-	public static void createTables() throws Exception
-	{
-		TestServer.buildTestTable( TestInterface.class, TableSetTest.class.getSimpleName());
-		base = TestServer.getTestCore().getBase( TestInterface.class ).getShardBase( TableSetTest.class.getSimpleName());
+		super(core);
+		
+		base = core.getBase( TestInterface.class ).getShardBase( TableSetTest.class.getSimpleName());
+		base.findAll().forEach( ActiveRecord::destroy);
 		set = new TableSet<TestInterface>(base, null );
 		
 		//fill set
@@ -72,10 +71,16 @@ public class TableSetTest extends Assert implements AssertException
 		a5 = base.createRecord();
 	}
 	
+	@BeforeClass
+	public static void createTables() throws Exception
+	{
+		TestServer.buildTestTables( TestInterface.class, TableSetTest.class.getSimpleName());
+	}
+	
 	@AfterClass
 	public static void destroyTables() throws Exception
 	{
-		TestServer.destroyTestTable( TestInterface.class, TableSetTest.class.getSimpleName());
+		TestServer.destroyTestTables( TestInterface.class, TableSetTest.class.getSimpleName());
 	}
 
 	@Test

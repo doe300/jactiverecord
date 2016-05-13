@@ -25,6 +25,8 @@
 package de.doe300.activerecord.record.association;
 
 import de.doe300.activerecord.RecordBase;
+import de.doe300.activerecord.RecordCore;
+import de.doe300.activerecord.TestBase;
 import de.doe300.activerecord.TestInterface;
 import de.doe300.activerecord.TestServer;
 import de.doe300.activerecord.dsl.Conditions;
@@ -34,8 +36,8 @@ import de.doe300.activerecord.scope.Scope;
 import java.util.Arrays;
 import java.util.SortedSet;
 import java.util.stream.Stream;
+import javax.annotation.Nonnull;
 import org.junit.AfterClass;
-import org.junit.Assert;
 import org.junit.BeforeClass;
 import org.junit.Test;
 
@@ -43,25 +45,19 @@ import org.junit.Test;
  *
  * @author daniel
  */
-public class HasManyThroughAssociationSetTest extends Assert
+public class HasManyThroughAssociationSetTest extends TestBase
 {
 	private static final String mappingTable = "hasManyThroughMappingTable";
-	private static RecordSet<TestInterface> set;
-	private static RecordBase<TestInterface> base;
-	private static TestInterface assocI;
-	private static TestInterface a1, a2, a3;
-	private static TestInterface n1, n2;
+	private RecordSet<TestInterface> set;
+	private RecordBase<TestInterface> base;
+	private TestInterface assocI;
+	private TestInterface a1, a2, a3;
+	private TestInterface n1, n2;
 	
-	public HasManyThroughAssociationSetTest()
+	public HasManyThroughAssociationSetTest(@Nonnull final RecordCore core)
 	{
-	}
-	
-	@BeforeClass
-	public static void setUpClass() throws Exception
-	{
-		TestServer.buildTestMappingTable( mappingTable);
-		TestServer.buildTestTable(TestInterface.class, HasManyThroughAssociationSetTest.class.getSimpleName());
-		base = TestServer.getTestCore().getBase( TestInterface.class ).getShardBase( HasManyThroughAssociationSetTest.class.getSimpleName());
+		super(core);
+		base = core.getBase( TestInterface.class ).getShardBase( HasManyThroughAssociationSetTest.class.getSimpleName());
 		assocI = base.createRecord();
 		set = AssociationHelper.getHasManyThroughSet(assocI, base, mappingTable, "fk_test1", "fk_test2" );
 		
@@ -78,11 +74,18 @@ public class HasManyThroughAssociationSetTest extends Assert
 		n2 = base.createRecord();
 	}
 	
+	@BeforeClass
+	public static void setUpClass() throws Exception
+	{
+		TestServer.buildTestMappingTables( mappingTable);
+		TestServer.buildTestTables(TestInterface.class, HasManyThroughAssociationSetTest.class.getSimpleName());
+	}
+	
 	@AfterClass
 	public static void tearDownClass() throws Exception
 	{
-		TestServer.destroyTestTable(TestInterface.class, HasManyThroughAssociationSetTest.class.getSimpleName());
-		TestServer.destroyTestMappingTable( mappingTable);
+		TestServer.destroyTestTables(TestInterface.class, HasManyThroughAssociationSetTest.class.getSimpleName());
+		TestServer.destroyTestMappingTables( mappingTable);
 	}
 
 	@Test

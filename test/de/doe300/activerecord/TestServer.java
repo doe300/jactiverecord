@@ -37,7 +37,6 @@ import javax.annotation.Nonnull;
 
 import org.junit.Assert;
 
-import de.doe300.activerecord.migration.MigrationTest;
 import de.doe300.activerecord.record.ActiveRecord;
 import de.doe300.activerecord.store.RecordStore;
 import de.doe300.activerecord.store.impl.CachedJDBCRecordStore;
@@ -66,6 +65,7 @@ public class TestServer extends Assert
 	public static final Class<? extends RecordStore> testStore = CachedJDBCRecordStore.class;
 	
 	@Nonnull
+	@Deprecated
 	public static RecordCore getTestCore() throws SQLException
 	{
 		return getTestCore( testStore );
@@ -97,39 +97,24 @@ public class TestServer extends Assert
 		return core;
 	}
 	
-	private static Connection con;
-	
 	public static Connection getTestConnection() throws SQLException
 	{
-		if(con == null || con.isClosed())
-		{
-			con = DriverManager.getConnection( "jdbc:hsqldb:mem:test", "sa", "");
-//			con = DriverManager.getConnection("jdbc:sqlite::memory:");
-			//FIXME MySQL errors:
-			/**
-			 * - Seems to not be able to put any index on columns about a certain length (~700 characters/bytes)
-			 * - can't use VARCHAR as result-type for CAST, needs to be CHAR for casting to string
-			 */
-			//start server with "systemctl start mysqld.service"
-//			con = DriverManager.getConnection( "jdbc:mysql://localhost:3306/mysql", "root", "");
-			
-			//FIXME PostgreSQL errors:
-			/**
-			 * - Doesn't support VARBINARY, types need to be BYTEA in tests
-			 */
-			//start server with "systemctl start postgresql.service"
-//			con = DriverManager.getConnection( "jdbc:postgresql:postgres", "postgres", "");
-			
-		}
-		printMetaData( con );
-		return con;
-	}
-	
-	@Deprecated
-	public static void buildTestTables() throws SQLException, Exception
-	{
-		MigrationTest.init();
-		new MigrationTest().testApply();
+		return DriverManager.getConnection( "jdbc:hsqldb:mem:test", "sa", "");
+//		return DriverManager.getConnection("jdbc:sqlite::memory:");
+		//FIXME MySQL errors:
+		/**
+		 * - Seems to not be able to put any index on columns about a certain length (~700 characters/bytes)
+		 * - can't use VARCHAR as result-type for CAST, needs to be CHAR for casting to string
+		 */
+		//start server with "systemctl start mysqld.service"
+//		return DriverManager.getConnection( "jdbc:mysql://localhost:3306/mysql", "root", "");
+
+		//FIXME PostgreSQL errors:
+		/**
+		 * - Doesn't support VARBINARY, types need to be BYTEA in tests
+		 */
+		//start server with "systemctl start postgresql.service"
+//		return DriverManager.getConnection( "jdbc:postgresql:postgres", "postgres", "");
 	}
 	
 	public static void buildTestMappingTable(@Nonnull final String tableName) throws Exception
@@ -140,15 +125,24 @@ public class TestServer extends Assert
 		Assert.assertTrue( getTestCore().getStore().getDriver().createMigration( tableName, columns, getTestCore().getStore()).apply());
 	}
 	
+	public static void buildTestMappingTables(@Nonnull final String tableName) throws Exception
+	{
+		final Map<String, Class<?>> columns = new HashMap<>(2);
+		columns.put( "fk_test1", Integer.class);
+		columns.put( "fk_test2", Integer.class);
+		Assert.assertTrue( getTestCore(SimpleJDBCRecordStore.class).getStore().getDriver().createMigration( tableName, columns, getTestCore(SimpleJDBCRecordStore.class).getStore()).apply());
+		Assert.assertTrue( getTestCore(MemoryRecordStore.class).getStore().getDriver().createMigration( tableName, columns, getTestCore(MemoryRecordStore.class).getStore()).apply());
+	}
+	
 	public static void buildTestTable(@Nonnull final Class<? extends ActiveRecord> type, @Nonnull final String tableName) throws SQLException, Exception
 	{
 		Assert.assertTrue( getTestCore().getStore().getDriver().createMigration( type, tableName, getTestCore().getStore() ).apply());
 	}
 	
-	@Deprecated
-	public static void destroyTestTables() throws SQLException, Exception
+	public static void buildTestTables(@Nonnull final Class<? extends ActiveRecord> type, @Nonnull final String tableName) throws SQLException, Exception
 	{
-		new MigrationTest().testRevert();
+		Assert.assertTrue( getTestCore(SimpleJDBCRecordStore.class).getStore().getDriver().createMigration( type, tableName, getTestCore(SimpleJDBCRecordStore.class).getStore() ).apply());
+		Assert.assertTrue( getTestCore(MemoryRecordStore.class).getStore().getDriver().createMigration( type, tableName, getTestCore(MemoryRecordStore.class).getStore() ).apply());
 	}
 	
 	public static void destroyTestMappingTable(@Nonnull final String tableName) throws Exception
@@ -159,9 +153,24 @@ public class TestServer extends Assert
 		Assert.assertTrue( getTestCore().getStore().getDriver().createMigration( tableName, columns, getTestCore().getStore()).revert());
 	}
 	
+	public static void destroyTestMappingTables(@Nonnull final String tableName) throws Exception
+	{
+		final Map<String, Class<?>> columns = new HashMap<>(2);
+		columns.put( "fk_test1", Integer.class);
+		columns.put( "fk_test2", Integer.class);
+		Assert.assertTrue( getTestCore(SimpleJDBCRecordStore.class).getStore().getDriver().createMigration( tableName, columns, getTestCore(SimpleJDBCRecordStore.class).getStore()).revert());
+		Assert.assertTrue( getTestCore(MemoryRecordStore.class).getStore().getDriver().createMigration( tableName, columns, getTestCore(MemoryRecordStore.class).getStore()).revert());
+	}
+	
 	public static void destroyTestTable(@Nonnull final Class<? extends ActiveRecord> type, @Nonnull final String tableName) throws SQLException, Exception
 	{
 		Assert.assertTrue( getTestCore().getStore().getDriver().createMigration( type, tableName, getTestCore().getStore() ).revert());
+	}
+	
+	public static void destroyTestTables(@Nonnull final Class<? extends ActiveRecord> type, @Nonnull final String tableName) throws SQLException, Exception
+	{
+		Assert.assertTrue( getTestCore(SimpleJDBCRecordStore.class).getStore().getDriver().createMigration( type, tableName, getTestCore(SimpleJDBCRecordStore.class).getStore() ).revert());
+		Assert.assertTrue( getTestCore(MemoryRecordStore.class).getStore().getDriver().createMigration( type, tableName, getTestCore(MemoryRecordStore.class).getStore() ).revert());
 	}
 	
 	static void printMetaData(final Connection con) throws SQLException
@@ -174,5 +183,5 @@ public class TestServer extends Assert
 		System.out.println( "Database: " );
 		System.out.println( "- Name: " +data.getDatabaseProductName() );
 		System.out.println( "- Version: "+data.getDatabaseProductVersion() );
-	}	
+	}
 }

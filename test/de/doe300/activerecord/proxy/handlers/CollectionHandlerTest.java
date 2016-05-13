@@ -26,6 +26,8 @@ package de.doe300.activerecord.proxy.handlers;
 
 import de.doe300.activerecord.AssertException;
 import de.doe300.activerecord.RecordBase;
+import de.doe300.activerecord.RecordCore;
+import de.doe300.activerecord.TestBase;
 import de.doe300.activerecord.TestInterface;
 import de.doe300.activerecord.TestServer;
 import de.doe300.activerecord.record.RecordType;
@@ -33,7 +35,6 @@ import java.util.Arrays;
 import java.util.Collection;
 import java.util.Iterator;
 import org.junit.AfterClass;
-import org.junit.Assert;
 import org.junit.BeforeClass;
 import org.junit.Test;
 
@@ -41,29 +42,30 @@ import org.junit.Test;
  *
  * @author daniel
  */
-public class CollectionHandlerTest extends Assert implements AssertException
+public class CollectionHandlerTest extends TestBase implements AssertException
 {
-	private static RecordBase<TestCollectionInterface> base;
-	private static CollectionHandler handler;
-	private static TestCollectionInterface record;
+	private final RecordBase<TestCollectionInterface> base;
+	private final CollectionHandler handler;
+	private final TestCollectionInterface record;
 	
 	@BeforeClass
 	public static void createTables() throws Exception
 	{
-		TestServer.buildTestTable(TestInterface.class, CollectionHandlerTest.class.getSimpleName());
-		handler = new CollectionHandler();
-		base = TestServer.getTestCore().getBase(CollectionHandlerTest.TestCollectionInterface.class, handler).getShardBase( CollectionHandlerTest.class.getSimpleName());
-		record = base.createRecord();
+		TestServer.buildTestTables(TestInterface.class, CollectionHandlerTest.class.getSimpleName());
 	}
 	
 	@AfterClass
 	public static void destroyTables() throws Exception
 	{
-		TestServer.destroyTestTable(TestInterface.class, CollectionHandlerTest.class.getSimpleName());
+		TestServer.destroyTestTables(TestInterface.class, CollectionHandlerTest.class.getSimpleName());
 	}
 	
-	public CollectionHandlerTest()
+	public CollectionHandlerTest(final RecordCore core)
 	{
+		super(core);
+		handler = new CollectionHandler();
+		base = core.getBase(CollectionHandlerTest.TestCollectionInterface.class, handler).getShardBase( CollectionHandlerTest.class.getSimpleName());
+		record = base.createRecord();
 	}
 
 	@Test

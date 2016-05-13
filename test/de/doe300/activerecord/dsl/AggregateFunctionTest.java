@@ -25,6 +25,8 @@
 package de.doe300.activerecord.dsl;
 
 import de.doe300.activerecord.RecordBase;
+import de.doe300.activerecord.RecordCore;
+import de.doe300.activerecord.TestBase;
 import de.doe300.activerecord.TestInterface;
 import de.doe300.activerecord.TestPOJO;
 import de.doe300.activerecord.TestServer;
@@ -36,11 +38,11 @@ import de.doe300.activerecord.dsl.functions.Minimum;
 import de.doe300.activerecord.dsl.functions.Signum;
 import de.doe300.activerecord.dsl.functions.Sum;
 import de.doe300.activerecord.dsl.functions.SumDouble;
+import de.doe300.activerecord.record.ActiveRecord;
 import de.doe300.activerecord.scope.Scope;
 import java.util.Collections;
 import java.util.stream.Stream;
 import org.junit.AfterClass;
-import org.junit.Assert;
 import org.junit.BeforeClass;
 import org.junit.Test;
 
@@ -48,22 +50,16 @@ import org.junit.Test;
  *
  * @author doe300
  */
-
-
-public class AggregateFunctionTest extends Assert
+public class AggregateFunctionTest extends TestBase
 {
-	private static RecordBase<TestInterface> base;
-	private static TestInterface t1, t2,t3, t4;
+	private RecordBase<TestInterface> base;
+	private TestInterface t1, t2,t3, t4;
 	
-	public AggregateFunctionTest()
+	public AggregateFunctionTest(final RecordCore core)
 	{
-	}
-	
-	@BeforeClass
-	public static void setUpClass() throws Exception
-	{
-		TestServer.buildTestTable(TestInterface.class, AggregateFunctionTest.class.getSimpleName());
-		base = TestServer.getTestCore().getBase( TestInterface.class).getShardBase( AggregateFunctionTest.class.getSimpleName());
+		super(core);
+		base = core.getBase( TestInterface.class).getShardBase( AggregateFunctionTest.class.getSimpleName());
+		base.findAll().forEach( ActiveRecord::destroy);
 		t1 = base.createRecord();
 		t1.setName( "123Name1");
 		t1.setAge( 912);
@@ -79,10 +75,16 @@ public class AggregateFunctionTest extends Assert
 		t4.setAge( 913);
 	}
 	
+	@BeforeClass
+	public static void setUpClass() throws Exception
+	{
+		TestServer.buildTestTables(TestInterface.class, AggregateFunctionTest.class.getSimpleName());
+	}
+	
 	@AfterClass
 	public static void destroyTables() throws Exception
 	{
-		TestServer.destroyTestTable(TestInterface.class, AggregateFunctionTest.class.getSimpleName());
+		TestServer.destroyTestTables(TestInterface.class, AggregateFunctionTest.class.getSimpleName());
 	}
 	
 	@Test

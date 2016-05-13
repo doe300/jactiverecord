@@ -26,6 +26,7 @@ package de.doe300.activerecord.dsl;
 
 import de.doe300.activerecord.RecordBase;
 import de.doe300.activerecord.RecordCore;
+import de.doe300.activerecord.TestBase;
 import de.doe300.activerecord.TestInterface;
 import de.doe300.activerecord.TestServer;
 import de.doe300.activerecord.dsl.functions.Absolute;
@@ -34,7 +35,6 @@ import de.doe300.activerecord.jdbc.driver.JDBCDriver;
 import java.util.HashMap;
 import java.util.Map;
 import org.junit.AfterClass;
-import org.junit.Assert;
 import org.junit.BeforeClass;
 import org.junit.Test;
 
@@ -43,27 +43,27 @@ import org.junit.Test;
  * @author doe300
  * @since 0.7
  */
-public class ScalarOrderTest extends Assert
+public class ScalarOrderTest extends TestBase
 {
 	
-	private static RecordBase<TestInterface> base;
+	private final RecordBase<TestInterface> base;
 	
-	public ScalarOrderTest()
+	public ScalarOrderTest(final RecordCore core)
 	{
+		super(core);
+		base = core.getBase( TestInterface.class).getShardBase( ScalarOrderTest.class.getSimpleName());
 	}
 
 	@BeforeClass
 	public static void setUpClass() throws Exception
 	{
-		TestServer.buildTestTable(TestInterface.class, ScalarOrderTest.class.getSimpleName());
-		RecordCore core = TestServer.getTestCore();
-		base = core.getBase( TestInterface.class).getShardBase( ScalarOrderTest.class.getSimpleName());
+		TestServer.buildTestTables(TestInterface.class, ScalarOrderTest.class.getSimpleName());
 	}
 
 	@AfterClass
 	public static void tearDownClass() throws Exception
 	{
-		TestServer.destroyTestTable(TestInterface.class, ScalarOrderTest.class.getSimpleName());
+		TestServer.destroyTestTables(TestInterface.class, ScalarOrderTest.class.getSimpleName());
 	}
 
 	@Test

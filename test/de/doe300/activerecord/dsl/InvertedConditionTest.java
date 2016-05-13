@@ -26,31 +26,28 @@ package de.doe300.activerecord.dsl;
 
 import de.doe300.activerecord.AssertException;
 import de.doe300.activerecord.RecordBase;
+import de.doe300.activerecord.RecordCore;
+import de.doe300.activerecord.TestBase;
 import de.doe300.activerecord.TestInterface;
 import de.doe300.activerecord.TestServer;
+import de.doe300.activerecord.record.ActiveRecord;
 import java.util.Collections;
 import java.util.stream.Stream;
 import org.junit.AfterClass;
-import org.junit.Assert;
 import org.junit.BeforeClass;
 import org.junit.Test;
 
-
-
-public class InvertedConditionTest extends Assert implements AssertException
+public class InvertedConditionTest extends TestBase implements AssertException
 {
-	private static RecordBase<TestInterface> base;
-	private static TestInterface t1, t2,t3;
+	private final RecordBase<TestInterface> base;
+	private final TestInterface t1, t2,t3;
 	
-	public InvertedConditionTest()
+	public InvertedConditionTest(final RecordCore core)
 	{
-	}
-	
-	@BeforeClass
-	public static void setUpClass() throws Exception
-	{
-		TestServer.buildTestTable(TestInterface.class, InvertedConditionTest.class.getSimpleName());
-		base = TestServer.getTestCore().getBase( TestInterface.class).getShardBase( InvertedConditionTest.class.getSimpleName());
+		super(core);
+		
+		base = core.getBase( TestInterface.class).getShardBase( InvertedConditionTest.class.getSimpleName());
+		base.findAll().forEach( ActiveRecord::destroy);
 		t1 = base.createRecord();
 		t1.setName( "123Name1");
 		t1.setAge( 912);
@@ -62,10 +59,16 @@ public class InvertedConditionTest extends Assert implements AssertException
 		t3.setAge( 913);
 	}
 	
+	@BeforeClass
+	public static void setUpClass() throws Exception
+	{
+		TestServer.buildTestTables(TestInterface.class, InvertedConditionTest.class.getSimpleName());
+	}
+	
 	@AfterClass
 	public static void destroyTables() throws Exception
 	{
-		TestServer.destroyTestTable(TestInterface.class, InvertedConditionTest.class.getSimpleName());
+		TestServer.destroyTestTables(TestInterface.class, InvertedConditionTest.class.getSimpleName());
 	}
 
 	@Test

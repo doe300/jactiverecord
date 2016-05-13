@@ -27,6 +27,7 @@ package de.doe300.activerecord.jdbc;
 import de.doe300.activerecord.AssertException;
 import de.doe300.activerecord.RecordBase;
 import de.doe300.activerecord.RecordCore;
+import de.doe300.activerecord.TestBase;
 import de.doe300.activerecord.TestServer;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
@@ -38,27 +39,22 @@ import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.sql.SQLException;
 import java.sql.Timestamp;
-import java.util.Arrays;
-import java.util.Collection;
 import java.util.Date;
 import java.util.Map;
 import java.util.TreeSet;
 import java.util.UUID;
 import org.junit.AfterClass;
 import org.junit.Test;
-import org.junit.Assert;
 import org.junit.BeforeClass;
-import org.junit.runner.RunWith;
-import org.junit.runners.Parameterized;
 
-@RunWith(Parameterized.class)
-public class TypeMappingsTest extends Assert implements AssertException
+public class TypeMappingsTest extends TestBase implements AssertException
 {
 	private final RecordBase<TestTypesInterface> base;
 	
-	public TypeMappingsTest(final RecordBase<TestTypesInterface> base)
+	public TypeMappingsTest(final RecordCore core)
 	{
-		this.base = base;
+		super(core);
+		this.base = core.getBase( TestTypesInterface.class );
 		for(Map.Entry<String, Class<?>> type: base.getStore().getAllColumnTypes( base.getTableName() ).entrySet())
 		{
 			System.out.println( type.getKey()+": " + type.getValue() );
@@ -68,25 +64,13 @@ public class TypeMappingsTest extends Assert implements AssertException
 	@BeforeClass
 	public static void setUpClass() throws Exception
 	{
-		TestServer.getTestCore().createTable( TestTypesInterface.class);
-		RecordCore.newMemoryStore( "testTypes").createTable( TestTypesInterface.class);
-	}
-	
-	
-	@Parameterized.Parameters
-	public static Collection<Object[]> getParameters() throws SQLException
-	{
-		return Arrays.asList(
-			new Object[]{TestServer.getTestCore().getBase( TestTypesInterface.class)},
-			new Object[]{RecordCore.newMemoryStore("testTypes").getBase( TestTypesInterface.class)}
-		);
+		TestServer.buildTestTables( TestTypesInterface.class, "testTypes");
 	}
 	
 	@AfterClass
 	public static void tearDownClass() throws Exception
 	{
-		TestServer.getTestCore().dropTable( TestTypesInterface.class);
-		RecordCore.newMemoryStore( "testTypes").dropTable( TestTypesInterface.class);
+		TestServer.destroyTestTables(TestTypesInterface.class, "testTypes");
 	}
 
 	@Test

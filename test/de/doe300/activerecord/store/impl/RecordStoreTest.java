@@ -84,8 +84,8 @@ public class RecordStoreTest extends Assert implements AssertException
 	@BeforeClass
 	public static void createTables() throws Exception
 	{
-		TestServer.buildTestTable(TestInterface.class, RecordStoreTest.class.getSimpleName());
-		TestServer.buildTestMappingTable( mappingTableName );
+		TestServer.buildTestTables(TestInterface.class, RecordStoreTest.class.getSimpleName());
+		TestServer.buildTestMappingTables( mappingTableName );
 	}
 	
 	@Parameterized.Parameters
@@ -93,16 +93,16 @@ public class RecordStoreTest extends Assert implements AssertException
 	{
 		return Arrays.asList(
 			new Object[]{new SimpleJDBCRecordStore(TestServer.getTestConnection())},
-			new Object[]{new CachedJDBCRecordStore(TestServer.getTestConnection())}
-			//new Object[]{new MemoryRecordStore()}
+			new Object[]{new CachedJDBCRecordStore(TestServer.getTestConnection())},
+			new Object[]{new MemoryRecordStore()}
 		);
 	}
 	
 	@AfterClass
 	public static void destroyTables() throws Exception
 	{
-		TestServer.destroyTestMappingTable( mappingTableName );
-		TestServer.destroyTestTable(TestInterface.class, RecordStoreTest.class.getSimpleName());
+		TestServer.destroyTestMappingTables( mappingTableName );
+		TestServer.destroyTestTables(TestInterface.class, RecordStoreTest.class.getSimpleName());
 	}
 	
 	@Test

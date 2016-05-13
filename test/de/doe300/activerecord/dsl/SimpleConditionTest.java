@@ -26,17 +26,19 @@ package de.doe300.activerecord.dsl;
 
 import de.doe300.activerecord.AssertException;
 import de.doe300.activerecord.RecordBase;
+import de.doe300.activerecord.RecordCore;
+import de.doe300.activerecord.TestBase;
 import de.doe300.activerecord.TestInterface;
 import de.doe300.activerecord.TestServer;
 import de.doe300.activerecord.scope.Scope;
 import de.doe300.activerecord.dsl.functions.Absolute;
 import de.doe300.activerecord.dsl.functions.LowerCase;
+import de.doe300.activerecord.record.ActiveRecord;
 import java.util.Arrays;
 import java.util.List;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 import org.junit.AfterClass;
-import org.junit.Assert;
 import org.junit.BeforeClass;
 import org.junit.Test;
 
@@ -45,17 +47,29 @@ import org.junit.Test;
  * But Predicate is already tested in {@link ComparisonTest}
  * @author doe300
  */
-public class SimpleConditionTest extends Assert implements AssertException
+public class SimpleConditionTest extends TestBase implements AssertException
 {
-	private static RecordBase<TestInterface> base;
-	private static TestInterface t1, t2,t3, t4;
+	private final RecordBase<TestInterface> base;
+	private final TestInterface t1, t2,t3, t4;
 	
 	@BeforeClass
 	public static void createTables() throws Exception
 	{
-		TestServer.buildTestTable( TestInterface.class, SimpleConditionTest.class.getSimpleName());
+		TestServer.buildTestTables( TestInterface.class, SimpleConditionTest.class.getSimpleName());
+	}
+	
+	@AfterClass
+	public static void destroyTables() throws Exception
+	{
+		TestServer.destroyTestTables(TestInterface.class, SimpleConditionTest.class.getSimpleName());
+	}
+	
+	public SimpleConditionTest(final RecordCore core)
+	{
+		super(core);
 		
-		base = TestServer.getTestCore().getBase( TestInterface.class).getShardBase( SimpleConditionTest.class.getSimpleName() );
+		base = core.getBase( TestInterface.class).getShardBase( SimpleConditionTest.class.getSimpleName() );
+		base.findAll().forEach( ActiveRecord::destroy);
 		t1 = base.createRecord();
 		t1.setName( "123Name1");
 		t1.setAge( -912);
@@ -66,12 +80,6 @@ public class SimpleConditionTest extends Assert implements AssertException
 		t3.setName( "123Name4");
 		t3.setAge( -913);
 		t4 = base.createRecord();
-	}
-	
-	@AfterClass
-	public static void destroyTables() throws Exception
-	{
-		TestServer.destroyTestTable(TestInterface.class, SimpleConditionTest.class.getSimpleName());
 	}
 	
 	protected Scope toScope(Condition cond)

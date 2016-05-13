@@ -25,12 +25,14 @@
 package de.doe300.activerecord.record.security;
 
 import de.doe300.activerecord.RecordBase;
+import de.doe300.activerecord.RecordCore;
+import de.doe300.activerecord.TestBase;
 import de.doe300.activerecord.TestServer;
 import de.doe300.activerecord.migration.Attribute;
+import java.security.GeneralSecurityException;
 import javax.crypto.SecretKeyFactory;
 import javax.crypto.spec.DESKeySpec;
 import org.junit.AfterClass;
-import org.junit.Assert;
 import org.junit.BeforeClass;
 import org.junit.Test;
 
@@ -38,24 +40,30 @@ import org.junit.Test;
  * @author doe300
  * @since 0.6
  */
-public class EncryptionHandlerTest extends Assert
+public class EncryptionHandlerTest extends TestBase
 {
-	private static RecordBase<TestEncryptedRecord> base;
-	private static TestEncryptedRecord record;
+	private final RecordBase<TestEncryptedRecord> base;
+	private final TestEncryptedRecord record;
+	
+	public EncryptionHandlerTest(final RecordCore core) throws GeneralSecurityException
+	{
+		super(core);
+
+		final EncryptionAlgorithm algrithm = new CipherEncryptionWrapper("DES/ECB/NoPadding", SecretKeyFactory.getInstance( "DES").generateSecret( new DESKeySpec("Hallo !!".getBytes())));		
+		base = core.getBase( TestEncryptedRecord.class, new EncryptionHandler(algrithm ));
+		record = base.createRecord();
+	}
 	
 	@BeforeClass
 	public static void createTables() throws Exception
 	{
-		final EncryptionAlgorithm algrithm = new CipherEncryptionWrapper("DES/ECB/NoPadding", SecretKeyFactory.getInstance( "DES").generateSecret( new DESKeySpec("Hallo !!".getBytes())));
-		base = TestServer.getTestCore().getBase( TestEncryptedRecord.class, new EncryptionHandler(algrithm ));
-		base.getCore().createTable( TestEncryptedRecord.class);
-		record = base.createRecord();
+		TestServer.buildTestTables( TestEncryptedRecord.class, "TestEncryptedRecord" );
 	}
 	
 	@AfterClass
 	public static void destroyTables() throws Exception
 	{
-		base.getCore().dropTable( TestEncryptedRecord.class);
+		TestServer.destroyTestTables(TestEncryptedRecord.class, "TestEncryptedRecord" );
 	}
 	
 	public static interface TestEncryptedRecord extends EncryptedRecord
@@ -67,10 +75,6 @@ public class EncryptionHandlerTest extends Assert
 		
 		@EncryptedAttribute(attribute = "name")
 		public void setName(String name);
-	}
-	
-	public EncryptionHandlerTest()
-	{
 	}
 
 	@Test

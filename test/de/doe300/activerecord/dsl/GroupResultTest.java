@@ -25,11 +25,13 @@
 package de.doe300.activerecord.dsl;
 
 import de.doe300.activerecord.RecordBase;
+import de.doe300.activerecord.RecordCore;
+import de.doe300.activerecord.TestBase;
 import de.doe300.activerecord.TestInterface;
 import de.doe300.activerecord.TestServer;
+import de.doe300.activerecord.record.ActiveRecord;
 import de.doe300.activerecord.scope.Scope;
 import org.junit.AfterClass;
-import org.junit.Assert;
 import org.junit.BeforeClass;
 import org.junit.Test;
 
@@ -37,19 +39,15 @@ import org.junit.Test;
  *
  * @author daniel
  */
-public class GroupResultTest extends Assert
+public class GroupResultTest extends TestBase
 {
-	private static RecordBase<TestInterface> base;
+	private RecordBase<TestInterface> base;
 	
-	public GroupResultTest()
+	public GroupResultTest(final RecordCore core)
 	{
-	}
-	
-	@BeforeClass
-	public static void createTables() throws Exception
-	{
-		TestServer.buildTestTable(TestInterface.class, GroupResultTest.class.getSimpleName());
-		base = TestServer.getTestCore().getBase(TestInterface.class).getShardBase( GroupResultTest.class.getSimpleName());
+		super(core);
+		base = core.getBase(TestInterface.class).getShardBase( GroupResultTest.class.getSimpleName());
+		base.getAll().forEach( ActiveRecord::destroy);
 		TestInterface t = base.createRecord();
 		t.setName( "Adam5");
 		t.setAge( 145);
@@ -61,10 +59,16 @@ public class GroupResultTest extends Assert
 		t.setAge( 122);
 	}
 	
+	@BeforeClass
+	public static void createTables() throws Exception
+	{
+		TestServer.buildTestTables(TestInterface.class, GroupResultTest.class.getSimpleName());
+	}
+	
 	@AfterClass
 	public static void destroyTables() throws Exception
 	{
-		TestServer.destroyTestTable(TestInterface.class, GroupResultTest.class.getSimpleName());
+		TestServer.destroyTestTables(TestInterface.class, GroupResultTest.class.getSimpleName());
 	}
 	
 	@Test
@@ -110,7 +114,7 @@ public class GroupResultTest extends Assert
 		}
 	}
 	
-	private static GroupResult<Object, TestInterface> getGroup()
+	private GroupResult<Object, TestInterface> getGroup()
 	{
 		return base.where( Conditions.isNotNull("name") ).groupBy( "name").filter( (GroupResult<Object,TestInterface> r) -> r.getKey().equals( "Adam5")).findAny().get();
 	}

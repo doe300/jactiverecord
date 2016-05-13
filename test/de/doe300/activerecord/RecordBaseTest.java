@@ -32,6 +32,9 @@ import de.doe300.activerecord.dsl.functions.Sum;
 import de.doe300.activerecord.record.RecordType;
 import de.doe300.activerecord.scope.Scope;
 import de.doe300.activerecord.record.validation.ValidationFailed;
+import de.doe300.activerecord.store.impl.CachedJDBCRecordStore;
+import de.doe300.activerecord.store.impl.SimpleJDBCRecordStore;
+import de.doe300.activerecord.store.impl.memory.MemoryRecordStore;
 import java.lang.reflect.UndeclaredThrowableException;
 import java.sql.SQLException;
 import java.util.Arrays;
@@ -41,10 +44,8 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.Objects;
 import org.junit.AfterClass;
-import org.junit.Assert;
 import org.junit.BeforeClass;
 import org.junit.Test;
-import org.junit.runner.RunWith;
 import org.junit.runners.Parameterized;
 
 /**
@@ -52,38 +53,44 @@ import org.junit.runners.Parameterized;
  * @author daniel
  * @param <T>
  */
-@RunWith(Parameterized.class)
-public class RecordBaseTest<T extends TestInterface> extends Assert implements AssertException
+public class RecordBaseTest<T extends TestInterface> extends TestBase implements AssertException
 {
 	private final RecordBase<T> base;
 	private final Class<T> type;
 	
-	public RecordBaseTest(Class<T> type) throws SQLException
+	public RecordBaseTest(Class<T> type, final RecordCore core) throws SQLException
 	{
+		super(core);
 		this.type = type;
-		this.base = TestServer.getTestCore().getBase( type).getShardBase( RecordBaseTest.class.getSimpleName());
+		this.base = core.getBase( type).getShardBase( RecordBaseTest.class.getSimpleName());
 	}
 	
 	@Parameterized.Parameters
-	public static Collection<Object[]> getParameters()
+	public static Collection<Object[]> getParameters() throws SQLException
 	{
 		return Arrays.asList(
-			new Object[]{TestInterface.class},
-			new Object[]{TestPOJO.class},
-			new Object[]{TestSingleInheritancePOJO.class}
+			new Object[]{TestInterface.class, TestServer.getTestCore( SimpleJDBCRecordStore.class)},
+			new Object[]{TestInterface.class, TestServer.getTestCore( CachedJDBCRecordStore.class)},
+			new Object[]{TestInterface.class, TestServer.getTestCore( MemoryRecordStore.class)},
+			new Object[]{TestPOJO.class, TestServer.getTestCore( SimpleJDBCRecordStore.class)},
+			new Object[]{TestPOJO.class, TestServer.getTestCore( CachedJDBCRecordStore.class)},
+			new Object[]{TestPOJO.class, TestServer.getTestCore( MemoryRecordStore.class)},
+			new Object[]{TestSingleInheritancePOJO.class, TestServer.getTestCore( SimpleJDBCRecordStore.class )},
+			new Object[]{TestSingleInheritancePOJO.class, TestServer.getTestCore( CachedJDBCRecordStore.class )},
+			new Object[]{TestSingleInheritancePOJO.class, TestServer.getTestCore( MemoryRecordStore.class )}
 		);
 	}
 	
 	@BeforeClass
 	public static void createTables() throws Exception
 	{
-		TestServer.buildTestTable(TestSingleInheritancePOJO.class, RecordBaseTest.class.getSimpleName());
+		TestServer.buildTestTables(TestSingleInheritancePOJO.class, RecordBaseTest.class.getSimpleName());
 	}
 	
 	@AfterClass
 	public static void destroyTables() throws Exception
 	{
-		TestServer.destroyTestTable(TestSingleInheritancePOJO.class, RecordBaseTest.class.getSimpleName());
+		TestServer.destroyTestTables(TestSingleInheritancePOJO.class, RecordBaseTest.class.getSimpleName());
 	}
 	
 	@Test

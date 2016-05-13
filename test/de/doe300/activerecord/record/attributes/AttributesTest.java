@@ -26,13 +26,14 @@ package de.doe300.activerecord.record.attributes;
 
 import de.doe300.activerecord.AssertException;
 import de.doe300.activerecord.RecordBase;
+import de.doe300.activerecord.RecordCore;
+import de.doe300.activerecord.TestBase;
 import de.doe300.activerecord.TestInterface;
 import de.doe300.activerecord.TestServer;
 import de.doe300.activerecord.record.TimestampedRecord;
 import de.doe300.activerecord.record.validation.ValidatedRecord;
 import java.lang.reflect.Method;
 import org.junit.AfterClass;
-import org.junit.Assert;
 import org.junit.BeforeClass;
 import org.junit.Test;
 
@@ -40,25 +41,26 @@ import org.junit.Test;
  *
  * @author daniel
  */
-public class AttributesTest extends Assert implements AssertException
+public class AttributesTest extends TestBase implements AssertException
 {
-	private static RecordBase<TestInterface> base;
+	private final RecordBase<TestInterface> base;
 	
-	public AttributesTest()
+	public AttributesTest(final RecordCore core)
 	{
+		super(core);
+		base = core.getBase( TestInterface.class).getShardBase( AttributesTest.class.getSimpleName());
 	}
 	
 	@BeforeClass
 	public static void createTables() throws Exception
 	{
-		TestServer.buildTestTable(TestInterface.class, AttributesTest.class.getSimpleName());
-		base = TestServer.getTestCore().getBase( TestInterface.class).getShardBase( AttributesTest.class.getSimpleName());
+		TestServer.buildTestTables(TestInterface.class, AttributesTest.class.getSimpleName());
 	}
 	
 	@AfterClass
 	public static void destroyTables() throws Exception
 	{
-		TestServer.destroyTestTable(TestInterface.class, AttributesTest.class.getSimpleName());
+		TestServer.destroyTestTables(TestInterface.class, AttributesTest.class.getSimpleName());
 	}
 
 	@Test

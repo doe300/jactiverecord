@@ -27,6 +27,7 @@ package de.doe300.activerecord;
 import java.sql.SQLException;
 
 import de.doe300.activerecord.dsl.Conditions;
+import de.doe300.activerecord.store.impl.CachedJDBCRecordStore;
 
 /**
  * Just some code to test the feeling of the syntax
@@ -42,7 +43,7 @@ public class TestActiveRecordSyntax
 	public static void main(final String[] args) throws SQLException, Exception
 	{
 		//0, create new core
-		final RecordCore core = TestServer.getTestCore();
+		final RecordCore core = TestServer.getTestCore(CachedJDBCRecordStore.class);
 		//1. create new recordbase
 		final RecordBase<TestInterface> base = core.getBase( TestInterface.class);
 		//2. get record

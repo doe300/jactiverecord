@@ -26,17 +26,19 @@ package de.doe300.activerecord.record.association;
 
 import de.doe300.activerecord.AssertException;
 import de.doe300.activerecord.RecordBase;
+import de.doe300.activerecord.RecordCore;
+import de.doe300.activerecord.TestBase;
 import de.doe300.activerecord.TestInterface;
 import de.doe300.activerecord.TestServer;
 import de.doe300.activerecord.dsl.Conditions;
 import de.doe300.activerecord.dsl.functions.Sum;
+import de.doe300.activerecord.record.ActiveRecord;
 import de.doe300.activerecord.scope.Scope;
 import java.util.Arrays;
 import java.util.Objects;
 import java.util.SortedSet;
 import java.util.stream.Stream;
 import org.junit.AfterClass;
-import org.junit.Assert;
 import org.junit.Before;
 import org.junit.BeforeClass;
 import org.junit.Test;
@@ -47,22 +49,18 @@ import org.junit.Test;
  */
 
 
-public class ConditionSetTest extends Assert implements AssertException
+public class ConditionSetTest extends TestBase implements AssertException
 {
-	private static RecordBase<TestInterface> base;
-	private static RecordSet<TestInterface> set;
-	private static TestInterface a1, a2, a3;
-	private static TestInterface n1, n2;
+	private final RecordBase<TestInterface> base;
+	private final RecordSet<TestInterface> set;
+	private final TestInterface a1, a2, a3;
+	private final TestInterface n1, n2;
 	
-	public ConditionSetTest()
+	public ConditionSetTest(final RecordCore core)
 	{
-	}
-	
-	@BeforeClass
-	public static void createTables() throws Exception
-	{
-		TestServer.buildTestTable(TestInterface.class, ConditionSetTest.class.getSimpleName());
-		base = TestServer.getTestCore().getBase( TestInterface.class ).getShardBase( ConditionSetTest.class.getSimpleName());
+		super(core);
+		base = core.getBase( TestInterface.class ).getShardBase( ConditionSetTest.class.getSimpleName());
+		base.findAll().forEach( ActiveRecord::destroy);
 		set = AssociationHelper.getConditionSet( base, "age", 23, 12);
 		
 		//fill set
@@ -80,10 +78,16 @@ public class ConditionSetTest extends Assert implements AssertException
 		n2.setAge( 24);
 	}
 	
+	@BeforeClass
+	public static void createTables() throws Exception
+	{
+		TestServer.buildTestTables(TestInterface.class, ConditionSetTest.class.getSimpleName());
+	}
+	
 	@AfterClass
 	public static void destroyTables() throws Exception
 	{
-		TestServer.destroyTestTable(TestInterface.class, ConditionSetTest.class.getSimpleName());
+		TestServer.destroyTestTables(TestInterface.class, ConditionSetTest.class.getSimpleName());
 	}
 	
 	@Before

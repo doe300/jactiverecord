@@ -26,10 +26,11 @@
 package de.doe300.activerecord.record.validation;
 
 import de.doe300.activerecord.RecordBase;
+import de.doe300.activerecord.RecordCore;
+import de.doe300.activerecord.TestBase;
 import de.doe300.activerecord.TestInterface;
 import de.doe300.activerecord.TestServer;
 import org.junit.AfterClass;
-import org.junit.Assert;
 import org.junit.BeforeClass;
 import org.junit.Test;
 
@@ -37,27 +38,26 @@ import org.junit.Test;
  *
  * @author daniel
  */
-
-
-public class ValidationHandlerTest extends Assert
+public class ValidationHandlerTest extends TestBase
 {
-	private static RecordBase<TestInterface> base;
+	private RecordBase<TestInterface> base;
 	
-	public ValidationHandlerTest()
+	public ValidationHandlerTest(final RecordCore core)
 	{
+		super(core);
+		base = core.getBase(TestInterface.class).getShardBase( ValidationHandlerTest.class.getSimpleName());
 	}
 	
 	@BeforeClass
 	public static void createTables() throws Exception
 	{
-		TestServer.buildTestTable(TestInterface.class, ValidationHandlerTest.class.getSimpleName());
-		base = TestServer.getTestCore().getBase(TestInterface.class).getShardBase( ValidationHandlerTest.class.getSimpleName());
+		TestServer.buildTestTables(TestInterface.class, ValidationHandlerTest.class.getSimpleName());
 	}
 	
 	@AfterClass
 	public static void destroyTables() throws Exception
 	{
-		TestServer.destroyTestTable(TestInterface.class, ValidationHandlerTest.class.getSimpleName());
+		TestServer.destroyTestTables(TestInterface.class, ValidationHandlerTest.class.getSimpleName());
 	}
 
 	@Test

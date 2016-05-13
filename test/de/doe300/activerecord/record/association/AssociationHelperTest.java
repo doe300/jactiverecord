@@ -25,12 +25,14 @@
 package de.doe300.activerecord.record.association;
 
 import de.doe300.activerecord.RecordBase;
+import de.doe300.activerecord.RecordCore;
+import de.doe300.activerecord.TestBase;
 import de.doe300.activerecord.TestInterface;
 import de.doe300.activerecord.TestServer;
 import de.doe300.activerecord.dsl.Conditions;
+import de.doe300.activerecord.record.ActiveRecord;
 import java.sql.SQLException;
 import org.junit.AfterClass;
-import org.junit.Assert;
 import org.junit.BeforeClass;
 import org.junit.Test;
 
@@ -38,25 +40,29 @@ import org.junit.Test;
  *
  * @author daniel
  */
-public class AssociationHelperTest extends Assert
+public class AssociationHelperTest extends TestBase
 {
 	private final RecordBase<TestInterface> base;
 	
-	public AssociationHelperTest() throws SQLException
+	public AssociationHelperTest(final RecordCore core) throws SQLException
 	{
-		base = TestServer.getTestCore().getBase( TestInterface.class);
+		super(core);
+		base = core.getBase( TestInterface.class);
+		base.findAll().forEach( ActiveRecord::destroy);
 	}
 	
 	@BeforeClass
 	public static void createTables() throws Exception
 	{
-		TestServer.buildTestTables();
+		TestServer.buildTestMappingTables( "mappingTable");
+		TestServer.buildTestTables(TestInterface.class, "TESTTABLE");
 	}
 	
 	@AfterClass
 	public static void destroyTables() throws Exception
 	{
-		TestServer.destroyTestTables();
+		TestServer.destroyTestTables(TestInterface.class, "TESTTABLE");
+		TestServer.destroyTestMappingTables( "mappingTable");
 	}
 
 	@Test
