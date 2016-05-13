@@ -98,7 +98,16 @@ public abstract class AggregateFunction<T extends ActiveRecord, C, V extends Mut
 	@Nullable
 	public R aggregate(@Nonnull final Stream<Map<String, Object>> dataMaps)
 	{
-		return aggregateValues(dataMaps.map((final Map<String, Object> map) -> Optional.ofNullable((C) map.get(column))));
+		if(column instanceof SQLFunction)
+		{
+			return aggregateValues(dataMaps.map((final Map<String, Object> map) -> Optional.ofNullable((C) ((SQLFunction<T,C>)column).apply( map ))));
+		}
+		return aggregateValues(dataMaps.peek( (final Map<String, Object> map) -> {
+			if(!map.containsKey( column ))
+				{
+					throw new IllegalArgumentException("No such key: " + column);
+				}
+		}).map((final Map<String, Object> map) -> Optional.ofNullable((C) map.get(column))));
 	}
 
 	@Nullable

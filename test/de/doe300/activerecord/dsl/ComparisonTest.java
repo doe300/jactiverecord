@@ -27,6 +27,7 @@ package de.doe300.activerecord.dsl;
 import de.doe300.activerecord.AssertException;
 import java.util.Arrays;
 import java.util.Collections;
+import java.util.Optional;
 import org.junit.Assert;
 import org.junit.Test;
 
@@ -44,94 +45,104 @@ public class ComparisonTest extends Assert implements AssertException
 	public void testIS()
 	{
 		Object a = "a";
-		assertTrue( Comparison.IS.test( a, a));
-		assertFalse( Comparison.IS.test( a, "b"));
+		assertTrue( Comparison.IS.test( Optional.ofNullable( a), Optional.ofNullable(a)));
+		assertFalse( Comparison.IS.test( Optional.ofNullable(a), Optional.ofNullable("b")));
+		assertThrows( IllegalArgumentException.class, () -> Comparison.IS.test( null, null));
 	}
 	
 	@Test
 	public void testIS_NOT()
 	{
 		Object a = "a";
-		assertTrue( Comparison.IS_NOT.test( a, "b"));
-		assertFalse( Comparison.IS_NOT.test( a, a));
+		assertTrue( Comparison.IS_NOT.test( Optional.ofNullable(a), Optional.ofNullable("b")));
+		assertFalse( Comparison.IS_NOT.test( Optional.ofNullable(a), Optional.ofNullable(a)));
+		assertThrows( IllegalArgumentException.class, () -> Comparison.IS_NOT.test( null, null));
 	}
 	
 	@Test
 	public void testIS_NULL()
 	{
 		Object a = null;
-		assertTrue( Comparison.IS_NULL.test( a, null));
-		assertFalse( Comparison.IS_NULL.test( "b", null));
+		assertTrue( Comparison.IS_NULL.test( Optional.ofNullable(a), Optional.ofNullable(null)));
+		assertFalse( Comparison.IS_NULL.test( Optional.ofNullable("b"), Optional.ofNullable(null)));
+		assertThrows( IllegalArgumentException.class, () -> Comparison.IS_NULL.test( null, null));
 	}
 	
 	@Test
 	public void testIS_NOT_NULL()
 	{
 		Object a = null;
-		assertTrue( Comparison.IS_NOT_NULL.test( "b", null));
-		assertFalse( Comparison.IS_NOT_NULL.test( a, null));
+		assertTrue( Comparison.IS_NOT_NULL.test( Optional.ofNullable("b"), Optional.ofNullable(null)));
+		assertFalse( Comparison.IS_NOT_NULL.test( Optional.ofNullable(a), Optional.ofNullable(null)));
+		assertThrows( IllegalArgumentException.class, () -> Comparison.IS_NOT_NULL.test( null, null));
 	}
 	
 	@Test
 	public void testLIKE()
 	{
 		Object a = "Apfelsaft";
-		assertTrue( Comparison.LIKE.test( a, "%saft"));
-		assertTrue( Comparison.LIKE.test( a, "%el%af%"));
-		assertFalse( Comparison.LIKE.test( a, "%Saft"));
-		assertFalse( Comparison.LIKE.test( a, "Birne"));
-		assertFalse( Comparison.LIKE.test( a, "Saftapfel"));
-		assertFalse( Comparison.LIKE.test( a, null));
+		assertTrue( Comparison.LIKE.test( Optional.ofNullable(a), Optional.ofNullable("%saft")));
+		assertTrue( Comparison.LIKE.test( Optional.ofNullable(a), Optional.ofNullable("%el%af%")));
+		assertFalse( Comparison.LIKE.test( Optional.ofNullable(a), Optional.ofNullable("%Saft")));
+		assertFalse( Comparison.LIKE.test( Optional.ofNullable(a), Optional.ofNullable("Birne")));
+		assertFalse( Comparison.LIKE.test( Optional.ofNullable(a), Optional.ofNullable("Saftapfel")));
+		assertFalse( Comparison.LIKE.test( Optional.ofNullable(a), Optional.ofNullable(null)));
+		assertThrows( IllegalArgumentException.class, () -> Comparison.LIKE.test( null, null));
 	}
 
 	@Test
 	public void testLARGER()
 	{
 		Object a = -5, b = 7;
-		assertTrue( Comparison.LARGER.test( b, a));
-		assertFalse( Comparison.LARGER.test( a, b));
-		assertFalse( Comparison.LARGER.test( a, a ));
+		assertTrue( Comparison.LARGER.test( Optional.ofNullable(b), Optional.ofNullable(a)));
+		assertFalse( Comparison.LARGER.test( Optional.ofNullable(a), Optional.ofNullable(b)));
+		assertFalse( Comparison.LARGER.test( Optional.ofNullable(a), Optional.ofNullable(a )));
 
-		assertThrows( ClassCastException.class, () ->Comparison.LARGER.test( "a", new String[0]));
+		assertThrows( ClassCastException.class, () ->Comparison.LARGER.test( Optional.ofNullable("a"), Optional.ofNullable(new String[0])));
+		assertThrows( IllegalArgumentException.class, () -> Comparison.LARGER.test( null, null));
 	}
 
 	@Test
 	public void testSMALLER()
 	{
 		Object a = -5, b = 7;
-		assertTrue( Comparison.SMALLER.test( a, b));
-		assertFalse( Comparison.SMALLER.test( b, a));
-		assertFalse( Comparison.SMALLER.test( a, a));
+		assertTrue( Comparison.SMALLER.test( Optional.ofNullable(a), Optional.ofNullable(b)));
+		assertFalse( Comparison.SMALLER.test( Optional.ofNullable(b), Optional.ofNullable(a)));
+		assertFalse( Comparison.SMALLER.test( Optional.ofNullable(a), Optional.ofNullable(a)));
 
-		assertThrows( ClassCastException.class, () -> Comparison.SMALLER.test( a, new int[]{7}));
+		assertThrows( ClassCastException.class, () -> Comparison.SMALLER.test( Optional.ofNullable(a), Optional.ofNullable(new int[]{7})));
+		assertThrows( IllegalArgumentException.class, () -> Comparison.SMALLER.test( null, null));
 	}
 
 	@Test
 	public void testLARGER_EQUALS()
 	{
 		Object a = -5, b = 7;
-		assertTrue( Comparison.LARGER_EQUALS.test( b, a));
-		assertTrue( Comparison.LARGER_EQUALS.test( a, a ));
-		assertFalse( Comparison.LARGER_EQUALS.test( a, b));
+		assertTrue( Comparison.LARGER_EQUALS.test( Optional.ofNullable(b), Optional.ofNullable(a)));
+		assertTrue( Comparison.LARGER_EQUALS.test( Optional.ofNullable(a), Optional.ofNullable(a )));
+		assertFalse( Comparison.LARGER_EQUALS.test( Optional.ofNullable(a), Optional.ofNullable(b)));
 
-		assertThrows( ClassCastException.class, () -> Comparison.LARGER_EQUALS.test( "a", new String[0]));
+		assertThrows( ClassCastException.class, () -> Comparison.LARGER_EQUALS.test( Optional.ofNullable("a"), Optional.ofNullable(new String[0])));
+		assertThrows( IllegalArgumentException.class, () -> Comparison.LARGER_EQUALS.test( null, null));
 	}
 
 	@Test
 	public void testSMALLER_EQUALS()
 	{
 		Object a = -5, b = 7;
-		assertTrue( Comparison.SMALLER_EQUALS.test( a, b));
-		assertTrue( Comparison.SMALLER_EQUALS.test( a, a));
-		assertFalse( Comparison.SMALLER_EQUALS.test( b, a));
+		assertTrue( Comparison.SMALLER_EQUALS.test( Optional.ofNullable(a), Optional.ofNullable(b)));
+		assertTrue( Comparison.SMALLER_EQUALS.test( Optional.ofNullable(a), Optional.ofNullable(a)));
+		assertFalse( Comparison.SMALLER_EQUALS.test( Optional.ofNullable(b), Optional.ofNullable(a)));
 
-		assertThrows( ClassCastException.class, () -> Comparison.SMALLER_EQUALS.test( a, new int[]{7}));
+		assertThrows( ClassCastException.class, () -> Comparison.SMALLER_EQUALS.test( Optional.ofNullable(a), Optional.ofNullable(new int[]{7})));
+		assertThrows( IllegalArgumentException.class, () -> Comparison.SMALLER_EQUALS.test( null, null));
 	}
 
 	@Test
 	public void testTRUE()
 	{
-		assertTrue( Comparison.TRUE.test( this, this));
+		assertTrue( Comparison.TRUE.test( Optional.ofNullable(this), Optional.ofNullable(this)));
+		assertTrue( Comparison.TRUE.test( Optional.ofNullable(null), Optional.ofNullable(null)));
 		assertTrue( Comparison.TRUE.test( null, null));
 	}
 
@@ -139,15 +150,16 @@ public class ComparisonTest extends Assert implements AssertException
 	public void  testIN()
 	{
 		Object a = "a";
-		assertTrue( Comparison.IN.test( a, new Object[]{a, "b"}));
-		assertTrue( Comparison.IN.test( a, Collections.singleton( a)));
-		assertTrue( Comparison.IN.test( a, Arrays.asList( a )));
-		assertTrue( Comparison.IN.test( a, a ));
-		assertFalse( Comparison.IN.test( a, new String[0]));
-		assertFalse( Comparison.IN.test( a, Collections.singleton( "b")));
-		assertFalse( Comparison.IN.test( a, Arrays.asList()));
-		assertFalse( Comparison.IN.test( a, null));
+		assertTrue( Comparison.IN.test( Optional.ofNullable(a), Optional.ofNullable(new Object[]{a, "b"})));
+		assertTrue( Comparison.IN.test( Optional.ofNullable(a), Optional.ofNullable(Collections.singleton( a))));
+		assertTrue( Comparison.IN.test( Optional.ofNullable(a), Optional.ofNullable(Arrays.asList( a ))));
+		assertTrue( Comparison.IN.test( Optional.ofNullable(a), Optional.ofNullable(a )));
+		assertFalse( Comparison.IN.test( Optional.ofNullable(a), Optional.ofNullable(new String[0])));
+		assertFalse( Comparison.IN.test( Optional.ofNullable(a), Optional.ofNullable(Collections.singleton( "b"))));
+		assertFalse( Comparison.IN.test( Optional.ofNullable(a), Optional.ofNullable(Arrays.asList())));
+		assertFalse( Comparison.IN.test( Optional.ofNullable(a), Optional.ofNullable(null)));
 
-		assertThrows( IllegalArgumentException.class, () -> Comparison.IN.test( a, "b"));
+		assertThrows( IllegalArgumentException.class, () -> Comparison.IN.test( Optional.ofNullable(a), Optional.ofNullable("b")));
+		assertThrows( IllegalArgumentException.class, () -> Comparison.IN.test( null, null));
 	}
 }

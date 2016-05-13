@@ -139,7 +139,7 @@ public class OrConditionTest extends TestBase implements AssertException
 		map.put( "name", "Adam");
 		map.put( "age", 100);
 		assertFalse( cond.test( map));
-		assertTrue( cond.test( Collections.singletonMap( "age", -1000)));
+		assertThrows(IllegalArgumentException.class, () -> cond.test( Collections.singletonMap( "age", -1000)));
 	}
 
 	@Test

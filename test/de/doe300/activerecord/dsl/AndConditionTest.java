@@ -131,7 +131,7 @@ public class AndConditionTest extends TestBase implements AssertException
 		map.put( "age", 913);
 		map.put( "name", "123Name1");
 		assertTrue( condition.test( map ) );
-		assertFalse( condition.test( Collections.singletonMap( "age", 913)));
+		assertThrows(IllegalArgumentException.class, () -> condition.test( Collections.singletonMap( "age", 913)));
 	}
 
 	@Test

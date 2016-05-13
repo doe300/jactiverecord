@@ -27,6 +27,7 @@ package de.doe300.activerecord.dsl;
 import java.lang.reflect.Array;
 import java.util.Collection;
 import java.util.Objects;
+import java.util.Optional;
 import java.util.function.BiPredicate;
 import java.util.regex.Pattern;
 
@@ -36,7 +37,7 @@ import javax.annotation.Nullable;
  *
  * @author doe300
  */
-public enum Comparison implements BiPredicate<Object, Object>
+public enum Comparison implements BiPredicate<Optional<Object>, Optional<Object>>
 {
 	/**
 	 * Exact match of the two values
@@ -44,11 +45,15 @@ public enum Comparison implements BiPredicate<Object, Object>
 	IS {
 
 		@Override
-		public boolean test( final Object value, final Object compareValue )
+		public boolean test(@Nullable final Optional<Object> value, @Nullable final Optional<Object> compareValue)
 		{
-			if(value instanceof Number && compareValue instanceof Number )
+			if(value == null || compareValue == null)
 			{
-				return ((Number)value).doubleValue() == ((Number)compareValue).doubleValue();
+				throw new IllegalArgumentException("Can't compare IS with nonexistent values!");
+			}
+			if(value.orElse( null) instanceof Number && compareValue.orElse( null) instanceof Number )
+			{
+				return ((Number)value.get()).doubleValue() == ((Number)compareValue.get()).doubleValue();
 			}
 			return Objects.equals( value, compareValue);
 		}
@@ -60,11 +65,15 @@ public enum Comparison implements BiPredicate<Object, Object>
 	IS_NOT {
 
 		@Override
-		public boolean test( final Object value, final Object compareValue )
+		public boolean test(@Nullable final Optional<Object> value, @Nullable final Optional<Object> compareValue)
 		{
-			if(value instanceof Number && compareValue instanceof Number )
+			if(value == null || compareValue == null)
 			{
-				return ((Number)value).doubleValue() != ((Number)compareValue).doubleValue();
+				throw new IllegalArgumentException("Can't compare IS NOT with nonexistent values!");
+			}
+			if(value.orElse( null) instanceof Number && compareValue.orElse( null) instanceof Number )
+			{
+				return ((Number)value.get()).doubleValue() != ((Number)compareValue.get()).doubleValue();
 			}
 			return !Objects.equals( value, compareValue);
 		}
@@ -76,15 +85,19 @@ public enum Comparison implements BiPredicate<Object, Object>
 	LIKE {
 
 		@Override
-		public boolean test( final Object value, final Object compareValue )
+		public boolean test(@Nullable final Optional<Object> value, @Nullable final Optional<Object> compareValue)
 		{
 			if (value == null || compareValue == null)
 			{
+				throw new IllegalArgumentException("Can't compare LIKE with nonexistent values!");
+			}
+			if(!value.isPresent() || !compareValue.isPresent())
+			{
 				return false;
 			}
-			if(value instanceof String)
+			if(value.get() instanceof String)
 			{
-				return Pattern.matches(((String)compareValue).replaceAll( "%", ".*"),(String)value );
+				return Pattern.matches(((String)compareValue.get()).replaceAll( "%", ".*"),(String)value.get() );
 			}
 			return false;
 		}
@@ -95,9 +108,13 @@ public enum Comparison implements BiPredicate<Object, Object>
 	IS_NULL {
 
 		@Override
-		public boolean test( final Object value, final Object compareValue )
+		public boolean test(@Nullable final Optional<Object> value, @Nullable final Optional<Object> compareValue)
 		{
-			return value == null;
+			if(value == null)
+			{
+				throw new IllegalArgumentException("Can't compare nonexistent value to NULL!");
+			}
+			return !value.isPresent();
 		}
 	},
 	/**
@@ -107,9 +124,13 @@ public enum Comparison implements BiPredicate<Object, Object>
 	IS_NOT_NULL {
 
 		@Override
-		public boolean test( final Object value, final Object compareValue )
+		public boolean test(@Nullable final Optional<Object> value, @Nullable final Optional<Object> compareValue)
 		{
-			return value != null;
+			if(value == null)
+			{
+				throw new IllegalArgumentException("Can't compare nonexistent value to NULL!");
+			}
+			return value.isPresent();
 		}
 	},
 	/**
@@ -119,13 +140,17 @@ public enum Comparison implements BiPredicate<Object, Object>
 	LARGER {
 
 		@Override
-		public boolean test( final Object value, final Object compareValue )
+		public boolean test(@Nullable final Optional<Object> value, @Nullable final Optional<Object> compareValue)
 		{
 			if(value == null || compareValue == null)
 			{
+				throw new IllegalArgumentException("Can't compare LARGER with nonexistent values!");
+			}
+			if(!value.isPresent() || !compareValue.isPresent())
+			{
 				return false;
 			}
-			return Comparable.class.cast(value).compareTo(compareValue) > 0;
+			return Comparable.class.cast(value.get()).compareTo(compareValue.get()) > 0;
 		}
 	},
 	/**
@@ -135,13 +160,17 @@ public enum Comparison implements BiPredicate<Object, Object>
 	LARGER_EQUALS {
 
 		@Override
-		public boolean test( final Object value, final Object compareValue )
+		public boolean test(@Nullable final Optional<Object> value, @Nullable final Optional<Object> compareValue)
 		{
 			if(value == null || compareValue == null)
 			{
+				throw new IllegalArgumentException("Can't compare LARGER with nonexistent values!");
+			}
+			if(!value.isPresent() || !compareValue.isPresent())
+			{
 				return false;
 			}
-			return Comparable.class.cast(value).compareTo(compareValue) >= 0;
+			return Comparable.class.cast(value.get()).compareTo(compareValue.get()) >= 0;
 		}
 	},
 	/**
@@ -151,13 +180,17 @@ public enum Comparison implements BiPredicate<Object, Object>
 	SMALLER {
 
 		@Override
-		public boolean test( final Object value, final Object compareValue )
+		public boolean test(@Nullable final Optional<Object> value, @Nullable final Optional<Object> compareValue)
 		{
 			if(value == null || compareValue == null)
 			{
+				throw new IllegalArgumentException("Can't compare SMALLER with nonexistent values!");
+			}
+			if(!value.isPresent() || !compareValue.isPresent())
+			{
 				return false;
 			}
-			return Comparable.class.cast(value).compareTo(compareValue) < 0;
+			return Comparable.class.cast(value.get()).compareTo(compareValue.get()) < 0;
 		}
 	},
 	/**
@@ -167,13 +200,17 @@ public enum Comparison implements BiPredicate<Object, Object>
 	SMALLER_EQUALS {
 
 		@Override
-		public boolean test( final Object value, final Object compareValue )
+		public boolean test(@Nullable final Optional<Object> value, @Nullable final Optional<Object> compareValue)
 		{
 			if(value == null || compareValue == null)
 			{
+				throw new IllegalArgumentException("Can't compare SMALLER with nonexistent values!");
+			}
+			if(!value.isPresent() || !compareValue.isPresent())
+			{
 				return false;
 			}
-			return Comparable.class.cast(value).compareTo(compareValue) <= 0;
+			return Comparable.class.cast(value.get()).compareTo(compareValue.get()) <= 0;
 		}
 	},
 	/**
@@ -182,7 +219,7 @@ public enum Comparison implements BiPredicate<Object, Object>
 	TRUE {
 
 		@Override
-		public boolean test( final Object value, final Object compareValue )
+		public boolean test(@Nullable final Optional<Object> value, @Nullable final Optional<Object> compareValue)
 		{
 			return true;
 		}
@@ -194,27 +231,31 @@ public enum Comparison implements BiPredicate<Object, Object>
 	IN {
 
 		@Override
-		public boolean test( final Object value, final Object compareValue )
+		public boolean test(@Nullable final Optional<Object> value, @Nullable final Optional<Object> compareValue)
 		{
-			if(Objects.equals( value, compareValue))
+			if(value == null || compareValue == null)
+			{
+				throw new IllegalArgumentException("Can't check nonexistent values with IN!");
+			}
+			if(Objects.equals( value.orElse( null), compareValue.orElse( null)))
 			{
 				return true;
 			}
-			if(compareValue==null)
+			if(!compareValue.isPresent())
 			{
 				return false;
 			}
 			Collection<?> col;
-			if(compareValue instanceof Collection)
+			if(compareValue.get() instanceof Collection)
 			{
-				col = Collection.class.cast(compareValue);
-				return col.contains( value );
+				col = Collection.class.cast(compareValue.get());
+				return col.contains( value.get() );
 			}
-			if(compareValue.getClass().isArray())
+			if(compareValue.get().getClass().isArray())
 			{
-				for(int i= 0;i<Array.getLength( compareValue);i++)
+				for(int i= 0;i<Array.getLength( compareValue.get());i++)
 				{
-					if(Objects.equals( value, Array.get( compareValue, i)))
+					if(Objects.equals( value.get(), Array.get( compareValue.get(), i)))
 					{
 						return true;
 					}
@@ -225,6 +266,13 @@ public enum Comparison implements BiPredicate<Object, Object>
 		}
 	};
 
+	/**
+	 * NOTE: A value of <code>null</code> represents a value which was not in the data-set.
+	 * An {@link Optional} with a <code>null</code>-value represents a <code>null</code> stored in the data-set.
+	 * @param value
+	 * @param compareValue
+	 * @return whether the comparison is true
+	 */
 	@Override
-	public abstract boolean test(@Nullable final Object value, @Nullable final Object compareValue );
+	public abstract boolean test(@Nullable final Optional<Object> value, @Nullable final Optional<Object> compareValue);
 }

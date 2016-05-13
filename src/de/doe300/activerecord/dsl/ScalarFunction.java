@@ -95,6 +95,10 @@ public abstract class ScalarFunction<T extends ActiveRecord, C, R> implements SQ
 		{
 			return applySQLFunction( ((SQLFunction<T, C>)column).apply( map));
 		}
+		if(!map.containsKey( column ))
+		{
+			throw new IllegalArgumentException("No such key: " + column);
+		}
 		return applySQLFunction((C) map.get(column));
 	}
 

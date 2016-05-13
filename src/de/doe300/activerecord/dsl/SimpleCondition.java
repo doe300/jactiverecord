@@ -34,6 +34,7 @@ import javax.annotation.Nullable;
 
 import de.doe300.activerecord.jdbc.driver.JDBCDriver;
 import de.doe300.activerecord.record.ActiveRecord;
+import java.util.Optional;
 
 /**
  *
@@ -211,23 +212,43 @@ public class SimpleCondition implements Condition
 	@Override
 	public boolean test( final Map<String, Object> t )
 	{
-		final Object compValue0 = key instanceof SQLFunction ? ((SQLFunction<?,?>)key).apply( t) : t.get( (String)key );
+		final Optional<Object> compValue0;
+		if(key instanceof SQLFunction)
+		{
+			compValue0 = Optional.ofNullable(((SQLFunction<?,?>)key).apply( t));
+		}
+		else if(!t.containsKey( key))
+		{
+			compValue0 = null;
+		}
+		else
+		{
+			 compValue0 = Optional.ofNullable( t.get( (String)key ));
+		}
 		if (compValue instanceof SQLFunction)
 		{
-			return comp.test(compValue0, SQLFunction.class.cast( compValue).apply(t));
+			return comp.test(compValue0, Optional.ofNullable( SQLFunction.class.cast( compValue).apply(t)));
 		}
-		return comp.test( compValue0, compValue);
+		return comp.test( compValue0, Optional.ofNullable( compValue));
 	}
 
 	@Override
 	public boolean test( final ActiveRecord t )
 	{
-		final Object compValue0 = key instanceof SQLFunction ? ((SQLFunction)key).apply( t) : t.getBase().getStore().getValue( t.getBase(), t.getPrimaryKey(), (String)key);
+		final Optional<Object> compValue0;
+		if(key instanceof SQLFunction)
+		{
+			compValue0 = Optional.ofNullable(((SQLFunction)key).apply( t));
+		}
+		else
+		{
+			 compValue0 = Optional.ofNullable( t.getBase().getStore().getValue( t.getBase(), t.getPrimaryKey(), (String)key));
+		}
 		if (compValue instanceof SQLFunction)
 		{
-			return comp.test(compValue0, SQLFunction.class.cast( compValue).apply(t));
+			return comp.test(compValue0, Optional.ofNullable( SQLFunction.class.cast( compValue).apply(t)));
 		}
-		return comp.test(compValue0, compValue);
+		return comp.test(compValue0, Optional.ofNullable( compValue));
 	}
 	
 	@Override
