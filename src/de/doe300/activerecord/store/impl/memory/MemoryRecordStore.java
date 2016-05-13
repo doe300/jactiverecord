@@ -211,8 +211,7 @@ public class MemoryRecordStore implements RecordStore
 		final MemoryTable table = assertTableExists( tableName );
 		assertColumnsExist( table, columns);
 		final int index = table.insertRow();
-		table.putValues( index, columns, values );
-		return true;
+		return table.putValues( index, columns, values );
 	}
 
 	@Override
@@ -297,7 +296,8 @@ public class MemoryRecordStore implements RecordStore
 	{
 		final MemoryTable table = assertTableExists( base.getTableName() );
 		assertColumnsExist( table, columns);
-		final Map.Entry<Integer, MemoryRow> row = table.findFirstRow( scope);
+		final Scope effectiveScope = scope.getOrder() != null ? scope : new Scope(scope.getCondition(), base.getDefaultOrder(), scope.getLimit());
+		final Map.Entry<Integer, MemoryRow> row = table.findFirstRow( effectiveScope);
 		if(row != null)
 		{
 			return new HashMap<>(row.getValue().getRowMap());
@@ -310,7 +310,8 @@ public class MemoryRecordStore implements RecordStore
 	{
 		final MemoryTable table = assertTableExists( base.getTableName() );
 		assertColumnsExist( table, columns);
-		return table.findAllRows( scope ).map( (final Map.Entry<Integer, MemoryRow> e) -> e.getValue().getRowMap());
+		final Scope effectiveScope = scope.getOrder() != null ? scope : new Scope(scope.getCondition(), base.getDefaultOrder(), scope.getLimit());
+		return table.findAllRows( effectiveScope ).map( (final Map.Entry<Integer, MemoryRow> e) -> e.getValue().getRowMap());
 	}
 
 	@Override

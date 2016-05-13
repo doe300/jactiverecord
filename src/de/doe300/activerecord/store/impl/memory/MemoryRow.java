@@ -24,6 +24,7 @@
  */
 package de.doe300.activerecord.store.impl.memory;
 
+import java.util.Collection;
 import java.util.HashMap;
 import java.util.Map;
 import javax.annotation.Nonnegative;
@@ -39,11 +40,6 @@ class MemoryRow
 {
 	private final Map<String, Object> rowMap;
 
-	MemoryRow(@Nonnegative int numColumns)
-	{
-		this.rowMap = new HashMap<>(numColumns);
-	}
-
 	MemoryRow(@Nonnegative int numColumns, @Nonnull final String[] rows, @Nonnull final Object[] rowData)
 	{
 		this.rowMap = new HashMap<>(numColumns);
@@ -53,9 +49,13 @@ class MemoryRow
 		}
 	}
 
-	MemoryRow(@Nonnegative int numColumns, @Nonnull final String primaryColumn, @Nonnegative final int primaryKey)
+	MemoryRow(@Nonnull final Collection<String> columnNames, @Nonnull final String primaryColumn, @Nonnegative final int primaryKey)
 	{
-		this.rowMap = new HashMap<>(numColumns);
+		this.rowMap = new HashMap<>(columnNames.size());
+		for(final String columnName : columnNames)
+		{
+			rowMap.put( columnName, null);
+		}
 		rowMap.put( primaryColumn, primaryKey);
 	}
 	

@@ -113,6 +113,10 @@ class MemoryTable
 		{
 			return false;
 		}
+		if(primaryColumn.equals( columnName))
+		{
+			return false;
+		}
 		data.get(primaryKey ).putRowValue( columnName, checkColumn( columnName, value ) );
 		return true;
 	}
@@ -123,11 +127,17 @@ class MemoryTable
 		{
 			return false;
 		}
+		boolean rowUpdated = false;
 		for(int i = 0; i < columnNames.length; i++)
 		{
+			if(primaryColumn.equals( columnNames[i]))
+			{
+				continue;
+			}
 			data.get(primaryKey ).putRowValue( columnNames[i], checkColumn( columnNames[i], values[i] ) );
+			rowUpdated = true;
 		}
-		return true;
+		return rowUpdated;
 	}
 	
 	public boolean putValues(@Nonnegative int primaryKey, @Nonnull final Map<String, Object> values)
@@ -137,11 +147,17 @@ class MemoryTable
 		{
 			return false;
 		}
+		boolean rowUpdated = false;
 		for(Map.Entry<String, Object> e : values.entrySet())
 		{
+			if(primaryColumn.equals( e.getKey()))
+			{
+				continue;
+			}
 			row.putRowValue( e.getKey(), checkColumn( e.getKey(), e.getValue()));
+			rowUpdated = true;
 		}
-		return true;
+		return rowUpdated;
 	}
 	
 	public boolean containsValue(@Nonnegative int primaryKey, @Nonnull final String columnName)
@@ -183,7 +199,7 @@ class MemoryTable
 	{
 		int rowIndex = nextRowIndex;
 		nextRowIndex++;
-		data.put( rowIndex, new MemoryRow(columns.size(), primaryColumn, rowIndex));
+		data.put( rowIndex, new MemoryRow(columns.keySet(), primaryColumn, rowIndex));
 		return rowIndex;
 	}
 	

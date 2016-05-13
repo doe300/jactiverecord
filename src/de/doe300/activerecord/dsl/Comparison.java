@@ -249,13 +249,13 @@ public enum Comparison implements BiPredicate<Optional<Object>, Optional<Object>
 			if(compareValue.get() instanceof Collection)
 			{
 				col = Collection.class.cast(compareValue.get());
-				return col.contains( value.get() );
+				return col.contains( value.orElse( null) );
 			}
 			if(compareValue.get().getClass().isArray())
 			{
 				for(int i= 0;i<Array.getLength( compareValue.get());i++)
 				{
-					if(Objects.equals( value.get(), Array.get( compareValue.get(), i)))
+					if(isEquals( value.orElse( null),Array.get( compareValue.get(), i)))
 					{
 						return true;
 					}
@@ -263,6 +263,19 @@ public enum Comparison implements BiPredicate<Optional<Object>, Optional<Object>
 				return false;
 			}
 			throw new IllegalArgumentException("No recognized collection");
+		}
+		
+		private boolean isEquals(@Nullable final Object obj0, @Nullable final Object obj1)
+		{
+			if(Objects.equals( obj0, obj1))
+			{
+				return true;
+			}
+			if(obj0 instanceof Number && obj1 instanceof Number)
+			{
+				return ((Number)obj0).doubleValue() == ((Number)obj1).doubleValue();
+			}
+			return false;
 		}
 	};
 
