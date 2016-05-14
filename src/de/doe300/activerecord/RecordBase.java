@@ -150,6 +150,8 @@ public abstract class RecordBase<T extends ActiveRecord> implements ReadOnlyReco
 		}
 		if(!shards.containsKey( shardTable))
 		{
+			//TODO somehow, for Single inheritance base, new shard is created every time (for same base)
+			//see output of RecordBaseTest
 			Logging.getLogger().info( recordType.getSimpleName(), "Created new table-shard: " + shardTable);
 			final RecordBase<T> shardBase = createShardBase( shardTable );
 			shards.put( shardTable, shardBase);

@@ -380,7 +380,7 @@ public class RecordStoreTest extends Assert implements AssertException
 		
 		//FIXME consistent handling for already existing row
 		//adding already existing row
-		mayThrow(IllegalArgumentException.class, () -> assertFalse( store.addRow( base.getTableName(), new String[]{"id", "name"}, new Object[]{primaryKey,"Test"} )));
+		mayThrow(IllegalArgumentException.class, () -> store.addRow( base.getTableName(), new String[]{"id", "name"}, new Object[]{primaryKey,"Test"} ));
 		//no such colums
 		assertThrows( IllegalArgumentException.class, () -> store.addRow( base.getTableName(), new String[]{"id", "no_such_column"}, new Object[]{primaryKey,"Test"} ));
 		//no such table
