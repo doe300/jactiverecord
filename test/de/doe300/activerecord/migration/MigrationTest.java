@@ -24,41 +24,35 @@
  */
 package de.doe300.activerecord.migration;
 
+import de.doe300.activerecord.RecordCore;
+import de.doe300.activerecord.TestBase;
 import de.doe300.activerecord.TestInterface;
-import de.doe300.activerecord.TestServer;
 import de.doe300.activerecord.store.RecordStore;
-import java.sql.SQLException;
 import java.util.HashMap;
 import java.util.Map;
-import org.junit.Assert;
-import org.junit.BeforeClass;
 import org.junit.Test;
 
 /**
  *
  * @author daniel
  */
-public class MigrationTest extends Assert
+public class MigrationTest extends TestBase
 {
-	private static Migration automaticMigration;
-	private static Migration manualMigration;
+	private final Migration automaticMigration;
+	private final Migration manualMigration;
 	
-	public MigrationTest()
+	public MigrationTest(final RecordCore core)
 	{
-	}
-	
-	@BeforeClass
-	public static void init() throws SQLException
-	{
-		final RecordStore store = TestServer.getTestCore().getStore();
+		super(core);
+		
+		final RecordStore store = core.getStore();
 		Map<String, Class<?>> columns = new HashMap<>(2);
 		columns.put( "fk_test1", Integer.class);
 		columns.put( "fk_test2", Integer.class);
 		automaticMigration = store.getDriver().createMigration( TestInterface.class, store);
 		manualMigration = store.getDriver().createMigration( "mappingTable", columns, store);
-		
 	}
-
+	
 	@Test
 	public void testApply() throws Exception
 	{

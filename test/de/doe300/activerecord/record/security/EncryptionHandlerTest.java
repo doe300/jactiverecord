@@ -86,8 +86,6 @@ public class EncryptionHandlerTest extends TestBase
 		record.setName( "AdamAdam");
 		assertEquals( "AdamAdam", record.getName());
 		
-		//TODO currently fails (because of padding)
-		//algorithm used in test converts '\0' zero-bytes to ' ' spaces
 		record.setName( "Eve");
 		assertEquals( "Eve", record.getName());
 		

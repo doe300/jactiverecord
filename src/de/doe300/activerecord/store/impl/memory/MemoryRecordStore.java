@@ -43,6 +43,7 @@ import de.doe300.activerecord.store.DBDriver;
 import de.doe300.activerecord.store.NoSuchAttributeException;
 import de.doe300.activerecord.store.NoSuchDataSetException;
 import de.doe300.activerecord.store.RecordStore;
+import java.util.Arrays;
 import javax.annotation.Nonnegative;
 
 /**
@@ -210,6 +211,10 @@ public class MemoryRecordStore implements RecordStore
 	{
 		final MemoryTable table = assertTableExists( tableName );
 		assertColumnsExist( table, columns);
+		if(Arrays.stream( columns).anyMatch( (String columnName) -> table.getPrimaryColumn().equalsIgnoreCase(columnName)))
+		{
+			throw new IllegalArgumentException("Can't insert already existing row!");
+		}
 		final int index = table.insertRow();
 		return table.putValues( index, columns, values );
 	}

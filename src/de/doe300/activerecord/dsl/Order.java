@@ -39,8 +39,6 @@ import javax.annotation.concurrent.Immutable;
 @Immutable
 public interface Order extends Comparator<ActiveRecord>
 {
-	//TODO add support for more complex orders per includes
-	
 	/**
 	 * @param driver the driver for the underlying RDBMS
 	 * @return a SQL representation of this Order

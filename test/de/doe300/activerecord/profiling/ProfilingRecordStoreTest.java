@@ -55,8 +55,6 @@ public class ProfilingRecordStoreTest extends Assert
 	private final ProfilingRecordBase<TestInterface> base;
 	private final String name;
 	
-	//TODO output is not correct, doesn't print anything for cached/memory
-	
 	public ProfilingRecordStoreTest(String name, RecordStore store) throws Exception
 	{
 		this.name = name;

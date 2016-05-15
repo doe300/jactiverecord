@@ -100,7 +100,7 @@ public abstract class AggregateFunction<T extends ActiveRecord, C, V extends Mut
 	{
 		if(column instanceof SQLFunction)
 		{
-			return aggregateValues(dataMaps.map((final Map<String, Object> map) -> Optional.ofNullable((C) ((SQLFunction<T,C>)column).apply( map ))));
+			return aggregateValues(dataMaps.map((final Map<String, Object> map) -> Optional.ofNullable(((SQLFunction<T,C>)column).apply( map ))));
 		}
 		return aggregateValues(dataMaps.peek( (final Map<String, Object> map) -> {
 			if(!map.containsKey( column ))

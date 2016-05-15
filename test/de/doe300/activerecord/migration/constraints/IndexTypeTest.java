@@ -24,36 +24,34 @@
  */
 package de.doe300.activerecord.migration.constraints;
 
-import de.doe300.activerecord.RecordBase;
+import de.doe300.activerecord.RecordCore;
+import de.doe300.activerecord.TestBase;
 import de.doe300.activerecord.TestServer;
 import de.doe300.activerecord.jdbc.driver.JDBCDriver;
 import de.doe300.activerecord.record.ActiveRecord;
 import org.junit.AfterClass;
-import org.junit.Assert;
 import org.junit.BeforeClass;
 import org.junit.Test;
 
 
 
-public class IndexTypeTest extends Assert
+public class IndexTypeTest extends TestBase
 {
-	private static RecordBase<TestIndexedRecord> base;
-	
 	@BeforeClass
 	public static void createTables() throws Exception
 	{
-		base = TestServer.getTestCore().getBase( TestIndexedRecord.class);
-		base.getCore().createTable( TestIndexedRecord.class);
+		TestServer.buildTestTables( TestIndexedRecord.class, "TestIndexedRecord");
 	}
 	
 	@AfterClass
 	public static void destroyTables() throws Exception
 	{
-		base.getCore().dropTable( TestIndexedRecord.class);
+		TestServer.destroyTestTables( TestIndexedRecord.class, "TestIndexedRecord" );
 	}
 	
-	public IndexTypeTest()
+	public IndexTypeTest(final RecordCore core)
 	{
+		super(core);
 	}
 	
 	@Test

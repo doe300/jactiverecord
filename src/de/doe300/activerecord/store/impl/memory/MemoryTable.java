@@ -59,9 +59,6 @@ class MemoryTable
 	private final SortedMap<String, MemoryColumn> columns;
 	private final SortedMap<Integer, MemoryRow> data;
 	
-	//XXX add indices (SortedMaps for specific key(s), need to be updated!!!)
-	// -> would only be of use for getValues() with condition-column
-	
 	//cache values
 	private Map<String, Class<?>> columnTypes;
 	private int nextRowIndex = 0;
@@ -72,6 +69,12 @@ class MemoryTable
 		this.columns = new TreeMap<>();
 		Arrays.stream( columns).forEach( (MemoryColumn c) -> this.columns.put( c.getName(), c));
 		this.data = new TreeMap<>();
+	}
+	
+	@Nonnull
+	public String getPrimaryColumn()
+	{
+		return primaryColumn;
 	}
 	
 	@Nonnull
@@ -301,9 +304,6 @@ class MemoryTable
 				while(rowKeys.hasNext())
 				{
 					currentRow = rowKeys.next();
-					//FIXME fails to throw exception if column in condition is not in map
-					//but how to test??
-					//FIXME also fails for e.g. "age > X" when age is NULL, but works for SQL (where age = NULL is skipped)
 					if(cond == null || cond.test( currentRow.getValue().getRowMap()))
 					{
 						action.accept( currentRow );

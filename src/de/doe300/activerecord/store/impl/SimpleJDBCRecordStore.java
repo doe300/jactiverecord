@@ -132,7 +132,7 @@ public class SimpleJDBCRecordStore implements JDBCRecordStore
 		{
 			if(cond.getValues().length > driver.getParametersLimit())
 			{
-				final String preparedQuery = StatementUtil.prepareStatment( query, cond );
+				final String preparedQuery = StatementUtil.prepareQuery( query, cond );
 				return con.createStatement( ResultSet.TYPE_FORWARD_ONLY, ResultSet.CONCUR_READ_ONLY).executeQuery( preparedQuery );
 			}
 		}

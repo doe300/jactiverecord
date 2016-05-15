@@ -378,9 +378,8 @@ public class RecordStoreTest extends Assert implements AssertException
 	{
 		assertTrue( store.addRow( mappingTableName, new String[]{"fk_test1", "fk_test2"}, new Object[]{primaryKey,primaryKey} ));
 		
-		//FIXME consistent handling for already existing row
 		//adding already existing row
-		mayThrow(IllegalArgumentException.class, () -> store.addRow( base.getTableName(), new String[]{"id", "name"}, new Object[]{primaryKey,"Test"} ));
+		assertThrows(IllegalArgumentException.class, () -> store.addRow( base.getTableName(), new String[]{"id", "name"}, new Object[]{primaryKey,"Test"} ));
 		//no such colums
 		assertThrows( IllegalArgumentException.class, () -> store.addRow( base.getTableName(), new String[]{"id", "no_such_column"}, new Object[]{primaryKey,"Test"} ));
 		//no such table
