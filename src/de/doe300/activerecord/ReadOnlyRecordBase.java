@@ -74,12 +74,10 @@ public interface ReadOnlyRecordBase<T extends ActiveRecord> extends FinderMethod
 	/**
 	 * The default order is looked up in {@link RecordType#defaultOrder() }. If
 	 * this value is not set, the records are ordered by
-	 * {@link #getPrimaryColumn() primary-key}
-	 * {@link de.doe300.activerecord.dsl.SimpleOrder.OrderType#ASCENDING ascending}.
+	 * {@link #getPrimaryColumn() primary-key} in ascending order.
 	 *
 	 * @return the default ordering of records
 	 * @see RecordType#defaultOrder()
-	 * @see de.doe300.activerecord.dsl.SimpleOrder.OrderType
 	 */
 	@Nonnull
 	public Order getDefaultOrder();

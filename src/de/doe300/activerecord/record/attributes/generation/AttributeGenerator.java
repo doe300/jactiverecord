@@ -127,7 +127,8 @@ public class AttributeGenerator extends AbstractProcessor
 				
 				writer.append( "@Generated(value = {\"").append( getClass().getCanonicalName()).append( "\"}, date = \"")
 						.append( ISO_8601_DATE_FORMAT.format( new Date())).append( "\")\n");
-				writer.append( "interface ").append( generatedFileName ).append(" extends ").append( ActiveRecord.class.getCanonicalName());
+				//must be public for the default methods to be called from proxy-record
+				writer.append( "public interface ").append( generatedFileName ).append(" extends ").append( ActiveRecord.class.getCanonicalName());
 
 				writer.append(" {\n\n");
 

@@ -65,6 +65,7 @@ public class MemoryTableTest extends Assert implements AssertException
 		
 		//failure-tests
 		assertFalse( table.putValue( 120431230, "name", "Adam"));
+		assertFalse( table.putValue( row, table.getPrimaryColumn(), row));
 		assertThrows( IllegalArgumentException.class, () -> table.putValue( row, "noSuchColumn", "Steve"));
 		table.removeRow( row );
 	}
@@ -77,6 +78,7 @@ public class MemoryTableTest extends Assert implements AssertException
 		assertNotNull( table.getValue( row, "name"));
 		
 		assertFalse( table.putValues( row + 2000, new String[]{"name", "age"}, new Object[]{"Eve", 42} ));
+		assertFalse( table.putValues( row, new String[]{table.getPrimaryColumn()}, new Object[]{row+100}));
 		//failure-test
 		assertThrows( IllegalArgumentException.class, () ->table.putValues( row, new String[]{"name", "noSuchColumn"}, new Object[]{"Eve", "42"} ));
 		table.removeRow( row );

@@ -337,7 +337,14 @@ public class AutomaticMigration implements Migration
 					foreignKeyTable = null;
 					foreignKeyColumn = null;
 				}
-				columns.put( name, columns.get( name)
+				final String prevValue = columns.get( name);
+				if(prevValue.contains( " NULL"))
+				{
+					//makes sure, modifiers are not added twice
+					//for annotated getter and setter
+					continue;
+				}
+				columns.put( name, prevValue
 					+(!"".equals( att.defaultValue() )?" DEFAULT "+att.defaultValue(): "")
 					+(att.mayBeNull()?" NULL": " NOT NULL")
 					+(att.isUnique()?" UNIQUE": "")
