@@ -251,6 +251,28 @@ public final class ProcessorUtils
 				filter( predicate);
 	}
 	
+	/**
+	 * Checks whether the record-type element extends the generated type (in the same package) with the given type-name
+	 * 
+	 * @param processingEnv
+	 * @param typeName
+	 * @param recordTypeElement
+	 * @return whether the given <code>recordTypeElement</code> extends the generated type with the given <code>typeName</code>
+	 * @since 0.8
+	 */
+	public static boolean extendsType(@Nonnull final ProcessingEnvironment processingEnv, @Nonnull final String typeName, @Nonnull final TypeElement recordTypeElement)
+	{
+		final String qualifiedTypeName = processingEnv.getElementUtils().getPackageOf( recordTypeElement) + "." + typeName;
+		if(recordTypeElement.getSuperclass().toString().equals( qualifiedTypeName))
+		{
+			return true;
+		}
+		return recordTypeElement.getInterfaces().stream().anyMatch( (TypeMirror interfaceMirror) -> 
+		{
+			return interfaceMirror.toString().equals( qualifiedTypeName);
+		});
+	}
+	
 	private ProcessorUtils()
 	{
 	}

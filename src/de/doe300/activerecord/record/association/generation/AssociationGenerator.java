@@ -60,7 +60,6 @@ import javax.annotation.processing.SupportedSourceVersion;
 import javax.lang.model.SourceVersion;
 import javax.lang.model.element.Element;
 import javax.lang.model.element.TypeElement;
-import javax.lang.model.type.TypeMirror;
 import javax.tools.Diagnostic;
 import javax.tools.JavaFileObject;
 
@@ -207,7 +206,7 @@ public class AssociationGenerator extends AbstractProcessor
 					recordTypeElement);
 			
 			//warn if type does not extend generated type
-			if(!recordTypeElement.getInterfaces().stream().anyMatch( (TypeMirror interfaceMirror) -> interfaceMirror.toString().equals( generatedFileName)))
+			if(!ProcessorUtils.extendsType( processingEnv, generatedFileName, recordTypeElement))
 			{
 				processingEnv.getMessager().printMessage( Diagnostic.Kind.WARNING, "Type '" + recordTypeElement.getSimpleName()
 						+ "' does not extend the generated type: " + generatedFileName, recordTypeElement);
