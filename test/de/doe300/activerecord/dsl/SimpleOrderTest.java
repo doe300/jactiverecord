@@ -67,7 +67,7 @@ public class SimpleOrderTest extends TestBase
 	{
 		String src = "name DESC, age ASC, title ASC";
 		Order o = Orders.fromSQLString( src );
-		assertEquals( src, o.toSQL(JDBCDriver.DEFAULT) );
+		assertEquals( src, o.toSQL(JDBCDriver.DEFAULT, null) );
 		assertNull(Orders.fromSQLString(null ) );
 		assertNull(Orders.fromSQLString("" ) );
 		assertEquals(o, Orders.fromSQLString( "ORDER BY name DESC, age ASC, title ASC"));
@@ -102,8 +102,8 @@ public class SimpleOrderTest extends TestBase
 	public void testToSQL()
 	{
 		Order o = new SimpleOrder(new String[]{"name", "age", "title"}, new SimpleOrder.OrderType[]{SimpleOrder.OrderType.ASCENDING,SimpleOrder.OrderType.ASCENDING,SimpleOrder.OrderType.DESCENDING} );
-		String sql = "name ASC, age ASC, title DESC";
-		assertEquals( sql, o.toSQL(JDBCDriver.DEFAULT));
+		String sql = "test.name ASC, test.age ASC, test.title DESC";
+		assertEquals( sql, o.toSQL(JDBCDriver.DEFAULT, "test"));
 	}
 	
 	@Test

@@ -30,6 +30,7 @@ import java.util.Arrays;
 import java.util.Map;
 import java.util.stream.Collectors;
 import javax.annotation.Nonnull;
+import javax.annotation.Nullable;
 
 /**
  * An {@link Order} consisting of a set of orders
@@ -50,9 +51,9 @@ class CombinedOrder implements Order
 	}
 	
 	@Override
-	public String toSQL( JDBCDriver driver )
+	public String toSQL( JDBCDriver driver, @Nullable final String tableName )
 	{
-		return Arrays.stream( orders ).map( (Order o) -> o.toSQL( driver)).collect( Collectors.joining(", "));
+		return Arrays.stream( orders ).map( (Order o) -> o.toSQL( driver, tableName)).collect( Collectors.joining(", "));
 	}
 
 	@Override
@@ -105,6 +106,6 @@ class CombinedOrder implements Order
 	@Override
 	public int hashCode()
 	{
-		return toSQL( JDBCDriver.DEFAULT ).hashCode();
+		return toSQL( JDBCDriver.DEFAULT, null ).hashCode();
 	}
 }

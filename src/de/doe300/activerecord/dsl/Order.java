@@ -29,6 +29,7 @@ import de.doe300.activerecord.record.ActiveRecord;
 import java.util.Comparator;
 import java.util.Map;
 import javax.annotation.Nonnull;
+import javax.annotation.Nullable;
 import javax.annotation.Syntax;
 import javax.annotation.concurrent.Immutable;
 
@@ -41,10 +42,11 @@ public interface Order extends Comparator<ActiveRecord>
 {
 	/**
 	 * @param driver the driver for the underlying RDBMS
+	 * @param tableName the name to use to uniquely identify the table
 	 * @return a SQL representation of this Order
 	 */
 	@Syntax(value = "SQL")
-	public String toSQL(@Nonnull final JDBCDriver driver);
+	public String toSQL(@Nonnull final JDBCDriver driver, @Nullable final String tableName);
 	
 	@Override
 	public int compare(ActiveRecord o1, ActiveRecord o2);
@@ -65,6 +67,19 @@ public interface Order extends Comparator<ActiveRecord>
 	public Order reversed();
 
 	/**
+	 * Concatenates the two orders. More exact: A.thenComparing(B) => "ORDER BY" A, B
+	 * @param order
+	 * @return a new combined order
+	 * @see Comparator#thenComparing(java.util.Comparator) 
+	 * @since 0.8
+	 */
+	@Nonnull
+	public default Order thenComparing(@Nonnull final Order order)
+	{
+		return Orders.combine( this, order);
+	}
+
+	/**
 	 * Orders are equal, if their SQL-representation is the same
 	 * @param order
 	 * @return whether the two orders are equal
@@ -73,6 +88,6 @@ public interface Order extends Comparator<ActiveRecord>
 	 */
 	public default boolean equals( @Nonnull final Order order )
 	{
-		return toSQL( JDBCDriver.DEFAULT ).equals( order.toSQL( JDBCDriver.DEFAULT));
+		return toSQL( JDBCDriver.DEFAULT, null ).equals( order.toSQL( JDBCDriver.DEFAULT, null));
 	}
 }

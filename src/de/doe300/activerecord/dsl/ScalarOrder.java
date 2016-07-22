@@ -111,12 +111,12 @@ class ScalarOrder extends SimpleOrder
 	}
 
 	@Override
-	public String toSQL(@Nonnull final JDBCDriver driver)
+	public String toSQL(@Nonnull final JDBCDriver driver, @Nullable final String tableName)
 	{
 		final StringBuilder sb = new StringBuilder(100);
 		for(int i=0;i<columns.length;i++)
 		{
-			sb.append( ", ").append( mappings[i].toSQL( driver, null )).append( " ").append( types[i].toSQL());
+			sb.append( ", ").append( mappings[i].toSQL( driver, tableName )).append( " ").append( types[i].toSQL());
 		}
 		//deletes first ', '
 		sb.delete( 0, 2 );

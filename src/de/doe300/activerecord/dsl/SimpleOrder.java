@@ -123,12 +123,12 @@ class SimpleOrder implements Order
 	 * @return a SQL representation of this Order
 	 */
 	@Override
-	public String toSQL(@Nonnull final JDBCDriver driver)
+	public String toSQL(@Nonnull final JDBCDriver driver, @Nullable final String tableName)
 	{
 		final StringBuilder sb = new StringBuilder(100);
 		for(int i=0;i<columns.length;i++)
 		{
-			sb.append( ", ").append( columns[i]).append( " ").append( types[i].toSQL());
+			sb.append( ", ").append( tableName != null ? tableName + "." : "" ).append( columns[i]).append( " ").append( types[i].toSQL());
 		}
 		//deletes first ', '
 		sb.delete( 0, 2 );
@@ -138,7 +138,7 @@ class SimpleOrder implements Order
 	@Override
 	public String toString()
 	{
-		return toSQL(JDBCDriver.DEFAULT);
+		return toSQL(JDBCDriver.DEFAULT, null);
 	}
 
 	@Override
@@ -165,7 +165,7 @@ class SimpleOrder implements Order
 	@Override
 	public int hashCode()
 	{
-		return toSQL( JDBCDriver.DEFAULT ).hashCode();
+		return toSQL( JDBCDriver.DEFAULT, null ).hashCode();
 	}
 
 	/**

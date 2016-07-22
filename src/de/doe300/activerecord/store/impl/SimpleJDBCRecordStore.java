@@ -457,7 +457,7 @@ public class SimpleJDBCRecordStore implements JDBCRecordStore
 		final String sql = "SELECT "+toColumnsList( columns, base.getPrimaryColumn(), tableID )
 				+" FROM "+base.getTableName()+" AS " + tableID
 				+toWhereClause( scope.getCondition(), tableID )
-				+" ORDER BY "+toOrder( base, scope ).toSQL(driver)+" " + driver.getLimitClause( 0, 1);
+				+" ORDER BY "+toOrder( base, scope ).toSQL(driver, tableID)+" " + driver.getLimitClause( 0, 1);
 		Logging.getLogger().debug( "JDBCStore", sql);
 		try (final ResultSet res = queryStatement( sql, scope.getCondition()))
 		{
@@ -541,7 +541,7 @@ public class SimpleJDBCRecordStore implements JDBCRecordStore
 		String sql = "SELECT "+toColumnsList( columns, base.getPrimaryColumn(), tableID )
 				+" FROM "+base.getTableName()+" AS "+tableID
 				+toWhereClause( scope.getCondition(), tableID )
-				+" ORDER BY "+toOrder( base, scope ).toSQL(driver)
+				+" ORDER BY "+toOrder( base, scope ).toSQL(driver, tableID)
 				+" " + driver.getLimitClause( 0, scope.getLimit());
 		Logging.getLogger().debug( "JDBCStore", sql);
 		try

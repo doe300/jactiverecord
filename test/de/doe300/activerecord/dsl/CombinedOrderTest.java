@@ -56,7 +56,7 @@ public class CombinedOrderTest extends Assert
 	public void testToSQL()
 	{
 		Order o = Orders.combine(Orders.fromSQLString( "name ASC"), Orders.fromSQLString( "age DESC") );
-		assertEquals( o.toSQL( JDBCDriver.DEFAULT), "name ASC, age DESC");
+		assertEquals( o.toSQL( JDBCDriver.DEFAULT, null), "name ASC, age DESC");
 	}
 
 	@Test

@@ -158,6 +158,6 @@ public class ScalarOrderTest extends TestBase
 			new LowerCase<TestInterface>("name", TestInterface::getName),
 			new Absolute<TestInterface, Integer>("age", TestInterface::getAge)
 		}, null );
-		assertEquals( o.toSQL( JDBCDriver.DEFAULT), "LOWER(name) ASC, CAST(ABS(age) AS BIGINT) ASC");
+		assertEquals( o.toSQL( JDBCDriver.DEFAULT, "test"), "LOWER(test.name) ASC, CAST(ABS(test.age) AS BIGINT) ASC");
 	}
 }
