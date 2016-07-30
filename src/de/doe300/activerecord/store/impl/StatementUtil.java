@@ -25,6 +25,7 @@
 package de.doe300.activerecord.store.impl;
 
 import de.doe300.activerecord.dsl.Condition;
+import de.doe300.activerecord.jdbc.driver.JDBCDriver;
 import java.util.Date;
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
@@ -40,13 +41,14 @@ final class StatementUtil
 	 * Converts a SQL-statement with host-parameters ("?") into a SQL-statement without parameters by directly replacing
 	 * the parameters with their corresponding values
 	 * 
+	 * @param driver the JDBC driver to use
 	 * @param sql the prepared statement including host-parameters ("?")
 	 * @param condition
 	 * @return the resulting statement
 	 * @throws IllegalArgumentException if an unsupported value-type is encountered
 	 */
 	@Nonnull
-	static String prepareQuery(@Nonnull final String sql, @Nullable final Condition condition)
+	static String prepareQuery(@Nonnull final JDBCDriver driver, @Nonnull final String sql, @Nullable final Condition condition)
 	{
 		if(condition == null || !condition.hasWildcards())
 		{
@@ -55,7 +57,7 @@ final class StatementUtil
 		String preparedSQL = sql;
 		for(final Object val : condition.getValues())
 		{
-			preparedSQL = replaceNext( preparedSQL, val);
+			preparedSQL = replaceNext(driver, preparedSQL, val);
 		}
 		return preparedSQL;
 	}
@@ -64,13 +66,14 @@ final class StatementUtil
 	 * Converts a SQL-statement with host-parameters ("?") into a SQL-statement without parameters by directly replacing
 	 * the parameters with their corresponding values
 	 * 
+	 * @param driver the JDBC driver to use
 	 * @param sql the prepared statement including host-parameters ("?")
 	 * @param values
 	 * @return the resulting statement
 	 * @throws IllegalArgumentException if an unsupported value-type is encountered
 	 */
 	@Nonnull
-	static String prepareUpdate(@Nonnull final String sql, @Nullable final Object... values)
+	static String prepareUpdate(@Nonnull final JDBCDriver driver, @Nonnull final String sql, @Nullable final Object... values)
 	{
 		if(values == null || values.length == 0)
 		{
@@ -79,16 +82,20 @@ final class StatementUtil
 		String resultSQL = sql;
 		for(final Object val : values)
 		{
-			resultSQL = replaceNext( resultSQL, val);
+			resultSQL = replaceNext(driver, resultSQL, val);
 		}
 		return resultSQL;
 	}
 	
-	private static String replaceNext(@Nonnull final String sql, @Nullable final Object value)
+	private static String replaceNext(@Nonnull final JDBCDriver driver, @Nonnull final String sql, @Nullable final Object value)
 	{
 		if(value == null)
 		{
 			return sql.replaceFirst( "\\?", "NULL");
+		}
+		else if(value instanceof Boolean)
+		{
+			return sql.replaceFirst( "\\?", driver.convertBooleanToDB( (Boolean)value));
 		}
 		else if(value instanceof Number)
 		{

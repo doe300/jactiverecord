@@ -44,6 +44,7 @@ import de.doe300.activerecord.dsl.functions.UpperCase;
 import de.doe300.activerecord.dsl.functions.Value;
 import de.doe300.activerecord.jdbc.driver.SQLiteDriver;
 import de.doe300.activerecord.record.ActiveRecord;
+import java.util.Collections;
 import org.junit.AfterClass;
 import org.junit.BeforeClass;
 import org.junit.Test;
@@ -89,6 +90,19 @@ public class ScalarFunctionTest extends TestBase
 		t4.setName( "  SomeName  ");
 		t4.setAge( -913);
 	}
+	
+	@Test
+	public void testGeneral()
+	{
+		ScalarFunction<TestInterface, String, String> lower = new LowerCase<TestInterface>( "name", TestInterface::getName);
+		
+		assertEquals( "name", lower.getAttributeName());
+		assertThrows( IllegalArgumentException.class, () -> lower.apply( Collections.singletonMap( "age", 13)));
+		assertTrue( lower.equals( lower));
+		assertFalse( lower.equals( new Object()));
+		assertFalse( lower.equals( null));
+		assertEquals( "LOWER(name)", lower.toString());
+	}
 
 	@Test
 	public void testLOWER()
@@ -96,6 +110,8 @@ public class ScalarFunctionTest extends TestBase
 		ScalarFunction<TestInterface, String, String> lower = new LowerCase<TestInterface>( "name", TestInterface::getName);
 		//test direct #apply
 		assertEquals( "123name1", lower.apply( t1));
+		assertEquals( "", lower.apply( Collections.singletonMap( "name", "")));
+		
 		Condition cond = Conditions.is( lower, "123name1");
 		assertTrue( cond.test( t1 ));
 		assertEquals( 2, base.count( cond));
@@ -110,6 +126,8 @@ public class ScalarFunctionTest extends TestBase
 		ScalarFunction<TestInterface, String, String> upper = new UpperCase<>("name", TestInterface::getName);
 		//test direct #apply
 		assertEquals( "123NAME1", upper.apply( t1));
+		assertEquals( "", upper.apply( Collections.singletonMap( "name", "")));
+		
 		Condition cond = Conditions.is( upper, "123NAME1");
 		assertTrue( cond.test( t1 ));
 		assertEquals( 2, base.count( cond));
@@ -124,6 +142,8 @@ public class ScalarFunctionTest extends TestBase
 		ScalarFunction<TestInterface, Integer, Long> abs = new Absolute<>( "age", TestInterface::getAge);
 		//test direct #apply
 		assertEquals( Long.valueOf( 913), abs.apply( t2));
+		assertEquals( Long.valueOf( 0), abs.apply(Collections.singletonMap( "age", 0.0)));
+		
 		Condition cond = Conditions.isNot( abs, 913);
 		assertTrue( cond.test( t1 ));
 		assertEquals( 2, base.count( cond));
@@ -141,6 +161,8 @@ public class ScalarFunctionTest extends TestBase
 		ScalarFunction<TestInterface, Integer, Double> abs = new AbsoluteDouble<>("age", TestInterface::getAge);
 		//test direct #apply
 		assertEquals( Double.valueOf( 913), abs.apply( t2));
+		assertEquals( Double.valueOf( 0), abs.apply( Collections.singletonMap( "age", 0)));
+		
 		Condition cond = Conditions.isNot( abs, 913);
 		assertTrue( cond.test( t1 ));
 		assertEquals( 2, base.count( cond));
@@ -155,6 +177,8 @@ public class ScalarFunctionTest extends TestBase
 		ScalarFunction<TestInterface, Integer, Integer> sign = new Signum<>("age", TestInterface::getAge);
 		//test direct #apply
 		assertEquals( Integer.valueOf( -1), sign.apply( t2));
+		assertEquals( Integer.valueOf( 0), sign.apply( Collections.singletonMap( "age", -0)));
+		
 		Condition cond = Conditions.isNot( sign, -1);
 		assertFalse(cond.test( t1 ));
 		assertEquals(0, base.count( cond));
@@ -169,6 +193,7 @@ public class ScalarFunctionTest extends TestBase
 		ScalarFunction<TestInterface, Integer, Long> floor = new Floor<>("age", TestInterface::getAge);
 		//test direct #apply
 		assertEquals( Long.valueOf( t2.getAge()), floor.apply( t2));
+		
 		Condition cond = Conditions.isNot( floor, -1);
 		assertTrue(cond.test( t1 ));
 		assertEquals(4, base.count( cond));
@@ -212,6 +237,8 @@ public class ScalarFunctionTest extends TestBase
 		ScalarFunction<TestInterface, Long, Double> sqrt = new SquareRoot<>(new Absolute<>("age", TestInterface::getAge));
 		//test direct #apply
 		assertEquals( Math.sqrt( Math.abs(t2.getAge())), sqrt.apply( t2), 0.00001);
+		assertEquals( 0, sqrt.apply( Collections.singletonMap( "age", 0)), 0.00001);
+		
 		Condition cond = Conditions.isNot( sqrt, -1);
 		assertTrue(cond.test( t1 ));
 		if(!(base.getStore().getDriver() instanceof SQLiteDriver))
@@ -238,6 +265,8 @@ public class ScalarFunctionTest extends TestBase
 		ScalarFunction<TestInterface, String, Number> length = new StringLength<>("name", TestInterface::getName);
 		//test direct #apply
 		assertEquals( "123Name4".length(), length.apply( t3));
+		assertEquals( 0, length.apply( Collections.singletonMap( "name", "")));
+		
 		Condition cond = Conditions.is( length, 8);
 		assertTrue( cond.test( t3));
 		assertEquals( 3, base.count( cond));
@@ -255,6 +284,8 @@ public class ScalarFunctionTest extends TestBase
 		ScalarFunction<TestInterface, String, String> trim = new TrimString<>("name", TestInterface::getName);
 		//test direct #apply
 		assertEquals( "SomeName", trim.apply( t4));
+		assertEquals( "", trim.apply( Collections.singletonMap( "name", "   ")));
+		
 		Condition cond = Conditions.is( trim, "SomeName");
 		assertTrue( cond.test( t4));
 		assertEquals( 1, base.count( cond));

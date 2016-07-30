@@ -42,7 +42,7 @@ import org.junit.runners.Parameterized;
  * @since 0.8
  */
 @RunWith(Parameterized.class)
-public abstract class TestBase extends Assert
+public abstract class TestBase extends Assert implements AssertException
 {
 	protected TestBase(final RecordCore core)
 	{

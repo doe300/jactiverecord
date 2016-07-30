@@ -83,6 +83,12 @@ public abstract class ScalarFunction<T extends ActiveRecord, C, R> implements SQ
 	}
 
 	@Override
+	public String getAttributeName()
+	{
+		return column instanceof SQLFunction ? ((SQLFunction)column).getAttributeName() : (String)column;
+	}
+	
+	@Override
 	public R apply( final T t )
 	{
 		return applySQLFunction( columnFunction.apply( t ));

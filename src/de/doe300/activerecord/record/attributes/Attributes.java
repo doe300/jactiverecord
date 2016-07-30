@@ -72,16 +72,8 @@ public final class Attributes
 			//valid getter/setter but not handled by this handler
 			return null;
 		}
-		final StringBuilder res = new StringBuilder( result.length() );
-		for ( final char c : result.toCharArray() )
-		{
-			if ( Character.isUpperCase( c ) )
-			{
-				res.append( '_' );
-			}
-			res.append( c );
-		}
-		return res.deleteCharAt( 0 ).toString().toLowerCase();
+		//removes leading '_'
+		return toSnakeCase( result ).substring( 1);
 	}
 	
 	/**
@@ -119,6 +111,35 @@ public final class Attributes
 			{
 				res.append( c );
 			}
+		}
+		return res.toString();
+	}
+	
+	/**
+	 * Converts the String to snake_case to be used for column names
+	 * 
+	 * @param camelCase
+	 * @return the String in snake_case
+	 * @since 0.8
+	 */
+	@Nonnull
+	public static String toSnakeCase(@Nonnull final String camelCase)
+	{
+		final StringBuilder res = new StringBuilder( camelCase.length() );
+		//skip leading and trailing whitespaces
+		for ( final char c : camelCase.trim().toCharArray() )
+		{
+			if( Character.isWhitespace( c))
+			{
+				//whitespaces in the attribute are errors
+				throw new IllegalArgumentException("Column-name can't contain whitespaces!");
+			}
+			//convert camel-case to '_'
+			if ( Character.isUpperCase( c) )
+			{
+				res.append( '_');
+			}
+			res.append( Character.toLowerCase( c) );
 		}
 		return res.toString();
 	}

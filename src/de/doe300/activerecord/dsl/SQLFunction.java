@@ -54,6 +54,14 @@ public interface SQLFunction<T extends ActiveRecord, R> extends Function<T, R>
 	public String toSQL(@Nonnull final JDBCDriver driver, @Nullable final String tableName);
 	
 	/**
+	 * Returns the name of the attribute used as argument of this function, may return <code>null</code> if no or multiple attributes are used.
+	 * @return the name of the underlying attribute
+	 * @since 0.8
+	 */
+	@Nullable
+	public String getAttributeName();
+	
+	/**
 	 * NOTE: This method is not required to be supported
 	 * @param map
 	 * @return the return-value for this function
@@ -68,8 +76,12 @@ public interface SQLFunction<T extends ActiveRecord, R> extends Function<T, R>
 	 * @return whether the two SQL functions are equal
 	 * @since 0.7
 	 */
-	public default boolean equals(@Nonnull final SQLFunction<?,?> func)
+	public default boolean equals(@Nullable final SQLFunction<?,?> func)
 	{
+		if(func == null)
+		{
+			return false;
+		}
 		return toSQL( JDBCDriver.DEFAULT, null ).equals( func.toSQL( JDBCDriver.DEFAULT, null));
 	}
 }

@@ -44,7 +44,7 @@ public class AssociationHelperTest extends TestBase
 {
 	private final RecordBase<TestInterface> base;
 	
-	public AssociationHelperTest(final RecordCore core) throws SQLException
+	public AssociationHelperTest(final RecordCore core)
 	{
 		super(core);
 		base = core.getBase( TestInterface.class);

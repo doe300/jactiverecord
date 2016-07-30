@@ -157,4 +157,13 @@ public class AttributesTest extends TestBase implements AssertException
 		
 		assertThrows( IllegalArgumentException.class, () ->Attributes.toCamelCase( " no such attribute"));
 	}	
+
+	@Test
+	public void testToSnakeCase()
+	{
+		assertEquals( "snake_case", Attributes.toSnakeCase( "snakeCase"));
+		assertEquals( "snake_case", Attributes.toSnakeCase( "snake_case"));
+		assertEquals( "snakecase", Attributes.toSnakeCase( "snakecase"));
+		assertThrows( IllegalArgumentException.class, () -> Attributes.toSnakeCase( "text with space"));
+	}
 }

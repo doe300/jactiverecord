@@ -91,6 +91,12 @@ public abstract class AggregateFunction<T extends ActiveRecord, C, V extends Mut
 		return driver.getSQLFunction(command, arg);
 	}
 
+	@Override
+	public String getAttributeName()
+	{
+		return column instanceof SQLFunction ? ((SQLFunction)column).getAttributeName() : (String)column;
+	}
+	
 	/**
 	 * @param dataMaps
 	 * @return the aggregated result
