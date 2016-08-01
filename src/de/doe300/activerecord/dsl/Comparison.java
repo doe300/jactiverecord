@@ -24,14 +24,17 @@
  */
 package de.doe300.activerecord.dsl;
 
+import de.doe300.activerecord.jdbc.driver.JDBCDriver;
 import java.lang.reflect.Array;
 import java.util.Collection;
 import java.util.Objects;
 import java.util.Optional;
 import java.util.function.BiPredicate;
 import java.util.regex.Pattern;
+import javax.annotation.Nonnull;
 
 import javax.annotation.Nullable;
+import javax.annotation.Syntax;
 
 /**
  *
@@ -57,6 +60,12 @@ public enum Comparison implements BiPredicate<Optional<Object>, Optional<Object>
 			}
 			return Objects.equals( value, compareValue);
 		}
+
+		@Override
+		public String toSQL(@Nonnull final JDBCDriver driver)
+		{
+			return " = ";
+		}
 	},
 	/**
 	 * Non-match of the values
@@ -76,6 +85,12 @@ public enum Comparison implements BiPredicate<Optional<Object>, Optional<Object>
 				return ((Number)value.get()).doubleValue() != ((Number)compareValue.get()).doubleValue();
 			}
 			return !Objects.equals( value, compareValue);
+		}
+
+		@Override
+		public String toSQL(@Nonnull final JDBCDriver driver)
+		{
+			return " != ";
 		}
 	},
 	/**
@@ -101,6 +116,12 @@ public enum Comparison implements BiPredicate<Optional<Object>, Optional<Object>
 			}
 			return false;
 		}
+
+		@Override
+		public String toSQL(@Nonnull final JDBCDriver driver)
+		{
+			return " LIKE ";
+		}
 	},
 	/**
 	 * Whether the first argument is <code>null</code>.
@@ -115,6 +136,12 @@ public enum Comparison implements BiPredicate<Optional<Object>, Optional<Object>
 				throw new IllegalArgumentException("Can't compare nonexistent value to NULL!");
 			}
 			return !value.isPresent();
+		}
+
+		@Override
+		public String toSQL(@Nonnull final JDBCDriver driver)
+		{
+			return " IS NULL";
 		}
 	},
 	/**
@@ -131,6 +158,12 @@ public enum Comparison implements BiPredicate<Optional<Object>, Optional<Object>
 				throw new IllegalArgumentException("Can't compare nonexistent value to NULL!");
 			}
 			return value.isPresent();
+		}
+
+		@Override
+		public String toSQL(@Nonnull final JDBCDriver driver)
+		{
+			return " IS NOT NULL";
 		}
 	},
 	/**
@@ -152,6 +185,12 @@ public enum Comparison implements BiPredicate<Optional<Object>, Optional<Object>
 			}
 			return Comparable.class.cast(value.get()).compareTo(compareValue.get()) > 0;
 		}
+
+		@Override
+		public String toSQL(@Nonnull final JDBCDriver driver)
+		{
+			return " > ";
+		}
 	},
 	/**
 	 * Returns, whether the first value is larger or equal to the second one
@@ -171,6 +210,12 @@ public enum Comparison implements BiPredicate<Optional<Object>, Optional<Object>
 				return false;
 			}
 			return Comparable.class.cast(value.get()).compareTo(compareValue.get()) >= 0;
+		}
+
+		@Override
+		public String toSQL(@Nonnull final JDBCDriver driver)
+		{
+			return " >= ";
 		}
 	},
 	/**
@@ -192,6 +237,12 @@ public enum Comparison implements BiPredicate<Optional<Object>, Optional<Object>
 			}
 			return Comparable.class.cast(value.get()).compareTo(compareValue.get()) < 0;
 		}
+
+		@Override
+		public String toSQL(@Nonnull final JDBCDriver driver)
+		{
+			return " < ";
+		}
 	},
 	/**
 	 * Returns whether the first value is smaller or equal to the second
@@ -212,6 +263,12 @@ public enum Comparison implements BiPredicate<Optional<Object>, Optional<Object>
 			}
 			return Comparable.class.cast(value.get()).compareTo(compareValue.get()) <= 0;
 		}
+
+		@Override
+		public String toSQL(@Nonnull final JDBCDriver driver)
+		{
+			return " <= ";
+		}
 	},
 	/**
 	 * always returns true
@@ -222,6 +279,12 @@ public enum Comparison implements BiPredicate<Optional<Object>, Optional<Object>
 		public boolean test(@Nullable final Optional<Object> value, @Nullable final Optional<Object> compareValue)
 		{
 			return true;
+		}
+
+		@Override
+		public String toSQL(@Nonnull final JDBCDriver driver)
+		{
+			return driver.convertBooleanToDB( true);
 		}
 	},
 	/**
@@ -277,6 +340,12 @@ public enum Comparison implements BiPredicate<Optional<Object>, Optional<Object>
 			}
 			return false;
 		}
+
+		@Override
+		public String toSQL( JDBCDriver driver )
+		{
+			return " IN ";
+		}
 	};
 
 	/**
@@ -288,4 +357,13 @@ public enum Comparison implements BiPredicate<Optional<Object>, Optional<Object>
 	 */
 	@Override
 	public abstract boolean test(@Nullable final Optional<Object> value, @Nullable final Optional<Object> compareValue);
+	
+	/**
+	 * @param driver the driver to use
+	 * @return the SQL representation of this comparison
+	 * @since 0.8
+	 */
+	@Nonnull
+	@Syntax(value = "SQL")
+	public abstract String toSQL(@Nonnull final JDBCDriver driver);
 }

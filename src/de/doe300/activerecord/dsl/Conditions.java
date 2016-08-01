@@ -162,6 +162,18 @@ public final class Conditions
 	{
 		return new SimpleCondition(attributeFunc, value, Comparison.SMALLER_EQUALS );
 	}
+	
+	@Nonnull
+	public static Condition compare(@Nonnull final String attributeName, @Nullable final Object value, @Nonnull final Comparison comparison)
+	{
+		return new SimpleCondition(attributeName, value, comparison );
+	}
+	
+	@Nonnull
+	public static Condition compare(@Nonnull final SQLFunction<?, ?> attributeFunc, @Nullable final Object value, @Nonnull final Comparison comparison)
+	{
+		return new SimpleCondition(attributeFunc, value, comparison );
+	}
 
 	/**
 	 * Combines the <code>conds</code> and optimizes according to the following rules:
