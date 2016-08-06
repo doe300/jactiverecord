@@ -252,4 +252,11 @@ public class TableSetTest extends TestBase implements AssertException
 	{
 		assertEquals( base.count( null), set.aggregate( new CountNotNull<>(base.getPrimaryColumn(), TestInterface::getPrimaryKey), null).intValue());
 	}
+	
+	@Test
+	public void testEmpty()
+	{
+		assertEquals( 0, RecordSet.empty( base).size());
+		assertNull( RecordSet.empty( base).findFirst( Conditions.isTrue()));
+	}
 }

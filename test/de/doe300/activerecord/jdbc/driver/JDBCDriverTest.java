@@ -24,6 +24,7 @@
  */
 package de.doe300.activerecord.jdbc.driver;
 
+import de.doe300.activerecord.AssertException;
 import de.doe300.activerecord.migration.constraints.IndexType;
 import de.doe300.activerecord.record.ActiveRecord;
 import java.lang.reflect.Array;
@@ -43,7 +44,7 @@ import org.junit.runners.Parameterized;
  * @since 0.7
  */
 @RunWith(Parameterized.class)
-public class JDBCDriverTest extends Assert
+public class JDBCDriverTest extends Assert implements AssertException
 {
 	private final JDBCDriver driver;
 	
@@ -129,15 +130,7 @@ public class JDBCDriverTest extends Assert
 		assertNotNull( driver.getSQLFunction( JDBCDriver.SCALAR_SIGN, "test_column"));
 		if(driver instanceof SQLiteDriver)
 		{
-			try
-			{
-				driver.getSQLFunction( JDBCDriver.SCALAR_SQRT, "test_column");
-				fail( "No exception thrown!");
-			}
-			catch(final RuntimeException e)
-			{
-				//exception is expected here!
-			}
+			assertThrows( RuntimeException.class, () -> driver.getSQLFunction( JDBCDriver.SCALAR_SQRT, "test_column"));
 		}
 		else
 		{

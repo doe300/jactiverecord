@@ -160,4 +160,17 @@ public interface RecordSet<T extends ActiveRecord> extends SortedSet<T>, FinderM
 	{
 		return new CachedRecordSet<T>(this );
 	}
+	
+	/**
+	 * Creates and returns a new empty RecordSet
+	 * @param <T>
+	 * @param base the base for the record-type
+	 * @return the empty RecordSet
+	 * @since 0.8
+	 */
+	@Nonnull
+	public static <T extends ActiveRecord> RecordSet<T> empty(@Nonnull final ReadOnlyRecordBase<T> base)
+	{
+		return new ConditionSet<T>(base, Conditions.invert( Conditions.isTrue()), null);
+	}
 }

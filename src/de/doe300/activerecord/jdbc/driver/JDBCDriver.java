@@ -345,7 +345,7 @@ public class JDBCDriver implements DBDriver
 		}
 		if ( javaType.equals( Short.class ) || javaType.equals( Short.TYPE ) )
 		{
-			return "SHORTINT";
+			return "SMALLINT";
 		}
 		if ( javaType.equals( Integer.class ) || javaType.equals( Integer.TYPE ) )
 		{
@@ -463,7 +463,7 @@ public class JDBCDriver implements DBDriver
 		{
 			return Byte.class;
 		}
-		if ( sqlTypeUpper.startsWith( "SHORTINT" ) )
+		if ( sqlTypeUpper.startsWith( "SMALLINT" ) )
 		{
 			return Short.class;
 		}

@@ -93,6 +93,18 @@ public class PostgreSQLDriver extends JDBCDriver
 	@Override
 	public Class<?> getJavaType( String sqlType ) throws IllegalArgumentException
 	{
+		if(sqlType.toUpperCase().startsWith( "BOOL"))
+		{
+			return Boolean.class;
+		}
+		if(sqlType.toUpperCase().startsWith( "FLOAT4"))
+		{
+			return Float.class;
+		}
+		if(sqlType.toUpperCase().startsWith( "FLOAT8"))
+		{
+			return Double.class;
+		}
 		if(sqlType.toUpperCase().startsWith( "UUID"))
 		{
 			return UUID.class;
@@ -119,7 +131,16 @@ public class PostgreSQLDriver extends JDBCDriver
 		{
 			return "UUID";
 		}
-		if(Double.class.equals( javaType))
+		if ( javaType.equals( Boolean.class ) || javaType.equals( Boolean.TYPE ) )
+		{
+			return "BOOL";
+		}
+		if ( javaType.equals( Byte.class ) || javaType.equals( Byte.TYPE ) )
+		{
+			//there is no TINYINT on PostgreSQL
+			return "SMALLINT";
+		}
+		if ( javaType.equals( Double.class ) || javaType.equals( Double.TYPE ) )
 		{
 			return "DOUBLE PRECISION";
 		}
