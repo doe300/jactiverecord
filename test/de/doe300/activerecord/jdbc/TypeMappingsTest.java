@@ -181,6 +181,8 @@ public class TypeMappingsTest extends TestBase implements AssertException
 		assertEquals( Long.valueOf( 123), TypeMappings.coerceToType( new Date(123), Long.TYPE));
 		Timestamp ts = new Timestamp(System.currentTimeMillis());
 		assertEquals( ts, TypeMappings.coerceToType( ts.getTime(), Timestamp.class));
+		assertEquals( 3600000, TypeMappings.coerceToType( Long.valueOf( 3600000), java.sql.Date.class).getTime());
+		assertEquals( 5000, TypeMappings.coerceToType( Long.valueOf( 5000), java.sql.Time.class).getTime());
 		try{
 			TypeMappings.coerceToType( new TreeSet<Object>(), String.class);
 			fail( "Failed to throw exception");
@@ -189,6 +191,20 @@ public class TypeMappingsTest extends TestBase implements AssertException
 		{
 			
 		}
+	}
+	
+	@Test
+	public void testConvertNumber()
+	{
+		assertNull( TypeMappings.convertNumber( null, Integer.class));
+		assertEquals( 5, TypeMappings.convertNumber( Integer.valueOf( 5), Integer.TYPE).intValue());
+		assertEquals( Integer.valueOf( 5), TypeMappings.convertNumber( Integer.valueOf( 5), Integer.class));
+		assertThrows( IllegalArgumentException.class, () -> TypeMappings.convertNumber( 5, String.class ));
+		assertEquals( 5L, TypeMappings.convertNumber( 5, Long.class).longValue());
+		assertEquals( 5L, TypeMappings.convertNumber( 5.0, Long.class).longValue());
+		assertEquals( (byte)5, TypeMappings.convertNumber( 5.0, Byte.class).byteValue());
+		assertEquals( (short)5, TypeMappings.convertNumber( 5.0, Short.TYPE).shortValue());
+		assertEquals( 5.1, TypeMappings.convertNumber( 5, Double.class).doubleValue(), 0.2);
 	}
 	
 	@Test

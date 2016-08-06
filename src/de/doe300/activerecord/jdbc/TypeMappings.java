@@ -112,17 +112,94 @@ public final class TypeMappings
 		{
 			return ( T ) (((Number)obj).intValue() == 0 ? Boolean.FALSE : Boolean.TRUE);
 		}
+		//converts various numerical types
+		if((type.isPrimitive() || Number.class.isAssignableFrom( type)) && obj instanceof Number)
+		{
+			return convertNumber( (Number)obj, type);
+		}
 		//implicit conversion date/timestamp -> long
 		if(obj instanceof Date && (Long.class.equals( type) || Long.TYPE.equals( type)))
 		{
 			return (T) Long.valueOf(((Date)obj).getTime());
 		}
-		//implicit conversion long/Long -> timestamp
-		if(obj instanceof Long && Timestamp.class.equals( type) )
+		//implicit conversion number -> timestamp
+		if(obj instanceof Number && Timestamp.class.equals( type) )
 		{
-			return type.cast( new Timestamp((Long)obj));
+			return type.cast( new Timestamp(((Number)obj).longValue()));
 		}
+		//implicit conversion number -> java.sql.Date
+		if(obj instanceof Number && java.sql.Date.class.equals( type) )
+		{
+			return type.cast( new java.sql.Date(((Number)obj).longValue()));
+		}
+		//implicit conversion number -> java.sql.Time
+		if(obj instanceof Number && java.sql.Time.class.equals( type) )
+		{
+			return type.cast( new java.sql.Time(((Number)obj).longValue()));
+		}
+		//TODO String -> Timestamp ??
 		throw new ClassCastException("Can't cast Object of type '"+obj.getClass()+"' to type '"+type+"'");
+	}
+	
+	/**
+	 * Converts a number to a given type. This method also converts between primitive and wrapper-types
+	 * 
+	 * NOTE: Conversions between numerical types can result in loss of precision!
+	 * 
+	 * @param <T> the numerical type
+	 * @param obj the original Number to convert
+	 * @param type the target type
+	 * @return the converted number
+	 * @throws ClassCastException 
+	 * @since 0.8
+	 */
+	@Nullable
+	@SuppressWarnings( "unchecked" )
+	public static <T> T convertNumber(@Nullable final Number obj, @Nonnull final Class<T> type) throws ClassCastException
+	{
+		if(obj == null)
+		{
+			return null;
+		}
+		if(!(type.isPrimitive() || Number.class.isAssignableFrom( type )))
+		{
+			throw new IllegalArgumentException("Can only convert Numbers!");
+		}
+		if(type.isInstance( obj ))
+		{
+			return type.cast( obj );
+		}
+		//there is no int.cast(Integer), so just implicitly cast it
+		if(type.isPrimitive() && TypeMappings.primitivesToWrapper.get( type).isInstance( obj ))
+		{
+			return ( T ) obj;
+		}
+		//allows for Integer -> byte, Integer -> long, ...
+		if(Byte.TYPE.equals( type) || Byte.class.equals( type))
+		{
+			return (T)(Byte)obj.byteValue();
+		}
+		if(Short.TYPE.equals(type) || Short.class.equals( type))
+		{
+			return (T)(Short)obj.shortValue();
+		}
+		if(Integer.TYPE.equals( type) || Integer.class.equals( type))
+		{
+			return (T)(Integer)obj.intValue();
+		}
+		if(Long.TYPE.equals( type) || Long.class.equals( type))
+		{
+			return (T)(Long)obj.longValue();
+		}
+		if(Float.TYPE.equals( type) || Float.class.equals( type))
+		{
+			return (T)(Float)obj.floatValue();
+		}
+		if(Double.TYPE.equals( type) || Double.class.equals( type))
+		{
+			return (T)(Double)obj.doubleValue();
+		}
+		throw new IllegalArgumentException("Invalid numerical type: " + type.getCanonicalName());
 	}
 
 	////
