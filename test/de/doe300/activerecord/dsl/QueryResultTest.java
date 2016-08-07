@@ -29,6 +29,7 @@ import de.doe300.activerecord.RecordCore;
 import de.doe300.activerecord.TestBase;
 import de.doe300.activerecord.TestInterface;
 import de.doe300.activerecord.TestServer;
+import de.doe300.activerecord.dsl.functions.Sum;
 import de.doe300.activerecord.record.ActiveRecord;
 import de.doe300.activerecord.scope.Scope;
 import org.junit.AfterClass;
@@ -140,6 +141,15 @@ public class QueryResultTest extends TestBase
 		try(final QueryResult<TestInterface> r = base.where( Conditions.isNotNull("name")))
 		{
 			assertEquals( 1, r.withScope( new Scope(Conditions.is("age", 20), null, Scope.NO_LIMIT)).count( null));
+		}
+	}
+	
+	@Test
+	public void testAggregate() throws Exception
+	{
+		try(final QueryResult<TestInterface> r = base.where( Conditions.isNotNull("name")))
+		{
+			assertTrue( r.aggregate( new Sum<>(base.getPrimaryColumn(), ActiveRecord::getPrimaryKey), null ).intValue() > 0);
 		}
 	}
 }	

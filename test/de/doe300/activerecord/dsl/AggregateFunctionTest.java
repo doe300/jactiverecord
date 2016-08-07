@@ -105,12 +105,22 @@ public class AggregateFunctionTest extends TestBase
 		assertEquals( ag1, ag2);
 		assertNotEquals( ag1, new Object());
 	}
+	
+	@Test
+	public void testHashCode()
+	{
+		AggregateFunction<TestInterface, Integer, ?, Integer> ag1 = new Minimum<>( "age", TestInterface::getAge);
+		AggregateFunction<TestPOJO, Integer, ?, Integer> ag2 = new Minimum<>( "age", TestPOJO::getAge);
+		
+		assertEquals( ag1.hashCode(), ag1.hashCode());
+		assertEquals( ag1.hashCode(), ag2.hashCode());
+	}
 
 	@Test
 	public void testMINIMUM()
 	{
 		AggregateFunction<TestInterface, Integer, ?, Integer> min = new Minimum<>( "age", TestInterface::getAge);
-		Integer minAge = Stream.of( t1, t2, t3, t4).collect( min);
+		Integer minAge = Stream.of( t1, t2, t3, t4).parallel().collect( min);
 		
 		assertEquals( Integer.valueOf( t1.getAge()), minAge);
 		assertEquals( Integer.valueOf( t1.getAge()), base.aggregate( min, null));
@@ -128,7 +138,7 @@ public class AggregateFunctionTest extends TestBase
 	public void testMAXIMUM()
 	{
 		AggregateFunction<TestInterface, Integer, ?, Integer> max = new Maximum<>("age", TestInterface::getAge);
-		Integer maxAge = Stream.of( t1, t2, t3, t4).collect( max);
+		Integer maxAge = Stream.of( t1, t2, t3, t4).parallel().collect( max);
 		
 		assertEquals( Integer.valueOf( t3.getAge()), maxAge);
 		assertEquals( Integer.valueOf( t3.getAge()), base.aggregate( max, null));
@@ -146,7 +156,7 @@ public class AggregateFunctionTest extends TestBase
 	public void testCOUNT()
 	{
 		AggregateFunction<TestInterface, Integer, ?, Number> count = new CountNotNull<>("age", TestInterface::getAge);
-		Number number = Stream.of( t1, t2, t3, t4).collect( count);
+		Number number = Stream.of( t1, t2, t3, t4).parallel().collect( count);
 		
 		assertEquals( 4L, number.longValue());
 		assertEquals( 4L, base.aggregate( count, null).longValue());
@@ -161,7 +171,7 @@ public class AggregateFunctionTest extends TestBase
 	public void testCOUNT_DISTINCT()
 	{
 		AggregateFunction<TestInterface, Integer, ?, Number> countDistinct = new CountDistinct<>("age", TestInterface::getAge);
-		Number distinctCount = Stream.of( t1, t2, t3, t4).collect( countDistinct);
+		Number distinctCount = Stream.of( t1, t2, t3, t4).parallel().collect( countDistinct);
 		
 		assertEquals( 3L, distinctCount.longValue());
 		assertEquals( 3L, base.aggregate( countDistinct, null).longValue());
@@ -179,7 +189,7 @@ public class AggregateFunctionTest extends TestBase
 	public void testSUM()
 	{
 		AggregateFunction<TestInterface, Integer, ?, Number> sum = new Sum<>("age", TestInterface::getAge);
-		Number sumAge = Stream.of( t1, t2, t3, t4).collect( sum);
+		Number sumAge = Stream.of( t1, t2, t3, t4).parallel().collect( sum);
 		long otherSum = t1.getAge() + t2.getAge() + t3.getAge() + t4.getAge();
 		
 		assertEquals( otherSum, sumAge.longValue());
@@ -195,7 +205,7 @@ public class AggregateFunctionTest extends TestBase
 	public void testSUM_FLOATING()
 	{
 		AggregateFunction<TestInterface, Integer, ?, Number> sumFloat = new SumDouble<>("age", TestInterface::getAge);
-		Number sumAge = Stream.of( t1, t2, t3, t4).collect( sumFloat);
+		Number sumAge = Stream.of( t1, t2, t3, t4).parallel().collect( sumFloat);
 		double otherSum = t1.getAge() + t2.getAge() + t3.getAge() + t4.getAge();
 		
 		assertEquals( otherSum, sumAge.doubleValue(), 0.0);
@@ -214,7 +224,7 @@ public class AggregateFunctionTest extends TestBase
 	public void testAVERAGE()
 	{
 		AggregateFunction<TestInterface, Integer, ?, Number> average = new Average<>("age", TestInterface::getAge);
-		Number averageAge = Stream.of( t1, t2, t3, t4).collect( average);
+		Number averageAge = Stream.of( t1, t2, t3, t4).parallel().collect( average);
 		double avgAge = (t1.getAge() + t2.getAge() + t3.getAge() + t4.getAge()) / 4.0;
 		
 		assertEquals( avgAge, average.apply( Collections.singletonMap( "age", averageAge)));

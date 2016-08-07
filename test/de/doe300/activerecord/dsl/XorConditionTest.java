@@ -141,9 +141,20 @@ public class XorConditionTest extends TestBase
 		final Condition cond2 = Conditions.xor( Conditions.is( "name", "Adam"), Conditions.is( "age", 12), Conditions.isLarger( "age", 15));
 		final Condition cond3 = Conditions.xor( Conditions.is( "name", "Adam"), Conditions.is( "age", 12));
 		
-		assertTrue( cond1.equals( cond2));
-		assertFalse( cond1.equals( cond3));
+		assertFalse( cond1.equals( (Object)null));
+		assertTrue( cond1.equals( (Object)cond2));
+		assertFalse( cond1.equals( (Object)cond3));
 		
 		assertFalse( cond1.equals( new Object()));
+	}
+	
+	@Test
+	public void testHashCode()
+	{
+		final Condition cond1 = Conditions.xor( Conditions.is( "name", "Adam"), Conditions.is( "age", 12)).xor( Conditions.isLarger( "age", 15));
+		final Condition cond2 = Conditions.xor( Conditions.is( "name", "Adam"), Conditions.is( "age", 12), Conditions.isLarger( "age", 15));
+		
+		assertEquals( cond1.hashCode(), cond1.hashCode());
+		assertEquals( cond1.hashCode(), cond2.hashCode());
 	}
 }

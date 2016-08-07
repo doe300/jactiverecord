@@ -91,6 +91,19 @@ public class CombinedOrderTest extends Assert
 		Order o1 = Orders.combine(Orders.fromSQLString( "name ASC"), Orders.fromSQLString( "age DESC") );
 		Order o2 = Orders.combine(Orders.fromSQLString( "name ASC, age DESC"));
 		
-		assertEquals( o1, o2);
+		assertTrue( o1.equals( (Object)o1));
+		assertFalse( o1.equals( (Object)null));
+		assertFalse( o1.equals( (Order)null));
+		assertTrue( o1.equals( (Object)o2));
+	}
+	
+	@Test
+	public void testHashCode()
+	{
+		Order o1 = Orders.combine(Orders.fromSQLString( "name ASC"), Orders.fromSQLString( "age DESC") );
+		Order o2 = Orders.combine(Orders.fromSQLString( "name ASC, age DESC"));
+		
+		assertEquals( o1.hashCode(), o1.hashCode());
+		assertEquals( o1.hashCode(), o2.hashCode());
 	}
 }

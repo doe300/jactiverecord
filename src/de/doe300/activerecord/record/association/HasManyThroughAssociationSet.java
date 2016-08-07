@@ -161,6 +161,7 @@ public class HasManyThroughAssociationSet<T extends ActiveRecord> extends Abstra
 		{
 			remove0( t.getPrimaryKey() );
 		} ).count() > 0;
+		//FIXME count() throws concurrent modification exception (sometimes). What is modified??
 	}
 
 	@Override

@@ -113,7 +113,7 @@ public class EncryptionHandler implements ProxyHandler
 				if(Attributes.isSetter( method, null, true ))
 				{
 					final Class<?> dbType = record.getBase().getStore().getAllColumnTypes( record.getBase().getTableName()).get( attributeName);
-					if(!(String.class.isAssignableFrom( dbType ) || dbType.isArray() && Byte.TYPE.isAssignableFrom( dbType.getComponentType())))
+					if(dbType == null || !(String.class.isAssignableFrom( dbType ) || dbType.isArray() && Byte.TYPE.isAssignableFrom( dbType.getComponentType())))
 					{
 						throw new IllegalArgumentException("Illegal DB-type for encrypted value");
 					}

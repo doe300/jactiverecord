@@ -146,4 +146,21 @@ public class BelongsToConditionTest extends TestBase
 		assertFalse( invCond.test( t3));
 	}
 
+	@Test
+	public void testEquals()
+	{
+		Condition cond = new BelongsToCondition("fk_test_id", base, Conditions.isNull("name"));
+		assertTrue( cond.equals( (Object)cond));
+		assertFalse( cond.equals( (Object)null));
+		assertFalse( cond.equals( (Condition)null));
+		assertTrue( cond.equals( (Object)cond1));
+	}
+	
+	@Test
+	public void testHashCode()
+	{
+		Condition cond = new BelongsToCondition("fk_test_id", base, Conditions.isNull("name"));
+		assertEquals( cond.hashCode(), cond.hashCode());
+		assertEquals( cond.hashCode(), cond1.hashCode());
+	}
 }

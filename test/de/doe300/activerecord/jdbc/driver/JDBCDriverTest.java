@@ -27,11 +27,14 @@ package de.doe300.activerecord.jdbc.driver;
 import de.doe300.activerecord.AssertException;
 import de.doe300.activerecord.migration.constraints.IndexType;
 import de.doe300.activerecord.record.ActiveRecord;
+import java.io.Serializable;
 import java.lang.reflect.Array;
+import java.math.BigDecimal;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.HashSet;
 import java.util.Set;
+import java.util.UUID;
 import javax.annotation.Nonnull;
 import org.junit.Assert;
 import org.junit.Test;
@@ -106,6 +109,7 @@ public class JDBCDriverTest extends Assert implements AssertException
 	@Test
 	public void testGetLimitClause()
 	{
+		assertTrue( driver.getLimitClause( 0, 0).isEmpty());
 		assertNotNull( driver.getLimitClause( 10, 10));
 	}
 
@@ -173,15 +177,29 @@ public class JDBCDriverTest extends Assert implements AssertException
 	public void testGetSQLType()
 	{
 		assertEquals( driver.getStringDataType(), driver.getSQLType( String.class));
+		assertThrows( IllegalArgumentException.class, () -> driver.getSQLType( Runtime.class) );
 	}
 
 	@Test
 	public void testGetJavaType()
 	{
+		assertTrue( java.sql.Array.class.isAssignableFrom( driver.getJavaType( driver.getSQLType( java.sql.Array.class))));
+		assertTrue( java.sql.Blob.class.isAssignableFrom( driver.getJavaType( driver.getSQLType( java.sql.Blob.class))));
+		assertTrue( java.sql.Clob.class.isAssignableFrom( driver.getJavaType( driver.getSQLType( java.sql.Clob.class))));
 		assertEquals( String.class, driver.getJavaType( driver.getStringDataType()));
 		assertTrue( Number.class.isAssignableFrom( driver.getJavaType( driver.getSQLType( ActiveRecord.class))));
 		assertTrue(java.sql.Date.class.isAssignableFrom( driver.getJavaType( driver.getSQLType( java.sql.Date.class))));
 		assertEquals( Array.newInstance( Byte.TYPE, 0).getClass(), driver.getJavaType( driver.getSQLType( java.io.Serializable.class)));
+		assertTrue( Number.class.isAssignableFrom( driver.getJavaType( driver.getSQLType( Byte.class))));
+		assertTrue( Number.class.isAssignableFrom( driver.getJavaType( driver.getSQLType( Short.class))));
+		assertTrue( Number.class.isAssignableFrom( driver.getJavaType( driver.getSQLType( Integer.class))));
+		assertTrue( Number.class.isAssignableFrom( driver.getJavaType( driver.getSQLType( Long.class))));
+		assertTrue( Number.class.isAssignableFrom( driver.getJavaType( driver.getSQLType( Float.class))));
+		assertTrue( Number.class.isAssignableFrom( driver.getJavaType( driver.getSQLType( Double.class))));
+		assertTrue( Number.class.isAssignableFrom( driver.getJavaType( driver.getSQLType( BigDecimal.class))));
+		assertTrue( Serializable.class.isAssignableFrom( driver.getJavaType( driver.getSQLType( UUID.class))));
+		
+		assertThrows( IllegalArgumentException.class, () -> driver.getJavaType( "STRUCT"));
 	}
 
 	@Test

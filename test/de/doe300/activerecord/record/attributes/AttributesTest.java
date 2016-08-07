@@ -30,6 +30,7 @@ import de.doe300.activerecord.RecordCore;
 import de.doe300.activerecord.TestBase;
 import de.doe300.activerecord.TestInterface;
 import de.doe300.activerecord.TestServer;
+import de.doe300.activerecord.record.ActiveRecord;
 import de.doe300.activerecord.record.TimestampedRecord;
 import de.doe300.activerecord.record.validation.ValidatedRecord;
 import java.lang.reflect.Method;
@@ -68,9 +69,14 @@ public class AttributesTest extends TestBase implements AssertException
 	{
 		Method m1 = TestInterface.class.getMethod( "getOther"), m2 = TestInterface.class.getMethod( "setName", String.class);
 		Method c1 = TestInterface.class.getMethod( "getInterFace", Object.class);
+		Method m3 = TestAttributes.class.getMethod( "getName"), m4 = TestInterface.class.getMethod( "setOther", TestInterface.class );
+		Method m5 = TestAttributes.class.getMethod( "setNumber", Integer.class);
 		assertEquals(Attributes.getConverterMethod( m1), c1);
 		assertNotSame(Attributes.getConverterMethod( m2), c1);
 		assertNull(Attributes.getConverterMethod( m2));
+		assertNull(Attributes.getConverterMethod( m3 ));
+		assertNotNull( Attributes.getConverterMethod( m4));
+		assertNull( Attributes.getConverterMethod( m5));
 	}
 
 	@Test
@@ -78,27 +84,36 @@ public class AttributesTest extends TestBase implements AssertException
 	{
 		Method m1 = TestInterface.class.getMethod( "getOther"), m2 = TestInterface.class.getMethod( "setName", String.class);
 		Method c1 = TestInterface.class.getMethod( "checkName", Object.class );
+		Method m3 = TestAttributes.class.getMethod( "setName", String.class);
 		assertEquals(Attributes.getValidatorMethod(m2), c1);
 		assertNotSame(Attributes.getValidatorMethod(m1), c1);
 		assertNull(Attributes.getValidatorMethod(m1));
+		assertNull( Attributes.getValidatorMethod( m3));
 	}
 
 	@Test
 	public void testIsGetter() throws NoSuchMethodException
 	{
 		Method m1 = TestInterface.class.getMethod( "getName"), m2 = TestInterface.class.getMethod( "setName", String.class);
+		Method m3 = TestAttributes.class.getMethod( "getName");
 		assertTrue(Attributes.isGetter( m1, false));
 		assertFalse(Attributes.isGetter( m2, false));
+		assertTrue( Attributes.isGetter( m3, true));
 	}
 
 	@Test
 	public void testIsSetter() throws NoSuchMethodException
 	{
 		Method m1 = TestInterface.class.getMethod( "getName"), m2 = TestInterface.class.getMethod( "setAge", Integer.TYPE);
+		Method m3 = TestAttributes.class.getMethod( "setName", String.class), m4 = TestAttributes.class.getMethod( "setNumber", Integer.class);
+		Method m5 = TestAttributes.class.getMethod( "setNothing");
 		assertTrue(Attributes.isSetter( m2, Integer.TYPE, false));
 		assertTrue(Attributes.isSetter( m2, Integer.class, false));
 		assertFalse(Attributes.isSetter(m1, String.class, false));
 		assertFalse(Attributes.isSetter( m2, Object.class, false));
+		assertTrue( Attributes.isSetter( m3, String.class, true));
+		assertTrue( Attributes.isSetter( m4, Integer.TYPE, true));
+		assertFalse( Attributes.isSetter( m5, Object.class, true));
 	}
 
 	@Test
@@ -165,5 +180,18 @@ public class AttributesTest extends TestBase implements AssertException
 		assertEquals( "snake_case", Attributes.toSnakeCase( "snake_case"));
 		assertEquals( "snakecase", Attributes.toSnakeCase( "snakecase"));
 		assertThrows( IllegalArgumentException.class, () -> Attributes.toSnakeCase( "text with space"));
+	}
+	
+	private static interface TestAttributes extends ActiveRecord
+	{
+		@AttributeSetter(name = "name")
+		public void setName(String name);
+		
+		@AttributeGetter(name = "name")
+		public String getName();
+		
+		public void setNumber(Integer i);
+		
+		public void setNothing();
 	}
 }

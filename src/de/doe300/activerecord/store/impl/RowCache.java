@@ -209,7 +209,7 @@ class RowCache implements Comparable<RowCache>
 	@Override
 	public boolean equals( final Object obj )
 	{
-		return obj instanceof RowCache && parent.equals( ((RowCache)obj).parent) && obj.toString().equals( toString());
+		return obj != null && obj instanceof RowCache && parent.equals( ((RowCache)obj).parent) && obj.toString().equals( toString());
 	}
 
 	@Override

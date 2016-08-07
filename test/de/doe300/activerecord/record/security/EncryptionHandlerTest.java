@@ -68,13 +68,19 @@ public class EncryptionHandlerTest extends TestBase
 	
 	public static interface TestEncryptedRecord extends EncryptedRecord
 	{
-		//PostgreSQL wants "BYTEA" as SQL-type
-		@Attribute(name = "name", typeName = "VARBINARY(255)")
+		@Attribute(name = "name", type = Byte[].class)
 		@EncryptedAttribute(attribute = "name")
 		public String getName();
 		
 		@EncryptedAttribute(attribute = "name")
 		public void setName(String name);
+		
+		@Attribute(name = "errorColumn", type = Integer.class)
+		@EncryptedAttribute(attribute = "errorColumn")
+		public String getWrongValue();
+		
+		@EncryptedAttribute(attribute = "errorColumn")
+		public void setWrongValue(String val);
 	}
 
 	@Test
@@ -91,5 +97,11 @@ public class EncryptionHandlerTest extends TestBase
 		
 		record.setName( null);
 		assertNull( record.getName());
+	}
+	
+	@Test
+	public void testErrors()
+	{
+		assertThrows( IllegalArgumentException.class, () -> record.setWrongValue("Eden"));
 	}
 }

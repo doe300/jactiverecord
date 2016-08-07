@@ -272,8 +272,12 @@ public abstract class RecordBase<T extends ActiveRecord> implements ReadOnlyReco
 	 * @param record2
 	 * @return whether the two records are equals
 	 */
-	public static boolean equals( final ActiveRecord record1, final ActiveRecord record2 )
+	public static boolean equals( @Nullable final ActiveRecord record1, @Nullable final ActiveRecord record2 )
 	{
+		if(record1 == null || record2 == null)
+		{
+			return false;
+		}
 		if ( record1.getBase() == record2.getBase() )
 		{
 			return record1.getPrimaryKey() == record2.getPrimaryKey();

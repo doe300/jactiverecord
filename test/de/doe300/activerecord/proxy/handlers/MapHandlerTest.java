@@ -31,6 +31,7 @@ import de.doe300.activerecord.TestBase;
 import de.doe300.activerecord.TestInterface;
 import de.doe300.activerecord.TestServer;
 import de.doe300.activerecord.record.RecordType;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
 import org.junit.AfterClass;
@@ -128,6 +129,12 @@ public class MapHandlerTest extends TestBase implements AssertException
 		record.putAll( m );
 		assertEquals(m.get( "name"), record.get( "name"));
 		assertEquals(m.get( "age"), record.getAge());
+		
+		assertThrows( RuntimeException.class, () -> record.putAll( Collections.singletonMap( "no_such_key", "Eve")));
+		//skips setting primary key
+		final int primaryKey = record.getPrimaryKey();
+		record.putAll( Collections.singletonMap( base.getPrimaryColumn(), primaryKey + 112));
+		assertEquals( primaryKey, record.getPrimaryKey());
 	}
 
 	@Test

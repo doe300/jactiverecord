@@ -24,8 +24,6 @@
  */
 package de.doe300.activerecord.dsl;
 
-import java.util.Arrays;
-import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
 import java.util.function.Function;
@@ -39,6 +37,7 @@ import javax.annotation.Nullable;
 import de.doe300.activerecord.jdbc.driver.JDBCDriver;
 import de.doe300.activerecord.record.ActiveRecord;
 import de.doe300.activerecord.util.MutablePair;
+import java.util.Collections;
 import java.util.Optional;
 
 /**
@@ -128,7 +127,7 @@ public abstract class AggregateFunction<T extends ActiveRecord, C, V extends Mut
 	@Override
 	public Set<Characteristics> characteristics()
 	{
-		return new HashSet<>(Arrays.asList( Characteristics.CONCURRENT, Characteristics.UNORDERED));
+		return Collections.singleton( Characteristics.UNORDERED);
 	}
 
 	@Override

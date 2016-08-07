@@ -132,4 +132,28 @@ public class InvertedConditionTest extends TestBase implements AssertException
 		Condition invCond = Conditions.invert(cond);
 		assertSame( cond, invCond.negate());
 	}
+	
+	@Test
+	public void testEquals()
+	{
+		Condition cond = Conditions.is("age", 913);
+		Condition invCond = Conditions.invert(cond);
+		Condition invCond2 = Conditions.invert(cond);
+		
+		assertTrue( invCond.equals( (Object)invCond));
+		assertFalse( invCond.equals( (Object)null));
+		assertFalse( invCond.equals( (Condition)null));
+		assertTrue( invCond.equals( (Object)invCond2));
+	}
+	
+	@Test
+	public void testHashCode()
+	{
+		Condition cond = Conditions.is("age", 913);
+		Condition invCond = Conditions.invert(cond);
+		Condition invCond2 = Conditions.invert(cond);
+		
+		assertEquals( invCond.hashCode()	, invCond.hashCode() );
+		assertEquals( invCond.hashCode(), invCond2.hashCode());
+	}
 }

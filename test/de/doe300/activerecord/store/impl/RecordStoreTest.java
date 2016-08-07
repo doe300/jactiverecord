@@ -139,6 +139,8 @@ public class RecordStoreTest extends Assert implements AssertException
 		store.setValues( base, primaryKey + 100000, new String[]{"name"}, new Object[]{"Adam"} );
 		//no such table
 		assertThrows( IllegalArgumentException.class,() -> store.setValues( no_such_table, primaryKey, new String[]{"name"}, new Object[]{"Adam"} ));
+		//numbers of columns and values do not match
+		assertThrows( RuntimeException.class, () -> store.setValues( base, primaryKey, new String[]{"name", "age"}, new Object[]{"Adam"}) );
 	}
 
 	@Test
@@ -276,6 +278,14 @@ public class RecordStoreTest extends Assert implements AssertException
 		//no such table
 		final Scope failScope2  = new Scope(Conditions.is("age", 112), null, Scope.NO_LIMIT);
 		assertThrows( IllegalArgumentException.class,() ->store.findFirstWithData( no_such_table, base.getDefaultColumns(), failScope2));
+	}
+	
+	@Test
+	public void testFindAll()
+	{
+		Scope scope = new Scope(Conditions.is(base.getPrimaryColumn(), primaryKey), null, 2 );
+		assertEquals( 1, store.findAll( base, scope).size());
+		assertEquals( primaryKey, store.findAll( base, scope).iterator().next().intValue());
 	}
 
 	@Test

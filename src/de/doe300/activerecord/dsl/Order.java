@@ -86,8 +86,12 @@ public interface Order extends Comparator<ActiveRecord>
 	 * @see #equals(java.lang.Object) 
 	 * @since 0.7
 	 */
-	public default boolean equals( @Nonnull final Order order )
+	public default boolean equals( @Nullable final Order order )
 	{
+		if(order == null)
+		{
+			return false;
+		}
 		return toSQL( JDBCDriver.DEFAULT, null ).equals( order.toSQL( JDBCDriver.DEFAULT, null));
 	}
 }

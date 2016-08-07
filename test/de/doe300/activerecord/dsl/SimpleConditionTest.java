@@ -243,9 +243,11 @@ public class SimpleConditionTest extends TestBase implements AssertException
 	}
 	
 	@Test
-	public void testInConditionError()
+	public void testCheckValue()
 	{
 		assertThrows( IllegalArgumentException.class, () -> new SimpleCondition("id", "Dummy", Comparison.IN));
+		//fails for trying to compare non-comparable value
+		assertThrows( IllegalArgumentException.class, () -> new SimpleCondition("age", new Object(), Comparison.SMALLER));
 	}
 	
 	@Test
@@ -253,5 +255,27 @@ public class SimpleConditionTest extends TestBase implements AssertException
 	{
 		SimpleCondition s1 = new SimpleCondition("id", "dummy", Comparison.IS);
 		assertSame( s1, s1.negate().negate() );
+	}
+	
+	@Test
+	public void testEquals()
+	{
+		SimpleCondition s1 = new SimpleCondition("id", "dummy", Comparison.IS);
+		SimpleCondition s2 = new SimpleCondition("id", "dummy", Comparison.IS);
+		
+		assertTrue( s1.equals((Object) s1));
+		assertFalse( s1.equals((Object) null));
+		assertFalse( s1.equals((Condition) null));
+		assertTrue( s1.equals( (Object)s2));
+	}
+	
+	@Test
+	public void testHashCode()
+	{
+		SimpleCondition s1 = new SimpleCondition("id", "dummy", Comparison.IS);
+		SimpleCondition s2 = new SimpleCondition("id", "dummy", Comparison.IS);
+		
+		assertEquals( s1.hashCode(), s2.hashCode());
+		assertEquals( s1.hashCode(), s2.hashCode());
 	}
 }

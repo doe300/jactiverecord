@@ -55,6 +55,7 @@ public class ValidationsTest extends Assert implements AssertException
 		assertFalse( Validations.notEmpty( new Object[]{}));
 		assertTrue( Validations.notEmpty( Collections.singletonMap( "a", null)));
 		assertFalse( Validations.notEmpty( Collections.emptyMap()));
+		assertTrue( Validations.notEmpty( Collections.singleton( "a")));
 		assertFalse( Validations.notEmpty(0));
 		assertTrue( Validations.notEmpty(5L));
 		
@@ -148,6 +149,8 @@ public class ValidationsTest extends Assert implements AssertException
 		assertFalse( customName.test( null, null));
 		assertFalse( customName.test( null, "Test"));
 		assertTrue( customName.test( null, "Dummy"));
+		
+		assertThrows( RuntimeException.class, () -> Validations.getValidationMethod( ValidationHolder.class.getAnnotationsByType( Validate.class)[7]));
 	}
 	
 	public static boolean customValidation(final Object name)
@@ -162,7 +165,8 @@ public class ValidationsTest extends Assert implements AssertException
 		@Validate(attribute = "children", type = ValidationType.NOT_EMPTY),
 		@Validate(attribute = "age", type = ValidationType.POSITIVE),
 		@Validate(attribute = "age", type = ValidationType.NEGATIVE),
-		@Validate(attribute = "name", type = ValidationType.CUSTOM, customClass = ValidationsTest.class, customMethod = "customValidation")
+		@Validate(attribute = "name", type = ValidationType.CUSTOM, customClass = ValidationsTest.class, customMethod = "customValidation"),
+		@Validate(attribute = "name", type = ValidationType.CUSTOM, customClass = ValidationsTest.class, customMethod = "no_such_validator"),
 	})
 	private interface ValidationHolder
 	{

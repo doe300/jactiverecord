@@ -128,8 +128,12 @@ public interface Condition extends Predicate<ActiveRecord>
 	 * @since 0.7
 	 * @see #equals(java.lang.Object) 
 	 */
-	public default boolean equals( @Nonnull final Condition condition )
+	public default boolean equals( @Nullable final Condition condition )
 	{
+		if(condition == null)
+		{
+			return false;
+		}
 		return toSQL( JDBCDriver.DEFAULT, null ).equals( condition.toSQL( JDBCDriver.DEFAULT, null));
 	}
 }

@@ -94,6 +94,18 @@ public class PairTest extends Assert implements AssertException
 		final Pair<String, String> testEq = Pair.createPair(firstNull.getFirst(), firstNull.getSecond());
 		assertFalse( firstNull.equals( secondNull));
 		assertTrue( firstNull.equals( testEq));
+		
+		assertEquals( Pair.createPair( null, null), Pair.createPair( null, null));
 	}
 
+	@Test
+	public void testHashCode()
+	{
+		assertEquals( Pair.createPair( null, null).hashCode(), Pair.EMPTY.hashCode());
+		
+		final Pair<String, String> p1 = Pair.createPair("a", "b");
+		final Pair<String, String> p2 = Pair.createPair("a", "b");
+		assertEquals( p1.hashCode(), p1.hashCode());
+		assertEquals( p1.hashCode(), p2.hashCode());
+	}
 }

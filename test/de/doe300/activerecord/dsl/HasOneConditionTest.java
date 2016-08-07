@@ -158,4 +158,23 @@ public class HasOneConditionTest extends TestBase
 		assertFalse( invCond.test( t3));
 	}
 
+	@Test
+	public void testEquals()
+	{
+		Condition cond = new HasOneCondition("id", base, "fk_test_id", Conditions.isNull("name"));
+		
+		assertTrue( cond.equals( (Object)cond));
+		assertFalse( cond.equals( (Object)null));
+		assertFalse( cond.equals( (Condition)null));
+		assertTrue( cond.equals( (Object)cond1));
+	}
+	
+	@Test
+	public void testHashCode()
+	{
+		Condition cond = new HasOneCondition("id", base, "fk_test_id", Conditions.isNull("name"));
+		
+		assertEquals( cond.hashCode(), cond.hashCode());
+		assertEquals( cond.hashCode(), cond1.hashCode());
+	}
 }

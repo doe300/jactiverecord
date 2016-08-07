@@ -138,6 +138,7 @@ public class RecordBaseTest<T extends TestInterface> extends TestBase implements
 		assertNotNull( t );
 		assertTrue(RecordBase.equals( t,t));
 		assertFalse(RecordBase.equals( t, base.createRecord()));
+		assertFalse( RecordBase.equals( t, null));
 	}
 
 	@Test

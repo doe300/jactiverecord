@@ -34,6 +34,7 @@ import de.doe300.activerecord.record.RecordType;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.Iterator;
+import java.util.Objects;
 import org.junit.AfterClass;
 import org.junit.BeforeClass;
 import org.junit.Test;
@@ -151,6 +152,12 @@ public class CollectionHandlerTest extends TestBase implements AssertException
 	public void testClear()
 	{
 		assertThrows( RuntimeException.class, () -> record.clear());
+	}
+	
+	@Test
+	public void testStream()
+	{
+		assertTrue( record.stream().parallel().anyMatch((Object t) -> Objects.equals( t, record.getPrimaryKey())));
 	}
 	
 	@RecordType(typeName = "TESTTABLE", primaryKey = "id", defaultColumns = {"id", "name", "age"})

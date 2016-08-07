@@ -97,7 +97,7 @@ public class MySQLDriver extends JDBCDriver
 	@Override
 	public String getLimitClause( int offset, int limit )
 	{
-		if(offset <= 0 && limit < 0)
+		if(offset <= 0 && limit <= 0)
 		{
 			return "";
 		}

@@ -520,7 +520,7 @@ public class JDBCDriver implements DBDriver
 	public Migration createMigration(final Class<? extends ActiveRecord> recordType, final RecordStore store)
 	{
 		if(!(store instanceof JDBCRecordStore)) {
-			throw new IllegalArgumentException("RecordStore must beof type JDBCRecordStore!");
+			throw new IllegalArgumentException("RecordStore must be of type JDBCRecordStore!");
 		}
 		return new AutomaticMigration(recordType, ((JDBCRecordStore)store), this);
 	}
@@ -529,7 +529,7 @@ public class JDBCDriver implements DBDriver
 	public Migration createMigration(Class<? extends ActiveRecord> recordType, String storeName, RecordStore store )
 	{
 		if(!(store instanceof JDBCRecordStore)) {
-			throw new IllegalArgumentException("RecordStore must beof type JDBCRecordStore!");
+			throw new IllegalArgumentException("RecordStore must be of type JDBCRecordStore!");
 		}
 		return new AutomaticMigration(recordType, storeName, ((JDBCRecordStore)store), this);
 	}
@@ -551,10 +551,12 @@ public class JDBCDriver implements DBDriver
 				}).collect( Collectors.joining( ",\n"))+ ");";
 		if(indices != null)
 		{
-			applyCommand += indices.entrySet().stream().map( (Map.Entry<Set<String>, IndexType> index) -> 
+			applyCommand += " " + indices.entrySet().stream().map( (Map.Entry<Set<String>, IndexType> index) -> 
 			{
-				return "CREATE INDEX ON " + storeName + " (" + index.getKey().stream().collect( Collectors.joining(", ")) + ")";
-			}).collect( Collectors.joining(";\n"));
+				//FIXME somehow can't create INDEX on newly created table (HSQLDB, MySQL)
+				final String name = "index_" + index.getKey().stream().collect( Collectors.joining( "_"));
+				return IndexType.DEFAULT.toSQL( this, storeName, name, index.getKey().toArray( new String[index.getKey().size()]));
+			}).collect( Collectors.joining(";\n")) + ';';
 		}
 		final String revertCommand = "DROP TABLE " + storeName;
 		//does not support update, too complicated
@@ -565,7 +567,7 @@ public class JDBCDriver implements DBDriver
 	public Migration createMigration( String applyCommand, String updateCommand, String revertCommand,  final RecordStore store )
 	{
 		if(!(store instanceof JDBCRecordStore)) {
-			throw new IllegalArgumentException("RecordStore must beof type JDBCRecordStore!");
+			throw new IllegalArgumentException("RecordStore must be of type JDBCRecordStore!");
 		}
 		return new ManualMigration(applyCommand, updateCommand, revertCommand, ((JDBCRecordStore)store).getConnection());
 	}

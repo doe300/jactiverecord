@@ -42,6 +42,9 @@ import de.doe300.activerecord.store.RecordStore;
 import de.doe300.activerecord.store.impl.CachedJDBCRecordStore;
 import de.doe300.activerecord.store.impl.SimpleJDBCRecordStore;
 import de.doe300.activerecord.store.impl.memory.MemoryRecordStore;
+import java.lang.reflect.Field;
+import java.sql.ResultSet;
+import org.junit.Test;
 
 /**
  * Starts the HSQLDB server for testing
@@ -100,6 +103,10 @@ public class TestServer extends Assert
 	public static Connection getTestConnection() throws SQLException
 	{
 		return DriverManager.getConnection( "jdbc:hsqldb:mem:test", "sa", "");
+		//FIXME SQLite errors
+		/**
+		 * - Cannot find ANY database anymore. Corrupted version? JDBC-wrapper incompatible with binaries?
+		 */
 //		return DriverManager.getConnection("jdbc:sqlite::memory:");
 		//FIXME MySQL errors:
 		/**
@@ -111,7 +118,6 @@ public class TestServer extends Assert
 
 		//FIXME PostgreSQL errors:
 		/**
-		 * - Doesn't support VARBINARY, types need to be BYTEA in tests
 		 */
 		//start server with "systemctl start postgresql.service"
 //		return DriverManager.getConnection( "jdbc:postgresql:postgres", "postgres", "");
@@ -173,8 +179,10 @@ public class TestServer extends Assert
 		Assert.assertTrue( getTestCore(MemoryRecordStore.class).getStore().getDriver().createMigration( type, tableName, getTestCore(MemoryRecordStore.class).getStore() ).revert());
 	}
 	
-	static void printMetaData(final Connection con) throws SQLException
+	@Test
+	public void printMetaData() throws Exception
 	{
+		final Connection con = getTestConnection();
 		final DatabaseMetaData data = con.getMetaData();
 		System.out.println( "Driver:" );
 		System.out.println( "- Name: "+data.getDriverName());
@@ -183,5 +191,26 @@ public class TestServer extends Assert
 		System.out.println( "Database: " );
 		System.out.println( "- Name: " +data.getDatabaseProductName() );
 		System.out.println( "- Version: "+data.getDatabaseProductVersion() );
+		
+		try(final ResultSet res = data.getTypeInfo())
+		{
+			System.out.println( "Data Types:" );
+			while(res.next())
+			{
+				System.out.println( "- " + res.getString( "TYPE_NAME" ) + " = " + getFieldName( res.getInt( "DATA_TYPE")));
+			}
+		}
+	}
+	
+	private String getFieldName(int value) throws IllegalArgumentException, IllegalAccessException
+	{
+		for(final Field f : java.sql.Types.class.getFields())
+		{
+			if(f.getType() == Integer.TYPE && ((int)f.get( null)) == value)
+			{
+				return java.sql.Types.class.getCanonicalName() + "#" + f.getName();
+			}
+		}
+		return null;
 	}
 }

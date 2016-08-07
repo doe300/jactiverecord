@@ -26,6 +26,7 @@ package de.doe300.activerecord.dsl;
 
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collection;
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 
@@ -176,6 +177,18 @@ public final class Conditions
 	}
 
 	/**
+	 * Wrapper for {@link #and(java.util.Collection) }
+	 * @param conds
+	 * @return the combined Condition
+	 * @see #and(java.util.Collection) 
+	 */
+	@Nonnull
+	public static Condition and(@Nullable final Condition... conds )
+	{
+		return and( Arrays.asList( conds));
+	}
+	
+	/**
 	 * Combines the <code>conds</code> and optimizes according to the following rules:
 	 * <ul>
 	 * <li>Removes all <code>null</code>-conditions</li>
@@ -187,15 +200,16 @@ public final class Conditions
 	 *
 	 * @param conds
 	 * @return the combined Condition
+	 * @since 0.8
 	 */
 	@Nonnull
-	public static Condition and(@Nullable final Condition... conds )
+	public static Condition and(@Nullable final Collection<Condition> conds )
 	{
-		if ( conds == null || conds.length == 0 )
+		if ( conds == null || conds.isEmpty() )
 		{
 			throw new IllegalArgumentException();
 		}
-		final ArrayList<Condition> list = new ArrayList<>( conds.length );
+		final ArrayList<Condition> list = new ArrayList<>( conds.size() );
 		for ( final Condition cond : conds )
 		{
 			//remove nulls
@@ -231,6 +245,18 @@ public final class Conditions
 		}
 		return new AndCondition( list.toArray( new Condition[ list.size() ] ) );
 	}
+	
+	/**
+	 * Wrapper for {@link #or(java.util.Collection) }
+	 * @param conds
+	 * @return the combined Condition
+	 * @see #or(java.util.Collection) 
+	 */
+	@Nonnull
+	public static Condition or(@Nullable Condition... conds )
+	{
+		return or( Arrays.asList( conds));
+	}
 
 	/**
 	 * Combines the <code>conds</code> and optimizes according to the following rules:
@@ -244,15 +270,16 @@ public final class Conditions
 	 *
 	 * @param conds
 	 * @return the combined Condition
+	 * @since 0.8
 	 */
 	@Nonnull
-	public static Condition or(@Nullable Condition... conds )
+	public static Condition or(@Nullable final Collection<Condition> conds )
 	{
-		if ( conds == null || conds.length == 0 )
+		if ( conds == null || conds.isEmpty() )
 		{
 			throw new IllegalArgumentException();
 		}
-		ArrayList<Condition> list = new ArrayList<>( conds.length );
+		ArrayList<Condition> list = new ArrayList<>( conds.size() );
 		for ( Condition cond : conds )
 		{
 			//clears nulls
@@ -291,6 +318,19 @@ public final class Conditions
 	}
 	
 	/**
+	 * Wrapper for {@link #xor(java.util.Collection) }
+	 * @param conditions
+	 * @return the combined Condition
+	 * @see #xor(java.util.Collection)
+	 * @since 0.8
+	 */
+	@Nonnull
+	public static Condition xor(@Nullable final Condition... conditions)
+	{
+		return xor( Arrays.asList( conditions));
+	}
+	
+	/**
 	 * Combines the <code>conditions</code> and optimizes according to the following rules:
 	 * <ul>
 	 * <li>Removes all <code>null</code>-conditions</li>
@@ -304,13 +344,13 @@ public final class Conditions
 	 * @since 0.8
 	 */
 	@Nonnull
-	public static Condition xor(@Nullable final Condition... conditions)
+	public static Condition xor(@Nullable final Collection<Condition> conditions)
 	{
-		if ( conditions == null || conditions.length == 0 )
+		if ( conditions == null || conditions.isEmpty() )
 		{
 			throw new IllegalArgumentException();
 		}
-		ArrayList<Condition> list = new ArrayList<>( conditions.length );
+		ArrayList<Condition> list = new ArrayList<>( conditions.size() );
 		for ( Condition cond : conditions )
 		{
 			//clears nulls

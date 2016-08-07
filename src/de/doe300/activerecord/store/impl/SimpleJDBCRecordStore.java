@@ -850,7 +850,7 @@ public class SimpleJDBCRecordStore implements JDBCRecordStore
 	{
 		if(!exists( tableName ))
 		{
-			throw new IllegalArgumentException("Table doesn't exists: "+tableName);
+			throw new NoSuchDataSetException(tableName);
 		}
 		final String sql = "INSERT INTO "+tableName+" ("+Arrays.stream( columns).collect( Collectors.joining(", "))+") VALUES ("+
 			Arrays.stream( values ).map( (final Object obj) -> "?").collect( Collectors.joining(", "))+")";

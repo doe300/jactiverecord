@@ -159,4 +159,14 @@ public class OrConditionTest extends TestBase implements AssertException
 		
 		assertNotEquals( cond, new Object());
 	}
+	
+	@Test
+	public void testHashCode()
+	{
+		final Condition cond1 = Conditions.or(Conditions.is("name", "123Name4"), Conditions.isSmallerEquals( "age",-913));;
+		//1. criteria: hash(x) = hash(x) for multiple calls
+		assertEquals( cond.hashCode(), cond.hashCode() );
+		//2. criteria: x = y => hash(x) = hash(y)
+		assertEquals( cond.hashCode(), cond1.hashCode() );
+	}
 }

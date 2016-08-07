@@ -95,13 +95,19 @@ public class ScalarFunctionTest extends TestBase
 	public void testGeneral()
 	{
 		ScalarFunction<TestInterface, String, String> lower = new LowerCase<TestInterface>( "name", TestInterface::getName);
+		ScalarFunction<TestInterface, ?, ?> lower1 = new LowerCase<TestInterface>( "name", TestInterface::getName);
 		
 		assertEquals( "name", lower.getAttributeName());
 		assertThrows( IllegalArgumentException.class, () -> lower.apply( Collections.singletonMap( "age", 13)));
-		assertTrue( lower.equals( lower));
+		assertTrue( lower.equals( (Object)lower));
 		assertFalse( lower.equals( new Object()));
-		assertFalse( lower.equals( null));
+		assertFalse( lower.equals( (Object)null));
+		assertFalse( lower.equals( (ScalarFunction)null));
 		assertEquals( "LOWER(name)", lower.toString());
+		assertEquals( lower, (Object)lower1);
+		
+		assertEquals( lower.hashCode(), lower.hashCode());
+		assertEquals( lower.hashCode(), lower1.hashCode());
 	}
 
 	@Test
@@ -201,6 +207,8 @@ public class ScalarFunctionTest extends TestBase
 		ScalarFunction<TestInterface, Double, Long> floor2 = new Floor<>(new SquareRoot<>(new Absolute<>("age", TestInterface::getAge)));
 		assertEquals( Long.valueOf( 30), floor2.apply( t1));
 		
+		ScalarFunction<TestInterface, Double, Long> floor3 = new Floor<>(new SquareRoot<>(new Signum<>("age", (i) -> null)));
+		assertNull( floor3.apply( t1));
 	}
 
 	@Test
@@ -215,6 +223,9 @@ public class ScalarFunctionTest extends TestBase
 		
 		ScalarFunction<TestInterface, Double, Long> ceil2 = new Ceiling<>(new SquareRoot<>(new Absolute<>("age", TestInterface::getAge)));
 		assertEquals( Long.valueOf( 31), ceil2.apply( t1));
+		
+		ScalarFunction<TestInterface, Double, Long> ceil3 = new Ceiling<>(new SquareRoot<>(new AbsoluteDouble<>("age", (i) -> null)));
+		assertNull( ceil3.apply( t1));
 	}
 
 	@Test
@@ -229,6 +240,9 @@ public class ScalarFunctionTest extends TestBase
 		
 		ScalarFunction<TestInterface, Long, Long> round2 = new Round<>(new Absolute<>("age", TestInterface::getAge));
 		assertEquals( Long.valueOf( -t1.getAge()), round2.apply( t1));
+		
+		ScalarFunction<TestInterface, Long, Long> round3 = new Round<>(new Absolute<>("age", (TestInterface i) -> null));
+		assertNull( round3.apply( t1));
 	}
 
 	@Test

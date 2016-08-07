@@ -161,4 +161,23 @@ public class SimpleOrderTest extends TestBase
 		
 		assertTrue( o.compare( i0, i1) > 0);
 	}
+	
+	@Test
+	public void testEquals()
+	{
+		Order o = Orders.fromSQLString( "name ASC, age DESC");
+		Order o1 = Orders.fromSQLString( "name ASC, age DESC");
+		assertTrue( o.equals( (Object)o));
+		assertFalse( o.equals( (Object)null));
+		assertTrue( o.equals( (Object)o1));
+	}
+	
+	@Test
+	public void testHashCode()
+	{
+		Order o = Orders.fromSQLString( "name ASC, age DESC");
+		Order o1 = Orders.fromSQLString( "name ASC, age DESC");
+		assertEquals(o.hashCode(), o.hashCode());
+		assertEquals( o.hashCode(), o1.hashCode());
+	}
 }

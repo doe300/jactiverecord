@@ -48,20 +48,13 @@ class ScalarOrder extends SimpleOrder
 	 * @param mappings the scalar functions to apply to the columns for value-mapping
 	 * @param types the order-types, may be <code>null</code>
 	 */
-	ScalarOrder(@Nonnull final String[] columns, @Nullable final ScalarFunction<?, ?, ?>[] mappings, @Nullable final OrderType[] types)
+	ScalarOrder(@Nonnull final String[] columns, @Nonnull final ScalarFunction<?, ?, ?>[] mappings, @Nullable final OrderType[] types)
 	{
 		super( columns, types );
-		if(mappings == null)
+		this.mappings = mappings;
+		if(mappings.length != columns.length)
 		{
-			this.mappings = new ScalarFunction[columns.length];
-		}
-		else
-		{
-			this.mappings = mappings;
-			if(mappings.length != columns.length)
-			{
-				throw new IllegalArgumentException("Invalid number of scalar-functions specified");
-			}
+			throw new IllegalArgumentException("Invalid number of scalar-functions specified");
 		}
 	}
 
@@ -71,7 +64,7 @@ class ScalarOrder extends SimpleOrder
 	 * @param mapping
 	 * @param type
 	 */
-	ScalarOrder(@Nonnull final String column, @Nullable final ScalarFunction<?, ?, ?> mapping, @Nonnull final OrderType type)
+	ScalarOrder(@Nonnull final String column, @Nonnull final ScalarFunction<?, ?, ?> mapping, @Nonnull final OrderType type)
 	{
 		super( column, type );
 		this.mappings = new ScalarFunction[]{mapping};

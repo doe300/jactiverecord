@@ -229,8 +229,10 @@ public class HasManyThroughAssociationSetTest extends TestBase
 		//test backing
 		set.remove( a2);
 		assertSame( 1, subSet.size());
+		assertFalse( subSet.contains( a2));
 		set.add( a2);
 		assertSame( 2, subSet.size());
+		assertTrue( subSet.contains( a2));
 	}
 	
 	@Test
@@ -248,15 +250,19 @@ public class HasManyThroughAssociationSetTest extends TestBase
 	@Test
 	public void testGetForCondition()
 	{
-		SortedSet<TestInterface> subSet = set.getForCondition( Conditions.is("name", "Hans") );
+		RecordSet<TestInterface> subSet = set.getForCondition( Conditions.is("name", "Hans") );
 		assertSame( 2, subSet.size());
 		assertSame( a2, subSet.first());
 		assertSame( a3, subSet.last());
 		//test backing
-		set.remove( a2);
+		assertTrue( set.remove( a2));
 		assertSame( 1, subSet.size());
-		set.add( a2);
+		assertTrue( set.add( a2));
 		assertSame( 2, subSet.size());
+		assertTrue( subSet.remove( a2));
+		assertTrue( subSet.add( a2));
+		assertSame( 2, subSet.size());
+		assertEquals(2, subSet.countDistinct("id", TestInterface::getPrimaryKey));
 	}
 
 	@Test

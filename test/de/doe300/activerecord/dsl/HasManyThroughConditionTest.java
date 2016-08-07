@@ -148,4 +148,23 @@ public class HasManyThroughConditionTest extends TestBase
 		assertFalse( invCond.test( t3));
 	}
 
+	@Test
+	public void testEquals()
+	{
+		Condition cond = new HasManyThroughCondition(base, mappingTable, "fk_test1", "fk_test2", "id", base, Conditions.is("age", 200));
+		
+		assertTrue( cond.equals( (Object)cond));
+		assertFalse( cond.equals( (Object)null));
+		assertFalse( cond.equals( (Condition)null));
+		assertTrue(cond.equals( (Object)cond1));
+	}
+	
+	@Test
+	public void testHashCode()
+	{
+		Condition cond = new HasManyThroughCondition(base, mappingTable, "fk_test1", "fk_test2", "id", base, Conditions.is("age", 200));
+		
+		assertEquals( cond.hashCode(), cond.hashCode());
+		assertEquals( cond1.hashCode(), cond.hashCode());
+	}
 }

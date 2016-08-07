@@ -151,8 +151,27 @@ public class AndConditionTest extends TestBase implements AssertException
 		Condition con1 = Conditions.and(
 				Conditions.is("age", 913),
 				Conditions.is("name", "123Name1"));
-		Condition con2 = Conditions.and(con1);
+		Condition con2 = Conditions.and(
+				Conditions.is("age", 913),
+				Conditions.is("name", "123Name1"));
 		
-		assertEquals( con1, con2);
+		assertTrue( con1.equals( (Object)con1));
+		assertTrue( con1.equals( (Object)con2));
+		assertFalse( con1.equals( (Object)null));
+		assertFalse( con1.equals( (Condition)null));
+	}
+	
+	@Test
+	public void testHashCode()
+	{
+		Condition con1 = Conditions.and(
+				Conditions.is("age", 913),
+				Conditions.is("name", "123Name1"));
+		Condition con2 = Conditions.and(
+				Conditions.is("age", 913),
+				Conditions.is("name", "123Name1"));
+		
+		assertEquals( con1.hashCode(), con1.hashCode());
+		assertEquals( con1.hashCode(), con2.hashCode());
 	}
 }
