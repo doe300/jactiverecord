@@ -49,7 +49,7 @@ public class QueryResultTest extends TestBase
 		super(core);
 		
 		base = core.getBase( TestInterface.class).getShardBase( QueryResultTest.class.getSimpleName());
-		base.findAll().forEach( ActiveRecord::destroy);
+		base.findAll().parallel().forEach( ActiveRecord::destroy);
 		TestInterface i = base.createRecord();
 		i.setName( "Alfons");
 		i.setAge( 20);

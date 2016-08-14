@@ -69,7 +69,7 @@ public class SimpleConditionTest extends TestBase implements AssertException
 		super(core);
 		
 		base = core.getBase( TestInterface.class).getShardBase( SimpleConditionTest.class.getSimpleName() );
-		base.findAll().forEach( ActiveRecord::destroy);
+		base.findAll().parallel().forEach( ActiveRecord::destroy);
 		t1 = base.createRecord();
 		t1.setName( "123Name1");
 		t1.setAge( -912);

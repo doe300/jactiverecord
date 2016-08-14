@@ -189,7 +189,7 @@ public class RecordBaseTest<T extends TestInterface> extends TestBase implements
 	public void testSaveAll()
 	{
 		//make sure all records are savable(validated)
-		base.find( Conditions.isNull("name")).forEach( (T t) -> t.setName( "Dummy"));
+		base.find( Conditions.isNull("name")).parallel().forEach( (T t) -> t.setName( "Dummy"));
 		base.saveAll();
 		//no data has changed since last save
 		assertFalse( base.saveAll() );
@@ -301,7 +301,7 @@ public class RecordBaseTest<T extends TestInterface> extends TestBase implements
 		T t = base.createRecord( Collections.singletonMap( "name", "AlexandraEven"));
 		assertNotNull( t );
 		assertTrue(base.search( "AlexandraEven").count() >= 1);
-		base.search( "AlexandraEven").forEach( (T i) -> i.destroy());
+		base.search( "AlexandraEven").parallel().forEach( (T i) -> i.destroy());
 		assertEquals(0, base.search( "AlexandraEven").count());
 	}
 
@@ -311,7 +311,7 @@ public class RecordBaseTest<T extends TestInterface> extends TestBase implements
 		T t = base.createRecord( Collections.singletonMap( "name", "hansPeterOlaf"));
 		assertNotNull( t );
 		assertEquals( t, base.searchFirst( "PeterOla") );
-		base.search( "hansPeterOlaf").forEach( (T i) -> i.destroy());
+		base.search( "hansPeterOlaf").parallel().forEach( (T i) -> i.destroy());
 	}
 
 	@Test
@@ -485,8 +485,8 @@ public class RecordBaseTest<T extends TestInterface> extends TestBase implements
 		assertTrue( base.minimum( "age", TestInterface::getAge) <= min.getAge());
 		assertTrue( min.getName().compareTo(base.minimum( "name", TestInterface::getName)) >= 0);
 		assertTrue( base.maximum( "age", TestInterface::getAge) >= max.getAge() );
-		//we have duplicate name, so count must be larger than count distinct
-		assertTrue( base.count( "name", TestInterface::getName) >= base.countDistinct( "name", TestInterface::getName));
+		//we have duplicate name, so count not null must be larger than count distinct
+		assertTrue( base.countNotNull( "name", TestInterface::getName) >= base.countDistinct( "name", TestInterface::getName));
 		assertTrue( base.sum( "age", TestInterface::getAge) > max.getAge());
 		assertEquals( base.sum( "age", TestInterface::getAge), base.sumFloating( "age", TestInterface::getAge), 0.01d);
 		assertTrue( base.average( "age", TestInterface::getAge) < max.getAge());

@@ -26,6 +26,7 @@ package de.doe300.activerecord;
 
 import de.doe300.activerecord.dsl.AggregateFunction;
 import de.doe300.activerecord.dsl.Condition;
+import de.doe300.activerecord.dsl.SQLFunction;
 import de.doe300.activerecord.dsl.functions.Average;
 import de.doe300.activerecord.dsl.functions.CountDistinct;
 import de.doe300.activerecord.dsl.functions.CountNotNull;
@@ -77,6 +78,19 @@ public interface AggregateMethods<T extends ActiveRecord> extends FinderMethods<
 	}
 	
 	/**
+	 * @param <C> the column-type
+	 * @param func the SQL-function mapping the record to a value
+	 * @return the minimum value
+	 * @see #aggregate(AggregateFunction, Condition)
+	 * @since 0.8
+	 */
+	@Nullable
+	public default <C extends Comparable<? super C>> C minimum(@Nonnull final SQLFunction<T, C> func)
+	{
+		return aggregate( new Minimum<>(func), null);
+	}
+	
+	/**
 	 * 
 	 * @param <C> the type of the column-value
 	 * @param columnName the name of the column to get the minimum from
@@ -90,30 +104,68 @@ public interface AggregateMethods<T extends ActiveRecord> extends FinderMethods<
 	}
 	
 	/**
-	 * NOTE: this method counts the number of records, with a column-value which is not <code>null</code>
+	 * 
+	 * @param <C> the type of the column-value
+	 * @param func the SQL-function mapping the record to a value
+	 * @return the maximum value
+	 * @since 0.8
+	 */
+	@Nullable
+	public default <C extends Comparable<? super C>> C maximum(@Nonnull final SQLFunction<T, C> func)
+	{
+		return aggregate( new Maximum<>(func), null);
+	}
+	
+	/**
 	 * @param <C> the type of the column-value
 	 * @param columnName the name of the column to count the <code>non-null</code> values
 	 * @param columnFunc the function mapping the record to its column-value
 	 * @return the count
 	 */
 	@Nonnegative
-	public default <C> long count(@Nonnull final String columnName, @Nonnull final Function<T, C> columnFunc)
+	public default <C> long countNotNull(@Nonnull final String columnName, @Nonnull final Function<T, C> columnFunc)
 	{
 		return Objects.requireNonNull( aggregate( new CountNotNull<>(columnName, columnFunc), null)).longValue();
+	}
+	
+	/**
+	 * @param <C> the type of the column-value
+	 * @param func the SQL-function mapping the record to a value
+	 * @return the countNotNull
+	 * @since 0.8
+	 */
+	@Nonnegative
+	public default <C> long countNotNull(@Nonnull final SQLFunction<T, C> func)
+	{
+		return Objects.requireNonNull( aggregate( new CountNotNull<>(func), null)).longValue();
 	}
 	
 	/**
 	 * Counts all records which column-values are distinct values
 	 * 
 	 * @param <C> the type of the column-value
-	 * @param columnName the name of the column to count the distinct values
+	 * @param columnName the name of the column to countNotNull the distinct values
 	 * @param columnFunc the function mapping the record to its column-value
-	 * @return the count of records with the given condition
+	 * @return the countNotNull of records with the given condition
 	 */
 	@Nonnegative
 	public default <C> long countDistinct(@Nonnull final String columnName, @Nonnull final Function<T, C> columnFunc)
 	{
 		return Objects.requireNonNull( aggregate( new CountDistinct<>(columnName, columnFunc), null)).longValue();
+	}
+	
+	/**
+	 * Counts all records which column-values are distinct values
+	 * 
+	 * @param <C> the type of the column-value
+	 * @param func the SQL-function mapping the record to a value
+	 * @return the countNotNull of records with the given condition
+	 * @since 0.8
+	 */
+	@Nonnegative
+	public default <C> long countDistinct(@Nonnull final SQLFunction<T, C> func)
+	{
+		return Objects.requireNonNull( aggregate( new CountDistinct<>(func), null)).longValue();
 	}
 	
 	/**
@@ -131,6 +183,20 @@ public interface AggregateMethods<T extends ActiveRecord> extends FinderMethods<
 	}
 	
 	/**
+	 * Calculates the sum of the column-values by casting all single column-values to long
+	 * 
+	 * @param <C> the type of the column-value
+	 * @param func the SQL-function mapping the record to a value
+	 * @return the sum of all the column-values
+	 * @since 0.8
+	 */
+	@Signed
+	public default <C extends Number> long sum(@Nonnull final SQLFunction<T, C> func)
+	{
+		return Objects.requireNonNull( aggregate( new Sum<>(func), null)).longValue();
+	}
+	
+	/**
 	 * Calculates the sum of the column-values by casting all single column-values to double
 	 * 
 	 * @param <C> the type of the column-value
@@ -145,6 +211,20 @@ public interface AggregateMethods<T extends ActiveRecord> extends FinderMethods<
 	}
 	
 	/**
+	 * Calculates the sum of the column-values by casting all single column-values to double
+	 * 
+	 * @param <C> the type of the column-value
+	 * @param func the SQL-function mapping the record to a value
+	 * @return the sum of all the column-values
+	 * @since 0.8
+	 */
+	@Signed
+	public default <C extends Number> double sumFloating(@Nonnull final SQLFunction<T, C> func)
+	{
+		return Objects.requireNonNull( aggregate( new SumDouble<>(func), null)).doubleValue();
+	}
+	
+	/**
 	 * Calculates the average column-value
 	 * @param <C> the type of the column-value
 	 * @param columnName the name of the column to retrieve the average value
@@ -155,5 +235,18 @@ public interface AggregateMethods<T extends ActiveRecord> extends FinderMethods<
 	public default <C extends Number> double average(@Nonnull final String columnName, @Nonnull final Function<T, C> columnFunc)
 	{
 		return Objects.requireNonNull( aggregate( new Average<>(columnName, columnFunc), null)).doubleValue();
+	}
+	
+	/**
+	 * Calculates the average column-value
+	 * @param <C> the type of the column-value
+	 * @param func the SQL-function mapping the record to a value
+	 * @return the average column-value
+	 * @since 0.8
+	 */
+	@Signed
+	public default <C extends Number> double average(@Nonnull final SQLFunction<T, C> func)
+	{
+		return Objects.requireNonNull( aggregate( new Average<>(func), null)).doubleValue();
 	}
 }

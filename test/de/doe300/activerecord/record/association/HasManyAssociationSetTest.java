@@ -56,7 +56,7 @@ public class HasManyAssociationSetTest extends TestBase
 	{
 		super(core);
 		base = core.getBase( TestInterface.class ).getShardBase( HasManyAssociationSetTest.class.getSimpleName());
-		base.findAll().forEach( ActiveRecord::destroy);
+		base.findAll().parallel().forEach( ActiveRecord::destroy);
 		assocI = base.createRecord();
 		set = AssociationHelper.getHasManySet( assocI, base, "fk_test_id" );
 		
@@ -185,7 +185,7 @@ public class HasManyAssociationSetTest extends TestBase
 	@Test
 	public void testFind()
 	{
-		assertTrue(set.find( Conditions.is(a2.getBase().getPrimaryColumn(), a2.getPrimaryKey())).allMatch( (TestInterface i) -> i.equals( a2)));
+		assertTrue(set.find( Conditions.is(a2.getBase().getPrimaryColumn(), a2.getPrimaryKey())).parallel().allMatch( (TestInterface i) -> i.equals( a2)));
 	}
 
 	@Test
@@ -276,7 +276,7 @@ public class HasManyAssociationSetTest extends TestBase
 		assertTrue( subSet.remove( a2));
 		assertTrue( subSet.add( a2));
 		assertSame( set.getRecordBase(), ((RecordSet)subSet).getRecordBase());
-		assertEquals( subSet.size(), ((RecordSet<TestInterface>)subSet).count( "name", TestInterface::getName));
+		assertEquals( subSet.size(), ((RecordSet<TestInterface>)subSet).countNotNull( "name", TestInterface::getName));
 	}
 
 	@Test

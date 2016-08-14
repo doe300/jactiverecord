@@ -65,7 +65,7 @@ public class CachedRecordSetTest extends TestBase implements AssertException
 	{
 		super(core);
 		base = core.getBase( TestInterface.class ).getShardBase( CachedRecordSetTest.class.getSimpleName());
-		base.findAll().forEach( ActiveRecord::destroy);
+		base.findAll().parallel().forEach( ActiveRecord::destroy);
 		set = new CachedRecordSet<>(new TableSet<TestInterface>(base, null ));
 		
 		//fill set

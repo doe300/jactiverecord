@@ -57,6 +57,7 @@ import de.doe300.activerecord.store.RecordStore;
 import de.doe300.activerecord.record.validation.ValidatedRecord;
 import de.doe300.activerecord.record.validation.ValidationFailed;
 import de.doe300.activerecord.store.JDBCRecordStore;
+import java.util.Collections;
 import java.util.Objects;
 import java.util.SortedMap;
 import java.util.function.Function;
@@ -97,7 +98,7 @@ public abstract class RecordBase<T extends ActiveRecord> implements ReadOnlyReco
 		this.recordType = recordType;
 		this.core = core;
 		this.store = store;
-		this.records = new TreeMap<>();
+		this.records = Collections.synchronizedSortedMap( new TreeMap<>());
 		this.shards = new TreeMap<>();
 	}
 	
@@ -114,7 +115,7 @@ public abstract class RecordBase<T extends ActiveRecord> implements ReadOnlyReco
 		this.store = origBase.store;
 		this.tableName = tableName;
 		this.records = new TreeMap<>();
-		//disallow creating shars from shards ...
+		//disallow creating shards from shards
 		this.shards = null;
 	}
 	

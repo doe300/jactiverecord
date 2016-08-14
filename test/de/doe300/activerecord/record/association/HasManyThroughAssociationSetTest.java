@@ -179,7 +179,7 @@ public class HasManyThroughAssociationSetTest extends TestBase
 	@Test
 	public void testFind()
 	{
-		assertTrue(set.find( Conditions.is(a2.getBase().getPrimaryColumn(), a2.getPrimaryKey())).allMatch( (TestInterface i) -> i.equals( a2)));
+		assertTrue(set.find( Conditions.is(a2.getBase().getPrimaryColumn(), a2.getPrimaryKey())).parallel().allMatch( (TestInterface i) -> i.equals( a2)));
 	}
 
 	@Test
@@ -268,7 +268,7 @@ public class HasManyThroughAssociationSetTest extends TestBase
 	@Test
 	public void testFindWithScope()
 	{
-		try(final Stream<TestInterface> s = set.findWithScope( new Scope(null, Orders.sortDescending( base.getPrimaryColumn()), 5)))
+		try(final Stream<TestInterface> s = set.findWithScope( new Scope(null, Orders.sortDescending( base.getPrimaryColumn()), 5)).parallel())
 		{
 			assertSame( a3, s.findFirst().get());
 		}

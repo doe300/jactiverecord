@@ -60,7 +60,7 @@ public class ConditionSetTest extends TestBase implements AssertException
 	{
 		super(core);
 		base = core.getBase( TestInterface.class ).getShardBase( ConditionSetTest.class.getSimpleName());
-		base.findAll().forEach( ActiveRecord::destroy);
+		base.findAll().parallel().forEach( ActiveRecord::destroy);
 		set = AssociationHelper.getConditionSet( base, "age", 23, 12);
 		
 		//fill set
@@ -200,7 +200,7 @@ public class ConditionSetTest extends TestBase implements AssertException
 	@Test
 	public void testFind()
 	{
-		assertTrue(set.find( Conditions.is(a2.getBase().getPrimaryColumn(), a2.getPrimaryKey())).allMatch( (TestInterface i) -> i.equals( a2)));
+		assertTrue(set.find( Conditions.is(a2.getBase().getPrimaryColumn(), a2.getPrimaryKey())).parallel().allMatch( (TestInterface i) -> i.equals( a2)));
 	}
 
 	@Test
@@ -294,7 +294,7 @@ public class ConditionSetTest extends TestBase implements AssertException
 		TestInterface i = base.createRecord();
 		i.setName( "Hans");
 		i.setAge( 23);
-		try(final Stream<TestInterface> s = set.findWithScope( new Scope(null, null, Scope.NO_LIMIT)))
+		try(final Stream<TestInterface> s = set.findWithScope( new Scope(null, null, Scope.NO_LIMIT)).parallel())
 		{
 			assertTrue( s.anyMatch( (TestInterface t) -> Objects.equals( t.getName(), "Hans")));
 		}

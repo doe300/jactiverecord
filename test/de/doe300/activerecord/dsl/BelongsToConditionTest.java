@@ -96,11 +96,11 @@ public class BelongsToConditionTest extends TestBase
 		assertEquals( 0, base.count( cond1));
 		assertEquals( 3, base.count( cond2 ));
 		assertEquals( 2, base.count( cond3));
-		try(final Stream<TestInterface> s = base.find( cond3))
+		try(final Stream<TestInterface> s = base.find( cond3).parallel())
 		{
 			assertTrue( s.anyMatch( (TestInterface i) -> i.equals( t2)));
 		}
-		try(final Stream<TestInterface> s = base.find( cond3 ))
+		try(final Stream<TestInterface> s = base.find( cond3 ).parallel())
 		{
 			assertFalse( s.anyMatch( (TestInterface i) -> i.equals( t1)));
 		}

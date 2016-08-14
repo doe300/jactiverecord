@@ -31,7 +31,6 @@ import de.doe300.activerecord.TestInterface;
 import de.doe300.activerecord.TestServer;
 import de.doe300.activerecord.dsl.Conditions;
 import de.doe300.activerecord.record.ActiveRecord;
-import java.sql.SQLException;
 import org.junit.AfterClass;
 import org.junit.BeforeClass;
 import org.junit.Test;
@@ -48,7 +47,7 @@ public class AssociationHelperTest extends TestBase
 	{
 		super(core);
 		base = core.getBase( TestInterface.class);
-		base.findAll().forEach( ActiveRecord::destroy);
+		base.findAll().parallel().forEach( ActiveRecord::destroy);
 	}
 	
 	@BeforeClass

@@ -58,7 +58,7 @@ public class TableSetTest extends TestBase implements AssertException
 		super(core);
 		
 		base = core.getBase( TestInterface.class ).getShardBase( TableSetTest.class.getSimpleName());
-		base.findAll().forEach( ActiveRecord::destroy);
+		base.findAll().parallel().forEach( ActiveRecord::destroy);
 		set = new TableSet<TestInterface>(base, null );
 		
 		//fill set
@@ -158,7 +158,7 @@ public class TableSetTest extends TestBase implements AssertException
 	@Test
 	public void testFind()
 	{
-		assertTrue(set.find( Conditions.is(a2.getBase().getPrimaryColumn(), a2.getPrimaryKey())).allMatch( (TestInterface i) -> i.equals( a2)));
+		assertTrue(set.find( Conditions.is(a2.getBase().getPrimaryColumn(), a2.getPrimaryKey())).parallel().allMatch( (TestInterface i) -> i.equals( a2)));
 	}
 
 	@Test
