@@ -51,6 +51,7 @@ import javax.annotation.WillNotClose;
 import de.doe300.activerecord.RecordBase;
 import de.doe300.activerecord.dsl.AggregateFunction;
 import de.doe300.activerecord.dsl.Condition;
+import de.doe300.activerecord.dsl.Conditions;
 import de.doe300.activerecord.dsl.Order;
 import de.doe300.activerecord.jdbc.driver.JDBCDriver;
 import de.doe300.activerecord.logging.Logging;
@@ -62,6 +63,7 @@ import de.doe300.activerecord.record.TimestampedRecord;
 import de.doe300.activerecord.scope.Scope;
 import de.doe300.activerecord.store.JDBCRecordStore;
 import de.doe300.activerecord.store.NoSuchDataSetException;
+import de.doe300.activerecord.store.diagnostics.Diagnostics;
 import java.util.Optional;
 
 /**
@@ -72,7 +74,10 @@ public class SimpleJDBCRecordStore implements JDBCRecordStore
 {
 	@Nonnull
 	protected final Connection con;
+	@Nonnull
 	protected final JDBCDriver driver;
+	@Nonnull
+	protected final Diagnostics<String> diagnostics;
 
 	/**
 	 * @param con
@@ -81,6 +86,7 @@ public class SimpleJDBCRecordStore implements JDBCRecordStore
 	{
 		this.con=con;
 		this.driver = JDBCDriver.guessDriver( con );
+		this.diagnostics = driver.createDiagnostics( this );
 	}
 
 	/**
@@ -91,6 +97,7 @@ public class SimpleJDBCRecordStore implements JDBCRecordStore
 	{
 		this.con = con;
 		this.driver = driver;
+		this.diagnostics = driver.createDiagnostics( this );
 	}
 
 	@Nonnull
@@ -133,7 +140,7 @@ public class SimpleJDBCRecordStore implements JDBCRecordStore
 			if(cond.getValues().length > driver.getParametersLimit())
 			{
 				final String preparedQuery = StatementUtil.prepareQuery(driver, query, cond );
-				return con.createStatement( ResultSet.TYPE_FORWARD_ONLY, ResultSet.CONCUR_READ_ONLY).executeQuery( preparedQuery );
+				return diagnostics.profileQuery( () -> con.createStatement( ResultSet.TYPE_FORWARD_ONLY, ResultSet.CONCUR_READ_ONLY).executeQuery( preparedQuery ), () -> preparedQuery).get();
 			}
 		}
 		final PreparedStatement stm = con.prepareStatement(query, ResultSet.TYPE_FORWARD_ONLY, ResultSet.CONCUR_READ_ONLY);
@@ -141,7 +148,7 @@ public class SimpleJDBCRecordStore implements JDBCRecordStore
 		{
 			fillStatement( stm, cond );
 		}
-		return stm.executeQuery();
+		return diagnostics.profileQuery(() -> stm.executeQuery(), () -> StatementUtil.prepareQuery(driver, query, cond )).get();
 	}
 	
 	protected void fillStatement(@Nonnull final PreparedStatement stm, @Nonnull final Condition condition)
@@ -269,6 +276,12 @@ public class SimpleJDBCRecordStore implements JDBCRecordStore
 	public JDBCDriver getDriver()
 	{
 		return driver;
+	}
+
+	@Override
+	public Diagnostics<String> getDiagnostics()
+	{
+		return diagnostics;
 	}
 
 	@Override
@@ -752,9 +765,7 @@ public class SimpleJDBCRecordStore implements JDBCRecordStore
 		try
 		{
 			//can't use try-with-resource here, because result-set is required to stay open
-			final PreparedStatement stmt = con.prepareStatement( sql);
-			stmt.setObject( 1, condValue);
-			final ResultSet res = stmt.executeQuery();
+			final ResultSet res = queryStatement( sql, Conditions.is( condColumn, condValue));
 			return valuesStream(res);
 		}
 		catch ( final SQLException ex )

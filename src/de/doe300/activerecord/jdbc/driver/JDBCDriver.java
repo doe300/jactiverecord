@@ -24,6 +24,7 @@
  */
 package de.doe300.activerecord.jdbc.driver;
 
+import de.doe300.activerecord.jdbc.diagnostics.JDBCQuery;
 import java.math.BigDecimal;
 import java.sql.Connection;
 import java.sql.DatabaseMetaData;
@@ -50,7 +51,10 @@ import de.doe300.activerecord.record.ActiveRecord;
 import de.doe300.activerecord.store.DBDriver;
 import de.doe300.activerecord.store.JDBCRecordStore;
 import de.doe300.activerecord.store.RecordStore;
+import de.doe300.activerecord.store.diagnostics.Diagnostics;
+import de.doe300.activerecord.store.diagnostics.QueryRemark;
 import java.lang.reflect.Array;
+import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.stream.Collectors;
@@ -571,6 +575,29 @@ public class JDBCDriver implements DBDriver
 		}
 		return new ManualMigration(applyCommand, updateCommand, revertCommand, ((JDBCRecordStore)store).getConnection());
 	}
+
+	@Override
+	public Diagnostics<String> createDiagnostics( RecordStore store )
+	{
+		return new Diagnostics<String>(store, (String t, Long u) ->
+		{
+			return new JDBCQuery(( JDBCRecordStore ) store, t, null, u)
+			{
+				@Override
+				protected List<String> runExplain( String sqlStatment ) throws Exception
+				{
+					throw new UnsupportedOperationException( "Not supported by default driver." );
+				}
+				
+				@Override
+				protected List<QueryRemark<String>> createRemarks( List<String> explainResult ) throws
+						UnsupportedOperationException
+				{
+					throw new UnsupportedOperationException( "Not supported by default driver." );
+				}
+			};
+		});
+	}
 	
 	/**
 	 * Determines the maximum number of host-parameters ("?") supported by the DBMS.
@@ -583,7 +610,7 @@ public class JDBCDriver implements DBDriver
 	{
 		return PARAMETERS_LIMIT_UNLIMITED;
 	}
-
+	
 	/**
 	 * This method tries to guess the vendor-specific driver from reading the
 	 * {@link DatabaseMetaData#getDatabaseProductName() database product-name}.

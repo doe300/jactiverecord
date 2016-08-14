@@ -37,12 +37,16 @@ import javax.annotation.Nonnull;
 import de.doe300.activerecord.RecordBase;
 import de.doe300.activerecord.dsl.AggregateFunction;
 import de.doe300.activerecord.dsl.Condition;
+import de.doe300.activerecord.dsl.Conditions;
 import de.doe300.activerecord.record.TimestampedRecord;
 import de.doe300.activerecord.scope.Scope;
 import de.doe300.activerecord.store.DBDriver;
 import de.doe300.activerecord.store.NoSuchAttributeException;
 import de.doe300.activerecord.store.NoSuchDataSetException;
 import de.doe300.activerecord.store.RecordStore;
+import de.doe300.activerecord.store.diagnostics.Diagnostics;
+import de.doe300.activerecord.util.Pair;
+import de.doe300.activerecord.util.ThrowingFunctions.ThrowingSupplier;
 import java.util.Arrays;
 import javax.annotation.Nonnegative;
 
@@ -53,6 +57,7 @@ import javax.annotation.Nonnegative;
  */
 public class MemoryRecordStore implements RecordStore
 {
+	private final Diagnostics<Pair< String, Scope>> diagnostics;
 	private final SortedMap<String, MemoryTable> tables;
 
 	/**
@@ -61,12 +66,19 @@ public class MemoryRecordStore implements RecordStore
 	public MemoryRecordStore()
 	{
 		this.tables = new TreeMap<>();
+		this.diagnostics = MemoryDBDriver.INSTANCE.createDiagnostics( this );
 	}
 
 	@Override
 	public DBDriver getDriver()
 	{
 		return MemoryDBDriver.INSTANCE;
+	}
+
+	@Override
+	public Diagnostics<?> getDiagnostics()
+	{
+		return diagnostics;
 	}
 
 	@Override
@@ -203,7 +215,9 @@ public class MemoryRecordStore implements RecordStore
 	{
 		final MemoryTable table = assertTableExists( tableName );
 		assertColumnsExist( table, column, condColumn);
-		return table.getValues( column, condColumn, condValue );
+		return diagnostics.profileQuery( (ThrowingSupplier<Stream<Object>, IllegalArgumentException>)() -> 
+				table.getValues( column, condColumn, condValue ), 
+				() -> Pair.createPair(tableName, new Scope(Conditions.is( condColumn, condValue), null, Scope.NO_LIMIT))).get();
 	}
 
 	@Override
@@ -302,7 +316,7 @@ public class MemoryRecordStore implements RecordStore
 		final MemoryTable table = assertTableExists( base.getTableName() );
 		assertColumnsExist( table, columns);
 		final Scope effectiveScope = scope.getOrder() != null ? scope : new Scope(scope.getCondition(), base.getDefaultOrder(), scope.getLimit());
-		final Map.Entry<Integer, MemoryRow> row = table.findFirstRow( effectiveScope);
+		final Map.Entry<Integer, MemoryRow> row = diagnostics.profileQuery((ThrowingSupplier<Map.Entry<Integer, MemoryRow>, IllegalArgumentException>) () -> table.findFirstRow( effectiveScope), () -> Pair.createPair( base.getTableName(), effectiveScope)).get();
 		if(row != null)
 		{
 			return new HashMap<>(row.getValue().getRowMap());
@@ -316,15 +330,20 @@ public class MemoryRecordStore implements RecordStore
 		final MemoryTable table = assertTableExists( base.getTableName() );
 		assertColumnsExist( table, columns);
 		final Scope effectiveScope = scope.getOrder() != null ? scope : new Scope(scope.getCondition(), base.getDefaultOrder(), scope.getLimit());
-		return table.findAllRows( effectiveScope ).map( (final Map.Entry<Integer, MemoryRow> e) -> e.getValue().getRowMap());
+		return diagnostics.profileQuery((ThrowingSupplier<Stream<Map<String, Object>>, RuntimeException>) 
+				() -> table.findAllRows( effectiveScope ).map( (final Map.Entry<Integer, MemoryRow> e) -> e.getValue().getRowMap()), 
+				() -> Pair.createPair( base.getTableName(), effectiveScope) ).get();
 	}
 
 	@Override
 	public <R> R aggregate(RecordBase<?> base, AggregateFunction<?, ?, ?, R> aggregateFunction, Condition condition )
 	{
 		final MemoryTable table = assertTableExists( base.getTableName() );
-		return aggregateFunction.aggregate( table.findAllRows( new Scope(condition, null, Scope.NO_LIMIT)).
-				map( Map.Entry::getValue ).map(MemoryRow::getRowMap));
+		return diagnostics.profileQuery((ThrowingSupplier<R, RuntimeException>) 
+				() -> aggregateFunction.aggregate( table.findAllRows( new Scope(condition, null, Scope.NO_LIMIT)).
+				map( Map.Entry::getValue ).map(MemoryRow::getRowMap)), 
+				//TODO Scope is wrong!
+				() -> Pair.createPair( base.getTableName(), new Scope(condition, null, Scope.NO_LIMIT))).get();
 	}
 
 	@Override

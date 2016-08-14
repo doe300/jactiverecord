@@ -24,7 +24,11 @@
  */
 package de.doe300.activerecord.jdbc.driver;
 
+import de.doe300.activerecord.jdbc.diagnostics.SQLiteQuery;
 import de.doe300.activerecord.migration.constraints.IndexType;
+import de.doe300.activerecord.store.JDBCRecordStore;
+import de.doe300.activerecord.store.RecordStore;
+import de.doe300.activerecord.store.diagnostics.Diagnostics;
 import java.io.Serializable;
 import javax.annotation.Nonnull;
 
@@ -148,5 +152,11 @@ public class SQLiteDriver extends JDBCDriver
 	{
 		//see: https://sqlite.org/limits.html section 9
 		return 999;
+	}
+
+	@Override
+	public Diagnostics<String> createDiagnostics( RecordStore store )
+	{
+		return new Diagnostics<String>(store, (String t, Long u) -> new SQLiteQuery(( JDBCRecordStore ) store, t, null, u));
 	}
 }

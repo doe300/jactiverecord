@@ -32,6 +32,7 @@ import de.doe300.activerecord.jdbc.driver.JDBCDriver;
 import de.doe300.activerecord.migration.Migration;
 import de.doe300.activerecord.migration.constraints.IndexType;
 import de.doe300.activerecord.record.ActiveRecord;
+import de.doe300.activerecord.store.diagnostics.Diagnostics;
 import java.util.Map;
 import java.util.Set;
 import javax.annotation.Nullable;
@@ -125,4 +126,13 @@ public interface DBDriver
 	{
 		throw new UnsupportedOperationException("Operation not supported by default implementation");
 	}
+	
+	/**
+	 * Creates a new instance of diagnostics to monitor and profile the given <code>store</code>
+	 * @param store the RecordStore to be profiled
+	 * @return a new diagnostics instance
+	 * @since 0.8
+	 */
+	@Nonnull
+	public Diagnostics<?> createDiagnostics(@Nonnull final RecordStore store);
 }

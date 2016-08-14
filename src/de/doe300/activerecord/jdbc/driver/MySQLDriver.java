@@ -24,7 +24,11 @@
  */
 package de.doe300.activerecord.jdbc.driver;
 
+import de.doe300.activerecord.jdbc.diagnostics.MySQLQuery;
 import de.doe300.activerecord.migration.constraints.IndexType;
+import de.doe300.activerecord.store.JDBCRecordStore;
+import de.doe300.activerecord.store.RecordStore;
+import de.doe300.activerecord.store.diagnostics.Diagnostics;
 import java.io.Serializable;
 import java.sql.SQLXML;
 import javax.annotation.Nonnull;
@@ -118,6 +122,11 @@ public class MySQLDriver extends JDBCDriver
 		}
 		return super.getSQLType( javaType );
 	}
-	
+
+	@Override
+	public Diagnostics<String> createDiagnostics( RecordStore store )
+	{
+		return new Diagnostics<String>(store, (String t, Long u) -> new MySQLQuery(( JDBCRecordStore ) store, t, null, u));
+	}
 	
 }

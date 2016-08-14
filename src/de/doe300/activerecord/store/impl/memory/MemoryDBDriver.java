@@ -27,8 +27,11 @@ package de.doe300.activerecord.store.impl.memory;
 import de.doe300.activerecord.migration.Migration;
 import de.doe300.activerecord.migration.constraints.IndexType;
 import de.doe300.activerecord.record.ActiveRecord;
+import de.doe300.activerecord.scope.Scope;
 import de.doe300.activerecord.store.DBDriver;
 import de.doe300.activerecord.store.RecordStore;
+import de.doe300.activerecord.store.diagnostics.Diagnostics;
+import de.doe300.activerecord.util.Pair;
 import java.util.Map;
 import java.util.Set;
 import java.util.stream.Collectors;
@@ -79,4 +82,9 @@ public enum MemoryDBDriver implements DBDriver
 		return createMigration( storeName, columns, store );
 	}
 
+	@Override
+	public Diagnostics<Pair< String, Scope>> createDiagnostics( RecordStore store )
+	{
+		return new Diagnostics<Pair< String, Scope>>(store, (Pair< String, Scope> t, Long u) -> new MemoryQuery(( MemoryRecordStore ) store, t, t.getFirst(), u));
+	}
 }

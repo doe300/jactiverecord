@@ -40,6 +40,7 @@ import de.doe300.activerecord.dsl.AggregateFunction;
 import de.doe300.activerecord.dsl.Condition;
 import de.doe300.activerecord.record.TimestampedRecord;
 import de.doe300.activerecord.scope.Scope;
+import de.doe300.activerecord.store.diagnostics.Diagnostics;
 
 /**
  * Base interface for all kinds of record storing data-base.
@@ -53,6 +54,13 @@ public interface RecordStore extends AutoCloseable
 	 */
 	@Nonnull
 	public DBDriver getDriver();
+	
+	/**
+	 * @return the diagnostics attached to this store
+	 * @since 0.8
+	 */
+	@Nonnull
+	public Diagnostics<?> getDiagnostics();
 
 	/**
 	 * @param tableName

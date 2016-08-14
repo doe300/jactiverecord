@@ -24,7 +24,11 @@
  */
 package de.doe300.activerecord.jdbc.driver;
 
+import de.doe300.activerecord.jdbc.diagnostics.HSQLDBQuery;
 import de.doe300.activerecord.migration.constraints.IndexType;
+import de.doe300.activerecord.store.JDBCRecordStore;
+import de.doe300.activerecord.store.RecordStore;
+import de.doe300.activerecord.store.diagnostics.Diagnostics;
 import java.io.Serializable;
 import javax.annotation.Nonnull;
 
@@ -84,5 +88,11 @@ public class HSQLDBDriver extends JDBCDriver
 			return "VARBINARY(" + Integer.MAX_VALUE + ")";
 		}
 		return super.getSQLType( javaType );
+	}
+
+	@Override
+	public Diagnostics<String> createDiagnostics( RecordStore store )
+	{
+		return new Diagnostics<String>(store, (String t, Long u) -> new HSQLDBQuery(( JDBCRecordStore ) store, t, null, u));
 	}
 }

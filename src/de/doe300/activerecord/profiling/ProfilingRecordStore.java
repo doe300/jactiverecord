@@ -35,6 +35,7 @@ import de.doe300.activerecord.scope.Scope;
 import de.doe300.activerecord.store.DBDriver;
 import de.doe300.activerecord.store.NoSuchDataSetException;
 import de.doe300.activerecord.store.RecordStore;
+import de.doe300.activerecord.store.diagnostics.Diagnostics;
 
 /**
  * Wrapper around another record-store profiling all method-calls
@@ -61,6 +62,12 @@ public class ProfilingRecordStore implements RecordStore
 	public DBDriver getDriver()
 	{
 		return profiler.profile( "getDriver", () -> store.getDriver());
+	}
+
+	@Override
+	public Diagnostics<?> getDiagnostics()
+	{
+		return profiler.profile( "getDiagnostics", () -> store.getDiagnostics());
 	}
 
 	@Override

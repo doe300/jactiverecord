@@ -30,6 +30,7 @@ import de.doe300.activerecord.TestBase;
 import de.doe300.activerecord.TestInterface;
 import de.doe300.activerecord.migration.Migration;
 import de.doe300.activerecord.migration.constraints.IndexType;
+import de.doe300.activerecord.store.diagnostics.Diagnostics;
 import java.io.Serializable;
 import java.util.Collections;
 import javax.annotation.Nonnull;
@@ -129,5 +130,12 @@ public class DBDriverTest extends TestBase
 		{
 			//is allowed
 		}
+	}
+	
+	@Test
+	public void testCreateDiagnostics()
+	{
+		assertNotNull( driver.createDiagnostics( base.getStore() ));
+		final Diagnostics<?> diagnostics = driver.createDiagnostics( base.getStore() );
 	}
 }

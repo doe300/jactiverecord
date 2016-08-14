@@ -24,7 +24,11 @@
  */
 package de.doe300.activerecord.jdbc.driver;
 
+import de.doe300.activerecord.jdbc.diagnostics.PostgreSQLQuery;
 import de.doe300.activerecord.migration.constraints.IndexType;
+import de.doe300.activerecord.store.JDBCRecordStore;
+import de.doe300.activerecord.store.RecordStore;
+import de.doe300.activerecord.store.diagnostics.Diagnostics;
 import java.io.Serializable;
 import java.lang.reflect.Array;
 import java.sql.ResultSet;
@@ -156,5 +160,11 @@ public class PostgreSQLDriver extends JDBCDriver
 	public String getLimitClause( int offset, int limit )
 	{
 		return (limit > 0 ? "LIMIT " + limit : "") + (offset > 0 ? " OFFSET " + offset : "");
+	}
+
+	@Override
+	public Diagnostics<String> createDiagnostics( RecordStore store )
+	{
+		return new Diagnostics<String>(store, (String t, Long u) -> new PostgreSQLQuery(( JDBCRecordStore ) store, t, null, u));
 	}
 }
