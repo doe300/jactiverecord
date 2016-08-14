@@ -231,7 +231,7 @@ public final class TypeMappings
 			//maybe some driver has a mapping for UUID
 			return (UUID)value;
 		}
-		if(value.getClass().isArray() && value.getClass().getComponentType() == Byte.TYPE)
+		if(value.getClass() == byte[].class)
 		{
 			return UUID.nameUUIDFromBytes(( byte[] ) value);
 		}
@@ -612,7 +612,7 @@ public final class TypeMappings
 		{
 			return null;
 		}
-		else if(value.getClass().isArray() && (value.getClass().getComponentType().equals( Byte.class) || value.getClass().getComponentType().equals( Byte.TYPE)))
+		else if(value.getClass() == Byte[].class || value.getClass() == byte[].class)
 		{
 			try(final ObjectInputStream ois = new ObjectInputStream(new ByteArrayInputStream((byte[])value)))
 			{
@@ -660,7 +660,7 @@ public final class TypeMappings
 	public static <T extends Serializable> void writeSerializable(@Nullable final T serializableObject, @Nonnull final ActiveRecord record, @Nonnull final String columnName) throws SQLException
 	{
 		final Class<?> columnType = record.getBase().getStore().getAllColumnTypes( record.getBase().getTableName()).get( columnName);
-		if(columnType.isArray() && (Byte.class.isAssignableFrom( columnType.getComponentType()) || Byte.TYPE.isAssignableFrom( columnType.getComponentType()))) 
+		if(columnType == Byte[].class || columnType == byte[].class) 
 		{
 			try(final ByteArrayOutputStream bos = new ByteArrayOutputStream(); final ObjectOutputStream oos = new ObjectOutputStream(bos ))
 			{

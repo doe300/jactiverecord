@@ -82,7 +82,7 @@ public class EncryptionHandler implements ProxyHandler
 					{
 						decryptedValue = algorithm.decryptValue( ((String)dbValue).getBytes());
 					}
-					else if(dbValue.getClass().isArray() && Byte.TYPE.isAssignableFrom( dbValue.getClass().getComponentType()))
+					else if(dbValue.getClass() == byte[].class)
 					{
 						decryptedValue = algorithm.decryptValue( (byte[])dbValue );
 					}
@@ -104,7 +104,7 @@ public class EncryptionHandler implements ProxyHandler
 						}
 						return new String(decryptedValue, 0, lastIndex);
 					}
-					else if(method.getReturnType().isArray() && Byte.TYPE.isAssignableFrom( method.getReturnType().getComponentType()))
+					else if(method.getReturnType() == byte[].class)
 					{
 						return decryptedValue;
 					}
@@ -113,7 +113,7 @@ public class EncryptionHandler implements ProxyHandler
 				if(Attributes.isSetter( method, null, true ))
 				{
 					final Class<?> dbType = record.getBase().getStore().getAllColumnTypes( record.getBase().getTableName()).get( attributeName);
-					if(dbType == null || !(String.class.isAssignableFrom( dbType ) || dbType.isArray() && Byte.TYPE.isAssignableFrom( dbType.getComponentType())))
+					if(dbType == null || !(String.class.isAssignableFrom( dbType ) || dbType == byte[].class))
 					{
 						throw new IllegalArgumentException("Illegal DB-type for encrypted value");
 					}

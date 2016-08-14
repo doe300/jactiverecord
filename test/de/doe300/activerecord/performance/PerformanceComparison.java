@@ -197,6 +197,7 @@ public class PerformanceComparison
 		core.createTable( TestInterface.class);
 		final long startCachedRecordStore = System.currentTimeMillis();
 		final RecordBase<TestInterface> cachedBase = TestServer.getTestCore( CachedJDBCRecordStore.class).getBase( TestInterface.class);
+//		cachedBase.getCore().createTable( TestInterface.class);
 		final RecordStore cachedStore = cachedBase.getStore();
 		for(int i = 0 ; i < numIterations; ++i)
 		{
@@ -326,6 +327,12 @@ public class PerformanceComparison
 		}
 		final long cachedRecordStoreDuration = System.currentTimeMillis() - startCachedRecordStore;
 		System.err.println("cached RecordStore: " + cachedRecordStoreDuration + "ms (" + cachedRecordStoreDuration / (double) numIterations + ")");
+		
+		//8. write back cache
+		final long startCacheWriteBack = System.currentTimeMillis();
+		cachedBase.saveAll();
+		final long cacheWriteBackDuration = System.currentTimeMillis() - startCacheWriteBack;
+		System.err.println( "Cache Write-back: " + cacheWriteBackDuration + "ms" );
 	}
 	
 	private static void testResultSetTypes(final long numIterations) throws SQLException
