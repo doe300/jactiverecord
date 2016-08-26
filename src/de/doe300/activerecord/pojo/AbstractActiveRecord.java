@@ -71,6 +71,14 @@ public abstract class AbstractActiveRecord implements ActiveRecord
 		base.setProperty( primaryKey, name, value );
 	}
 	
+	/**
+	 *
+	 * @param <U> the destination type of the property
+	 * @param name the property-name
+	 * @param type the class-type of the property
+	 * @return the property for the given name and type
+	 * @throws ClassCastException if an error occurred casting the types
+	 */
 	protected <U> U getProperty(@Nonnull final String name, @Nonnull final Class<U> type) throws ClassCastException
 	{
 		return base.getProperty( primaryKey, name, type );

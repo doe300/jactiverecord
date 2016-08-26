@@ -43,6 +43,13 @@ public abstract class JDBCQuery extends Query<String>
 	private List<String> explainResult;
 	private List<QueryRemark<String>> remarks;
 	
+	/**
+	 *
+	 * @param store the RecordStore this Query was run on
+	 * @param source the originating SQL command
+	 * @param storeName the name of the table 
+	 * @param duration the duration of this query
+	 */
 	public JDBCQuery(@Nonnull final JDBCRecordStore store, @Nonnull final String source, @Nullable final String storeName, @Nonnegative final long duration )
 	{
 		super(store, source, storeName, duration);
@@ -58,6 +65,12 @@ public abstract class JDBCQuery extends Query<String>
 		return explainResult;
 	}
 	
+	/**
+	 *
+	 * @param sqlStatment
+	 * @return
+	 * @throws Exception
+	 */
 	protected abstract List<String> runExplain(@Nonnull final String sqlStatment) throws Exception;
 
 	@Override
@@ -71,5 +84,12 @@ public abstract class JDBCQuery extends Query<String>
 	}
 
 	//TODO create remarks for ResultSet/original statment, not output
+
+	/**
+	 *
+	 * @param explainResult
+	 * @return
+	 * @throws UnsupportedOperationException
+	 */
 	protected abstract List<QueryRemark<String>> createRemarks(@Nonnull final List<String> explainResult) throws UnsupportedOperationException;
 }

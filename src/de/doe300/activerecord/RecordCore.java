@@ -145,6 +145,10 @@ public final class RecordCore implements AutoCloseable
 		return RecordCore.cores.get( name );
 	}
 
+	/**
+	 * Closes this RecordCore, freeing all resources associated with it (DB-connection, cache, ...)
+	 * @throws Exception
+	 */
 	@Override
 	public void close() throws Exception
 	{

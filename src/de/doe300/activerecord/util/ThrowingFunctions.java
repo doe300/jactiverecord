@@ -43,6 +43,11 @@ public interface ThrowingFunctions
 	@FunctionalInterface
 	public interface ThrowingRunnable<E extends Exception>
 	{
+
+		/**
+		 *
+		 * @throws ThrowingRunnable.E
+		 */
 		public void run() throws E;
 	}
 	
@@ -54,6 +59,12 @@ public interface ThrowingFunctions
 	@FunctionalInterface
 	public interface ThrowingConsumer<T, E extends Exception>
 	{
+
+		/**
+		 *
+		 * @param value
+		 * @throws ThrowingConsumer.E
+		 */
 		public void accept(T value) throws E;
 	}
 	
@@ -65,6 +76,12 @@ public interface ThrowingFunctions
 	@FunctionalInterface
 	public interface ThrowingSupplier<R, E extends Exception>
 	{
+
+		/**
+		 *
+		 * @return
+		 * @throws ThrowingSupplier.E
+		 */
 		public R get() throws E;
 	}
 	
@@ -78,6 +95,13 @@ public interface ThrowingFunctions
 	@FunctionalInterface
 	public interface ThrowingFunction<T, R, E extends Exception>
 	{
+
+		/**
+		 *
+		 * @param value
+		 * @return
+		 * @throws ThrowingFunction.E
+		 */
 		public R apply(T value) throws E;
 	}
 }

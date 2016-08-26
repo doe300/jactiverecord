@@ -78,6 +78,10 @@ public interface Condition extends Predicate<ActiveRecord>
 	 */
 	public boolean test(@Nonnull final Map<String, Object> map);
 
+	/**
+	 * @return the negated Condition
+	 * @see Predicate#negate() 
+	 */
 	@Override
 	@Nonnull
 	public default Condition negate()

@@ -115,6 +115,11 @@ public abstract class AggregateFunction<T extends ActiveRecord, C, V extends Mut
 		}).map((final Map<String, Object> map) -> Optional.ofNullable((C) map.get(column))));
 	}
 
+	/**
+	 * Aggregates the values from the given stream
+	 * @param valueStream the input stream to aggregate
+	 * @return the aggregation result
+	 */
 	@Nullable
 	protected abstract R aggregateValues(@Nonnull final Stream<Optional<C>> valueStream);
 

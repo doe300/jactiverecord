@@ -100,6 +100,12 @@ public class SimpleJDBCRecordStore implements JDBCRecordStore
 		this.diagnostics = driver.createDiagnostics( this );
 	}
 
+	/**
+	 * Converts the given Condition to a WHERE clause
+	 * @param condition the condition to convert
+	 * @param tableName the table-name
+	 * @return the resulting WHERE-clause
+	 */
 	@Nonnull
 	protected String toWhereClause(@Nullable final Condition condition, @Nullable String tableName)
 	{
@@ -118,6 +124,13 @@ public class SimpleJDBCRecordStore implements JDBCRecordStore
 		return Optional.ofNullable( scope.getOrder()).orElse( base.getDefaultOrder());
 	}
 
+	/**
+	 * Converts the given String[] to a comma-separated list of columns to fetch
+	 * @param columns the columns to convert
+	 * @param primaryColumn the primary column
+	 * @param tableName the table-name
+	 * @return the comma-separated list
+	 */
 	@Nonnull
 	protected String toColumnsList(@Nonnull final String[] columns, @Nonnull final String primaryColumn, @Nullable final String tableName)
 	{
@@ -131,6 +144,13 @@ public class SimpleJDBCRecordStore implements JDBCRecordStore
 				.map( (String col) -> tableID + col).collect( Collectors.joining(", "));
 	}
 	
+	/**
+	 * Helper method to support large queries not supported by the underlying JDBC driver
+	 * @param query the query to check and potentially convert
+	 * @param cond the condition to extract the wildcards from
+	 * @return the resulting ResultSet
+	 * @throws SQLException
+	 */
 	@Nonnull
 	@WillNotClose
 	protected ResultSet queryStatement(@Nonnull final String query, @Nullable final Condition cond) throws SQLException
@@ -151,8 +171,13 @@ public class SimpleJDBCRecordStore implements JDBCRecordStore
 		return diagnostics.profileQuery(() -> stm.executeQuery(), () -> StatementUtil.prepareQuery(driver, query, cond )).get();
 	}
 	
-	protected void fillStatement(@Nonnull final PreparedStatement stm, @Nonnull final Condition condition)
-		throws SQLException
+	/**
+	 * Fills a statement with the wildcards extracted from the given Condition
+	 * @param stm the Statement to fill
+	 * @param condition the Condition holding the values
+	 * @throws SQLException
+	 */
+	protected void fillStatement(@Nonnull final PreparedStatement stm, @Nonnull final Condition condition) throws SQLException
 	{
 		if(condition.hasWildcards())
 		{

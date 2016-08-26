@@ -79,6 +79,10 @@ public class ValidationException extends RuntimeException
 		return value;
 	}
 
+	/**
+	 * @return the composed validation-message
+	 * @see Exception#getMessage() 
+	 */
 	@Override
 	public String getMessage()
 	{

@@ -48,6 +48,11 @@ public abstract class ScalarFunction<T extends ActiveRecord, C, R> implements SQ
 	private final Function<T, C> columnFunction;
 	private final Object column;
 
+	/**
+	 * @param command the name of the SQL function
+	 * @param columnName the name of the column to apply the function to
+	 * @param columnFunction the function to retrieve the column-value
+	 */
 	protected ScalarFunction(@Nonnull final String command, @Nonnull final String columnName,
 		@Nonnull final Function<T, C> columnFunction)
 	{
@@ -56,6 +61,10 @@ public abstract class ScalarFunction<T extends ActiveRecord, C, R> implements SQ
 		this.columnFunction = columnFunction;
 	}
 	
+	/**
+	 * @param command the name of the command
+	 * @param sqlFunction the SQL-function to retrieve the input value
+	 */
 	protected ScalarFunction(@Nonnull final String command, @Nonnull final SQLFunction<T, C> sqlFunction)
 	{
 		this.command = command;

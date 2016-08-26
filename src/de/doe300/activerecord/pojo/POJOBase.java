@@ -54,6 +54,11 @@ public class POJOBase<T extends ActiveRecord> extends RecordBase<T>
 		super( recordType, core, store );
 	}
 	
+	/**
+	 * Constructor for creating sharded POJO bases
+	 * @param origBase
+	 * @param shardTable
+	 */
 	protected POJOBase(@Nonnull final POJOBase<T> origBase, @Nonnull final String shardTable)
 	{
 		super(origBase, shardTable );
