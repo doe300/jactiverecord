@@ -49,6 +49,7 @@ import de.doe300.activerecord.store.NoSuchDataSetException;
 import java.util.Arrays;
 import java.util.Iterator;
 import java.util.Optional;
+import java.util.stream.Collectors;
 
 /**
  * Uses write-back cache
@@ -316,29 +317,36 @@ public class CachedJDBCRecordStore extends SimpleJDBCRecordStore
 	/**
 	 * This method is only to be used to write cache back to the DB
 	 *
-	 * @param base
-	 * @param primaryKey
-	 * @param values
-	 */
-	@Deprecated
-	void writeDBValues(@Nonnull final RecordBase<?> base, final int primaryKey, @Nonnull final Map<String, Object> values)
-	{
-		super.setValues( base, primaryKey, values );
-	}
-	
-	/**
-	 * This method is only to be used to write cache back to the DB
-	 *
 	 * @param container the container containing the data to be written back
 	 */
 	void writeBack(@Nonnull final WriteBack container)
 	{
+		final RecordBase<?> base = container.getBase();
 		//TODO how to write them all back at once? the columns to write back differ too much
-		final Iterator<Pair<Integer, Map<String, Object>>> it = container.iterator();
-		while(it.hasNext())
+		try(final Statement stmt = con.createStatement())
 		{
-			final Pair<Integer, Map<String, Object>> p = it.next();
-			super.setValues( container.getBase(), p.getFirstOrThrow(),p.getSecondOrThrow() );
+			final Iterator<Pair<Integer, Map<String, Object>>> it = container.iterator();
+			while(it.hasNext())
+			{
+				final Pair<Integer, Map<String, Object>> p = it.next();
+				final Pair<String[], Object[]> values = prepareWriteValues( base, p.getSecondOrThrow());
+				if(!values.hasFirst())
+				{
+					continue;
+				}
+				String sql = "UPDATE "+base.getTableName()+" SET ";
+				sql+= Arrays.stream( values.getFirstOrThrow()).map( (final String s)-> s+ " = ? ").collect( Collectors.joining(", "));
+				sql += " WHERE "+base.getPrimaryColumn()+" = "+p.getFirstOrThrow();
+				Logging.getLogger().debug( "JDBCStore", sql);
+				stmt.addBatch( StatementUtil.prepareUpdate(driver, sql, values.getSecond() ));
+			}
+			stmt.executeBatch();
+		}
+		catch ( final SQLException ex )
+		{
+			Logging.getLogger().error( "JDBCStore", "Failed write back cache!");
+			Logging.getLogger().error( "JDBCStore", ex);
+			throw new IllegalArgumentException(ex);
 		}
 	}
 	

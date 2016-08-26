@@ -20,3 +20,6 @@
 .project
 /nb-configuration.xml
 /nbactions.xml
+
+ActiveRecord-profiling.*
+JActiveRecord-profiling.*
