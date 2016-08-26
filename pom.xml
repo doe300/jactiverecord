@@ -2,7 +2,7 @@
 	<modelVersion>4.0.0</modelVersion>
 	<groupId>de.doe300</groupId>
 	<artifactId>JActiveRecord</artifactId>
-	<version>0.8-SNAPSHOT</version>
+	<version>0.8</version>
 	<name>JActiveRecord</name>
 	<description>An java-based object-database-binding on top of JDBC inspired by Rails ActiveRecord.</description>
 	<url>https://github.com/doe300/jactiverecord</url>
@@ -134,7 +134,7 @@
 		<connection>scm:git:git@github.com:doe300/jactiverecord.git</connection>
 		<url>git@github.com:doe300/jactiverecord.git</url>
 		<developerConnection>scm:git:git@github.com:doe300/jactiverecord.git</developerConnection>
-	  <tag>v0.7</tag>
+	  <tag>v0.8</tag>
   </scm>
 	<ciManagement>
 		<system>travis</system>
