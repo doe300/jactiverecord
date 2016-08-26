@@ -189,6 +189,13 @@ public class ConditionSetTest extends TestBase implements AssertException
 		set.clear();
 		assertTrue( set.isEmpty());
 	}
+	
+	@Test
+	public void testFindAll()
+	{
+		set.addAll( Arrays.asList( a1,a2,a3));
+		assertEquals( 3, set.findAll().count());
+	}
 
 	@Test
 	public void testStream()

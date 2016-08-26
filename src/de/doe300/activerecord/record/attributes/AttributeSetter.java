@@ -32,7 +32,7 @@ import java.util.function.Function;
 
 import javax.annotation.Nonnull;
 
-import de.doe300.activerecord.record.validation.ValidationFailed;
+import de.doe300.activerecord.record.validation.ValidationException;
 
 /**
  * Setter for a attribute. Use this annotation if the setter name does not conform with beans-standard or you need to convert the data to the correct type.
@@ -58,7 +58,7 @@ public @interface AttributeSetter
 
 	/**
 	 * The validator-method must conform accept a single argument of type {@link Object} and must be accessible publicly.
-	 * If the validation is set and fails, the setter has no effect on the underlying record-base and the validation-method throws a {@link ValidationFailed}.
+	 * If the validation is set and fails, the setter has no effect on the underlying record-base and the validation-method throws a {@link ValidationException}.
 	 *
 	 * If both {@link #validatorMethod() } and {@link #converterMethod() } are set, the validation is performed on the unconverted parameter.
 	 * Meaning, the validation is called before the conversion and therefore must accept the original argument type.

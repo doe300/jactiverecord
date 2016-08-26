@@ -80,6 +80,7 @@ public class HSQLDBDriver extends JDBCDriver
 //		if(java.util.UUID.class.isAssignableFrom( javaType ))
 //		{
 //			//TODO HsqlDB 2.3.4+ supports UUID, but currently type-error on read (a BinaryData is returned)
+//			//will be fixed in the next release - https://sourceforge.net/p/hsqldb/bugs/1446/
 //			return "UUID";
 //		}
 		if(Serializable.class.isAssignableFrom( javaType) && super.getSQLType( javaType ).equals( super.getSQLType( 

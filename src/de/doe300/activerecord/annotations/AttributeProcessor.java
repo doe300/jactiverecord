@@ -33,7 +33,7 @@ import de.doe300.activerecord.record.attributes.AttributeGetter;
 import de.doe300.activerecord.record.attributes.AttributeSetter;
 import de.doe300.activerecord.record.attributes.Attributes;
 import de.doe300.activerecord.record.security.EncryptedAttribute;
-import de.doe300.activerecord.record.validation.ValidationFailed;
+import de.doe300.activerecord.record.validation.ValidationException;
 import java.lang.reflect.Field;
 import java.util.Arrays;
 import java.util.Collections;
@@ -267,7 +267,7 @@ public class AttributeProcessor extends AbstractProcessor
 	
 	private void processAttributeSetter(final RoundEnvironment roundEnv)
 	{
-		final TypeMirror validationFailedType = ProcessorUtils.getTypeMirror(processingEnv, () -> ValidationFailed.class);
+		final TypeMirror validationFailedType = ProcessorUtils.getTypeMirror(processingEnv, () -> ValidationException.class);
 		
 		roundEnv.getElementsAnnotatedWith( AttributeSetter.class).forEach((final Element e)->{
 			final AttributeSetter setterAnnotation= e.getAnnotation( AttributeSetter.class);
@@ -305,14 +305,14 @@ public class AttributeProcessor extends AbstractProcessor
 				{
 					processingEnv.getMessager().printMessage( Diagnostic.Kind.ERROR, "Declared validator-method not found", e);
 				}
-				//check for validator-method throwing ValidationFailed
+				//check for validator-method throwing ValidationException
 				else
 				{
 					boolean validationErrorThrown = validatorMethod.getThrownTypes().stream().anyMatch( (TypeMirror type) -> 
 					{
 						return processingEnv.getTypeUtils().isSubtype( type, validationFailedType);
 					});
-					//validator-method should throw ValidationFailed
+					//validator-method should throw ValidationException
 					if(!validationErrorThrown)
 					{
 						processingEnv.getMessager().printMessage( Diagnostic.Kind.WARNING, "Validation-method should be marked to throw a ValidationFailed", e);

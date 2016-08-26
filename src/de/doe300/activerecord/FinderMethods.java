@@ -24,7 +24,6 @@
  */
 package de.doe300.activerecord;
 
-import java.util.ArrayList;
 import java.util.Map;
 import java.util.stream.Stream;
 
@@ -95,16 +94,12 @@ public interface FinderMethods<T extends ActiveRecord>
 	@Nonnull
 	public default Stream<T> findFor(@Nonnull final Map<String,Object> data)
 	{
-		final ArrayList<Condition> conds = new ArrayList<>(data.size());
+		Condition cond = Conditions.isTrue();
 		for(final Map.Entry<String,Object> e :data.entrySet())
 		{
-			conds.add( Conditions.is( e.getKey(), e.getValue()));
+			cond = cond.and( Conditions.is( e.getKey(), e.getValue()));
 		}
-		if(conds.size()==1)
-		{
-			return find( conds.get( 0));
-		}
-		return find(Conditions.and( conds) );
+		return find(cond );
 	}
 
 	/**
@@ -114,16 +109,12 @@ public interface FinderMethods<T extends ActiveRecord>
 	@Nullable
 	public default T findFirstFor(@Nonnull final Map<String,Object> data)
 	{
-		final ArrayList<Condition> conds = new ArrayList<>(data.size());
+		Condition cond = Conditions.isTrue();
 		for(final Map.Entry<String,Object> e :data.entrySet())
 		{
-			conds.add( Conditions.is( e.getKey(), e.getValue()));
+			cond = cond.and( Conditions.is( e.getKey(), e.getValue()));
 		}
-		if(conds.size()==1)
-		{
-			return findFirst( conds.get( 0));
-		}
-		return findFirst(Conditions.and(conds ));
+		return findFirst(cond);
 	}
 
 	/**

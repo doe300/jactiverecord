@@ -57,6 +57,7 @@ public class MigrationTest extends TestBase
 	public void testApply() throws Exception
 	{
 		assertTrue( automaticMigration.apply());
+		assertFalse( automaticMigration.apply());
 		assertTrue(manualMigration.apply(  ));
 	}
 	
@@ -71,6 +72,7 @@ public class MigrationTest extends TestBase
 	public void testRevert() throws Exception
 	{
 		assertTrue(automaticMigration.revert());
+		assertFalse( automaticMigration.revert());
 		assertTrue(manualMigration.revert());
 	}
 }

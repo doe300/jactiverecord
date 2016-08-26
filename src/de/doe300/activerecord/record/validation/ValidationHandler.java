@@ -63,6 +63,7 @@ public class ValidationHandler implements ProxyHandler
 			if(method.equals( ValidatedRecord.class.getMethod( "validate")))
 			{
 				getOrCreateValidationEnforcer( handler.getRecordType()).accept( record );
+				return null;
 			}
 			throw new IllegalArgumentException("Method is not handled by this handler");
 		}
@@ -115,7 +116,7 @@ public class ValidationHandler implements ProxyHandler
 						Object value = record.getBase().getStore().getValue( record.getBase(), record.getPrimaryKey(), valid.attribute());
 						if(!Validations.getValidationMethod( valid ).test( record, value))
 						{
-							throw new ValidationFailed(valid.attribute(), value);
+							throw new ValidationException(valid.attribute(), value);
 						}
 					});
 				}

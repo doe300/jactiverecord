@@ -30,6 +30,8 @@ import de.doe300.activerecord.RecordCore;
 import de.doe300.activerecord.TestBase;
 import de.doe300.activerecord.TestInterface;
 import de.doe300.activerecord.TestServer;
+import de.doe300.activerecord.record.ActiveRecord;
+import de.doe300.activerecord.record.RecordType;
 import org.junit.AfterClass;
 import org.junit.BeforeClass;
 import org.junit.Test;
@@ -40,12 +42,14 @@ import org.junit.Test;
  */
 public class ValidationHandlerTest extends TestBase
 {
-	private RecordBase<TestInterface> base;
+	private final RecordBase<TestInterface> base;
+	private final RecordBase<ValidationTestRecord> testBase;
 	
 	public ValidationHandlerTest(final RecordCore core)
 	{
 		super(core);
 		base = core.getBase(TestInterface.class).getShardBase( ValidationHandlerTest.class.getSimpleName());
+		testBase = core.getBase( ValidationTestRecord.class);
 	}
 	
 	@BeforeClass
@@ -68,6 +72,15 @@ public class ValidationHandlerTest extends TestBase
 		i.setAge( 23);
 		i.setName( "Adfan");
 		assertTrue( i.isValid());
+		
+		ValidationTestRecord r = testBase.createRecord();
+		assertFalse( r.isValid());
+		r.setName( "");
+		assertFalse( r.isValid());
+		r.setName( "Eve");
+		assertFalse( r.isValid());
+		r.setName( "Adam");
+		assertTrue( r.isValid());
 	}
 	
 	@Test
@@ -79,5 +92,31 @@ public class ValidationHandlerTest extends TestBase
 		i.validate();
 		i.setAge(-100 );
 		i.validate();
+		
+		ValidationTestRecord r = testBase.createRecord();
+		assertThrows( ValidationException.class, () -> r.validate());
+		r.setName( "");
+		assertThrows( ValidationException.class, () -> r.validate());
+		r.setName( "Eve");
+		assertThrows( ValidationException.class, () -> r.validate());
+		r.setName( "Adam");
+		r.validate();
+	}
+	
+	@Validates({
+			@Validate(attribute = "name", type = ValidationType.NOT_NULL),
+			@Validate(attribute = "name", type = ValidationType.NOT_EMPTY),
+			@Validate(attribute = "name", type = ValidationType.CUSTOM, customClass = ValidationTestRecord.class, customMethod = "testName")
+	})
+	@RecordType(autoCreate = true, defaultColumns = ActiveRecord.DEFAULT_PRIMARY_COLUMN, typeName = "validationTest")
+	public interface ValidationTestRecord extends ValidatedRecord
+	{
+		public void setName(String name);
+		public String getName();
+		
+		public static boolean testName(final Object object)
+		{
+			return object != null && object instanceof String && object.equals( "Adam");
+		}
 	}
 }

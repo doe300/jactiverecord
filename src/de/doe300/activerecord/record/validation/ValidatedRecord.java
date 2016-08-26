@@ -46,11 +46,11 @@ public interface ValidatedRecord extends ActiveRecord
 
 	/**
 	 * This method is called before {@link #save()}
-	 * @throws ValidationFailed the validation-error
+	 * @throws ValidationException the validation-error
 	 */
-	public default void validate() throws ValidationFailed
+	public default void validate() throws ValidationException
 	{
 		Logging.getLogger().info( getBase().getRecordType().getSimpleName(), "Default implementation of validate() called");
-		throw new ValidationFailed(null, null, "Validation not implemented" );
+		throw new ValidationException(null, null, "Validation not implemented" );
 	}
 }

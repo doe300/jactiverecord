@@ -29,9 +29,10 @@ import de.doe300.activerecord.dsl.Orders;
 import de.doe300.activerecord.dsl.QueryResult;
 import de.doe300.activerecord.dsl.functions.Absolute;
 import de.doe300.activerecord.dsl.functions.Sum;
+import de.doe300.activerecord.record.ActiveRecord;
 import de.doe300.activerecord.record.RecordType;
 import de.doe300.activerecord.scope.Scope;
-import de.doe300.activerecord.record.validation.ValidationFailed;
+import de.doe300.activerecord.record.validation.ValidationException;
 import de.doe300.activerecord.store.impl.CachedJDBCRecordStore;
 import de.doe300.activerecord.store.impl.SimpleJDBCRecordStore;
 import de.doe300.activerecord.store.impl.memory.MemoryRecordStore;
@@ -56,6 +57,7 @@ import org.junit.runners.Parameterized;
 public class RecordBaseTest<T extends TestInterface> extends TestBase implements AssertException
 {
 	private final RecordBase<T> base;
+	private final RecordBase<DummyRecordType> dummyBase;
 	private final Class<T> type;
 	
 	public RecordBaseTest(Class<T> type, final RecordCore core) throws SQLException
@@ -63,6 +65,7 @@ public class RecordBaseTest<T extends TestInterface> extends TestBase implements
 		super(core);
 		this.type = type;
 		this.base = core.getBase( type).getShardBase( RecordBaseTest.class.getSimpleName());
+		this.dummyBase = core.getBase( DummyRecordType.class);
 	}
 	
 	@Parameterized.Parameters
@@ -129,6 +132,7 @@ public class RecordBaseTest<T extends TestInterface> extends TestBase implements
 	public void testGetPrimaryColumn()
 	{
 		assertEquals(type.getAnnotation(RecordType.class).primaryKey(), base.getPrimaryColumn());
+		assertEquals( ActiveRecord.DEFAULT_PRIMARY_COLUMN, dummyBase.getPrimaryColumn());
 	}
 
 	@Test
@@ -139,6 +143,9 @@ public class RecordBaseTest<T extends TestInterface> extends TestBase implements
 		assertTrue(RecordBase.equals( t,t));
 		assertFalse(RecordBase.equals( t, base.createRecord()));
 		assertFalse( RecordBase.equals( t, null));
+		
+		DummyRecordType d = dummyBase.createRecord();
+		assertFalse( RecordBase.equals( t, d));
 	}
 
 	@Test
@@ -177,6 +184,8 @@ public class RecordBaseTest<T extends TestInterface> extends TestBase implements
 	public void testGetDefaultColumns()
 	{
 		assertTrue(Arrays.equals(type.getAnnotation(RecordType.class).defaultColumns(), base.getDefaultColumns()));
+		assertEquals( 1, dummyBase.getDefaultColumns().length);
+		assertEquals(ActiveRecord.DEFAULT_PRIMARY_COLUMN, dummyBase.getDefaultColumns()[0]);
 	}
 
 	@Test
@@ -293,6 +302,7 @@ public class RecordBaseTest<T extends TestInterface> extends TestBase implements
 	public void testIsSearchable()
 	{
 		assertTrue( base.isSearchable() );
+		assertFalse( dummyBase.isSearchable());
 	}
 
 	@Test
@@ -303,6 +313,8 @@ public class RecordBaseTest<T extends TestInterface> extends TestBase implements
 		assertTrue(base.search( "AlexandraEven").count() >= 1);
 		base.search( "AlexandraEven").parallel().forEach( (T i) -> i.destroy());
 		assertEquals(0, base.search( "AlexandraEven").count());
+		
+		assertThrows( UnsupportedOperationException.class, () -> dummyBase.search( "Dummy"));
 	}
 
 	@Test
@@ -312,6 +324,8 @@ public class RecordBaseTest<T extends TestInterface> extends TestBase implements
 		assertNotNull( t );
 		assertEquals( t, base.searchFirst( "PeterOla") );
 		base.search( "hansPeterOlaf").parallel().forEach( (T i) -> i.destroy());
+		
+		assertThrows( UnsupportedOperationException.class, () -> dummyBase.searchFirst("Dummy"));
 	}
 
 	@Test
@@ -324,6 +338,7 @@ public class RecordBaseTest<T extends TestInterface> extends TestBase implements
 	public void testIsValidated()
 	{
 		assertTrue( base.isValidated());
+		assertFalse( dummyBase.isValidated());
 	}
 
 	@Test
@@ -331,6 +346,8 @@ public class RecordBaseTest<T extends TestInterface> extends TestBase implements
 	{
 		T t = base.createRecord();
 		assertFalse( base.isValid(t));
+		
+		assertTrue( dummyBase.isValid( dummyBase.createRecord()));
 	}
 
 	@Test
@@ -340,16 +357,19 @@ public class RecordBaseTest<T extends TestInterface> extends TestBase implements
 		t.setName( "Name");
 		assertNotNull( t.getName());
 		base.validate( t);
-		mayThrow(ValidationFailed.class, () -> {
+		mayThrow(ValidationException.class, () -> {
 		try{
 			t.setName( null );
 		}
 		catch(UndeclaredThrowableException e)
 		{
-			//TODO fix, so ValidationFailed is thrown
-			throw new ValidationFailed("name", t);
+			//TODO fix, so ValidationException is thrown
+			throw new ValidationException("name", t);
 		}} );
-		mayThrow(ValidationFailed.class, () -> base.validate( t));
+		mayThrow(ValidationException.class, () -> base.validate( t));
+		
+		//no-op
+		dummyBase.validate( dummyBase.createRecord());
 	}
 	
 	@Test
@@ -437,6 +457,7 @@ public class RecordBaseTest<T extends TestInterface> extends TestBase implements
 	public void testHasCallbacks()
 	{
 		assertTrue( base.hasCallbacks());
+		assertFalse( dummyBase.hasCallbacks());
 	}
 
 	@Test
@@ -468,6 +489,7 @@ public class RecordBaseTest<T extends TestInterface> extends TestBase implements
 	public void testIsAutoCreate()
 	{
 		assertFalse(base.isAutoCreate());
+		assertTrue( dummyBase.isAutoCreate());
 	}
 
 	@Test
@@ -518,5 +540,11 @@ public class RecordBaseTest<T extends TestInterface> extends TestBase implements
 	public void testGetForCondition()
 	{
 		assertEquals( base.getForCondition( null, null).size(), base.count( null));
+	}
+	
+	@RecordType(autoCreate = true, typeName = "dummyrecordstore", defaultColumns = {ActiveRecord.DEFAULT_PRIMARY_COLUMN})
+	public interface DummyRecordType extends ActiveRecord
+	{
+		
 	}
 }

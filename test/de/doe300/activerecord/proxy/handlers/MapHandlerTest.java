@@ -163,6 +163,13 @@ public class MapHandlerTest extends TestBase implements AssertException
 		for(Map.Entry<String,Object> e:record.entrySet())
 		{
 			assertEquals( base.getStore().getValue( base, record.getPrimaryKey(), e.getKey()), e.getValue());
+			if("name".equals( e.getKey() ))
+			{
+				e.setValue( "Stevenson");
+				assertEquals( "Stevenson", record.getName());
+				record.setName( "Adam");
+				assertEquals( "Adam", e.getValue());
+			}
 		}
 	}
 	

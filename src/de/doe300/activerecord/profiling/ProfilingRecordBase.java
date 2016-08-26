@@ -36,7 +36,7 @@ import de.doe300.activerecord.dsl.QueryResult;
 import de.doe300.activerecord.record.ActiveRecord;
 import de.doe300.activerecord.scope.Scope;
 import de.doe300.activerecord.store.RecordStore;
-import de.doe300.activerecord.record.validation.ValidationFailed;
+import de.doe300.activerecord.record.validation.ValidationException;
 
 /**
  * A wrapper around another RecordBase profiling all method-calls
@@ -267,7 +267,7 @@ public class ProfilingRecordBase<T extends ActiveRecord> extends RecordBase<T>
 	}
 
 	@Override
-	public boolean save( final ActiveRecord record ) throws ValidationFailed
+	public boolean save( final ActiveRecord record ) throws ValidationException
 	{
 		return profiler.profileBoolean("save", () -> otherBase.save(record));
 	}

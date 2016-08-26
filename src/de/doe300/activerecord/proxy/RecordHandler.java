@@ -33,7 +33,7 @@ import de.doe300.activerecord.record.attributes.AttributeGetter;
 import de.doe300.activerecord.record.attributes.AttributeSetter;
 import de.doe300.activerecord.record.attributes.Attributes;
 import de.doe300.activerecord.store.RecordStore;
-import de.doe300.activerecord.record.validation.ValidationFailed;
+import de.doe300.activerecord.record.validation.ValidationException;
 import java.lang.invoke.MethodHandles;
 import java.lang.reflect.Constructor;
 import java.lang.reflect.InvocationHandler;
@@ -187,7 +187,7 @@ public final class RecordHandler<T extends ActiveRecord> implements InvocationHa
 			{
 				if(validatorMethod.invoke( proxy, args[0] ) == Boolean.FALSE)
 				{
-					throw new ValidationFailed(column, args[0]);
+					throw new ValidationException(column, args[0]);
 				}
 			}
 			if(converterMethod==null)

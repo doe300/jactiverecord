@@ -27,7 +27,7 @@ package de.doe300.activerecord.record.validation;
 /**
  * One single error in validation
  */
-public class ValidationFailed extends RuntimeException
+public class ValidationException extends RuntimeException
 {
 	private static final long serialVersionUID = 5985957524527711273L;
 	private final String column;
@@ -38,7 +38,7 @@ public class ValidationFailed extends RuntimeException
 	 * @param column
 	 * @param value
 	 */
-	public ValidationFailed( final String column, final Object value)
+	public ValidationException( final String column, final Object value)
 	{
 		this(column,value,"");
 	}
@@ -48,7 +48,7 @@ public class ValidationFailed extends RuntimeException
 	 * @param value
 	 * @param description
 	 */
-	public ValidationFailed( final String column, final Object value, final String description )
+	public ValidationException( final String column, final Object value, final String description )
 	{
 		this.column = column;
 		this.description = description;

@@ -35,6 +35,7 @@ import de.doe300.activerecord.dsl.functions.Absolute;
 import de.doe300.activerecord.dsl.functions.LowerCase;
 import de.doe300.activerecord.record.ActiveRecord;
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.List;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
@@ -237,6 +238,15 @@ public class SimpleConditionTest extends TestBase implements AssertException
 		TestInterface t1 = base.createRecord();
 		t1.setName( "adam");
 		assertTrue( cond1.test( t1));
+		
+		//both are SQL function
+		final Condition cond2 = Conditions.is( new LowerCase<>("name", TestInterface::getName), new LowerCase<>("name", TestInterface::getName));
+		assertFalse( cond2.hasWildcards());
+		assertTrue( cond2.test( t));
+		assertTrue( cond2.test( t1));
+		assertTrue( cond2.test( Collections.singletonMap( "name", "Eve")));
+		assertThrows(IllegalArgumentException.class, () -> cond2.test( Collections.emptyMap()));
+		
 		
 		t.destroy();
 		t1.destroy();

@@ -108,7 +108,7 @@ public class ValidationGenerator extends AbstractProcessor
 				writer.append( ";\n");
 
 				writer.append( "import ").append( ValidatedRecord.class.getCanonicalName()).append( ";\n");
-				writer.append( "import ").append( ValidationFailed.class.getCanonicalName()).append( ";\n");
+				writer.append( "import ").append( ValidationException.class.getCanonicalName()).append( ";\n");
 				writer.append( "import ").append( Validations.class.getCanonicalName()).append( ";\n");
 				writer.append( "import ").append( Generated.class.getCanonicalName()).append( ";\n");
 				writer.append( "\n");
@@ -182,7 +182,7 @@ public class ValidationGenerator extends AbstractProcessor
 	
 	private static String generateValidateMethod(@Nonnull final Validate[] validations)
 	{
-		//public default void validate() throws ValidationFailed {
+		//public default void validate() throws ValidationException {
 		return "\t@Override\n" +
 				"\tpublic default void validate() throws ValidationFailed {\n"
 				//print validation-methods
@@ -228,7 +228,7 @@ public class ValidationGenerator extends AbstractProcessor
 				+ "\t\t\tObject value = getBase().getStore().getValue( getBase(), getPrimaryKey(), \"" + validation.attribute() + "\");\n"
 				// if(!<validation-method>) {
 				+ "\t\t\tif(!(" + toValidationMethodCall( validation )+ "))\n"
-				//throw new ValidationFailed(<attribute-name>, value);
+				//throw new ValidationException(<attribute-name>, value);
 				+ "\t\t\t\tthrow new ValidationFailed(\"" + validation.attribute() + "\", value);\n"
 				//}
 				+ "\t\t}";

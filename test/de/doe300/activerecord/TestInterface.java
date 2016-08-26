@@ -35,7 +35,7 @@ import de.doe300.activerecord.record.attributes.AttributeSetter;
 import de.doe300.activerecord.record.validation.Validate;
 import de.doe300.activerecord.record.validation.ValidatedRecord;
 import de.doe300.activerecord.record.validation.Validates;
-import de.doe300.activerecord.record.validation.ValidationFailed;
+import de.doe300.activerecord.record.validation.ValidationException;
 import de.doe300.activerecord.record.validation.ValidationType;
 import java.util.stream.Stream;
 
@@ -55,7 +55,7 @@ public interface TestInterface extends TimestampedRecord, ValidatedRecord, Recor
 	public String getName();
 	
 	@AttributeSetter(name = "name", validatorClass = TestInterface.class, validatorMethod = "checkName")
-	public void setName(String name) throws ValidationFailed;
+	public void setName(String name) throws ValidationException;
 	
 	public int getAge();
 	
@@ -110,16 +110,16 @@ public interface TestInterface extends TimestampedRecord, ValidatedRecord, Recor
 	}
 	//-- end of obsolete
 	
-	public default void checkName(Object name) throws ValidationFailed
+	public default void checkName(Object name) throws ValidationException
 	{
 		if(name == null || !String.class.isAssignableFrom( name.getClass()))
 		{
-			throw new ValidationFailed("name", name);
+			throw new ValidationException("name", name);
 		}
 	}
 
 	@Override
-	public default void validate() throws ValidationFailed
+	public default void validate() throws ValidationException
 	{
 		checkName( getName());
 	}

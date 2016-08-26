@@ -106,7 +106,9 @@ public interface RecordStore extends AutoCloseable
 	 * @param names
 	 * @param values
 	 * @throws IllegalArgumentException if the data-set for the given {@link RecordBase} does not exist
+	 * @deprecated as of 0.8, use {@link #setValues(de.doe300.activerecord.RecordBase, int, java.util.Map) } instead
 	 */
+	@Deprecated
 	public void setValues(@Nonnull final RecordBase<?> base, @Nonnegative int primaryKey, @Nonnull final String[] names, @Nonnull final Object[] values) throws NoSuchDataSetException, NoSuchAttributeException;
 
 	/**

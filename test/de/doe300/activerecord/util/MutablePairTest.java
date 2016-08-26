@@ -106,4 +106,11 @@ public class MutablePairTest extends Assert implements AssertException
 		assertTrue( firstNull.equals( testEq));
 	}
 
+	@Test
+	public void testHashCode()
+	{
+		final MutablePair<String, String> p1 = new MutablePair<>(firstNull.getFirst(), firstNull.getSecond());
+		assertEquals( p1.hashCode(), p1.hashCode());
+		assertEquals( firstNull.hashCode(), p1.hashCode());
+	}
 }

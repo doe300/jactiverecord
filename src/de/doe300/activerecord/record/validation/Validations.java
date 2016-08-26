@@ -135,16 +135,16 @@ public final class Validations
 	 * @param value
 	 * @param pred
 	 * @param message
-	 * @throws ValidationFailed if the validation failed
+	 * @throws ValidationException if the validation failed
 	 */
 	public static void validate(@Nonnull final String column, @Nullable final Object value,
-		@Nonnull final Predicate<Object> pred, final String message) throws ValidationFailed
+		@Nonnull final Predicate<Object> pred, final String message) throws ValidationException
 	{
 		if(pred.test( value ))
 		{
 			return;
 		}
-		throw new ValidationFailed(column, value, message);
+		throw new ValidationException(column, value, message);
 	}
 
 	/**

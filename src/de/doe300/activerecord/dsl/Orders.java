@@ -116,15 +116,14 @@ public final class Orders
 	
 	/**
 	 * Creates an order for the given attribute in ascending order
-	 * @param attributeName
 	 * @param scalarFunction
 	 * @return the new order
 	 * @since 0.8
 	 */
 	@Nonnull
-	public static Order sortAscending(@Nonnull final String attributeName, @Nullable final ScalarFunction<?, ?, ?> scalarFunction)
+	public static Order sortAscending(@Nullable final ScalarFunction<?, ?, ?> scalarFunction)
 	{
-		return new ScalarOrder(attributeName, scalarFunction, SimpleOrder.OrderType.ASCENDING );
+		return new ScalarOrder(scalarFunction.getAttributeName(), scalarFunction, SimpleOrder.OrderType.ASCENDING );
 	}
 	
 	/**
@@ -141,15 +140,14 @@ public final class Orders
 	
 	/**
 	 * Creates an order for the given attribute in descending order
-	 * @param attributeName
 	 * @param scalarFunction
 	 * @return the new order
 	 * @since 0.8
 	 */
 	@Nonnull
-	public static Order sortDescending(@Nonnull final String attributeName, @Nullable final ScalarFunction<?, ?, ?> scalarFunction)
+	public static Order sortDescending(@Nullable final ScalarFunction<?, ?, ?> scalarFunction)
 	{
-		return new ScalarOrder(attributeName, scalarFunction, SimpleOrder.OrderType.DESCENDING );
+		return new ScalarOrder(scalarFunction.getAttributeName(), scalarFunction, SimpleOrder.OrderType.DESCENDING );
 	}
 	
 	private Orders()

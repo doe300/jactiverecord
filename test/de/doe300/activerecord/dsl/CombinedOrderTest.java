@@ -24,10 +24,18 @@
  */
 package de.doe300.activerecord.dsl;
 
+import de.doe300.activerecord.RecordBase;
+import de.doe300.activerecord.RecordCore;
+import de.doe300.activerecord.TestBase;
+import de.doe300.activerecord.TestInterface;
+import de.doe300.activerecord.TestServer;
+import de.doe300.activerecord.dsl.functions.LowerCase;
+import de.doe300.activerecord.dsl.functions.SquareRoot;
 import de.doe300.activerecord.jdbc.driver.JDBCDriver;
 import java.util.HashMap;
 import java.util.Map;
-import org.junit.Assert;
+import org.junit.AfterClass;
+import org.junit.BeforeClass;
 import org.junit.Test;
 
 /**
@@ -35,10 +43,26 @@ import org.junit.Test;
  * @author doe300
  * @since 0.7
  */
-public class CombinedOrderTest extends Assert
+public class CombinedOrderTest extends TestBase
 {
-	public CombinedOrderTest()
+	private final RecordBase<TestInterface> base;
+	
+	public CombinedOrderTest(final RecordCore core)
 	{
+		super(core);
+		base = core.getBase( TestInterface.class).getShardBase( CombinedOrderTest.class.getSimpleName());
+	}
+	
+	@BeforeClass
+	public static void setUpClass() throws Exception
+	{
+		TestServer.buildTestTables(TestInterface.class, CombinedOrderTest.class.getSimpleName());
+	}
+
+	@AfterClass
+	public static void tearDownClass() throws Exception
+	{
+		TestServer.destroyTestTables(TestInterface.class, CombinedOrderTest.class.getSimpleName());
 	}
 	
 	@Test
@@ -82,7 +106,18 @@ public class CombinedOrderTest extends Assert
 	@Test
 	public void testCompare_ActiveRecord_ActiveRecord()
 	{
-		//TODO
+		final TestInterface t1 = base.createRecord();
+		t1.setName( "Adam");
+		t1.setAge( 12);
+		final TestInterface t2 = base.createRecord();
+		t2.setName( "adam");
+		t2.setAge( 13);
+		
+		final Order order = Orders.sortAscending(new LowerCase<TestInterface>("name", TestInterface::getName)).thenComparing( Orders.sortAscending( "age"));
+		assertTrue( order.compare( t1, t2) < 0);
+		
+		final Order order2 = Orders.sortDescending(new SquareRoot<TestInterface, Integer>("age", TestInterface::getAge)).thenComparing( Orders.sortAscending( "name"));
+		assertTrue( order2.compare( t1, t1) == 0);
 	}
 
 	@Test

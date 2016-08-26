@@ -55,7 +55,7 @@ import de.doe300.activerecord.record.association.TableSet;
 import de.doe300.activerecord.scope.Scope;
 import de.doe300.activerecord.store.RecordStore;
 import de.doe300.activerecord.record.validation.ValidatedRecord;
-import de.doe300.activerecord.record.validation.ValidationFailed;
+import de.doe300.activerecord.record.validation.ValidationException;
 import de.doe300.activerecord.store.JDBCRecordStore;
 import java.util.Collections;
 import java.util.Objects;
@@ -114,7 +114,7 @@ public abstract class RecordBase<T extends ActiveRecord> implements ReadOnlyReco
 		this.core = origBase.core;
 		this.store = origBase.store;
 		this.tableName = tableName;
-		this.records = new TreeMap<>();
+		this.records = Collections.synchronizedSortedMap( new TreeMap<>());
 		//disallow creating shards from shards
 		this.shards = null;
 	}
@@ -395,10 +395,10 @@ public abstract class RecordBase<T extends ActiveRecord> implements ReadOnlyReco
 	/**
 	 * Saves all cached data to the record-store
 	 * @return whether data was changed
-	 * @throws ValidationFailed if the record-type is {@link ValidatedRecord} and any of the validations failed
+	 * @throws ValidationException if the record-type is {@link ValidatedRecord} and any of the validations failed
 	 */
 	@CheckReturnValue
-	public boolean saveAll() throws ValidationFailed
+	public boolean saveAll() throws ValidationException
 	{
 		Logging.getLogger().debug( recordType.getSimpleName(), "Saving all records...");
 		for(final T record : records.values())
@@ -427,10 +427,10 @@ public abstract class RecordBase<T extends ActiveRecord> implements ReadOnlyReco
 	 * Saves the record to the record-store
 	 * @param record
 	 * @return whether data was changed
-	 * @throws ValidationFailed if the record is {@link ValidatedRecord} and the validation failed
+	 * @throws ValidationException if the record is {@link ValidatedRecord} and the validation failed
 	 */
 	@CheckReturnValue
-	public boolean save(@Nonnull final ActiveRecord record) throws ValidationFailed
+	public boolean save(@Nonnull final ActiveRecord record) throws ValidationException
 	{
 		if(hasCallbacks())
 		{
@@ -641,7 +641,7 @@ public abstract class RecordBase<T extends ActiveRecord> implements ReadOnlyReco
 
 	/**
 	 * @param record
-	 * @throws ValidationFailed if the validation failed
+	 * @throws ValidationException if the validation failed
 	 * @see ValidatedRecord#validate()
 	 */
 	public void validate(@Nonnull final ActiveRecord record)

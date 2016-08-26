@@ -69,7 +69,7 @@ public class ValidationsTest extends Assert implements AssertException
 		//succeeds
 		Validations.validate( "name", "Adam", Validations::notEmpty, "is wrong1");
 		//fails
-		assertThrows( ValidationFailed.class, () -> Validations.validate("name", null, (Object obj) -> obj != null, "is null"));
+		assertThrows( ValidationException.class, () -> Validations.validate("name", null, (Object obj) -> obj != null, "is null"));
 	}
 
 	@Test

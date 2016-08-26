@@ -125,6 +125,12 @@ public class BelongsToConditionTest extends TestBase
 		TestInterface t4 = base.createRecord();
 		//t4 has no fk_test_id set
 		assertFalse( cond1.test( t4));
+		
+		TestInterface t5 = base.createRecord();
+		t4.setDirectionOther( t5);
+		//foreign record doesn't exist anymore
+		t5.destroy();
+		assertFalse( cond1.test( t4));
 	}
 
 	@Test
@@ -134,6 +140,10 @@ public class BelongsToConditionTest extends TestBase
 		assertFalse( cond1.test( new HashMap<String, Object>(0) ));
 		assertFalse( cond2.test( t4));
 		assertTrue( cond2.test( Collections.singletonMap( "fk_test_id", t3.getPrimaryKey())));
+		//t4 doesn't match condition "age == -913"
+		assertFalse( cond2.test( Collections.singletonMap( "fk_test_id", t4.getPrimaryKey())));
+		//there is no record with this primary key
+		assertFalse( cond2.test( Collections.singletonMap( "fk_test_id", t4.getPrimaryKey() + 253)));
 	}
 
 	@Test

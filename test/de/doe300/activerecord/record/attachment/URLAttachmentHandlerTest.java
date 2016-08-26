@@ -31,6 +31,7 @@ import de.doe300.activerecord.TestServer;
 import de.doe300.activerecord.migration.Attribute;
 import de.doe300.activerecord.pojo.AbstractActiveRecord;
 import de.doe300.activerecord.pojo.POJOBase;
+import java.io.IOException;
 import java.io.InputStream;
 import java.net.URI;
 import org.junit.AfterClass;
@@ -70,12 +71,16 @@ public class URLAttachmentHandlerTest extends TestBase
 	{
 		TestURLAttachmentRecord r = base.createRecord();
 		assertFalse( r.attachmentExists());
+		assertThrows( NullPointerException.class, () -> r.writeAttachment().close());
+		r.setAttachment( "http://nu.com.url/");
+		assertFalse( r.attachmentExists());
 		r.setAttachment( "http://docs.oracle.com/javase/tutorial/reallybigindex.html");
 		assertTrue( r.attachmentExists());
 		try(final InputStream is = r.readAttachment())
 		{
 			assertNotNull( is);
 		}
+		assertThrows( IOException.class, () -> r.writeAttachment());
 		assertFalse(r.removeAttachment());
 		r.setAttachment( null);
 		assertFalse( r.attachmentExists());
