@@ -39,5 +39,5 @@ public interface SlowQueryListener
 	 * This listener-method is executed on every slow query detected by the registered record-store
 	 * @param query the slow query
 	 */
-	public void onSlowQuery(@Nonnull final Query<?> query);
+	public void onSlowQuery(@Nonnull final LoggedQuery<?> query);
 }

@@ -25,12 +25,12 @@
 package de.doe300.activerecord.jdbc.diagnostics;
 
 import de.doe300.activerecord.store.JDBCRecordStore;
-import de.doe300.activerecord.store.diagnostics.Query;
+import de.doe300.activerecord.store.diagnostics.LoggedQuery;
 import de.doe300.activerecord.store.diagnostics.QueryRemark;
 import java.util.List;
 
 /**
- * Implementation of a {@link Query} for the PostgreSQL database engine
+ * Implementation of a {@link LoggedQuery} for the PostgreSQL database engine
  *
  * @author doe300
  * @since 0.8

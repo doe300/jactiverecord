@@ -38,7 +38,7 @@ import javax.annotation.concurrent.Immutable;
  * @since 0.8
  */
 @Immutable
-public abstract class Query<T>
+public abstract class LoggedQuery<T>
 {
 	protected final RecordStore store;
 	protected final T source;
@@ -51,7 +51,7 @@ public abstract class Query<T>
 	 * @param storeName
 	 * @param duration the duration in milliseconds
 	 */
-	protected Query(@Nonnull final RecordStore store, @Nonnull final T source, @Nullable final String storeName, @Nonnegative final long duration )
+	protected LoggedQuery(@Nonnull final RecordStore store, @Nonnull final T source, @Nullable final String storeName, @Nonnegative final long duration )
 	{
 		this.store = store;
 		this.source = source;

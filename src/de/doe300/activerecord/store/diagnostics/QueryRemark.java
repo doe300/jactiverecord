@@ -38,12 +38,12 @@ import javax.annotation.concurrent.Immutable;
 @Immutable
 public class QueryRemark<T>
 {
-	public final Query<T> query;
+	public final LoggedQuery<T> query;
 	public final RemarkType type;
 	public final String tableName;
 	public final String remark;
 
-	public QueryRemark(@Nonnull final Query<T> query, @Nonnull final RemarkType type, @Nullable final String tableName, @Nonnull final String remark )
+	public QueryRemark(@Nonnull final LoggedQuery<T> query, @Nonnull final RemarkType type, @Nullable final String tableName, @Nonnull final String remark )
 	{
 		this.query = query;
 		this.type = type;

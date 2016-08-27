@@ -25,7 +25,7 @@
 package de.doe300.activerecord.jdbc.diagnostics;
 
 import de.doe300.activerecord.store.JDBCRecordStore;
-import de.doe300.activerecord.store.diagnostics.Query;
+import de.doe300.activerecord.store.diagnostics.LoggedQuery;
 import de.doe300.activerecord.store.diagnostics.QueryRemark;
 import java.sql.ResultSet;
 import java.sql.Statement;
@@ -34,7 +34,7 @@ import java.util.List;
 import javax.annotation.Nonnull;
 
 /**
- * Implementation for {@link Query} for HSQLDB driver
+ * Implementation for {@link LoggedQuery} for HSQLDB driver
  *
  * @author doe300
  * @since 0.8

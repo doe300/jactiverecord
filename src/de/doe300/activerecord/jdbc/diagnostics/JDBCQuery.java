@@ -25,7 +25,7 @@
 package de.doe300.activerecord.jdbc.diagnostics;
 
 import de.doe300.activerecord.store.JDBCRecordStore;
-import de.doe300.activerecord.store.diagnostics.Query;
+import de.doe300.activerecord.store.diagnostics.LoggedQuery;
 import de.doe300.activerecord.store.diagnostics.QueryRemark;
 import java.util.List;
 import javax.annotation.Nonnegative;
@@ -33,19 +33,19 @@ import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 
 /**
- * Implementation for a {@link Query} for JDBC drivers
+ * Implementation for a {@link LoggedQuery} for JDBC drivers
  *
  * @author doe300
  * @since 0.8
  */
-public abstract class JDBCQuery extends Query<String>
+public abstract class JDBCQuery extends LoggedQuery<String>
 {
 	private List<String> explainResult;
 	private List<QueryRemark<String>> remarks;
 	
 	/**
 	 *
-	 * @param store the RecordStore this Query was run on
+	 * @param store the RecordStore this LoggedQuery was run on
 	 * @param source the originating SQL command
 	 * @param storeName the name of the table 
 	 * @param duration the duration of this query

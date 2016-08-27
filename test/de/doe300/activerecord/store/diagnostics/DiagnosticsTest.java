@@ -76,7 +76,7 @@ public class DiagnosticsTest extends TestBase
 	public void testProfileQuery()
 	{
 		diagnostics.setSlowQueryThreshold( 1);
-		diagnostics.setSlowQueryListener((Query<?> query) ->
+		diagnostics.setSlowQueryListener((LoggedQuery<?> query) ->
 		{
 			assertTrue( query.getDuration() > 1);
 			System.out.println( query.store );

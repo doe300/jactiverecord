@@ -26,6 +26,9 @@ package de.doe300.activerecord.record.association.generation;
 
 import de.doe300.activerecord.record.ActiveRecord;
 import java.lang.annotation.ElementType;
+import java.lang.annotation.Inherited;
+import java.lang.annotation.Retention;
+import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
 
 /**
@@ -36,10 +39,14 @@ import java.lang.annotation.Target;
  * 
  * {@link SingleTableInheritance} is automatically supported.
  * 
+ * As of v0.9 this annotation can be used on methods to support proxy-methods for associations.
+ * 
  * @author doe300
  * @since 0.4
  */
-@Target(ElementType.TYPE)
+@Retention(RetentionPolicy.RUNTIME)
+@Target({ElementType.TYPE, ElementType.METHOD})
+@Inherited
 public @interface BelongsTo
 {
 	/**

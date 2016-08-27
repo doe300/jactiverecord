@@ -290,8 +290,10 @@ public interface RecordStore extends AutoCloseable
 	 * @param scope
 	 * @return the primary keys of all matches or an empty Set
 	 * @throws IllegalArgumentException if there is no data-set for the given <code>base</code>
+	 * @deprecated As of v0.9, use {@link #streamAll(de.doe300.activerecord.RecordBase, de.doe300.activerecord.scope.Scope) } instead
 	 */
 	@Nonnull
+	@Deprecated
 	public default Set<Integer> findAll(@Nonnull final RecordBase<?> base, @Nonnull final Scope scope) throws NoSuchDataSetException, NoSuchAttributeException
 	{
 		return streamAll(base, scope).collect( Collectors.toSet());

@@ -25,7 +25,7 @@
 package de.doe300.activerecord.store.impl.memory;
 
 import de.doe300.activerecord.scope.Scope;
-import de.doe300.activerecord.store.diagnostics.Query;
+import de.doe300.activerecord.store.diagnostics.LoggedQuery;
 import de.doe300.activerecord.store.diagnostics.QueryRemark;
 import de.doe300.activerecord.util.Pair;
 import javax.annotation.Nonnegative;
@@ -33,12 +33,12 @@ import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 
 /**
- * Implementation for a {@link Query} for the {@link MemoryRecordStore}
+ * Implementation for a {@link LoggedQuery} for the {@link MemoryRecordStore}
  *
  * @author doe300
  * @since 0.8
  */
-class MemoryQuery extends Query<Pair< String, Scope>>
+class MemoryQuery extends LoggedQuery<Pair< String, Scope>>
 {
 	MemoryQuery(@Nonnull final MemoryRecordStore store, @Nonnull final Pair< String, Scope> source, @Nullable final String storeName, @Nonnegative final long duration )
 	{

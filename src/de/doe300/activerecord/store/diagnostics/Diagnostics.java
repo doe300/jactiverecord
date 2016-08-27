@@ -54,15 +54,15 @@ public class Diagnostics<T>
 	@Nonnull
 	protected final RecordStore store;
 	protected long slowQueryThreshold;
-	protected final Deque<Query<T>> slowQueryLog;
-	private final BiFunction<T, Long, ? extends Query<T>> logCreator;
+	protected final Deque<LoggedQuery<T>> slowQueryLog;
+	private final BiFunction<T, Long, ? extends LoggedQuery<T>> logCreator;
 	private SlowQueryListener listener;
 	
 	/**
 	 * @param store 
 	 * @param logCreator 
 	 */
-	public Diagnostics(@Nonnull final RecordStore store, @Nonnull final BiFunction<T, Long, ? extends Query<T>> logCreator)
+	public Diagnostics(@Nonnull final RecordStore store, @Nonnull final BiFunction<T, Long, ? extends LoggedQuery<T>> logCreator)
 	{
 		this.store = store;
 		slowQueryThreshold = THRESHOLD_DISABLE;
@@ -140,7 +140,7 @@ public class Diagnostics<T>
 	 */
 	protected void logSlowQuery(@Nonnull final T entry, @Nonnegative final long duration)
 	{
-		final Query<T> query = logCreator.apply( entry, duration );
+		final LoggedQuery<T> query = logCreator.apply( entry, duration );
 		slowQueryLog.add( query);
 		if(listener != null)
 		{
@@ -154,7 +154,7 @@ public class Diagnostics<T>
 	 * @return the slow-query log
 	 */
 	@Nonnull
-	public Deque<Query<T>> getSlowQueryLog()
+	public Deque<LoggedQuery<T>> getSlowQueryLog()
 	{
 		return slowQueryLog;
 	}
