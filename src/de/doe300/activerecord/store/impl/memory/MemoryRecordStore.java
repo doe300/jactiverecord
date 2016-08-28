@@ -265,6 +265,12 @@ public class MemoryRecordStore implements RecordStore
 	}
 
 	@Override
+	public boolean loadIntoCache(RecordBase<?> base, int primaryKey ) throws UnsupportedOperationException
+	{
+		return false;
+	}
+
+	@Override
 	public boolean isCached()
 	{
 		return false;

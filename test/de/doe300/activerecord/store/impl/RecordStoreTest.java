@@ -281,14 +281,6 @@ public class RecordStoreTest extends Assert implements AssertException
 	}
 	
 	@Test
-	public void testFindAll()
-	{
-		Scope scope = new Scope(Conditions.is(base.getPrimaryColumn(), primaryKey), null, 2 );
-		assertEquals( 1, store.findAll( base, scope).size());
-		assertEquals( primaryKey, store.findAll( base, scope).iterator().next().intValue());
-	}
-
-	@Test
 	public void testStreamAllWithData()
 	{
 		Scope scope = new Scope(Conditions.is(base.getPrimaryColumn(), primaryKey), null, 2 );
@@ -358,6 +350,19 @@ public class RecordStoreTest extends Assert implements AssertException
 		store.clearCache( base, primaryKey );
 		assertFalse( Objects.equals( store.getValue( base, primaryKey, "age"), -112));
 		assertEquals( 112, store.getValue( base, primaryKey, "age"));
+	}
+	
+	@Test
+	public void testLoadIntoCache()
+	{
+		if(!store.isCached())
+		{
+			assertFalse( store.loadIntoCache( base, primaryKey));
+			return;
+		}
+		store.setValue( base, primaryKey, "name", "Eve");
+		assertTrue( store.loadIntoCache( base, primaryKey));
+		assertTrue( store.isSynchronized( base, primaryKey));
 	}
 
 	@Test

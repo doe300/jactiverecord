@@ -168,6 +168,8 @@ class RowCache implements Comparable<RowCache>
 		{
 			setData( set.getMetaData().getColumnLabel( i).toLowerCase(), set.getObject( i ),false);
 		}
+		//loading from DB overwrites all modified data
+		modifiedData.clear();
 	}
 
 	/**

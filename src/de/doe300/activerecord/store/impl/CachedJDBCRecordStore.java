@@ -428,6 +428,17 @@ public class CachedJDBCRecordStore extends SimpleJDBCRecordStore
 	}
 
 	@Override
+	public boolean loadIntoCache(RecordBase<?> base, int primaryKey )
+	{
+		final Optional<RowCache> cacheRow = getCache( base, primaryKey);
+		if(cacheRow.isPresent())
+		{
+			return getDBValue( base, primaryKey, cacheRow.get(), base.getPrimaryColumn()).getSecondOrThrow();
+		}
+		return false;
+	}
+	
+	@Override
 	public boolean isCached()
 	{
 		return true;

@@ -162,6 +162,12 @@ public class ProfilingRecordStore implements RecordStore
 	}
 
 	@Override
+	public boolean loadIntoCache(RecordBase<?> base, int primaryKey )
+	{
+		return profiler.profile( "loadIntoCache", () -> store.loadIntoCache( base, primaryKey));
+	}
+
+	@Override
 	public boolean isCached()
 	{
 		return profiler.profileBoolean("isCached", () -> store.isCached());
@@ -224,21 +230,9 @@ public class ProfilingRecordStore implements RecordStore
 	}
 
 	@Override
-	public Set<Integer> findAll(final RecordBase<?> base, final Scope scope)
-	{
-		return profiler.profile( "findAll", () -> store.findAll( base, scope));
-	}
-
-	@Override
 	public Stream<Integer> streamAll(final RecordBase<?> base, final Scope scope)
 	{
 		return profiler.profile( "streamAll", () -> store.streamAll( base, scope));
-	}
-
-	@Override
-	public Map<Integer, Map<String, Object>> findAllWithData(final RecordBase<?> base, final String[] columns, final Scope scope)
-	{
-		return profiler.profile( "findAllWithData", () -> store.findAllWithData( base, columns, scope));
 	}
 
 	@Override

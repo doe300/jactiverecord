@@ -27,7 +27,6 @@ package de.doe300.activerecord.store;
 import java.sql.Timestamp;
 import java.util.Map;
 import java.util.Set;
-import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 import javax.annotation.CheckReturnValue;
@@ -212,9 +211,10 @@ public interface RecordStore extends AutoCloseable
 
 	/**
 	 * Clears all cached records for the given RecordBase.
-	 * NOTE: this method does NOT write the cached values onto the underlying medium!
+	 * NOTE: this method does NOT write the cached values onto the underlying medium. but discards the cached values!
 	 * @param base
 	 * @param primaryKey
+	 * @see #isCached() 
 	 */
 	public void clearCache(@Nonnull final RecordBase<?> base, @Nonnegative int primaryKey);
 
@@ -222,6 +222,16 @@ public interface RecordStore extends AutoCloseable
 	 * @return whether this store maintains some kind of cache
 	 */
 	public boolean isCached();
+	
+	/**
+	 * Loads the data for the given record into cache, if this RecordStore supports it, otherwise this method is a no-op
+	 * @param base
+	 * @param primaryKey
+	 * @return whether the data was loaded into cache
+	 * @since 0.9
+	 * @see #isCached() 
+	 */
+	public boolean loadIntoCache(@Nonnull final RecordBase<?> base, @Nonnegative int primaryKey);
 
 	/**
 	 * Updates the {@link TimestampedRecord#COLUMN_UPDATED_AT} on the given record
@@ -288,20 +298,6 @@ public interface RecordStore extends AutoCloseable
 	/**
 	 * @param base
 	 * @param scope
-	 * @return the primary keys of all matches or an empty Set
-	 * @throws IllegalArgumentException if there is no data-set for the given <code>base</code>
-	 * @deprecated As of v0.9, use {@link #streamAll(de.doe300.activerecord.RecordBase, de.doe300.activerecord.scope.Scope) } instead
-	 */
-	@Nonnull
-	@Deprecated
-	public default Set<Integer> findAll(@Nonnull final RecordBase<?> base, @Nonnull final Scope scope) throws NoSuchDataSetException, NoSuchAttributeException
-	{
-		return streamAll(base, scope).collect( Collectors.toSet());
-	}
-
-	/**
-	 * @param base
-	 * @param scope
 	 * @return all matching primary keys or an empty Stream
 	 * @throws IllegalArgumentException if there is no data-set for the given <code>base</code>
 	 */
@@ -323,22 +319,6 @@ public interface RecordStore extends AutoCloseable
 	 */
 	@Nonnull
 	public Map<String, Object> findFirstWithData(@Nonnull final RecordBase<?> base, @Nonnull final String[] columns, @Nonnull final Scope scope) throws NoSuchDataSetException, NoSuchAttributeException;
-
-	/**
-	 * @param base
-	 * @param columns
-	 * @param scope
-	 * @return the data for all matches or an empty map
-	 * @throws IllegalArgumentException if there is no data-set for the given <code>base</code> or any of the <code>columns</code> does not exist in the data-set
-	 */
-	@Nonnull
-	public default Map<Integer, Map<String, Object>> findAllWithData(@Nonnull final RecordBase<?> base, @Nonnull final String[] columns, @Nonnull final Scope scope) throws NoSuchDataSetException, NoSuchAttributeException
-	{
-		return streamAllWithData( base, columns, scope ).collect( Collectors.toMap( (final Map<String,Object> map) ->
-		{
-			return (Integer)map.get( base.getPrimaryColumn());
-		}, (final Map<String,Object> map)->map));
-	}
 
 	/**
 	 * @param base

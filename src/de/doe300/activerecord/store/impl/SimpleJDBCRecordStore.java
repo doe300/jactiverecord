@@ -882,6 +882,13 @@ public class SimpleJDBCRecordStore implements JDBCRecordStore
 	}
 
 	@Override
+	public boolean loadIntoCache(RecordBase<?> base, int primaryKey )
+	{
+		//nothing to do
+		return false;
+	}
+
+	@Override
 	public boolean addRow( final String tableName, final String[] columns, final Object[] values ) throws IllegalArgumentException
 	{
 		if(!exists( tableName ))

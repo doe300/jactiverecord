@@ -126,8 +126,7 @@ public class AggregateFunctionTest extends TestBase
 		assertEquals( Integer.valueOf( t1.getAge()), base.aggregate( min, null));
 		assertEquals( Integer.valueOf( t1.getAge()), base.getStore().aggregate( base, min, null));
 		assertEquals( Integer.valueOf( t1.getAge()), min.aggregate( 
-				base.getStore().findAllWithData( base, new String[]{"age"}, Scope.DEFAULT).
-						values().stream().parallel()));
+				base.getStore().streamAllWithData(base, new String[]{"age"}, Scope.DEFAULT).parallel()));
 		assertNull( min.aggregate( Stream.empty()));
 		
 		AggregateFunction<TestInterface, ? extends Number, ?, ? extends Number> min2 = new Minimum<>(new Signum<>("age", TestInterface::getAge));
@@ -144,8 +143,7 @@ public class AggregateFunctionTest extends TestBase
 		assertEquals( Integer.valueOf( t3.getAge()), base.aggregate( max, null));
 		assertEquals( Integer.valueOf( t3.getAge()), base.getStore().aggregate( base, max, null));
 		assertEquals( Integer.valueOf( t3.getAge()), max.aggregate( 
-				base.getStore().findAllWithData( base, new String[]{"age"}, Scope.DEFAULT).
-						values().stream().parallel()));
+				base.getStore().streamAllWithData(base, new String[]{"age"}, Scope.DEFAULT).parallel()));
 		assertNull( max.aggregate( Stream.empty()));
 		
 		AggregateFunction<TestInterface, ? extends Number, ?, ? extends Number> max2 = new Maximum<>(new Signum<>("age", TestInterface::getAge));
@@ -162,8 +160,7 @@ public class AggregateFunctionTest extends TestBase
 		assertEquals( 4L, base.aggregate( count, null).longValue());
 		assertEquals( 4L, base.getStore().aggregate( base, count, null).longValue());
 		assertEquals( 4L, count.aggregate( 
-				base.getStore().findAllWithData( base, new String[]{"age"}, Scope.DEFAULT).
-						values().stream().parallel()).longValue());
+				base.getStore().streamAllWithData(base, new String[]{"age"}, Scope.DEFAULT).parallel()).longValue());
 		assertEquals(0L, count.aggregate( Stream.empty()));
 	}
 
@@ -177,8 +174,7 @@ public class AggregateFunctionTest extends TestBase
 		assertEquals( 3L, base.aggregate( countDistinct, null).longValue());
 		assertEquals( 3L, base.getStore().aggregate( base, countDistinct, null).longValue());
 		assertEquals( 3L, countDistinct.aggregate( 
-				base.getStore().findAllWithData( base, new String[]{"age"}, Scope.DEFAULT).
-						values().stream().parallel()).longValue());
+				base.getStore().streamAllWithData(base, new String[]{"age"}, Scope.DEFAULT).parallel()).longValue());
 		assertEquals(0L, countDistinct.aggregate( Stream.empty()));
 		
 		AggregateFunction<TestInterface, ?, ?, Number> countDistinct2 = new CountDistinct<>(new Signum<>("age", TestInterface::getAge));
@@ -196,8 +192,7 @@ public class AggregateFunctionTest extends TestBase
 		assertEquals( otherSum, base.aggregate( sum, null).longValue());
 		assertEquals( otherSum, base.getStore().aggregate( base, sum, null).longValue());
 		assertEquals( otherSum, sum.aggregate( 
-				base.getStore().findAllWithData( base, new String[]{"age"}, Scope.DEFAULT).
-						values().stream().parallel()).longValue());
+				base.getStore().streamAllWithData(base, new String[]{"age"}, Scope.DEFAULT).parallel()).longValue());
 		assertEquals(0L, sum.aggregate( Stream.empty()));
 	}
 
@@ -212,8 +207,7 @@ public class AggregateFunctionTest extends TestBase
 		assertEquals( otherSum, base.aggregate( sumFloat, null).doubleValue(), 0.0);
 		assertEquals( otherSum, base.getStore().aggregate( base, sumFloat, null).doubleValue(), 0.0);
 		assertEquals( otherSum, sumFloat.aggregate( 
-				base.getStore().findAllWithData( base, new String[]{"age"}, Scope.DEFAULT).
-						values().stream().parallel()).doubleValue(), 0.0);
+				base.getStore().streamAllWithData(base, new String[]{"age"}, Scope.DEFAULT).parallel()).doubleValue(), 0.0);
 		assertEquals(0.0, sumFloat.aggregate( Stream.empty()));
 		
 		AggregateFunction<TestInterface, Integer, ?, Number> sumFloat2 = new SumDouble<>(new Signum<>("age", TestInterface::getAge));
@@ -233,8 +227,7 @@ public class AggregateFunctionTest extends TestBase
 		assertEquals( avgAge, base.aggregate( average, null).doubleValue(), 0.0);
 		assertEquals( avgAge, base.getStore().aggregate( base, average, null).doubleValue(), 0.0);
 		assertEquals( avgAge, average.aggregate( 
-				base.getStore().findAllWithData( base, new String[]{"age"}, Scope.DEFAULT).
-						values().stream().parallel()).doubleValue(), 0.0);
+				base.getStore().streamAllWithData(base, new String[]{"age"}, Scope.DEFAULT).parallel()).doubleValue(), 0.0);
 		assertNull( average.aggregate( Stream.empty()));
 		
 		AggregateFunction<TestInterface, Integer, ?, Number> average2 = new Average<>(new Signum<>("age", TestInterface::getAge));
