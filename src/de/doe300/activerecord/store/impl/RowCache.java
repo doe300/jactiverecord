@@ -35,6 +35,7 @@ import java.util.Objects;
 import javax.annotation.Nonnull;
 
 import de.doe300.activerecord.record.TimestampedRecord;
+import de.doe300.activerecord.store.RecordStore;
 
 /**
  * Caches one single row of one DB TABLE
@@ -89,7 +90,9 @@ class RowCache implements Comparable<RowCache>
 	/**
 	 * @param names
 	 * @param values
+	 * @deprecated Will be removed with {@link RecordStore#setValues(de.doe300.activerecord.RecordBase, int, java.lang.String[], java.lang.Object[]) }
 	 */
+	@Deprecated
 	public synchronized void setData(final String[] names, final Object[] values)
 	{
 		//prevents updating only the timestamps

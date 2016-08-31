@@ -199,10 +199,10 @@ public final class Conditions
 	 * </ul>
 	 *
 	 * @param conds
-	 * @return the combined Condition
+	 * @return the combined Condition or <code>null</code> if all conditions are tautologies
 	 * @since 0.8
 	 */
-	@Nonnull
+	@Nullable
 	public static Condition and(@Nullable final Collection<Condition> conds )
 	{
 		if ( conds == null || conds.isEmpty() )
@@ -237,7 +237,8 @@ public final class Conditions
 		}
 		if ( list.isEmpty() )
 		{
-			throw new IllegalArgumentException( "Cant AND null conditions" );
+			//no condition
+			return null;
 		}
 		if ( list.size() == 1 )
 		{
@@ -269,10 +270,10 @@ public final class Conditions
 	 * </ul>
 	 *
 	 * @param conds
-	 * @return the combined Condition
+	 * @return the combined Condition or <code>null</code> if all conditions are tautologies
 	 * @since 0.8
 	 */
-	@Nonnull
+	@Nullable
 	public static Condition or(@Nullable final Collection<Condition> conds )
 	{
 		if ( conds == null || conds.isEmpty() )
@@ -308,7 +309,8 @@ public final class Conditions
 		}
 		if ( list.isEmpty() )
 		{
-			throw new IllegalArgumentException( "Can't OR null conditions" );
+			//no conditions
+			return null;
 		}
 		if ( list.size() == 1 )
 		{

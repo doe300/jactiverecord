@@ -137,8 +137,21 @@ public final class TypeMappings
 		{
 			return type.cast( new java.sql.Time(((Number)obj).longValue()));
 		}
-		//TODO String -> Timestamp ??
-		throw new ClassCastException("Can't cast Object of type '"+obj.getClass()+"' to type '"+type+"'");
+		
+		//Support for storing and loading Date/Time types (required for SQLite)
+		if(obj instanceof String && java.sql.Date.class.equals( type))
+		{
+			return type.cast( java.sql.Date.valueOf((String) obj));
+		}
+		if(obj instanceof String && java.sql.Time.class.equals( type))
+		{
+			return type.cast( java.sql.Time.valueOf((String) obj));
+		}
+		if(obj instanceof String && java.sql.Timestamp.class.equals( type))
+		{
+			return type.cast( java.sql.Timestamp.valueOf((String) obj));
+		}
+		throw new ClassCastException("Can't coerce object of type '"+obj.getClass()+"' to type '"+type+"'");
 	}
 	
 	/**
