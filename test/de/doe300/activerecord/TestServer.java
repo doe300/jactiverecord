@@ -68,13 +68,6 @@ public class TestServer extends Assert
 	public static final Class<? extends RecordStore> testStore = CachedJDBCRecordStore.class;
 	
 	@Nonnull
-	@Deprecated
-	public static RecordCore getTestCore() throws SQLException
-	{
-		return getTestCore( testStore );
-	}
-	
-	@Nonnull
 	public static RecordCore getTestCore(@Nonnull final Class<? extends RecordStore> storeType) throws SQLException
 	{
 		RecordCore core = RecordCore.getCore( storeType.getSimpleName());
@@ -105,7 +98,6 @@ public class TestServer extends Assert
 		return DriverManager.getConnection( "jdbc:hsqldb:mem:test", "sa", "");
 		//FIXME SQLite errors
 		/**
-		 * - Cannot find ANY database anymore. Corrupted version? JDBC-wrapper incompatible with binaries?
 		 */
 //		return DriverManager.getConnection("jdbc:sqlite::memory:");
 		//FIXME MySQL errors:
@@ -123,12 +115,12 @@ public class TestServer extends Assert
 //		return DriverManager.getConnection( "jdbc:postgresql:postgres", "postgres", "");
 	}
 	
-	public static void buildTestMappingTable(@Nonnull final String tableName) throws Exception
+	public static void buildTestMappingTable(@Nonnull final RecordStore store, @Nonnull final String tableName) throws Exception
 	{
 		final Map<String, Class<?>> columns = new HashMap<>(2);
 		columns.put( "fk_test1", Integer.class);
 		columns.put( "fk_test2", Integer.class);
-		Assert.assertTrue( getTestCore().getStore().getDriver().createMigration( tableName, columns, getTestCore().getStore()).apply());
+		Assert.assertTrue( store.getDriver().createMigration( tableName, columns, store).apply());
 	}
 	
 	public static void buildTestMappingTables(@Nonnull final String tableName) throws Exception
@@ -137,26 +129,44 @@ public class TestServer extends Assert
 		columns.put( "fk_test1", Integer.class);
 		columns.put( "fk_test2", Integer.class);
 		Assert.assertTrue( getTestCore(SimpleJDBCRecordStore.class).getStore().getDriver().createMigration( tableName, columns, getTestCore(SimpleJDBCRecordStore.class).getStore()).apply());
+		try
+		{
+			//may fail when simple JDBC and cached JDBC use same database - not the case for SQLite
+			getTestCore(CachedJDBCRecordStore.class).getStore().getDriver().createMigration( tableName, columns, getTestCore(CachedJDBCRecordStore.class).getStore()).apply();
+		}
+		catch(Exception e)
+		{
+			
+		}
 		Assert.assertTrue( getTestCore(MemoryRecordStore.class).getStore().getDriver().createMigration( tableName, columns, getTestCore(MemoryRecordStore.class).getStore()).apply());
 	}
 	
-	public static void buildTestTable(@Nonnull final Class<? extends ActiveRecord> type, @Nonnull final String tableName) throws SQLException, Exception
+	public static void buildTestTable(@Nonnull final RecordStore store, @Nonnull final Class<? extends ActiveRecord> type, @Nonnull final String tableName) throws SQLException, Exception
 	{
-		Assert.assertTrue( getTestCore().getStore().getDriver().createMigration( type, tableName, getTestCore().getStore() ).apply());
+		Assert.assertTrue( store.getDriver().createMigration( type, tableName, store ).apply());
 	}
 	
 	public static void buildTestTables(@Nonnull final Class<? extends ActiveRecord> type, @Nonnull final String tableName) throws SQLException, Exception
 	{
 		Assert.assertTrue( getTestCore(SimpleJDBCRecordStore.class).getStore().getDriver().createMigration( type, tableName, getTestCore(SimpleJDBCRecordStore.class).getStore() ).apply());
+		try
+		{
+			//may fail when simple JDBC and cached JDBC use same database - not the case for SQLite
+			getTestCore(CachedJDBCRecordStore.class).getStore().getDriver().createMigration( type, tableName, getTestCore(CachedJDBCRecordStore.class).getStore() ).apply();
+		}
+		catch(Exception e)
+		{
+			
+		}
 		Assert.assertTrue( getTestCore(MemoryRecordStore.class).getStore().getDriver().createMigration( type, tableName, getTestCore(MemoryRecordStore.class).getStore() ).apply());
 	}
 	
-	public static void destroyTestMappingTable(@Nonnull final String tableName) throws Exception
+	public static void destroyTestMappingTable(@Nonnull final RecordStore store, @Nonnull final String tableName) throws Exception
 	{
 		final Map<String, Class<?>> columns = new HashMap<>(2);
 		columns.put( "fk_test1", Integer.class);
 		columns.put( "fk_test2", Integer.class);
-		Assert.assertTrue( getTestCore().getStore().getDriver().createMigration( tableName, columns, getTestCore().getStore()).revert());
+		Assert.assertTrue( store.getDriver().createMigration( tableName, columns, store).revert());
 	}
 	
 	public static void destroyTestMappingTables(@Nonnull final String tableName) throws Exception
@@ -165,17 +175,35 @@ public class TestServer extends Assert
 		columns.put( "fk_test1", Integer.class);
 		columns.put( "fk_test2", Integer.class);
 		Assert.assertTrue( getTestCore(SimpleJDBCRecordStore.class).getStore().getDriver().createMigration( tableName, columns, getTestCore(SimpleJDBCRecordStore.class).getStore()).revert());
+		try
+		{
+			//may fail when simple JDBC and cached JDBC use same database - not the case for SQLite
+			getTestCore(CachedJDBCRecordStore.class).getStore().getDriver().createMigration( tableName, columns, getTestCore(CachedJDBCRecordStore.class).getStore()).revert();
+		}
+		catch(Exception e)
+		{
+			
+		}
 		Assert.assertTrue( getTestCore(MemoryRecordStore.class).getStore().getDriver().createMigration( tableName, columns, getTestCore(MemoryRecordStore.class).getStore()).revert());
 	}
 	
-	public static void destroyTestTable(@Nonnull final Class<? extends ActiveRecord> type, @Nonnull final String tableName) throws SQLException, Exception
+	public static void destroyTestTable(@Nonnull final RecordStore store, @Nonnull final Class<? extends ActiveRecord> type, @Nonnull final String tableName) throws SQLException, Exception
 	{
-		Assert.assertTrue( getTestCore().getStore().getDriver().createMigration( type, tableName, getTestCore().getStore() ).revert());
+		Assert.assertTrue( store.getDriver().createMigration( type, tableName, store ).revert());
 	}
 	
 	public static void destroyTestTables(@Nonnull final Class<? extends ActiveRecord> type, @Nonnull final String tableName) throws SQLException, Exception
 	{
 		Assert.assertTrue( getTestCore(SimpleJDBCRecordStore.class).getStore().getDriver().createMigration( type, tableName, getTestCore(SimpleJDBCRecordStore.class).getStore() ).revert());
+		try
+		{
+			//may fail when simple JDBC and cached JDBC use same database - not the case for SQLite
+			getTestCore(CachedJDBCRecordStore.class).getStore().getDriver().createMigration( type, tableName, getTestCore(CachedJDBCRecordStore.class).getStore() ).revert();
+		}
+		catch(Exception e)
+		{
+			
+		}
 		Assert.assertTrue( getTestCore(MemoryRecordStore.class).getStore().getDriver().createMigration( type, tableName, getTestCore(MemoryRecordStore.class).getStore() ).revert());
 	}
 	

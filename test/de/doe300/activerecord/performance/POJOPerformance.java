@@ -24,7 +24,7 @@
  */
 package de.doe300.activerecord.performance;
 
-import de.doe300.activerecord.RecordBase;
+import de.doe300.activerecord.pojo.AbstractActiveRecord;
 import de.doe300.activerecord.pojo.POJOBase;
 import de.doe300.activerecord.record.association.AssociationHelper;
 
@@ -32,27 +32,24 @@ import de.doe300.activerecord.record.association.AssociationHelper;
  *
  * @author doe300
  */
-public class POJOPerformance implements ProxyPerformance
+public class POJOPerformance extends AbstractActiveRecord implements ProxyPerformance
 {
-	private final POJOBase<?> base;
-	private final int primaryKey;
 
 	public POJOPerformance(int primaryKey, POJOBase<?> base )
 	{
-		this.base = base;
-		this.primaryKey = primaryKey;
+		super(primaryKey, base );
 	}
 
 	@Override
 	public String getName()
 	{
-		return base.getProperty( primaryKey, "name", String.class);
+		return getProperty( "name", String.class);
 	}
 
 	@Override
 	public void setName(String newName)
 	{
-		base.setProperty( primaryKey, "name", newName);
+		setProperty( "name", newName);
 	}
 
 	@Override
@@ -65,17 +62,5 @@ public class POJOPerformance implements ProxyPerformance
 	public void setOther( ProxyPerformance other )
 	{
 		AssociationHelper.setBelongsTo( this, other, "other");
-	}
-
-	@Override
-	public int getPrimaryKey()
-	{
-		return primaryKey;
-	}
-
-	@Override
-	public RecordBase<?> getBase()
-	{
-		return base;
-	}
+	}	
 }

@@ -38,11 +38,7 @@ import java.sql.SQLException;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
-import java.util.HashMap;
-import java.util.Map;
-import org.junit.After;
 import org.junit.Assert;
-import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.junit.runners.Parameterized;
@@ -51,6 +47,7 @@ import org.junit.runners.Parameterized;
 public class ProfilingRecordStoreTest extends Assert
 {
 	private static final String mappingTable = "mappingTable" + ProfilingRecordStoreTest.class.getSimpleName();
+	private final RecordStore originalStore;
 	private final ProfilingRecordStore recordStore;
 	private final ProfilingRecordBase<TestInterface> base;
 	private final String name;
@@ -58,19 +55,11 @@ public class ProfilingRecordStoreTest extends Assert
 	public ProfilingRecordStoreTest(String name, RecordStore store) throws Exception
 	{
 		this.name = name;
+		originalStore = store;
 		this.recordStore = new ProfilingRecordStore(store );
 		final RecordCore core = RecordCore.fromStore( name, recordStore );
 		final RecordBase<TestInterface> origBase = core.getBase( TestInterface.class).getShardBase( ProfilingRecordStoreTest.class.getSimpleName());
 		base = new ProfilingRecordBase<>(origBase);
-		if(store instanceof MemoryRecordStore)
-		{
-			recordStore.getDriver().createMigration( TestInterface.class, ProfilingRecordStoreTest.class.getSimpleName(), store).apply();
-			Map<String, Class<?>> columns = new HashMap<>(5);
-			columns.put("id", Integer.class);
-			columns.put("fk_test1", Integer.class);
-			columns.put("fk_test2", Integer.class);
-			base.getStore().getDriver().createMigration( mappingTable, columns, store).apply();
-		}
 	}
 	
 	@Parameterized.Parameters
@@ -83,23 +72,11 @@ public class ProfilingRecordStoreTest extends Assert
 		);
 	}
 	
-	@Before
-	public void setUp() throws Exception
-	{
-		TestServer.buildTestMappingTable( mappingTable );
-		TestServer.buildTestTable(TestInterface.class, ProfilingRecordStoreTest.class.getSimpleName());
-	}
-	
-	@After
-	public void tearDown() throws Exception
-	{
-		TestServer.destroyTestTable(TestInterface.class, ProfilingRecordStoreTest.class.getSimpleName());
-		TestServer.destroyTestMappingTable( mappingTable);
-	}
-
 	@Test
-	public void testPerformance()
+	public void testPerformance() throws Exception
 	{
+		TestServer.buildTestMappingTable(originalStore, mappingTable );
+		TestServer.buildTestTable(originalStore, TestInterface.class, ProfilingRecordStoreTest.class.getSimpleName());
 		for(int i = 0; i< 200; i++)
 		{
 			TestInterface t = base.createRecord(Collections.singletonMap( "name", "ThisIsAName"));
@@ -148,5 +125,8 @@ public class ProfilingRecordStoreTest extends Assert
 		System.out.println( "Connection:" );
 		System.out.println(  );
 		System.out.println(  );
+		
+		TestServer.destroyTestTable(originalStore, TestInterface.class, ProfilingRecordStoreTest.class.getSimpleName());
+		TestServer.destroyTestMappingTable(originalStore, mappingTable);
 	}
 }

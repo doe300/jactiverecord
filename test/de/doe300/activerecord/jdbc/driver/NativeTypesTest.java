@@ -105,15 +105,15 @@ public class NativeTypesTest extends TestBase
 		final Calendar cal = Calendar.getInstance();
 		cal.setTimeInMillis( someDays );
 		final long offset = cal.getTimeZone().getOffset( someDays );
-		if(base.getStore() instanceof MemoryRecordStore)
+		if(base.getStore() instanceof MemoryRecordStore || base.getStore().getDriver() instanceof SQLiteDriver)
 		{
+			//SQLite doesn't apply any offset!
 			assertEquals( someDays, base.createRecord( Collections.singletonMap( "col_date", new Date(someDays))).getColDate().getTime());
 			assertEquals( someDays, base.createRecord( Collections.singletonMap( "col_time", new Time(someDays))).getColTime().getTime());
 			assertEquals( someDays, base.createRecord( Collections.singletonMap( "col_timestamp", new Timestamp(someDays))).getColTimestamp().getTime());
 		}
 		else	//HsqlDB, MySQL and PostgreSQL apply timezone offset
 		{
-			//TODO SQLite doesn't apply any offset!
 			assertEquals( someDays - offset, base.createRecord( Collections.singletonMap( "col_date", new Date(someDays))).getColDate().getTime());
 			assertEquals( 450000, base.createRecord( Collections.singletonMap( "col_time", new Time(450000))).getColTime().getTime());
 			assertEquals( someDays, base.createRecord( Collections.singletonMap( "col_timestamp", new Timestamp(someDays))).getColTimestamp().getTime());

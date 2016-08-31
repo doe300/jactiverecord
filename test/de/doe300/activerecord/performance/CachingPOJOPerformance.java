@@ -24,7 +24,7 @@
  */
 package de.doe300.activerecord.performance;
 
-import de.doe300.activerecord.RecordBase;
+import de.doe300.activerecord.pojo.CachingActiveRecord;
 import de.doe300.activerecord.pojo.POJOBase;
 import de.doe300.activerecord.record.association.AssociationHelper;
 
@@ -32,35 +32,25 @@ import de.doe300.activerecord.record.association.AssociationHelper;
  *
  * @author doe300
  */
-public class CachingPOJOPerformance implements ProxyPerformance
+public class CachingPOJOPerformance extends CachingActiveRecord implements ProxyPerformance
 {
-	private final POJOBase<?> base;
-	private final int primaryKey;
-	
-	private String cacheName;
 	private ProxyPerformance cacheOther;
 
 	public CachingPOJOPerformance(int primaryKey, POJOBase<?> base )
 	{
-		this.base = base;
-		this.primaryKey = primaryKey;
+		super(primaryKey, base );
 	}
 
 	@Override
 	public String getName()
 	{
-		if(cacheName == null)
-		{
-			cacheName = base.getProperty( primaryKey, "name", String.class);
-		}
-		return cacheName;
+		return getProperty( "name", String.class);
 	}
 
 	@Override
 	public void setName( String newName )
 	{
-		cacheName = newName;
-		base.setProperty( primaryKey, "name", newName );
+		setProperty( "name", newName );
 	}
 
 	@Override
@@ -78,17 +68,5 @@ public class CachingPOJOPerformance implements ProxyPerformance
 	{
 		cacheOther = other;
 		AssociationHelper.setBelongsTo( this, other, "other");
-	}
-
-	@Override
-	public int getPrimaryKey()
-	{
-		return primaryKey;
-	}
-
-	@Override
-	public RecordBase<?> getBase()
-	{
-		return base;
 	}
 }

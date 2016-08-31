@@ -24,9 +24,9 @@
  */
 package de.doe300.activerecord.store.impl;
 
-import de.doe300.activerecord.AssertException;
 import de.doe300.activerecord.RecordBase;
 import de.doe300.activerecord.RecordCore;
+import de.doe300.activerecord.TestBase;
 import de.doe300.activerecord.TestInterface;
 import de.doe300.activerecord.TestServer;
 import de.doe300.activerecord.dsl.Conditions;
@@ -35,17 +35,14 @@ import de.doe300.activerecord.dsl.functions.Sum;
 import de.doe300.activerecord.scope.Scope;
 import de.doe300.activerecord.store.RecordStore;
 import de.doe300.activerecord.store.impl.memory.MemoryRecordStore;
-import java.sql.SQLException;
 import java.sql.Timestamp;
 import java.util.Arrays;
-import java.util.Collection;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Objects;
 import java.util.stream.Stream;
 import org.junit.AfterClass;
-import org.junit.Assert;
 import org.junit.BeforeClass;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -56,7 +53,7 @@ import org.junit.runners.Parameterized;
  * @since 0.7
  */
 @RunWith(Parameterized.class)
-public class RecordStoreTest extends Assert implements AssertException
+public class RecordStoreTest extends TestBase
 {
 	private static String mappingTableName = "mappingTable" + RecordStoreTest.class.getSimpleName();
 	private final RecordStore store;
@@ -64,11 +61,12 @@ public class RecordStoreTest extends Assert implements AssertException
 	private final RecordBase<TestInterface> no_such_table;
 	private final int primaryKey;
 	
-	public RecordStoreTest(final RecordStore store) throws Exception
+	public RecordStoreTest(final RecordCore core) throws Exception
 	{
-		this.store = store;
-		this.base = RecordCore.fromStore( store.getClass().getCanonicalName(), store).getBase( TestInterface.class).getShardBase( RecordStoreTest.class.getSimpleName());
-		this.no_such_table = RecordCore.fromStore( store.getClass().getCanonicalName(), store).getBase( TestInterface.class).getShardBase( "no_such_table");
+		super(core);
+		this.store = core.getStore();
+		this.base = core.getBase( TestInterface.class).getShardBase( RecordStoreTest.class.getSimpleName());
+		this.no_such_table = core.getBase( TestInterface.class).getShardBase( "no_such_table");
 		if(store instanceof MemoryRecordStore)
 		{
 			store.getDriver().createMigration( TestInterface.class, RecordStoreTest.class.getSimpleName(), store).apply();
@@ -86,16 +84,6 @@ public class RecordStoreTest extends Assert implements AssertException
 	{
 		TestServer.buildTestTables(TestInterface.class, RecordStoreTest.class.getSimpleName());
 		TestServer.buildTestMappingTables( mappingTableName );
-	}
-	
-	@Parameterized.Parameters
-	public static Collection<Object[]> getParameters() throws SQLException
-	{
-		return Arrays.asList(
-			new Object[]{new SimpleJDBCRecordStore(TestServer.getTestConnection())},
-			new Object[]{new CachedJDBCRecordStore(TestServer.getTestConnection())},
-			new Object[]{new MemoryRecordStore()}
-		);
 	}
 	
 	@AfterClass

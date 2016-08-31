@@ -32,6 +32,7 @@ import de.doe300.activerecord.TestServer;
 import de.doe300.activerecord.dsl.Conditions;
 import de.doe300.activerecord.dsl.functions.Sum;
 import de.doe300.activerecord.scope.Scope;
+import java.sql.SQLException;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashMap;
@@ -50,8 +51,19 @@ import org.junit.Test;
 @Deprecated
 public class SimpleJDBCRecordStoreTest extends Assert implements AssertException
 {
+	private static final SimpleJDBCRecordStore store;
+	static
+	{
+		try
+		{
+			store = new SimpleJDBCRecordStore(TestServer.getTestConnection());
+		}
+		catch ( SQLException ex )
+		{
+			throw new RuntimeException(ex);
+		}
+	}
 	private static final String mappingTableName = "mappingTable"+SimpleJDBCRecordStoreTest.class.getSimpleName();
-	private static SimpleJDBCRecordStore store;
 	private static RecordBase<TestInterface> base;
 	private static int primaryKey;
 	
@@ -62,9 +74,8 @@ public class SimpleJDBCRecordStoreTest extends Assert implements AssertException
 	@BeforeClass
 	public static void createTables() throws Exception
 	{
-		TestServer.buildTestTable(TestInterface.class, SimpleJDBCRecordStoreTest.class.getSimpleName());
-		TestServer.buildTestMappingTable( mappingTableName );
-		store = new SimpleJDBCRecordStore(TestServer.getTestConnection());
+		TestServer.buildTestTable(store, TestInterface.class, SimpleJDBCRecordStoreTest.class.getSimpleName());
+		TestServer.buildTestMappingTable(store, mappingTableName );
 		base = RecordCore.fromStore( "Test1", store).getBase(TestInterface.class).getShardBase( SimpleJDBCRecordStoreTest.class.getSimpleName());
 		assertNotNull( base );
 		primaryKey = base.createRecord().getPrimaryKey();
@@ -73,8 +84,8 @@ public class SimpleJDBCRecordStoreTest extends Assert implements AssertException
 	@AfterClass
 	public static void destroyTables() throws Exception
 	{
-		TestServer.destroyTestMappingTable( mappingTableName );
-		TestServer.destroyTestTable(TestInterface.class, SimpleJDBCRecordStoreTest.class.getSimpleName());
+		TestServer.destroyTestMappingTable(store, mappingTableName );
+		TestServer.destroyTestTable(store, TestInterface.class, SimpleJDBCRecordStoreTest.class.getSimpleName());
 	}
 
 	@Test

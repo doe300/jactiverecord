@@ -38,6 +38,7 @@ import org.junit.Test;
  */
 public class MigrationTest extends TestBase
 {
+	private final static String MAPPING_TABLE_NAME = "mappingTableMigrationTest";
 	private final Migration automaticMigration;
 	private final Migration manualMigration;
 	
@@ -49,8 +50,8 @@ public class MigrationTest extends TestBase
 		Map<String, Class<?>> columns = new HashMap<>(2);
 		columns.put( "fk_test1", Integer.class);
 		columns.put( "fk_test2", Integer.class);
-		automaticMigration = store.getDriver().createMigration( TestInterface.class, store);
-		manualMigration = store.getDriver().createMigration( "mappingTable", columns, store);
+		automaticMigration = store.getDriver().createMigration( TestInterface.class, MigrationTest.class.getSimpleName(), store);
+		manualMigration = store.getDriver().createMigration( MAPPING_TABLE_NAME, columns, store);
 	}
 	
 	@Test

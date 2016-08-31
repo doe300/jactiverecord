@@ -27,6 +27,7 @@ package de.doe300.activerecord;
 import de.doe300.activerecord.proxy.handlers.MapHandler;
 import de.doe300.activerecord.record.ActiveRecord;
 import de.doe300.activerecord.store.impl.CachedJDBCRecordStore;
+import de.doe300.activerecord.store.impl.SimpleJDBCRecordStore;
 import de.doe300.activerecord.store.impl.memory.MemoryRecordStore;
 import org.junit.AfterClass;
 import org.junit.Assert;
@@ -48,14 +49,25 @@ public class RecordCoreTest extends Assert
 	@BeforeClass
 	public static void createTables() throws Exception
 	{
-		TestServer.buildTestTable(TestInterface.class, RecordCoreTest.class.getSimpleName());
-		core = TestServer.getTestCore();
+		if(SimpleJDBCRecordStore.class.equals( TestServer.testStore))
+		{
+			core = RecordCore.fromStore( "RecordCoreTest", new SimpleJDBCRecordStore(TestServer.getTestConnection()) );
+		}
+		else if(CachedJDBCRecordStore.class.equals( TestServer.testStore))
+		{
+			core = RecordCore.fromStore( "RecordCoreTest", new CachedJDBCRecordStore(TestServer.getTestConnection()) );
+		}
+		else
+		{
+			core = RecordCore.fromStore( "RecordCoreTest", new MemoryRecordStore() );
+		}
+		core.getStore().getDriver().createMigration( TestInterface.class, RecordCoreTest.class.getSimpleName(), core.getStore() ).apply();
 	}
 	
 	@AfterClass
 	public static void destroyTables() throws Exception
 	{
-		TestServer.destroyTestTable(TestInterface.class, RecordCoreTest.class.getSimpleName());
+		core.getStore().getDriver().createMigration( TestInterface.class, RecordCoreTest.class.getSimpleName(), core.getStore() ).revert();
 		core.close();
 	}
 	

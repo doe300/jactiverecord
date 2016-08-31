@@ -189,6 +189,8 @@ public class JDBCDriverTest extends Assert implements AssertException
 		assertEquals( String.class, driver.getJavaType( driver.getStringDataType()));
 		assertTrue( Number.class.isAssignableFrom( driver.getJavaType( driver.getSQLType( ActiveRecord.class))));
 		assertTrue(java.sql.Date.class.isAssignableFrom( driver.getJavaType( driver.getSQLType( java.sql.Date.class))));
+		assertTrue(java.sql.Time.class.isAssignableFrom( driver.getJavaType( driver.getSQLType( java.sql.Time.class))));
+		assertTrue(java.sql.Timestamp.class.isAssignableFrom( driver.getJavaType( driver.getSQLType( java.sql.Timestamp.class))));
 		assertEquals( Array.newInstance( Byte.TYPE, 0).getClass(), driver.getJavaType( driver.getSQLType( java.io.Serializable.class)));
 		assertTrue( Number.class.isAssignableFrom( driver.getJavaType( driver.getSQLType( Byte.class))));
 		assertTrue( Number.class.isAssignableFrom( driver.getJavaType( driver.getSQLType( Short.class))));

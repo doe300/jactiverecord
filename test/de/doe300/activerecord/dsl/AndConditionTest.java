@@ -88,6 +88,7 @@ public class AndConditionTest extends TestBase implements AssertException
 		//removes duplicates
 		Condition c5 = Conditions.and( simpleCond, simpleCond, simpleCond, simpleCond2, c1);
 		assertSame( c5, simpleCond);
+		assertNull( Conditions.and( Conditions.isTrue(), Conditions.isTrue()));
 		//error-tests
 		assertThrows( IllegalArgumentException.class, () -> Conditions.and( new Condition[0]));
 		assertThrows( IllegalArgumentException.class, () -> Conditions.and( new Condition[0]) );

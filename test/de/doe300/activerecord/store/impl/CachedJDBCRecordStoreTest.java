@@ -32,6 +32,7 @@ import de.doe300.activerecord.dsl.Conditions;
 import de.doe300.activerecord.dsl.Orders;
 import de.doe300.activerecord.dsl.functions.Sum;
 import de.doe300.activerecord.scope.Scope;
+import java.sql.SQLException;
 import java.sql.Timestamp;
 import java.util.Arrays;
 import java.util.Collections;
@@ -50,7 +51,18 @@ import org.junit.Test;
 @Deprecated
 public class CachedJDBCRecordStoreTest extends Assert
 {
-	private static CachedJDBCRecordStore store;
+	private static final CachedJDBCRecordStore store;
+	static
+	{
+		try
+		{
+			store = new CachedJDBCRecordStore(TestServer.getTestConnection());
+		}
+		catch ( SQLException ex )
+		{
+			throw new RuntimeException(ex);
+		}
+	}
 	private static RecordBase<TestInterface> base;
 	private static int primaryKey;
 	
@@ -61,8 +73,7 @@ public class CachedJDBCRecordStoreTest extends Assert
 	@BeforeClass
 	public static void createTables() throws Exception
 	{
-		TestServer.buildTestTable(TestInterface.class, CachedJDBCRecordStoreTest.class.getSimpleName());
-		store = new CachedJDBCRecordStore(TestServer.getTestConnection());
+		TestServer.buildTestTable(store, TestInterface.class, CachedJDBCRecordStoreTest.class.getSimpleName());
 		base = RecordCore.fromStore( "Test1", store).getBase(TestInterface.class).getShardBase( CachedJDBCRecordStoreTest.class.getSimpleName() );
 		assertNotNull( base );
 		primaryKey = base.createRecord().getPrimaryKey();
@@ -71,7 +82,7 @@ public class CachedJDBCRecordStoreTest extends Assert
 	@AfterClass
 	public static void destroyTables() throws Exception
 	{
-		TestServer.destroyTestTable(TestInterface.class, CachedJDBCRecordStoreTest.class.getSimpleName());
+		TestServer.destroyTestTable(store, TestInterface.class, CachedJDBCRecordStoreTest.class.getSimpleName());
 	}
 	
 	@Test
