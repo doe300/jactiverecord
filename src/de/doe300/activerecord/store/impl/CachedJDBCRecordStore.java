@@ -140,20 +140,6 @@ public class CachedJDBCRecordStore extends SimpleJDBCRecordStore
 	}
 
 	@Override
-	public void setValues( final RecordBase<?> base, final int primaryKey, final String[] names, final Object[] values ) throws IllegalArgumentException
-	{
-		if(names.length != values.length)
-		{
-			throw new IllegalArgumentException("Number of columns and values do not match!");
-		}
-		if(!getAllColumnNames( base.getTableName()).containsAll( Arrays.asList( names)))
-		{
-			throw new NoSuchAttributeException(base.getTableName(), Arrays.toString( names));
-		}
-		getCache(base, primaryKey ).ifPresent( (final RowCache c) -> c.setData( names, values));
-	}
-
-	@Override
 	public void setValues( final RecordBase<?> base, final int primaryKey, final Map<String, Object> values ) throws IllegalArgumentException
 	{
 		if(!getAllColumnNames( base.getTableName()).containsAll( values.keySet()))

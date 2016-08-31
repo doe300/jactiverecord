@@ -306,13 +306,16 @@ public class PerformanceComparison
 		final long preparedBatchDuration = System.currentTimeMillis() - startBatchPrepared;
 		System.err.println("Batch Prepared Statement: " + preparedBatchDuration + "ms (" + preparedBatchDuration / (double) numIterations + ")");
 		
+		final Map<String, Object> pairs = new HashMap<>(2);
+		pairs.put( columns[0], values[0]);
+		pairs.put( columns[1], values[1]);
 		//7. simple JDBCRecordStore
 		final long startRecordStore = System.currentTimeMillis();
 		final RecordStore store = core.getStore();
 		final RecordBase<TestInterface> base = core.getBase( TestInterface.class);
 		for(int i = 1 ; i < numIterations; ++i)
 		{
-			store.setValues(base, i, columns, values);
+			store.setValues(base, i, pairs);
 		}
 		final long recordStoreDuration = System.currentTimeMillis() - startRecordStore;
 		System.err.println("simple RecordStore: " + recordStoreDuration + "ms (" + recordStoreDuration / (double) numIterations + ")");
@@ -323,7 +326,7 @@ public class PerformanceComparison
 		final RecordStore cachedStore = cachedBase.getStore();
 		for(int i = 1 ; i < numIterations; ++i)
 		{
-			cachedStore.setValues(cachedBase, i, columns, values);
+			cachedStore.setValues(cachedBase, i, pairs);
 		}
 		final long cachedRecordStoreDuration = System.currentTimeMillis() - startCachedRecordStore;
 		System.err.println("cached RecordStore: " + cachedRecordStoreDuration + "ms (" + cachedRecordStoreDuration / (double) numIterations + ")");

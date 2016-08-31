@@ -124,9 +124,11 @@ class MemoryTable
 		return true;
 	}
 	
+	@Deprecated
 	public boolean putValues(@Nonnegative int primaryKey, @Nonnull final String[] columnNames, @Nonnull final Object[] values)
 	{
-		if(!data.containsKey( primaryKey))
+		MemoryRow row = data.get(primaryKey );
+		if(row == null)
 		{
 			return false;
 		}
@@ -137,7 +139,7 @@ class MemoryTable
 			{
 				continue;
 			}
-			data.get(primaryKey ).putRowValue( columnNames[i], checkColumn( columnNames[i], values[i] ) );
+			row.putRowValue( columnNames[i], checkColumn( columnNames[i], values[i] ) );
 			rowUpdated = true;
 		}
 		return rowUpdated;

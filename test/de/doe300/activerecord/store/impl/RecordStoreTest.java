@@ -115,23 +115,6 @@ public class RecordStoreTest extends TestBase
 	}
 
 	@Test
-	public void testSetValues_4args()
-	{
-		store.setValues( base, primaryKey, new String[]{"name", "age"}, new Object[]{"Adam", 10000});
-		assertEquals( "Adam", store.getValue( base, primaryKey, "name"));
-		assertEquals( 10000, store.getValue( base, primaryKey, "age"));
-		
-		//no such column
-		assertThrows( IllegalArgumentException.class, () -> store.setValues( base, primaryKey, new String[]{"no_such_column", "no_column"}, new Object[]{"valu1", 1000}) );
-		//no such primary key
-		store.setValues( base, primaryKey + 100000, new String[]{"name"}, new Object[]{"Adam"} );
-		//no such table
-		assertThrows( IllegalArgumentException.class,() -> store.setValues( no_such_table, primaryKey, new String[]{"name"}, new Object[]{"Adam"} ));
-		//numbers of columns and values do not match
-		assertThrows( RuntimeException.class, () -> store.setValues( base, primaryKey, new String[]{"name", "age"}, new Object[]{"Adam"}) );
-	}
-
-	@Test
 	public void testSetValues_3args()
 	{
 		store.setValues( base, primaryKey, Collections.singletonMap( "age", 13));

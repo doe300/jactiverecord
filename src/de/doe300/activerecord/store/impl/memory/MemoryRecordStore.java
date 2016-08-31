@@ -165,16 +165,6 @@ public class MemoryRecordStore implements RecordStore
 
 	@Override
 	public void setValues(
-		final RecordBase<?> base, final int primaryKey, final String[] names, final Object[] values ) throws IllegalArgumentException
-	{
-		final MemoryTable table = assertTableExists( base.getTableName() );
-		assertColumnsExist( table, names );
-		table.putValues( primaryKey, names, values );
-		updateTimestamps( base, primaryKey, false);
-	}
-
-	@Override
-	public void setValues(
 		final RecordBase<?> base, final int primaryKey, final Map<String, Object> values ) throws IllegalArgumentException
 	{
 		final MemoryTable table = assertTableExists( base.getTableName() );

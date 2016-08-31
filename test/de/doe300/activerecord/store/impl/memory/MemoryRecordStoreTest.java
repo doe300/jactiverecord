@@ -96,14 +96,6 @@ public class MemoryRecordStoreTest extends Assert implements AssertException
 	}
 
 	@Test
-	public void testSetValues_4args()
-	{
-		store.setValues( base, primaryKey, new String[]{"name", "age"}, new Object[]{"Eve", 23});
-		assertEquals( "Eve", store.getValue( base, primaryKey, "name"));
-		assertEquals( 23, base.getRecord( primaryKey).getAge());
-	}
-
-	@Test
 	public void testSetValues_3args()
 	{
 		store.setValues( base, primaryKey, Collections.singletonMap( "age", 123));

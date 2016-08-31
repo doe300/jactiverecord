@@ -96,14 +96,6 @@ public class SimpleJDBCRecordStoreTest extends Assert implements AssertException
 	}
 
 	@Test
-	public void testSetValues_4args()
-	{
-		store.setValues( base, primaryKey, new String[]{"name", "age"}, new Object[]{"Adam", 10000});
-		assertEquals( "Adam", store.getValue( base, primaryKey, "name"));
-		assertEquals( 10000, store.getValue( base, primaryKey, "age"));
-	}
-
-	@Test
 	public void testSetValues_3args()
 	{
 		store.setValues( base, primaryKey, Collections.singletonMap( "age", 13));

@@ -316,17 +316,6 @@ public class SimpleJDBCRecordStore implements JDBCRecordStore
 	}
 
 	@Override
-	public void setValues(final RecordBase<?> base, final int primaryKey, final String[] names, final Object[] values ) throws IllegalArgumentException
-	{
-		final Map<String,Object> map = new HashMap<>(names.length);
-		for(int i = 0;i<names.length;i++)
-		{
-			map.put( names[i], values[i]);
-		}
-		setValues( base, primaryKey, map );
-	}
-
-	@Override
 	public void setValues(final RecordBase<?> base, final int primaryKey, final Map<String,Object> data) throws IllegalArgumentException
 	{
 		//1. get updated columns

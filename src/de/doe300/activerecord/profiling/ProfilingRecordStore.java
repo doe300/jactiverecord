@@ -95,12 +95,6 @@ public class ProfilingRecordStore implements RecordStore
 	}
 
 	@Override
-	public void setValues(final RecordBase<?> base, final int primaryKey, final String[] names, final Object[] values ) throws IllegalArgumentException
-	{
-		profiler.profile( "setValuesArray", () -> store.setValues( base, primaryKey, names, values));
-	}
-
-	@Override
 	public void setValues(final RecordBase<?> base, final int primaryKey, final Map<String, Object> values ) throws IllegalArgumentException
 	{
 		profiler.profile( "setValuesMap", () -> store.setValues( base, primaryKey, values ));

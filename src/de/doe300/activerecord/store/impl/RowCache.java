@@ -35,7 +35,6 @@ import java.util.Objects;
 import javax.annotation.Nonnull;
 
 import de.doe300.activerecord.record.TimestampedRecord;
-import de.doe300.activerecord.store.RecordStore;
 
 /**
  * Caches one single row of one DB TABLE
@@ -85,33 +84,6 @@ class RowCache implements Comparable<RowCache>
 			updateModifiedTimestamp();
 		}
 		return columnData.put( columnLower, value );
-	}
-
-	/**
-	 * @param names
-	 * @param values
-	 * @deprecated Will be removed with {@link RecordStore#setValues(de.doe300.activerecord.RecordBase, int, java.lang.String[], java.lang.Object[]) }
-	 */
-	@Deprecated
-	public synchronized void setData(final String[] names, final Object[] values)
-	{
-		//prevents updating only the timestamps
-		boolean anyUpdates = false;
-		for(int i=0;i<names.length;i++)
-		{
-			if(hasData( names[i].toLowerCase() ) && Objects.equals( getData( names[i].toLowerCase()), values[i]))
-			{
-				continue;
-			}
-			anyUpdates = true;
-			modifiedData.put( names[i].toLowerCase(), values[i]);
-			parent.setModified( this );
-			columnData.put( names[i].toLowerCase(), values[i]);
-		}
-		if(anyUpdates && isTimestamped)
-		{
-			updateModifiedTimestamp();
-		}
 	}
 
 	/**
