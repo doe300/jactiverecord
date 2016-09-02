@@ -74,7 +74,6 @@ public interface Condition extends Predicate<ActiveRecord>
 	 * NOTE: This method is not required to be supported
 	 * @param map
 	 * @return whether the column-map matches this condition
-	 * @throws UnsupportedOperationException if the method is not supported
 	 */
 	public boolean test(@Nonnull final Map<String, Object> map);
 

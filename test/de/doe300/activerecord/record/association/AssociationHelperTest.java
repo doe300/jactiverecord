@@ -48,6 +48,8 @@ public class AssociationHelperTest extends TestBase
 		super(core);
 		base = core.getBase( TestInterface.class);
 		base.findAll().parallel().forEach( ActiveRecord::destroy);
+		//need to clear mapping-table between Simple and Cached for SQLite
+		core.getStore().removeRow( "mappingTable", null);
 	}
 	
 	@BeforeClass
@@ -186,7 +188,7 @@ public class AssociationHelperTest extends TestBase
 		assertFalse( set.isEmpty());
 		int size = set.size();
 		set.remove( set.first());
-		assertSame( size-1, set.size());
+		assertEquals(size-1, set.size());
 		
 		set.clear();
 		assertTrue(set.isEmpty());

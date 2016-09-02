@@ -140,7 +140,10 @@ public class SimpleConditionTest extends TestBase implements AssertException
 	public void testLikeCondition()
 	{
 		//test Predicate
-		assertSame( t3, base.findFirst( new SimpleCondition("name", "1%3Name4", Comparison.LIKE)));
+		try(final Stream<TestInterface> s = base.find( new SimpleCondition("name", "1%3Name4", Comparison.LIKE)))
+		{
+			assertTrue( s.anyMatch( (TestInterface i) -> i.equals( t3)) );
+		}
 		//test SQL
 		assertEquals( (Integer)t3.getPrimaryKey(), base.getStore().findFirst( base, toScope( new SimpleCondition("name", "1%3Name4", Comparison.LIKE))));
 	}
