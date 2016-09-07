@@ -30,6 +30,9 @@ import de.doe300.activerecord.TestInterface;
 import de.doe300.activerecord.TestServer;
 import de.doe300.activerecord.dsl.Conditions;
 import de.doe300.activerecord.dsl.Orders;
+import de.doe300.activerecord.dsl.functions.Absolute;
+import de.doe300.activerecord.dsl.functions.Floor;
+import de.doe300.activerecord.dsl.functions.Maximum;
 import de.doe300.activerecord.scope.Scope;
 import java.util.HashMap;
 import java.util.Map;
@@ -82,6 +85,26 @@ public class DiagnosticsTest extends TestBase
 			System.out.println( query.store );
 			System.out.println( query.getSource() );
 			System.out.println( query.getDuration() );
+			try
+			{
+				for(String line : query.explainQuery())
+				{
+					System.out.println( "\t" + line );
+				}
+				System.out.println(  );
+				for(QueryRemark<?> remark : query.getRemarks())
+				{
+					System.out.println( "\t" + remark.type + " - " + remark.remark);
+				}
+			}
+			catch(UnsupportedOperationException uoe)
+			{
+				//allowed to happen
+			}
+			catch(Exception e)
+			{
+				throw new RuntimeException(e);
+			}
 		});
 		assertNotNull( diagnostics.getSlowQueryListener());
 		
@@ -97,6 +120,7 @@ public class DiagnosticsTest extends TestBase
 				Orders.combine( Orders.sortAscending( "name"), Orders.sortDescending( "age")), Scope.NO_LIMIT))
 				.parallel().forEach( (i) -> {});
 		assertTrue( base.getStore().getValues(base.getTableName(), "age", "name", "Adam" ).parallel().allMatch(Integer.valueOf( 12)::equals));
+		assertEquals( 12, base.aggregate(new Maximum<>("age", TestInterface::getAge), Conditions.is( new Absolute<>("age", TestInterface::getAge), new Floor<>("age", TestInterface::getAge) )).intValue());
 	}
 
 

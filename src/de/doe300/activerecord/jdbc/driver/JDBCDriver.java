@@ -579,7 +579,7 @@ public class JDBCDriver implements DBDriver
 	@Override
 	public Diagnostics<String> createDiagnostics( RecordStore store )
 	{
-		return new Diagnostics<String>(store, (String t, Long u) ->
+		return new Diagnostics<String>((String t, Long u) ->
 		{
 			return new JDBCQuery(( JDBCRecordStore ) store, t, null, u)
 			{
@@ -590,7 +590,7 @@ public class JDBCDriver implements DBDriver
 				}
 				
 				@Override
-				protected List<QueryRemark<String>> createRemarks( List<String> explainResult ) throws
+				protected List<QueryRemark<String>> createRemarks( String sqlStatment ) throws
 						UnsupportedOperationException
 				{
 					throw new UnsupportedOperationException( "Not supported by default driver." );

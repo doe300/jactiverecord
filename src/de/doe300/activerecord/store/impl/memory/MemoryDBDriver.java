@@ -85,6 +85,6 @@ public enum MemoryDBDriver implements DBDriver
 	@Override
 	public Diagnostics<Pair< String, Scope>> createDiagnostics( RecordStore store )
 	{
-		return new Diagnostics<Pair< String, Scope>>(store, (Pair< String, Scope> t, Long u) -> new MemoryQuery(( MemoryRecordStore ) store, t, t.getFirst(), u));
+		return new Diagnostics<Pair< String, Scope>>((Pair< String, Scope> t, Long u) -> new MemoryQuery(( MemoryRecordStore ) store, t, t.getFirst(), u));
 	}
 }

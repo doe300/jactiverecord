@@ -52,19 +52,16 @@ public class Diagnostics<T>
 	public static final long THRESHOLD_DISABLE = Long.MAX_VALUE;
 	
 	@Nonnull
-	protected final RecordStore store;
-	protected long slowQueryThreshold;
-	protected final Deque<LoggedQuery<T>> slowQueryLog;
+	private long slowQueryThreshold;
+	private final Deque<LoggedQuery<T>> slowQueryLog;
 	private final BiFunction<T, Long, ? extends LoggedQuery<T>> logCreator;
 	private SlowQueryListener listener;
 	
 	/**
-	 * @param store 
 	 * @param logCreator 
 	 */
-	public Diagnostics(@Nonnull final RecordStore store, @Nonnull final BiFunction<T, Long, ? extends LoggedQuery<T>> logCreator)
+	public Diagnostics(@Nonnull final BiFunction<T, Long, ? extends LoggedQuery<T>> logCreator)
 	{
-		this.store = store;
 		slowQueryThreshold = THRESHOLD_DISABLE;
 		slowQueryLog = new LinkedBlockingDeque<>();
 		this.logCreator = logCreator;

@@ -27,6 +27,10 @@ package de.doe300.activerecord.jdbc.diagnostics;
 import de.doe300.activerecord.store.JDBCRecordStore;
 import de.doe300.activerecord.store.diagnostics.LoggedQuery;
 import de.doe300.activerecord.store.diagnostics.QueryRemark;
+import java.sql.ResultSet;
+import java.sql.Statement;
+import java.util.ArrayList;
+import java.util.Iterator;
 import java.util.List;
 
 /**
@@ -46,14 +50,48 @@ public class PostgreSQLQuery extends JDBCQuery
 	@Override
 	protected List<String> runExplain( String sqlStatment ) throws Exception
 	{
-		//EXPLAIN ANALYZE
-		throw new UnsupportedOperationException( "Not supported yet." ); //To change body of generated methods, choose Tools | Templates.
+		//https://www.postgresql.org/docs/current/static/using-explain.html
+		//EXPLAIN
+		//EXPLAIN ANALYZE will execute the query resulting in real results as comparison, but is not needed
+		try(final Statement stmt = ((JDBCRecordStore)store).getConnection().createStatement();
+				final ResultSet result = stmt.executeQuery( "EXPLAIN " + sqlStatment))
+		{
+			//QUERY PLAN (text)
+			final List<String> output = new ArrayList<>(32);
+			while(result.next())
+			{
+				output.add( result.getString( 1));
+			}
+			return output;
+		}
 	}
 
 	@Override
-	protected List<QueryRemark<String>> createRemarks( List<String> explainResult ) throws UnsupportedOperationException
+	protected List<QueryRemark<String>> createRemarks( String sqlStatment ) throws Exception
 	{
-		throw new UnsupportedOperationException( "Not supported yet." ); //To change body of generated methods, choose Tools | Templates.
+		final Iterator<String> details = explainQuery().iterator();
+		final List<QueryRemark<String>> remarks = new ArrayList<>(4);
+		while(details.hasNext())
+		{
+			final String detail = details.next();
+			//Possible contents of lines:
+			//[Seq|Bitmap [Heap|Index]|Index] Scan - "Seq" walks trough complete table, "Bitmap X" only trough results of previous filtering and "Index" uses index
+			//Nested Loop - runs the "inner" node for every row of the outer row
+			//Sort Method: - "quicksort" is good, anything else not!?
+			if(detail.toUpperCase().contains( "SEQ SCAN"))
+			{
+				//sequential scan, bad
+				//Seq Scan on table-name ....
+				final String tableName = detail.substring( detail.toUpperCase().indexOf( " ON ") + 4).split( " ")[0];
+				remarks.add( new QueryRemark<String>(this, QueryRemark.RemarkType.INDEX, tableName, "Using sequential scan over table '" + tableName + "'.Consider adding an index!"));
+			}
+			if(detail.toUpperCase().contains( "NESTED LOOOP"))
+			{
+				//nested loop, inner node is executed n-times
+				remarks.add( new QueryRemark<String>(this, QueryRemark.RemarkType.OTHER, getStoreName(), "Sub-query is run for every row in the parent query!"));
+			}
+		}
+		return remarks;
 	}
 
 }

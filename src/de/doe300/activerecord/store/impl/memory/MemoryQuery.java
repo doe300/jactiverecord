@@ -48,13 +48,13 @@ class MemoryQuery extends LoggedQuery<Pair< String, Scope>>
 	@Override
 	public Iterable<String> explainQuery() throws Exception, UnsupportedOperationException
 	{
-		throw new UnsupportedOperationException( "Not supported yet." ); //To change body of generated methods, choose Tools | Templates.
+		throw new UnsupportedOperationException( "Not supported by memory store." );
 	}
 
 	@Override
 	public Iterable<QueryRemark<Pair< String, Scope>>> getRemarks() throws Exception, UnsupportedOperationException
 	{
-		throw new UnsupportedOperationException( "Not supported yet." ); //To change body of generated methods, choose Tools | Templates.
+		throw new UnsupportedOperationException( "Not supported by memory store." );
 	}
 
 }

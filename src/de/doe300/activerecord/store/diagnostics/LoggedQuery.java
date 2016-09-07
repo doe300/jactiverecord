@@ -93,7 +93,6 @@ public abstract class LoggedQuery<T>
 	 * @throws java.lang.Exception
 	 */
 	@Nonnull
-	//TODO needs improvement or drop?
 	public abstract Iterable<String> explainQuery() throws Exception, UnsupportedOperationException;
 	
 	/**

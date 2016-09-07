@@ -71,6 +71,7 @@ public abstract class JDBCQuery extends LoggedQuery<String>
 	 * @return
 	 * @throws Exception
 	 */
+	@Nonnull
 	protected abstract List<String> runExplain(@Nonnull final String sqlStatment) throws Exception;
 
 	@Override
@@ -78,18 +79,17 @@ public abstract class JDBCQuery extends LoggedQuery<String>
 	{
 		if(remarks == null)
 		{
-			remarks = createRemarks( (List<String>)explainQuery());
+			remarks = createRemarks( source);
 		}
 		return remarks;
 	}
 
-	//TODO create remarks for ResultSet/original statment, not output
-
 	/**
 	 *
-	 * @param explainResult
+	 * @param sqlStatment the source statement to explain and generate remarks
 	 * @return
 	 * @throws UnsupportedOperationException
 	 */
-	protected abstract List<QueryRemark<String>> createRemarks(@Nonnull final List<String> explainResult) throws UnsupportedOperationException;
+	@Nonnull
+	protected abstract List<QueryRemark<String>> createRemarks(@Nonnull final String sqlStatment) throws Exception;
 }

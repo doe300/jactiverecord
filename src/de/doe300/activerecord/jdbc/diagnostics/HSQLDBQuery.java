@@ -30,6 +30,8 @@ import de.doe300.activerecord.store.diagnostics.QueryRemark;
 import java.sql.ResultSet;
 import java.sql.Statement;
 import java.util.ArrayList;
+import java.util.Collections;
+import java.util.Iterator;
 import java.util.List;
 import javax.annotation.Nonnull;
 
@@ -53,23 +55,26 @@ public class HSQLDBQuery extends JDBCQuery
 		try(final Statement stmt = ((JDBCRecordStore)store).getConnection().createStatement();
 				final ResultSet result = stmt.executeQuery( "EXPLAIN PLAN FOR " + sqlStatment))
 		{
-			final List<String> output = new ArrayList<>(12);
+			//HSQLDB EXPLAIN PLAN has only one column called OPERATION of type VARCHAR
+			final List<String> output = new ArrayList<>(32);
 			while(result.next())
 			{
-				System.out.println( result.getMetaData().getColumnCount());
-				for(int i = 0; i < result.getMetaData().getColumnCount(); i++)
-				{
-					System.out.println( result.getMetaData().getColumnTypeName(i ) + " : " + result.getMetaData().getColumnName( i ) );
-				}
+				output.add( result.getString( 1));
 			}
 			return output;
 		}
 	}
 
 	@Override
-	protected List<QueryRemark<String>> createRemarks( List<String> explainResult ) throws UnsupportedOperationException
+	protected List<QueryRemark<String>> createRemarks( String sqlStatment ) throws Exception
 	{
-		throw new UnsupportedOperationException( "Not supported yet." ); //To change body of generated methods, choose Tools | Templates.
+		final Iterator<String> operations = explainQuery().iterator();
+		
+		while(operations.hasNext())
+		{
+			///TODO analyze operations and search for select without index, ...
+			operations.next();
+		}
+		return Collections.emptyList();
 	}
-
 }

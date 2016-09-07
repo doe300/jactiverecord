@@ -165,6 +165,6 @@ public class PostgreSQLDriver extends JDBCDriver
 	@Override
 	public Diagnostics<String> createDiagnostics( RecordStore store )
 	{
-		return new Diagnostics<String>(store, (String t, Long u) -> new PostgreSQLQuery(( JDBCRecordStore ) store, t, null, u));
+		return new Diagnostics<String>((String t, Long u) -> new PostgreSQLQuery(( JDBCRecordStore ) store, t, null, u));
 	}
 }
