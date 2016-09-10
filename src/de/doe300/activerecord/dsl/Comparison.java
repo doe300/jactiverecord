@@ -45,7 +45,7 @@ public enum Comparison implements BiPredicate<Optional<Object>, Optional<Object>
 	/**
 	 * Exact match of the two values
 	 */
-	IS {
+	IS(true, true) {
 
 		@Override
 		public boolean test(@Nullable final Optional<Object> value, @Nullable final Optional<Object> compareValue)
@@ -71,7 +71,7 @@ public enum Comparison implements BiPredicate<Optional<Object>, Optional<Object>
 	 * Non-match of the values
 	 * @see #IS
 	 */
-	IS_NOT {
+	IS_NOT(true, true) {
 
 		@Override
 		public boolean test(@Nullable final Optional<Object> value, @Nullable final Optional<Object> compareValue)
@@ -97,7 +97,7 @@ public enum Comparison implements BiPredicate<Optional<Object>, Optional<Object>
 	 * Regex-match (SQL LIKE-Statement).
 	 * This comparison uses <code>%</code> as wildcard.
 	 */
-	LIKE {
+	LIKE(true, true) {
 
 		@Override
 		public boolean test(@Nullable final Optional<Object> value, @Nullable final Optional<Object> compareValue)
@@ -126,7 +126,7 @@ public enum Comparison implements BiPredicate<Optional<Object>, Optional<Object>
 	/**
 	 * Whether the first argument is <code>null</code>.
 	 */
-	IS_NULL {
+	IS_NULL(true, false) {
 
 		@Override
 		public boolean test(@Nullable final Optional<Object> value, @Nullable final Optional<Object> compareValue)
@@ -148,7 +148,7 @@ public enum Comparison implements BiPredicate<Optional<Object>, Optional<Object>
 	 * Whether the first value is not <code>null</code>
 	 * @see #IS_NULL
 	 */
-	IS_NOT_NULL {
+	IS_NOT_NULL(true, false) {
 
 		@Override
 		public boolean test(@Nullable final Optional<Object> value, @Nullable final Optional<Object> compareValue)
@@ -170,7 +170,7 @@ public enum Comparison implements BiPredicate<Optional<Object>, Optional<Object>
 	 * Returns, whether the first value is larger than the second
 	 * @see Comparable
 	 */
-	LARGER {
+	LARGER(true, true) {
 
 		@Override
 		public boolean test(@Nullable final Optional<Object> value, @Nullable final Optional<Object> compareValue)
@@ -196,7 +196,7 @@ public enum Comparison implements BiPredicate<Optional<Object>, Optional<Object>
 	 * Returns, whether the first value is larger or equal to the second one
 	 * @see Comparable
 	 */
-	LARGER_EQUALS {
+	LARGER_EQUALS(true, true) {
 
 		@Override
 		public boolean test(@Nullable final Optional<Object> value, @Nullable final Optional<Object> compareValue)
@@ -222,7 +222,7 @@ public enum Comparison implements BiPredicate<Optional<Object>, Optional<Object>
 	 * Returns whether the first value is smaller than the second
 	 * @see Comparable
 	 */
-	SMALLER {
+	SMALLER(true, true) {
 
 		@Override
 		public boolean test(@Nullable final Optional<Object> value, @Nullable final Optional<Object> compareValue)
@@ -248,7 +248,7 @@ public enum Comparison implements BiPredicate<Optional<Object>, Optional<Object>
 	 * Returns whether the first value is smaller or equal to the second
 	 * @see Comparable
 	 */
-	SMALLER_EQUALS {
+	SMALLER_EQUALS(true, true) {
 
 		@Override
 		public boolean test(@Nullable final Optional<Object> value, @Nullable final Optional<Object> compareValue)
@@ -273,7 +273,7 @@ public enum Comparison implements BiPredicate<Optional<Object>, Optional<Object>
 	/**
 	 * always returns true
 	 */
-	TRUE {
+	TRUE(false, false) {
 
 		@Override
 		public boolean test(@Nullable final Optional<Object> value, @Nullable final Optional<Object> compareValue)
@@ -291,7 +291,7 @@ public enum Comparison implements BiPredicate<Optional<Object>, Optional<Object>
 	 * Checks whether the first value is in collection specified by the second value.
 	 * Supported collection-types are: Array and {@link Collection}.
 	 */
-	IN {
+	IN(true, true) {
 
 		@Override
 		public boolean test(@Nullable final Optional<Object> value, @Nullable final Optional<Object> compareValue)
@@ -347,6 +347,23 @@ public enum Comparison implements BiPredicate<Optional<Object>, Optional<Object>
 			return " IN ";
 		}
 	};
+	
+	/**
+	 * Whether this type of comparison has a left side
+	 * @since 0.9
+	 */
+	public final boolean hasLeft;
+	/**
+	 * Whether this type of comparison has a right side
+	 * @since 0.9
+	 */
+	public final boolean hasRight;
+
+	private Comparison( boolean hasLeft, boolean hasRight )
+	{
+		this.hasLeft = hasLeft;
+		this.hasRight = hasRight;
+	}
 
 	/**
 	 * NOTE: A value of <code>null</code> represents a value which was not in the data-set.

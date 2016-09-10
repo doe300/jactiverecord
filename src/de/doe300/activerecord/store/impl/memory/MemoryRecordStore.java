@@ -47,7 +47,6 @@ import de.doe300.activerecord.store.RecordStore;
 import de.doe300.activerecord.store.diagnostics.Diagnostics;
 import de.doe300.activerecord.util.Pair;
 import de.doe300.activerecord.util.ThrowingFunctions.ThrowingSupplier;
-import java.util.Arrays;
 import javax.annotation.Nonnegative;
 
 /**
@@ -215,12 +214,17 @@ public class MemoryRecordStore implements RecordStore
 	{
 		final MemoryTable table = assertTableExists( tableName );
 		assertColumnsExist( table, columns);
-		if(Arrays.stream( columns).anyMatch( (String columnName) -> table.getPrimaryColumn().equalsIgnoreCase(columnName)))
+		final Map<String, Object> data = new HashMap<>(columns.length);
+		for(int i = 0; i < columns.length; i++)
 		{
-			throw new IllegalArgumentException("Can't insert already existing row!");
+			if(table.getPrimaryColumn().equalsIgnoreCase(columns[i]))
+			{
+				throw new IllegalArgumentException("Can't insert already existing row!");
+			}
+			data.put( columns[i], values[i]);
 		}
 		final int index = table.insertRow();
-		return table.putValues( index, columns, values );
+		return table.putValues( index, data );
 	}
 
 	@Override

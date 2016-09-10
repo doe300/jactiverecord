@@ -24,17 +24,19 @@
  */
 package de.doe300.activerecord.dsl;
 
-import java.util.Arrays;
 import java.util.Collection;
 import java.util.Map;
-import java.util.stream.Collectors;
 
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 
 import de.doe300.activerecord.jdbc.driver.JDBCDriver;
 import de.doe300.activerecord.record.ActiveRecord;
+import java.util.Arrays;
 import java.util.Optional;
+import java.util.stream.Collectors;
+import javax.annotation.Syntax;
+import javax.annotation.concurrent.Immutable;
 
 /**
  *
@@ -42,54 +44,49 @@ import java.util.Optional;
  */
 public class SimpleCondition implements Condition
 {
-	@Nonnull
-	private final Object key;
+	//TODO add support for value left and column-name right -> could be used for JOINs
 	@Nullable
-	private final Object compValue;
+	private final Side left;
+	@Nullable
+	private final Side right;
 	@Nonnull
 	private final Comparison comp;
 
 	/**
-	 * @param key
-	 * @param compValue
-	 * @param comp
+	 * @param leftSide
+	 * @param rightSide
+	 * @param comparison
 	 */
-	SimpleCondition(@Nonnull final String key, @Nullable final Object compValue, @Nonnull final Comparison comp)
+	SimpleCondition(@Nonnull final Object leftSide, @Nullable final Object rightSide, @Nonnull final Comparison comparison)
 	{
-		this.key = key;
-		this.compValue = SimpleCondition.checkValue( compValue, comp );
-		this.comp = SimpleCondition.checkComparison( this.compValue, comp);
+		if(!(leftSide instanceof String) && !(leftSide instanceof SQLFunction))
+		{
+			throw new UnsupportedOperationException("Value as left is is currently not supported!");
+		}
+		left = comparison.hasLeft ? checkValue( leftSide, comparison, false) : null;
+		right = comparison.hasRight ? checkValue( rightSide, comparison, true ) : null;
+		this.comp = checkComparison( rightSide, comparison);
 	}
 	
-	/**
-	 * @param key
-	 * @param compValue
-	 * @param comp
-	 * @since 0.6
-	 */
-	SimpleCondition(@Nonnull final SQLFunction<?,?> key, @Nullable final Object compValue, @Nonnull final Comparison comp)
+	private static Side checkValue(@Nullable final Object val, @Nonnull final Comparison comp, final boolean mayBeValue)
 	{
-		this.key = key;
-		this.compValue = SimpleCondition.checkValue( compValue, comp );
-		this.comp = SimpleCondition.checkComparison( this.compValue, comp);
-	}
-
-	private static Object checkValue(final Object val, final Comparison comp)
-	{
-		//check for IN
-		if(comp == Comparison.IN)
+		//XXX check for type compatibility for SQL-functions and rows too ?!?
+		final boolean isValue = mayBeValue && (val == null || !SQLFunction.class.isAssignableFrom( val.getClass()));
+		
+		//check for IN (only check for values)
+		if(isValue && val != null && comp == Comparison.IN)
 		{
 			if(val instanceof Collection)
 			{
-				return Collection.class.cast(val).toArray();
+				return new Side(Collection.class.cast(val).toArray(), isValue);
 			}
 			if(val.getClass().isArray())
 			{
-				return val;
+				return new Side(val, isValue );
 			}
 			throw new IllegalArgumentException("Invalid list-type: "+val.getClass());
 		}
-		//check for LARGER/SMALLER
+		//check for LARGER/SMALLER (only check for values)
 		if(comp == Comparison.LARGER || comp == Comparison.LARGER_EQUALS || comp == Comparison.SMALLER || comp == Comparison.SMALLER_EQUALS)
 		{
 			if(!(val instanceof Comparable))
@@ -97,7 +94,7 @@ public class SimpleCondition implements Condition
 				throw new IllegalArgumentException("Type must be comparable: " + val.getClass());
 			}
 		}
-		return val;
+		return new Side(val, isValue );
 	}
 
 	@Nonnull
@@ -123,14 +120,14 @@ public class SimpleCondition implements Condition
 	{
 		if(comp == Comparison.IN)
 		{
-			return ( Object[] ) compValue;
+			return ( Object[] ) right.data;
 		}
-		if(compValue instanceof SQLFunction)
+		if(right == null || right.data instanceof SQLFunction)
 		{
 			//SQLFunctions are handled via #toSQL()
 			return null;
 		}
-		return new Object[]{compValue};
+		return new Object[]{right.data};
 	}
 
 	/**
@@ -144,111 +141,31 @@ public class SimpleCondition implements Condition
 	@Override
 	public String toSQL(@Nonnull final JDBCDriver driver, final String tableName)
 	{
-		final String columnID;
-		if(key instanceof SQLFunction)
-		{
-			columnID = ((SQLFunction<?,?>)key).toSQL( driver, tableName);
-		}
-		else
-		{
-			columnID = tableName != null ? tableName + "." + key : (String)key;
-		}
-		final String condValue = compValue instanceof SQLFunction ? ((SQLFunction<?,?>)compValue).toSQL( driver, tableName ) : "?";
-		switch(comp)
-		{
-			case IS:
-				return columnID+" = " + condValue;
-			case IS_NOT:
-				return columnID+" != " + condValue;
-			case LIKE:
-				return columnID+" LIKE " + condValue;
-			case IS_NULL:
-				return columnID+" IS NULL";
-			case IS_NOT_NULL:
-				return columnID+" IS NOT NULL";
-			case LARGER:
-				return columnID+" > " + condValue;
-			case LARGER_EQUALS:
-				return columnID+" >= " + condValue;
-			case SMALLER:
-				return columnID+" < " + condValue;
-			case SMALLER_EQUALS:
-				return columnID+" <= " + condValue;
-			case IN:
-				//see: https://stackoverflow.com/questions/178479/preparedstatement-in-clause-alternatives
-				return columnID+" IN ("+Arrays.stream( (Object[])compValue).map( (final Object o) -> "?").collect( Collectors.joining( ", "))+")";
-			case TRUE:
-			default:
-				return driver.convertBooleanToDB( true );
-		}
+		final String leftSide = comp.hasLeft ? left.toSQL( driver, tableName ) : "";
+		final String rightSide = comp.hasRight ? right.toSQL( driver, tableName ) : "";
+		return leftSide + comp.toSQL( driver ) + rightSide;
 	}
 
 	@Override
 	public boolean hasWildcards()
 	{
-		if(compValue instanceof SQLFunction)
-		{
-			return false;
-		}
-		switch(comp)
-		{
-			case IS:
-			case IS_NOT:
-			case LIKE:
-			case LARGER:
-			case LARGER_EQUALS:
-			case SMALLER:
-			case SMALLER_EQUALS:
-			case IN:
-				return true;
-			case IS_NULL:
-			case IS_NOT_NULL:
-			case TRUE:
-			default:
-				return false;
-		}
+		return (comp.hasLeft && left.isValue) || (comp.hasRight && right.isValue);
 	}
 
 	@Override
 	public boolean test( final Map<String, Object> t )
 	{
-		final Optional<Object> compValue0;
-		if(key instanceof SQLFunction)
-		{
-			compValue0 = Optional.ofNullable(((SQLFunction<?,?>)key).apply( t));
-		}
-		else if(!t.containsKey( key))
-		{
-			compValue0 = null;
-		}
-		else
-		{
-			 compValue0 = Optional.ofNullable( t.get( (String)key ));
-		}
-		if (compValue instanceof SQLFunction)
-		{
-			return comp.test(compValue0, Optional.ofNullable( SQLFunction.class.cast( compValue).apply(t)));
-		}
-		return comp.test( compValue0, Optional.ofNullable( compValue));
+		final Optional<Object> leftValue = comp.hasLeft ? left.getValue( t) : null;
+		final Optional<Object> rightValue = comp.hasRight ? right.getValue( t) : null;
+		return comp.test( leftValue, rightValue );
 	}
 
 	@Override
 	public boolean test( final ActiveRecord t )
 	{
-		final Optional<Object> compValue0;
-		if(key instanceof SQLFunction)
-		{
-			compValue0 = Optional.ofNullable(((SQLFunction)key).apply( t));
-		}
-		else
-		{
-			 compValue0 = Optional.ofNullable( t.getBase().getStore().getValue( t.getBase(), t.getPrimaryKey(), (String)key));
-		}
-		if (compValue instanceof SQLFunction)
-		{
-			return comp.test(compValue0, Optional.ofNullable( SQLFunction.class.cast( compValue).apply(t)));
-		}
-		return comp.test(compValue0, Optional.ofNullable( compValue));
+		final Optional<Object> leftValue = comp.hasLeft ? left.getValue( t) : null;
+		final Optional<Object> rightValue = comp.hasRight ? right.getValue( t) : null;
+		return comp.test( leftValue, rightValue );
 	}
 	
 	@Override
@@ -265,5 +182,71 @@ public class SimpleCondition implements Condition
 	public int hashCode()
 	{
 		return toSQL( JDBCDriver.DEFAULT, null ).hashCode();
+	}
+	
+	@Immutable
+	private static class Side
+	{
+		@Nullable
+		final Object data;
+		final boolean isValue;
+
+		Side(@Nullable final Object data, boolean isValue )
+		{
+			this.data = data;
+			this.isValue = isValue;
+		}
+		
+		@Nonnull
+		@Syntax("SQL")
+		public String toSQL(@Nonnull final JDBCDriver driver, @Nullable final String tableName)
+		{
+			if(isValue)
+			{
+				if(data != null && data.getClass().isArray())
+				{
+					//see: https://stackoverflow.com/questions/178479/preparedstatement-in-clause-alternatives
+					return "("+Arrays.stream( (Object[])data).map( (final Object o) -> "?").collect( Collectors.joining( ", "))+")";
+				}
+				return "?";
+			}
+			if(data instanceof SQLFunction)
+			{
+				return ((SQLFunction)data).toSQL( driver, tableName );
+			}
+			return (String)(tableName != null ? tableName + "." + data : data);
+		}
+		
+		@Nonnull
+		public Optional<Object> getValue(@Nonnull final ActiveRecord record)
+		{
+			if(isValue)
+			{
+				return Optional.ofNullable( data);
+			}
+			if(data instanceof SQLFunction)
+			{
+				return Optional.ofNullable( ((SQLFunction)data).apply( record));
+			}
+			return Optional.ofNullable( record.getBase().getStore().getValue( record.getBase(), record.getPrimaryKey(), (String)data));
+		}
+		
+		@Nullable
+		public Optional<Object> getValue(@Nonnull final Map<String, Object> row)
+		{
+			if(isValue)
+			{
+				return Optional.ofNullable( data);
+			}
+			if(data instanceof SQLFunction)
+			{
+				return Optional.ofNullable( ((SQLFunction)data).apply( row));
+			}
+			if(!row.containsKey( (String)data))
+			{
+				return null;
+			}
+			return Optional.ofNullable( row.get( (String)data));
+		}
 	}
 }
