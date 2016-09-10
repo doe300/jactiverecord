@@ -40,7 +40,7 @@ import javax.annotation.Nonnegative;
  * @author doe300
  * @param <T>
  */
-public interface QueryMethods<T extends ActiveRecord> extends FinderMethods<T>, AggregateMethods<T>
+public interface QueryMethods<T extends ActiveRecord> extends FinderMethods<T>, AggregateMethods<T>, AutoCloseable
 {
 	/**
 	 * Value for unknown getEstimatedSize
@@ -111,7 +111,10 @@ public interface QueryMethods<T extends ActiveRecord> extends FinderMethods<T>, 
 	@Nullable
 	public default T findFirstWithScope(@Nonnull final Scope scope)
 	{
-		return withScope( scope ).stream().findFirst().get();
+		try(final Stream<T> stream = withScope( scope ).stream())
+		{
+			return stream.findFirst().get();
+		}
 	}
 
 	@Override

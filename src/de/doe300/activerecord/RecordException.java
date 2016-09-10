@@ -42,8 +42,7 @@ public class RecordException extends RuntimeException
 	 */
 	public RecordException( final String message )
 	{
-		super( message );
-		this.record = null;
+		this((ActiveRecord) null, message);
 	}
 
 	/**
@@ -69,8 +68,7 @@ public class RecordException extends RuntimeException
 	 */
 	public RecordException( final ActiveRecord record, final String message )
 	{
-		super( message );
-		this.record = record;
+		this(record, message, null);
 	}
 
 	/**
@@ -79,8 +77,7 @@ public class RecordException extends RuntimeException
 	 */
 	public RecordException( final ActiveRecord record, final Throwable cause )
 	{
-		super( cause );
-		this.record = record;
+		this(record, null, cause);
 	}
 
 	/**

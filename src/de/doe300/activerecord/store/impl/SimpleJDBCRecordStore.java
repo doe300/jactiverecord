@@ -99,6 +99,21 @@ public class SimpleJDBCRecordStore implements JDBCRecordStore
 		this.driver = driver;
 		this.diagnostics = driver.createDiagnostics( this );
 	}
+	
+	/**
+	 * Calling this method asserts a Statement to be closed by the corresponding ResultSet
+	 * @param <T>
+	 * @param stmt
+	 * @return the same statement
+	 * @throws SQLException 
+	 * @since 0.9
+	 */
+	@Nonnull
+	protected <T extends Statement> T closeStatementWithResultSet(@Nonnull final T stmt) throws SQLException
+	{
+		stmt.closeOnCompletion();
+		return stmt;
+	}
 
 	/**
 	 * Converts the given Condition to a WHERE clause
@@ -160,10 +175,10 @@ public class SimpleJDBCRecordStore implements JDBCRecordStore
 			if(cond.getValues().length > driver.getParametersLimit())
 			{
 				final String preparedQuery = StatementUtil.prepareQuery(driver, query, cond );
-				return diagnostics.profileQuery( () -> con.createStatement( ResultSet.TYPE_FORWARD_ONLY, ResultSet.CONCUR_READ_ONLY).executeQuery( preparedQuery ), () -> preparedQuery).get();
+				return diagnostics.profileQuery( () -> closeStatementWithResultSet( con.createStatement( ResultSet.TYPE_FORWARD_ONLY, ResultSet.CONCUR_READ_ONLY)).executeQuery( preparedQuery ), () -> preparedQuery).get();
 			}
 		}
-		final PreparedStatement stm = con.prepareStatement(query, ResultSet.TYPE_FORWARD_ONLY, ResultSet.CONCUR_READ_ONLY);
+		final PreparedStatement stm = closeStatementWithResultSet( con.prepareStatement(query, ResultSet.TYPE_FORWARD_ONLY, ResultSet.CONCUR_READ_ONLY));
 		if(cond != null)
 		{
 			fillStatement( stm, cond );
@@ -354,7 +369,7 @@ public class SimpleJDBCRecordStore implements JDBCRecordStore
 			"SELECT " + name + " FROM " + base.getTableName() + " WHERE " + base.getPrimaryColumn() + " = "
 				+ primaryKey;
 		Logging.getLogger().debug("JDBCStore", sql);
-		try (Statement stm = con.createStatement(); ResultSet res = stm.executeQuery(sql))
+		try (ResultSet res = closeStatementWithResultSet( con.createStatement()).executeQuery(sql))
 		{
 			if(res.next())
 			{
@@ -379,7 +394,7 @@ public class SimpleJDBCRecordStore implements JDBCRecordStore
 			"SELECT " + toColumnsList(columns, base.getPrimaryColumn(), null) + " FROM " + base.getTableName() + " WHERE "
 				+ base.getPrimaryColumn() + " = " + primaryKey;
 		Logging.getLogger().debug("JDBCStore", sql);
-		try (Statement stm = con.createStatement(); final ResultSet res = stm.executeQuery(sql))
+		try (final ResultSet res = closeStatementWithResultSet( con.createStatement()).executeQuery(sql))
 		{
 			if(res.next())
 			{
@@ -407,7 +422,7 @@ public class SimpleJDBCRecordStore implements JDBCRecordStore
 	{
 		final String sql = "SELECT * FROM " + base.getTableName() + " WHERE " + base.getPrimaryColumn() + " = " + primaryKey;
 		Logging.getLogger().debug("JDBCStore", sql);
-		try (Statement stm = con.createStatement(); final ResultSet res = stm.executeQuery(sql))
+		try (final ResultSet res = closeStatementWithResultSet( con.createStatement()).executeQuery(sql))
 		{
 			if(res.next())
 			{
@@ -443,8 +458,7 @@ public class SimpleJDBCRecordStore implements JDBCRecordStore
 		checkTableExists( base );
 		final String sql = "SELECT "+base.getPrimaryColumn()+" FROM "+base.getTableName()+" WHERE "+base.getPrimaryColumn()+" = "+primaryKey;
 		Logging.getLogger().debug( "JDBCStore", sql);
-		try(final PreparedStatement stmt = con.prepareStatement( sql ); 
-				final ResultSet result = stmt.executeQuery())
+		try(final ResultSet result = closeStatementWithResultSet( con.prepareStatement( sql)).executeQuery())
 		{
 			return result.next();
 		}
@@ -732,7 +746,7 @@ public class SimpleJDBCRecordStore implements JDBCRecordStore
 			}
 			
 			Logging.getLogger().debug( "JDBCStore", sql);
-			try (PreparedStatement stmt = con.prepareStatement(sql, Statement.RETURN_GENERATED_KEYS))
+			try (PreparedStatement stmt = closeStatementWithResultSet( con.prepareStatement(sql, Statement.RETURN_GENERATED_KEYS)))
 			{
 				int i = 0;
 				for (final Map.Entry<String, Object> e : rowData.entrySet())

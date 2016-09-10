@@ -49,7 +49,12 @@ public class Diagnostics<T>
 	/**
 	 * A value to disable the slow query timeout
 	 */
-	public static final long THRESHOLD_DISABLE = Long.MAX_VALUE;
+	public static final long THRESHOLD_DISABLE = -1;
+	/**
+	 * Setting the threshold to this value will log every query
+	 * @since 0.9
+	 */
+	public static final long THRESHOLD_LOG_ALL = 0;
 	
 	@Nonnull
 	private long slowQueryThreshold;
@@ -68,7 +73,7 @@ public class Diagnostics<T>
 	}
 	
 	/**
-	 * Sets the value of the slow-query-threshold. Any query taking longer than the defined threshold will be logged
+	 * Sets the value of the slow-query-threshold. Any query taking as long or longer than the defined threshold will be logged
 	 * 
 	 * @param timeout the timeout in milliseconds (ms)
 	 */
@@ -90,7 +95,7 @@ public class Diagnostics<T>
 	 */
 	public boolean isSlowQueryLogEnabled()
 	{
-		return slowQueryThreshold < THRESHOLD_DISABLE && slowQueryThreshold > 0;
+		return slowQueryThreshold >= 0;
 	}
 	
 	public <R, E extends Exception> ThrowingSupplier<R, E> profileQuery(@Nonnull final ThrowingSupplier<R, E> sup, @Nonnull final Supplier<T> entry)
@@ -104,7 +109,7 @@ public class Diagnostics<T>
 			final long start = System.currentTimeMillis();
 			final R result = sup.get();
 			final long end = System.currentTimeMillis();
-			if((end - start) > slowQueryThreshold)
+			if((end - start) >= slowQueryThreshold)
 			{
 				logSlowQuery( entry.get(), (end - start));
 			}
@@ -123,7 +128,7 @@ public class Diagnostics<T>
 			final long start = System.currentTimeMillis();
 			run.run();
 			final long end = System.currentTimeMillis();
-			if((end - start) > slowQueryThreshold)
+			if((end - start) >= slowQueryThreshold)
 			{
 				logSlowQuery( entry.get(), (end - start));
 			}

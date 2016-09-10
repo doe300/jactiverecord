@@ -246,7 +246,7 @@ public class CachedJDBCRecordStore extends SimpleJDBCRecordStore
 			"SELECT * FROM " + base.getTableName() + " WHERE " + base.getPrimaryColumn() + " = " + primaryKey;
 		Logging.getLogger().debug("CachedJDBCStore", "Loading into cache...");
 		Logging.getLogger().debug("CachedJDBCStore", sql);
-		try (Statement stmt = con.createStatement(); final ResultSet res = stmt.executeQuery(sql))
+		try (final ResultSet res = closeStatementWithResultSet( con.createStatement()).executeQuery(sql))
 		{
 			if(res.next())
 			{
