@@ -56,7 +56,7 @@ public interface ProxyHandler
 	 * @return the return value of the invocation
 	 * @throws IllegalArgumentException 
 	 */
-	public <T extends ActiveRecord> Object invoke(@Nonnull final ActiveRecord record, @Nonnull final RecordHandler<T> handler, @Nonnull final Method method, Object[] args) throws IllegalArgumentException;
+	public <T extends ActiveRecord> Object invoke(@Nonnull final ActiveRecord record, @Nonnull final RecordHandler<T> handler, @Nonnull final Method method, @Nullable Object[] args) throws IllegalArgumentException;
 	
 	/**
 	 * A hook to manipulate/analyze the <code>value</code> for an attribute-getter

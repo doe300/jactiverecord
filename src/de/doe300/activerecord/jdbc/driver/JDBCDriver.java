@@ -81,7 +81,6 @@ public class JDBCDriver implements DBDriver
 	 */
 	public static final long PARAMETERS_LIMIT_UNLIMITED = Long.MAX_VALUE;
 
-	// TODO move functions out of here
 	public static final String AGGREGATE_COUNT_ALL= "COUNT(*)";
 	public static final String AGGREGATE_COUNT_NOT_NULL="COUNT(%column%)";
 	public static final String AGGREGATE_COUNT_DISTINCT="COUNT(DISTINCT %column%)";

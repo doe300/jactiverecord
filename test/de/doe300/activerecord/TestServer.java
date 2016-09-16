@@ -95,9 +95,15 @@ public class TestServer extends Assert
 	
 	public static Connection getTestConnection() throws SQLException
 	{
+		//FIXME HSQLDB errors
+		/**
+		 * - native type UUID is not mapped correctly to java.util.UUID, https://sourceforge.net/p/hsqldb/bugs/1446/
+		 */
 		return DriverManager.getConnection( "jdbc:hsqldb:mem:test", "sa", "");
 		//FIXME SQLite errors
 		/**
+		 * - empty ResultSets don't close Statement (even with Statement#closeOnCompletion()), https://github.com/xerial/sqlite-jdbc/issues/148
+		 * - Statement#closeOnCompletion() is not supported for PreparedStatements, https://github.com/xerial/sqlite-jdbc/issues/147
 		 */
 //		return DriverManager.getConnection("jdbc:sqlite::memory:");
 		//FIXME MySQL errors:

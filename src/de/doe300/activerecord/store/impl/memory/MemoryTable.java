@@ -277,8 +277,14 @@ class MemoryTable
 	{
 		return StreamSupport.stream( new Spliterator<Map.Entry<Integer, MemoryRow>>()
 		{
-			//FIXME sometimes throws concurrent modification on copying entries from data to rowKeys (data is edited in the mean-time)
-			private final Iterator<Map.Entry<Integer, MemoryRow>> rowKeys = new HashSet<>(data.entrySet()).iterator();
+			private final Iterator<Map.Entry<Integer, MemoryRow>> rowKeys;
+			{
+				//to prevent ConcurrentModificationException while copying the entries
+				synchronized(data)
+				{
+					rowKeys = new HashSet<>(data.entrySet()).iterator();
+				}
+			}
 			@Override
 			public boolean tryAdvance(final Consumer<? super Map.Entry<Integer, MemoryRow>> action )
 			{

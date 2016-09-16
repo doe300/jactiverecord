@@ -22,7 +22,7 @@
  * THE SOFTWARE.
  */
 
-package de.doe300.activerecord;
+package de.doe300.activerecord.bugs;
 
 import java.sql.Connection;
 import java.sql.DriverManager;
@@ -37,6 +37,10 @@ import java.util.UUID;
  */
 public class HSQLDBUUIDBug
 {
+	//Occurs with hsqldb 2.3.4
+	//Reported as https://sourceforge.net/p/hsqldb/bugs/1446/
+	//fixed and will be released in version 2.3.5
+	
 	public static void main(String[] args) throws SQLException
 	{
 		final Connection con = DriverManager.getConnection( "jdbc:hsqldb:mem:test", "sa", "");

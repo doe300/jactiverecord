@@ -26,17 +26,24 @@ package de.doe300.activerecord.proxy.handlers;
 
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
-import java.util.Arrays;
 
 import de.doe300.activerecord.proxy.RecordHandler;
 import de.doe300.activerecord.record.ActiveRecord;
+import java.util.Arrays;
+import javax.annotation.Nonnull;
+import javax.annotation.Nullable;
 
 /**
- * Base-class for dummy-objects implementing some interfaces used by an activerecord
+ * Base-class for dummy-objects implementing some interfaces used by an activerecord.
+ * 
+ * Every method in the supported interface must be implemented in a subclass of this handler with additional parameters.
+ * The first two parameters of the implementing methods are the <code>record</code> of type {@link ActiveRecord} and the
+ * {@link RecordHandler}.
+ * 
  * @author doe300
  * @param <T>
  */
-public abstract class InterfaceProxyHandler<T extends ActiveRecord> implements ProxyHandler
+public abstract class InterfaceProxyHandler<T> implements ProxyHandler
 {
 	private final Class<T> type;
 
@@ -53,12 +60,31 @@ public abstract class InterfaceProxyHandler<T extends ActiveRecord> implements P
 	{
 		try
 		{
-			return method.invoke( this, record, handler, args);
+			for(final Method m : getClass().getMethods())
+			{
+				if(m.getName().equals( method.getName()) && typesEqual( Arrays.copyOfRange( m.getParameterTypes(), 2, m.getParameterTypes().length), method.getParameterTypes() ))
+				{
+					final Object[] newArgs;
+					if(args != null)
+					{
+						newArgs = new Object[args.length + 2];
+						System.arraycopy( args, 0, newArgs, 2, args.length);
+					}
+					else
+					{
+						newArgs = new Object[2];
+					}
+					newArgs[0] = record;
+					newArgs[1] = handler;
+					return m.invoke( this, newArgs);
+				}
+			}
 		}
 		catch ( IllegalAccessException | InvocationTargetException ex )
 		{
 			throw new IllegalArgumentException(ex);
 		}
+		throw new IllegalArgumentException("No such method: " + method.getName());
 	}
 
 	@Override
@@ -66,7 +92,7 @@ public abstract class InterfaceProxyHandler<T extends ActiveRecord> implements P
 	{
 		for(final Method m:type.getMethods())
 		{
-			if(m.getName().equals( method.getName()) && Arrays.equals( m.getParameterTypes(), InterfaceProxyHandler.getArgumentsTypes( args)))
+			if(m.getName().equals( method.getName()) && typesEqual( m.getParameterTypes(), InterfaceProxyHandler.getArgumentsTypes( args)))
 			{
 				return true;
 			}
@@ -74,17 +100,46 @@ public abstract class InterfaceProxyHandler<T extends ActiveRecord> implements P
 		return false;
 	}
 
-	private static Class<?>[] getArgumentsTypes(final Object... args)
+	private static Class<?>[] getArgumentsTypes(@Nullable final Object... args)
 	{
-		final Class<?>[] array = new Class<?>[args.length+2];
-		array[0] = ActiveRecord.class;
-		array[1] = RecordHandler.class;
+		if(args == null || args.length == 0)
+		{
+			return new Class[0];
+		}
+		final Class<?>[] array = new Class<?>[args.length];
 
 		for(int i=0;i<args.length;i++)
 		{
-			array[i+2] = args.getClass();
+			array[i] = args[i].getClass();
 		}
 
 		return array;
+	}
+	
+	private static boolean typesEqual(@Nonnull final Class<?>[] parentTypes, @Nonnull final Class<?>[] childTypes)
+	{
+		if(parentTypes.length != childTypes.length)
+		{
+			return false;
+		}
+		for(int i = 0; i < parentTypes.length; i++)
+		{
+			if(parentTypes[i].isAssignableFrom( childTypes[i]))
+			{
+				continue;
+			}
+			if(Number.class.isAssignableFrom( parentTypes[i]) && childTypes[i].isPrimitive())
+			{
+				//XXX test match of number-type
+				continue;
+			}
+			if(parentTypes[i].isPrimitive() && Number.class.isAssignableFrom( childTypes[i]))
+			{
+				//XXX test match of number-type
+				continue;
+			}
+			return false;
+		}
+		return true;
 	}
 }
