@@ -308,10 +308,9 @@ public enum Comparison implements BiPredicate<Optional<Object>, Optional<Object>
 			{
 				return false;
 			}
-			Collection<?> col;
 			if(compareValue.get() instanceof Collection)
 			{
-				col = Collection.class.cast(compareValue.get());
+				final Collection<?> col = Collection.class.cast(compareValue.get());
 				return col.contains( value.orElse( null) );
 			}
 			if(compareValue.get().getClass().isArray())

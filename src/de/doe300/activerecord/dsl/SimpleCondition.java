@@ -74,8 +74,12 @@ public class SimpleCondition implements Condition
 		final boolean isValue = mayBeValue && (val == null || !SQLFunction.class.isAssignableFrom( val.getClass()));
 		
 		//check for IN (only check for values)
-		if(isValue && val != null && comp == Comparison.IN)
+		if(isValue && comp == Comparison.IN)
 		{
+			if(val == null)
+			{
+				throw new IllegalArgumentException("Can't match item to NULL list!");
+			}
 			if(val instanceof Collection)
 			{
 				return new Side(Collection.class.cast(val).toArray(), isValue);
@@ -205,6 +209,11 @@ public class SimpleCondition implements Condition
 			{
 				if(data != null && data.getClass().isArray())
 				{
+					if(((Object[])data).length == 0)
+					{
+						//Matching item to empty list is not supported by SQL
+						return "(NULL)";
+					}
 					//see: https://stackoverflow.com/questions/178479/preparedstatement-in-clause-alternatives
 					return "("+Arrays.stream( (Object[])data).map( (final Object o) -> "?").collect( Collectors.joining( ", "))+")";
 				}

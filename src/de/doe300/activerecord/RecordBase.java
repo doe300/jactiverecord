@@ -479,6 +479,23 @@ public abstract class RecordBase<T extends ActiveRecord> implements ReadOnlyReco
 		final Map<String, Object> copyValues = store.getValues( this, record.getPrimaryKey(), columnNames.toArray( new String[columnNames.size()]));
 		return createRecord( copyValues );
 	}
+	
+	/**
+	 * Clears the stored record-objects. 
+	 * Use this method to clean up memory after requiring a large amount of records from this record.
+	 * Any subsequent calls to this method must re-create the records from the storage-data.
+	 * 
+	 * NOTE: This method does not delete the entries from the storage, but simply discards the internal cache of record-objects.
+	 * 
+	 * WARNING: Using this method may result in duplicate record-object for the same storage-entry! 
+	 * Make sure, there are no active record-objects for this record-type when using this method!
+	 * 
+	 * @since 0.9
+	 */
+	public void clearRecords()
+	{
+		records.clear();
+	}
 
 	////
 	// Finder-Methods

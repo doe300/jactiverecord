@@ -30,6 +30,7 @@ import de.doe300.activerecord.dsl.QueryResult;
 import de.doe300.activerecord.dsl.functions.Absolute;
 import de.doe300.activerecord.dsl.functions.Sum;
 import de.doe300.activerecord.record.ActiveRecord;
+import de.doe300.activerecord.record.RecordCallbacks;
 import de.doe300.activerecord.record.RecordType;
 import de.doe300.activerecord.scope.Scope;
 import de.doe300.activerecord.record.validation.ValidationException;
@@ -452,12 +453,28 @@ public class RecordBaseTest<T extends TestInterface> extends TestBase implements
 		assertTrue( base.find( Conditions.is("name", "Alex")).count() >= 2);
 		assertTrue( base.count( Conditions.is("name", "Alex")) >= 2);
 	}
+	
+	@Test
+	public void testClearRecords()
+	{
+		loadCounter = 0;
+		int key = dummyBase.createRecord().getPrimaryKey();
+		
+		//already in cache
+		dummyBase.getRecord( key);
+		assertEquals( 0, loadCounter);
+		
+		dummyBase.clearRecords();
+		dummyBase.getRecord( key );
+		assertEquals( 1, loadCounter);
+		dummyBase.getRecord( key );
+		assertEquals( 1, loadCounter);
+	}
 
 	@Test
 	public void testHasCallbacks()
 	{
 		assertTrue( base.hasCallbacks());
-		assertFalse( dummyBase.hasCallbacks());
 	}
 
 	@Test
@@ -542,9 +559,15 @@ public class RecordBaseTest<T extends TestInterface> extends TestBase implements
 		assertEquals( base.getForCondition( null, null).size(), base.count( null));
 	}
 	
+	static int loadCounter = 0;
+	
 	@RecordType(autoCreate = true, typeName = "dummyrecordstore", defaultColumns = {ActiveRecord.DEFAULT_PRIMARY_COLUMN})
-	public interface DummyRecordType extends ActiveRecord
+	public interface DummyRecordType extends ActiveRecord, RecordCallbacks
 	{
-		
+		@Override
+		public default void afterLoad()
+		{
+			loadCounter++;
+		}
 	}
 }

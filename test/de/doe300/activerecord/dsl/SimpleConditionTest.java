@@ -206,10 +206,19 @@ public class SimpleConditionTest extends TestBase implements AssertException
 	public void testInCondition()
 	{
 		//test Predicate
+		assertTrue( new SimpleCondition("age", new Integer[]{-912,-913}, Comparison.IN).test( t1));
+		//test SQL
 		assertSame( t1, base.findFirst( new SimpleCondition("age", new Integer[]{-912,-913}, Comparison.IN)));
 		assertSame( t1, base.findFirst( new SimpleCondition("age", Arrays.asList( -912,-913), Comparison.IN)));
-		//test SQL
 		assertEquals( (Integer)t1.getPrimaryKey(), base.getStore().findFirst( base, toScope( new SimpleCondition("age", new Integer[]{-912,-913}, Comparison.IN))));
+		
+		//empty list
+		new SimpleCondition("age", new Integer[0], Comparison.IN).test( t1);
+		base.findFirst( new SimpleCondition("age", new Integer[0], Comparison.IN));
+		
+		//error test
+		assertThrows( IllegalArgumentException.class, () -> new SimpleCondition("age", null, Comparison.IN).test( t1));
+		assertThrows( IllegalArgumentException.class, () -> base.findFirst( new SimpleCondition("age", null, Comparison.IN)));
 	}
 	
 	@Test

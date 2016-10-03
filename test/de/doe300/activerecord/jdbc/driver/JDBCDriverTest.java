@@ -90,9 +90,9 @@ public class JDBCDriverTest extends Assert implements AssertException
 		//some more types
 		assertTrue( driver.isTypeSupported( ActiveRecord.class));
 		assertTrue( driver.isTypeSupported( Enum.class));
-		assertTrue( driver.isTypeSupported( java.util.UUID.class));
+		assertTrue( driver.isTypeSupported( UUID.class));
 		assertTrue( driver.isTypeSupported( java.net.URL.class));
-		assertTrue( driver.isTypeSupported( java.io.Serializable.class));
+		assertTrue( driver.isTypeSupported( Serializable.class));
 		
 		//some dummy type
 		assertFalse( driver.isTypeSupported( Void.class) );
@@ -191,7 +191,7 @@ public class JDBCDriverTest extends Assert implements AssertException
 		assertTrue(java.sql.Date.class.isAssignableFrom( driver.getJavaType( driver.getSQLType( java.sql.Date.class))));
 		assertTrue(java.sql.Time.class.isAssignableFrom( driver.getJavaType( driver.getSQLType( java.sql.Time.class))));
 		assertTrue(java.sql.Timestamp.class.isAssignableFrom( driver.getJavaType( driver.getSQLType( java.sql.Timestamp.class))));
-		assertEquals( Array.newInstance( Byte.TYPE, 0).getClass(), driver.getJavaType( driver.getSQLType( java.io.Serializable.class)));
+		assertEquals( Array.newInstance( Byte.TYPE, 0).getClass(), driver.getJavaType( driver.getSQLType( Serializable.class)));
 		assertTrue( Number.class.isAssignableFrom( driver.getJavaType( driver.getSQLType( Byte.class))));
 		assertTrue( Number.class.isAssignableFrom( driver.getJavaType( driver.getSQLType( Short.class))));
 		assertTrue( Number.class.isAssignableFrom( driver.getJavaType( driver.getSQLType( Integer.class))));
