@@ -32,7 +32,7 @@ import java.util.function.Function;
 import javax.annotation.Nonnull;
 
 /**
- * Calcualtes the rounded-down integer value
+ * Calculates the rounded-down integer value
  * 
  * @author daniel
  *

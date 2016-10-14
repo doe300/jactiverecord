@@ -79,6 +79,10 @@ public class MySQLDriver extends JDBCDriver
 		{
 			return "ABS(" + column + ") + 0.0";
 		}
+		if(SCALAR_CONCATENATE.equals( sqlFunction))
+		{
+			return "CONCAT(" + column + ", %other%)";
+		}
 		if(sqlFunction.contains( "BIGINT"))
 		{
 			return super.getSQLFunction( sqlFunction.replaceAll( "BIGINT", "SIGNED INTEGER"), column );

@@ -103,6 +103,8 @@ public class JDBCDriver implements DBDriver
 	public static final String SCALAR_STRING_LENGTH = "CHAR_LENGTH(%column%)";
 	public static final String SCALAR_TRIM = "TRIM(%column%)";
 	public static final String SCALAR_CAST = "CAST(%column% AS %type%)";
+	public static final String SCALAR_CONCATENATE = "(%column% || %other%)";
+	public static final String SCALAR_COALESCE = "COALESCE(%column%, %other%)";
 	
 	private static final String[] sql92Keywords = {
 		"absolute", "action", "allocate", "are", "assertion",

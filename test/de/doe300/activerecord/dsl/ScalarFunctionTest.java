@@ -33,6 +33,8 @@ import de.doe300.activerecord.dsl.functions.Absolute;
 import de.doe300.activerecord.dsl.functions.AbsoluteDouble;
 import de.doe300.activerecord.dsl.functions.CastType;
 import de.doe300.activerecord.dsl.functions.Ceiling;
+import de.doe300.activerecord.dsl.functions.Coalesce;
+import de.doe300.activerecord.dsl.functions.Concatenate;
 import de.doe300.activerecord.dsl.functions.Floor;
 import de.doe300.activerecord.dsl.functions.LowerCase;
 import de.doe300.activerecord.dsl.functions.Round;
@@ -321,5 +323,43 @@ public class ScalarFunctionTest extends TestBase
 		
 		ScalarFunction<TestInterface, Long, String> cast2 = new CastType<TestInterface, Long, String>(new Absolute<>("age", TestInterface::getAge), String.class, (Long l) -> Long.toString( l ));
 		assertEquals("913", cast2.apply( t4));
+	}
+	
+	@Test
+	public void testCONCAT()
+	{
+		final ScalarFunction<TestInterface, String, String> concat = new Concatenate<TestInterface>(
+				new Value<TestInterface, String>("name", TestInterface::getName),
+				new CastType<TestInterface, Integer, String>("age", TestInterface::getAge, String.class, (i) -> Integer.toString( i))
+		);
+		
+		assertEquals( "123Name1-912", concat.apply( t1));
+		Condition cond = Conditions.isLike( concat, "123Name%");
+		assertTrue( cond.test( t1));
+		assertTrue( cond.test( t2));
+		assertTrue( cond.test( t3));
+		assertEquals( 3, base.count( cond ) );
+		
+		final TestInterface t = base.createRecord( Collections.singletonMap( "age", 23));
+		assertNull( concat.apply( t));
+		t.destroy();
+	}
+	
+	@Test
+	public void testCOALESCE()
+	{
+		final ScalarFunction<TestInterface, String, String> coalesce = new Coalesce<TestInterface, String>(
+				new Value<TestInterface, String>("name", TestInterface::getName),
+				new CastType<TestInterface, Integer, String>("age", TestInterface::getAge, String.class, (i) -> Integer.toString( i))
+		);
+		
+		final TestInterface t = base.createRecord( Collections.singletonMap( "age", 23));
+		
+		assertEquals( Integer.toString( 23), coalesce.apply( t));
+		Condition cond = Conditions.is( coalesce, Integer.toString( 23));
+		assertTrue( cond.test( t ));
+		assertEquals( 1, base.count( cond));
+		
+		t.destroy();
 	}
 }
