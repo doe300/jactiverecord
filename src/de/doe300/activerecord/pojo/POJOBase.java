@@ -112,6 +112,6 @@ public class POJOBase<T extends ActiveRecord> extends RecordBase<T>
 		throws ClassCastException
 	{
 		final Object obj = store.getValue( this, primaryKey, name );
-		return TypeMappings.coerceToType( obj, type );
+		return TypeMappings.mapFromDB( obj, type );
 	}
 }

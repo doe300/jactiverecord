@@ -22,52 +22,43 @@
  * THE SOFTWARE.
  */
 
-package de.doe300.activerecord.pojo;
+package de.doe300.activerecord.jdbc;
 
-import de.doe300.activerecord.jdbc.TypeMappings;
-import java.util.HashMap;
-import java.util.Map;
-import javax.annotation.Nonnegative;
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 
 /**
- * abstract active record which caches all columns values locally.
- * 
- * The cache of this record is write-through, so it is only used for read-access
- * 
+ * Maps a custom type to a type understood by the active JDBC-driver.
+ *
  * @author doe300
+ * @param <T> the type to map from/to
  * @since 0.9
+ * @see DBMappable
+ * @see TypeMappings
  */
-public class CachingActiveRecord extends AbstractActiveRecord
+public interface DBMapper<T>
 {
-	private final Map<String, Object> cache;
-
 	/**
-	 * 
-	 * @param primaryKey
-	 * @param base 
+	 * Converts the given DB-value to the mapped type
+	 * @param dbValue the object read from the underlying data-store
+	 * @return the converted/mapped object
+	 * @throws IllegalArgumentException 
 	 */
-	public CachingActiveRecord( @Nonnegative int primaryKey, @Nonnull POJOBase<?> base )
-	{
-		super( primaryKey, base );
-		cache = new HashMap<>(16);
-	}
-
-	@Override
-	protected void setProperty(@Nonnull final String name, @Nullable final Object value)
-	{
-		super.setProperty( name, value );
-		cache.put( name, value );
-	}
-
-	@Override
-	protected <U> U getProperty(@Nonnull final String name, @Nonnull final Class<U> type) throws ClassCastException
-	{
-		if(cache.containsKey( name))
-		{
-			return TypeMappings.mapFromDB(cache.get( name), type );
-		}
-		return super.getProperty( name, type );
-	}
+	@Nullable
+	public T readFromDBValue(@Nullable final Object dbValue) throws IllegalArgumentException;
+	
+	/**
+	 * Converts the given value to be stored in the underlying store
+	 * @param userValue the value to be converted
+	 * @param dbType the type to convert to
+	 * @return the converted object
+	 */
+	@Nullable
+	public Object toDBValue(@Nullable final T userValue, @Nonnull final Class<?> dbType);
+	
+	/**
+	 * @return the mapped type
+	 */
+	@Nonnull
+	public Class<T> getMappedType();
 }

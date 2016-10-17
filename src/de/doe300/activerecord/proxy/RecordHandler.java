@@ -169,7 +169,7 @@ public final class RecordHandler<T extends ActiveRecord> implements InvocationHa
 			Method converterMethod = Attributes.getConverterMethod( method);
 			if(converterMethod==null)
 			{
-				return TypeMappings.coerceToType( store.getValue(base, primaryKey, column ), method.getReturnType());
+				return TypeMappings.mapFromDB( store.getValue(base, primaryKey, column ), method.getReturnType());
 			}
 			return converterMethod.invoke( proxy, store.getValue(base, primaryKey, column ) );
 		}
@@ -214,7 +214,7 @@ public final class RecordHandler<T extends ActiveRecord> implements InvocationHa
 			}
 			if(args==null||args.length==0&&Attributes.isGetter( method, false ))
 			{
-				return TypeMappings.coerceToType( getAttribute( record, property ), method.getReturnType());
+				return TypeMappings.mapFromDB( getAttribute( record, property ), method.getReturnType());
 			}
 		}
 		//method not handled

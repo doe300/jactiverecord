@@ -64,6 +64,7 @@ public final class TypeMappings
 	{
 	}
 
+	private static final Map<Class, DBMapper> customMappers = new HashMap<>(10);
 	private static final Map<Class<?>, Class<?>> primitivesToWrapper= new HashMap<>(10);
 	static
 	{
@@ -76,8 +77,13 @@ public final class TypeMappings
 		TypeMappings.primitivesToWrapper.put(long.class, Long.class);
 		TypeMappings.primitivesToWrapper.put(short.class, Short.class);
 		TypeMappings.primitivesToWrapper.put(void.class, Void.class);
+		
+		TypeMappings.customMappers.put( UUID.class, new UUIDMapper());
+		TypeMappings.customMappers.put( URL.class, new URLMapper());
+		TypeMappings.customMappers.put( URI.class, new URIMapper());
+		TypeMappings.customMappers.put( Path.class, new PathMapper());
 	}
-
+	
 	////
 	// General
 	////
@@ -214,6 +220,62 @@ public final class TypeMappings
 		}
 		throw new IllegalArgumentException("Invalid numerical type: " + type.getCanonicalName());
 	}
+	
+	/**
+	 * Converts a value stored in the underlying storage to a custom type
+	 * @param <T> the custom type to convert to
+	 * @param dbValue the value to be converted
+	 * @param javaType the resulting type
+	 * @return the possibly converted value
+	 * @throws ClassCastException if no such conversion was possible
+	 * @since 0.9
+	 * @see DBMapper
+	 */
+	@Nullable
+	@SuppressWarnings("rawtypes")
+	public static <T> T mapFromDB(@Nullable final Object dbValue, @Nonnull final Class<T> javaType) throws ClassCastException
+	{
+		if(dbValue == null)
+		{
+			return null;
+		}
+		for(final Map.Entry<Class, DBMapper> mapper : customMappers.entrySet())
+		{
+			if(javaType.isAssignableFrom( mapper.getKey()))
+			{
+				return javaType.cast( mapper.getValue().readFromDBValue( dbValue ) );
+			}
+		}
+		return coerceToType( dbValue, javaType );
+	}
+	
+	/**
+	 * Converts an arbitrary value for storage into an underlying store
+	 * @param <T>
+	 * @param javaValue the arbitrary value
+	 * @param dbType the database-type
+	 * @return the converted value
+	 * @throws ClassCastException 
+	 * @since 0.8
+	 * @see DBMapper
+	 */
+	@Nullable
+	public static <T> T mapToDB(@Nullable final Object javaValue, @Nonnull final Class<T> dbType) throws ClassCastException
+	{
+		//TODO needs polishing: currently overwrites native mapping
+		if(javaValue == null)
+		{
+			return null;
+		}
+		for(final Map.Entry<Class, DBMapper> mapper : customMappers.entrySet())
+		{
+			if(mapper.getKey().isInstance(javaValue))
+			{
+				return dbType.cast( mapper.getValue().toDBValue( javaValue, dbType));
+			}
+		}
+		return TypeMappings.coerceToType( javaValue, dbType );
+	}
 
 	////
 	//	UUID
@@ -235,20 +297,7 @@ public final class TypeMappings
 	public static UUID readUUID(@Nonnull final ActiveRecord record, @Nonnull final String columnName)
 	{
 		final Object value = record.getBase().getStore().getValue( record.getBase(), record.getPrimaryKey(), columnName);
-		if(value == null)
-		{
-			return null;
-		}
-		if(value instanceof UUID)
-		{
-			//maybe some driver has a mapping for UUID
-			return (UUID)value;
-		}
-		if(value.getClass() == byte[].class)
-		{
-			return UUID.nameUUIDFromBytes(( byte[] ) value);
-		}
-		return UUID.fromString( value.toString());
+		return UUID.class.cast( customMappers.get( UUID.class).readFromDBValue( value ));
 	}
 
 	/**
@@ -260,16 +309,8 @@ public final class TypeMappings
 	public static void writeUUID(@Nullable final UUID uuid, @Nonnull final ActiveRecord record,
 		@Nonnull final String columnName)
 	{
-		final Object value;
-		if(record.getBase().getStore().getAllColumnTypes( record.getBase().getTableName()).get( columnName).isAssignableFrom( UUID.class))
-		{
-			value = uuid;
-		}
-		else
-		{
-			value = uuid == null ? null : uuid.toString();
-		}
-		record.getBase().getStore().setValue( record.getBase(), record.getPrimaryKey(), columnName, value);
+		final Class<?> dbType = record.getBase().getStore().getAllColumnTypes( record.getBase().getTableName()).get( columnName);
+		record.getBase().getStore().setValue( record.getBase(), record.getPrimaryKey(), columnName, customMappers.get( UUID.class).toDBValue( uuid, dbType));
 	}
 
 	////
@@ -288,16 +329,7 @@ public final class TypeMappings
 		throws MalformedURLException
 	{
 		final Object value = record.getBase().getStore().getValue( record.getBase(), record.getPrimaryKey(), columnName);
-		if(value == null)
-		{
-			return null;
-		}
-		if(value instanceof URL)
-		{
-			//maybe some driver has a mapping for URL
-			return (URL)value;
-		}
-		return new URL(value.toString());
+		return URL.class.cast( customMappers.get( URL.class).readFromDBValue( value ));
 	}
 
 	/**
@@ -310,16 +342,7 @@ public final class TypeMappings
 	public static URI readURI(@Nonnull final ActiveRecord record, @Nonnull final String columnName)
 	{
 		final Object value = record.getBase().getStore().getValue( record.getBase(), record.getPrimaryKey(), columnName);
-		if(value == null)
-		{
-			return null;
-		}
-		if(value instanceof URI)
-		{
-			//maybe some driver has a mapping for URI
-			return (URI)value;
-		}
-		return URI.create( value.toString());
+		return URI.class.cast( customMappers.get( URI.class).readFromDBValue( value ));
 	}
 
 	/**
@@ -331,16 +354,8 @@ public final class TypeMappings
 	public static void writeURL(@Nullable final URL url, @Nonnull final ActiveRecord record,
 		@Nonnull final String columnName)
 	{
-		final Object value;
-		if(record.getBase().getStore().getAllColumnTypes( record.getBase().getTableName()).get( columnName).isAssignableFrom( URL.class))
-		{
-			value = url;
-		}
-		else
-		{
-			value = url == null ? null : url.toExternalForm();
-		}
-		record.getBase().getStore().setValue( record.getBase(), record.getPrimaryKey(), columnName, value);
+		final Class<?> dbType = record.getBase().getStore().getAllColumnTypes( record.getBase().getTableName()).get( columnName);
+		record.getBase().getStore().setValue( record.getBase(), record.getPrimaryKey(), columnName, customMappers.get( URL.class).toDBValue( url, dbType ));
 	}
 
 	/**
@@ -352,16 +367,8 @@ public final class TypeMappings
 	public static void writeURI(@Nullable final URI uri, @Nonnull final ActiveRecord record,
 		@Nonnull final String columnName)
 	{
-		final Object value;
-		if(record.getBase().getStore().getAllColumnTypes( record.getBase().getTableName()).get( columnName).isAssignableFrom( URI.class))
-		{
-			value = uri;
-		}
-		else
-		{
-			value = uri == null ? null : uri.toString();
-		}
-		record.getBase().getStore().setValue( record.getBase(), record.getPrimaryKey(), columnName, value);
+		final Class<?> dbType = record.getBase().getStore().getAllColumnTypes( record.getBase().getTableName()).get( columnName);
+		record.getBase().getStore().setValue( record.getBase(), record.getPrimaryKey(), columnName, customMappers.get( URI.class).toDBValue( uri, dbType ));
 	}
 
 	////
@@ -446,21 +453,7 @@ public final class TypeMappings
 	public static Path readPath(@Nonnull final ActiveRecord record, @Nonnull final String columnName)
 	{
 		final Object value = record.getBase().getStore().getValue( record.getBase(), record.getPrimaryKey(), columnName);
-		if(value == null)
-		{
-			return null;
-		}
-		if(value instanceof Path)
-		{
-			//maybe some driver has a mapping for Path
-			return (Path)value;
-		}
-		if(value instanceof URI)
-		{
-			//maybe some driver has a mapping for URI
-			return Paths.get((URI)value);
-		}
-		return Paths.get( (String)value);
+		return Path.class.cast( customMappers.get( Path.class).readFromDBValue( value ));
 	}
 
 	/**
@@ -471,21 +464,8 @@ public final class TypeMappings
 	 */
 	public static void writePath(@Nullable final Path path, @Nonnull final ActiveRecord record, @Nonnull final String columnName)
 	{
-		final Object value;
 		final Class<?> columnType = record.getBase().getStore().getAllColumnTypes( record.getBase().getTableName()).get( columnName);
-		if(columnType.isAssignableFrom( Path.class))
-		{
-			value = path;
-		}
-		else if(columnType.isAssignableFrom( URI.class))
-		{
-			value = path == null ? null : path.toUri();
-		}
-		else
-		{
-			value = path == null ? null : path.toString();
-		}
-		record.getBase().getStore().setValue( record.getBase(), record.getPrimaryKey(), columnName, value);
+		record.getBase().getStore().setValue( record.getBase(), record.getPrimaryKey(), columnName, customMappers.get( Path.class).toDBValue( path, columnType ));
 	}
 
 	/**
@@ -701,6 +681,216 @@ public final class TypeMappings
 		else
 		{
 			throw new IllegalArgumentException("Illegal column-type!");
+		}
+	}
+	
+	/**
+	 * Sets a new custom type-mapped
+	 * @param <T> the type to be mapped
+	 * @param mapper 
+	 * @since 0.9
+	 * @see #mapFromDB(java.lang.Object, java.lang.Class) 
+	 * @see #mapToDB(java.lang.Object, java.lang.Class) 
+	 */
+	public static <T> void setTypeMapper(@Nonnull final DBMapper<T> mapper)
+	{
+		customMappers.put( mapper.getMappedType(), mapper);
+	}
+	
+	/**
+	 * Removes a binding for a type-mapper
+	 * @param <T> the type to be un-mapped
+	 * @param mappedType 
+	 * @since 0.9
+	 */
+	public static <T> void removeTypeMapper(@Nonnull final Class<T> mappedType)
+	{
+		customMappers.remove( mappedType);
+	}
+	
+	/**
+	 * @since 0.9
+	 */
+	private static final class UUIDMapper implements DBMapper<UUID>
+	{
+		@Override
+		public UUID readFromDBValue( Object dbValue ) throws IllegalArgumentException
+		{
+			if ( dbValue == null )
+			{
+				return null;
+			}
+			if ( dbValue instanceof UUID )
+			{
+				//maybe some driver has a mapping for UUID
+				return ( UUID ) dbValue;
+			}
+			if ( dbValue.getClass() == byte[].class )
+			{
+				return UUID.nameUUIDFromBytes( ( byte[] ) dbValue );
+			}
+			return UUID.fromString( dbValue.toString() );
+		}
+		
+		@Override
+		public Object toDBValue( UUID userValue,Class<?> dbType )
+		{
+			if(userValue == null)
+			{
+				return null;
+			}
+			if ( UUID.class.isAssignableFrom( dbType) )
+			{
+				return userValue;
+			}
+			return userValue.toString();
+		}
+
+		@Override
+		public Class<UUID> getMappedType()
+		{
+			return UUID.class;
+		}
+	}
+
+	/**
+	 * @since 0.9
+	 */
+	private static final class URLMapper implements DBMapper<URL>
+	{
+		@Override
+		public URL readFromDBValue( Object dbValue ) throws IllegalArgumentException
+		{
+			if ( dbValue == null )
+			{
+				return null;
+			}
+			if ( dbValue instanceof URL )
+			{
+				//maybe some driver has a mapping for URL
+				return ( URL ) dbValue;
+			}
+			try
+			{
+				return new URL( dbValue.toString() );
+			}
+			catch ( MalformedURLException ex )
+			{
+				throw new IllegalArgumentException(ex );
+			}
+		}
+
+		@Override
+		public Object toDBValue( URL userValue, Class<?> dbType )
+		{
+			if(userValue == null)
+			{
+				return null;
+			}
+			if ( URL.class.isAssignableFrom( dbType ) )
+			{
+				return userValue;
+			}
+			return userValue.toExternalForm();
+		}
+
+		@Override
+		public Class<URL> getMappedType()
+		{
+			return URL.class;
+		}
+	}
+	
+	/**
+	 * @since 0.9
+	 */
+	private static final class URIMapper implements DBMapper<URI>
+	{
+
+		@Override
+		public URI readFromDBValue( Object dbValue ) throws IllegalArgumentException
+		{
+			if ( dbValue == null )
+			{
+				return null;
+			}
+			if ( dbValue instanceof URI )
+			{
+				//maybe some driver has a mapping for URI
+				return ( URI ) dbValue;
+			}
+			return URI.create( dbValue.toString() );
+		}
+
+		@Override
+		public Object toDBValue( URI userValue, Class<?> dbType )
+		{
+			if(userValue == null)
+			{
+				return null;
+			}
+			if ( URI.class.isAssignableFrom( dbType) )
+			{
+				return userValue;
+			}
+			return userValue.toString();
+		}
+
+		@Override
+		public Class<URI> getMappedType()
+		{
+			return URI.class;
+		}
+	}
+	
+	/**
+	 * @since 0.9
+	 */
+	private static final class PathMapper implements DBMapper<Path>
+	{
+
+		@Override
+		public Path readFromDBValue( Object dbValue ) throws IllegalArgumentException
+		{
+			if ( dbValue == null )
+			{
+				return null;
+			}
+			if ( dbValue instanceof Path )
+			{
+				//maybe some driver has a mapping for Path
+				return ( Path ) dbValue;
+			}
+			if ( dbValue instanceof URI )
+			{
+				//maybe some driver has a mapping for URI
+				return Paths.get( ( URI ) dbValue );
+			}
+			return Paths.get( ( String ) dbValue );
+		}
+
+		@Override
+		public Object toDBValue( Path userValue, Class<?> dbType )
+		{
+			if(userValue == null)
+			{
+				return null;
+			}
+			if ( Path.class.isAssignableFrom( dbType ) )
+			{
+				return userValue;
+			}
+			else if ( URI.class.isAssignableFrom( dbType ))
+			{
+				return userValue.toUri();
+			}
+			return userValue.toString();
+		}
+
+		@Override
+		public Class<Path> getMappedType()
+		{
+			return Path.class;
 		}
 	}
 }
