@@ -63,7 +63,7 @@
 			<plugin>
 				<groupId>org.jacoco</groupId>
 				<artifactId>jacoco-maven-plugin</artifactId>
-				<version>0.7.7.201606060606</version>
+				<version>0.7.9</version>
 				<executions>
 					<execution>
 						<goals>
@@ -104,14 +104,14 @@
 		<dependency>
 			<groupId>org.xerial</groupId>
 			<artifactId>sqlite-jdbc</artifactId>
-			<version>3.16.1</version>
+			<version>3.19.3</version>
 			<scope>test</scope>
 			<optional>true</optional>
 		</dependency>
 		<dependency>
 			<groupId>org.postgresql</groupId>
 			<artifactId>postgresql</artifactId>
-			<version>9.4.1212</version>
+			<version>42.0.0</version>
 			<scope>test</scope>
 			<optional>true</optional>
 		</dependency>
@@ -125,7 +125,7 @@
 		<dependency>
 			<groupId>org.hsqldb</groupId>
 			<artifactId>hsqldb</artifactId>
-			<version>2.3.4</version>
+			<version>2.4.0</version>
 			<scope>test</scope>
 			<optional>true</optional>
 		</dependency>
@@ -134,7 +134,7 @@
 		<connection>scm:git:git@github.com:doe300/jactiverecord.git</connection>
 		<url>git@github.com:doe300/jactiverecord.git</url>
 		<developerConnection>scm:git:git@github.com:doe300/jactiverecord.git</developerConnection>
-	  <tag>v0.7</tag>
+	  <tag>v0.8</tag>
   </scm>
 	<ciManagement>
 		<system>travis</system>

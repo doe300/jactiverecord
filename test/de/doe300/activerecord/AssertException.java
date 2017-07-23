@@ -25,10 +25,12 @@
 package de.doe300.activerecord;
 
 import javax.annotation.Nonnull;
+
 import org.junit.Assert;
 
 /**
- * Mixin adding assertion to thrown exceptions
+ * Mixin adding assertion to throw exceptions
+ * 
  * @author doe300
  * @since 0.8
  */
@@ -49,7 +51,7 @@ public interface AssertException
 			}
 		}
 	}
-	
+
 	public default void mayThrow(@Nonnull final Class<? extends Throwable> exceptionType, @Nonnull final Executable call)
 	{
 		try
@@ -64,7 +66,7 @@ public interface AssertException
 			}
 		}
 	}
-	
+
 	public interface Executable
 	{
 		public void call() throws Throwable;

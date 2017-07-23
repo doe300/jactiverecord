@@ -151,7 +151,8 @@ public class SQLiteDriver extends JDBCDriver
 	public long getParametersLimit()
 	{
 		//see: https://sqlite.org/limits.html section 9
-		return 999;
+		//SQLite set this to 25000, see https://github.com/xerial/sqlite-jdbc/pull/167
+		return 25000;
 	}
 
 	@Override

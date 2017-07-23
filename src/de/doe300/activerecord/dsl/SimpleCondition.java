@@ -24,19 +24,19 @@
  */
 package de.doe300.activerecord.dsl;
 
+import java.util.Arrays;
 import java.util.Collection;
 import java.util.Map;
+import java.util.Optional;
+import java.util.stream.Collectors;
 
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
+import javax.annotation.Syntax;
+import javax.annotation.concurrent.Immutable;
 
 import de.doe300.activerecord.jdbc.driver.JDBCDriver;
 import de.doe300.activerecord.record.ActiveRecord;
-import java.util.Arrays;
-import java.util.Optional;
-import java.util.stream.Collectors;
-import javax.annotation.Syntax;
-import javax.annotation.concurrent.Immutable;
 
 /**
  *
@@ -63,16 +63,16 @@ public class SimpleCondition implements Condition
 		{
 			throw new UnsupportedOperationException("Value as left is is currently not supported!");
 		}
-		left = comparison.hasLeft ? checkValue( leftSide, comparison, false) : null;
-		right = comparison.hasRight ? checkValue( rightSide, comparison, true ) : null;
-		this.comp = checkComparison( rightSide, comparison);
+		left = comparison.hasLeft ? SimpleCondition.checkValue( leftSide, comparison, false) : null;
+		right = comparison.hasRight ? SimpleCondition.checkValue( rightSide, comparison, true ) : null;
+		this.comp = SimpleCondition.checkComparison( rightSide, comparison);
 	}
-	
+
 	private static Side checkValue(@Nullable final Object val, @Nonnull final Comparison comp, final boolean mayBeValue)
 	{
 		//XXX check for type compatibility for SQL-functions and rows too ?!?
 		final boolean isValue = mayBeValue && (val == null || !SQLFunction.class.isAssignableFrom( val.getClass()));
-		
+
 		//check for IN (only check for values)
 		if(isValue && comp == Comparison.IN)
 		{
@@ -93,7 +93,7 @@ public class SimpleCondition implements Condition
 		//check for LARGER/SMALLER (only check for values)
 		if(comp == Comparison.LARGER || comp == Comparison.LARGER_EQUALS || comp == Comparison.SMALLER || comp == Comparison.SMALLER_EQUALS)
 		{
-			if(!(val instanceof Comparable))
+			if (val != null && !(val instanceof Comparable))
 			{
 				throw new IllegalArgumentException("Type must be comparable: " + val.getClass());
 			}
@@ -153,7 +153,7 @@ public class SimpleCondition implements Condition
 	@Override
 	public boolean hasWildcards()
 	{
-		return (comp.hasLeft && left.isValue) || (comp.hasRight && right.isValue);
+		return comp.hasLeft && left.isValue || comp.hasRight && right.isValue;
 	}
 
 	@Override
@@ -171,9 +171,9 @@ public class SimpleCondition implements Condition
 		final Optional<Object> rightValue = comp.hasRight ? right.getValue( t) : null;
 		return comp.test( leftValue, rightValue );
 	}
-	
+
 	@Override
-	public boolean equals( Object obj )
+	public boolean equals( final Object obj )
 	{
 		if(obj == null || !(obj instanceof Condition))
 		{
@@ -181,13 +181,13 @@ public class SimpleCondition implements Condition
 		}
 		return equals( (Condition)obj);
 	}
-	
+
 	@Override
 	public int hashCode()
 	{
 		return toSQL( JDBCDriver.DEFAULT, null ).hashCode();
 	}
-	
+
 	@Immutable
 	private static class Side
 	{
@@ -195,12 +195,12 @@ public class SimpleCondition implements Condition
 		final Object data;
 		final boolean isValue;
 
-		Side(@Nullable final Object data, boolean isValue )
+		Side(@Nullable final Object data, final boolean isValue )
 		{
 			this.data = data;
 			this.isValue = isValue;
 		}
-		
+
 		@Nonnull
 		@Syntax("SQL")
 		public String toSQL(@Nonnull final JDBCDriver driver, @Nullable final String tableName)
@@ -225,7 +225,7 @@ public class SimpleCondition implements Condition
 			}
 			return (String)(tableName != null ? tableName + "." + data : data);
 		}
-		
+
 		@Nonnull
 		public Optional<Object> getValue(@Nonnull final ActiveRecord record)
 		{
@@ -239,7 +239,7 @@ public class SimpleCondition implements Condition
 			}
 			return Optional.ofNullable( record.getBase().getStore().getValue( record.getBase(), record.getPrimaryKey(), (String)data));
 		}
-		
+
 		@Nullable
 		public Optional<Object> getValue(@Nonnull final Map<String, Object> row)
 		{
@@ -251,11 +251,11 @@ public class SimpleCondition implements Condition
 			{
 				return Optional.ofNullable( ((SQLFunction)data).apply( row));
 			}
-			if(!row.containsKey( (String)data))
+			if(!row.containsKey( data))
 			{
 				return null;
 			}
-			return Optional.ofNullable( row.get( (String)data));
+			return Optional.ofNullable( row.get( data));
 		}
 	}
 }

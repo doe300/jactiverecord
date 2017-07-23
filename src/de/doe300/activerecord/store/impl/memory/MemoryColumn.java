@@ -94,6 +94,12 @@ public class MemoryColumn implements Comparable<MemoryColumn>
 	{
 		return getName().compareToIgnoreCase( o.getName());
 	}
+	
+	@Override
+	public boolean equals(final Object obj)
+	{
+		return obj instanceof MemoryColumn && getName() == ((MemoryColumn)obj).getName() && getType() == ((MemoryColumn)obj).getType();
+	}
 
 	@Override
 	public String toString()

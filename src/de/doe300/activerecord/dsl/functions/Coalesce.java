@@ -24,18 +24,20 @@
 
 package de.doe300.activerecord.dsl.functions;
 
-import de.doe300.activerecord.dsl.SQLFunction;
-import de.doe300.activerecord.dsl.ScalarFunction;
-import de.doe300.activerecord.jdbc.driver.JDBCDriver;
-import de.doe300.activerecord.record.ActiveRecord;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
+
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
+
+import de.doe300.activerecord.dsl.SQLFunction;
+import de.doe300.activerecord.dsl.ScalarFunction;
+import de.doe300.activerecord.jdbc.driver.JDBCDriver;
+import de.doe300.activerecord.record.ActiveRecord;
 
 /**
  * Returns the first non-NULL argument.
@@ -44,19 +46,25 @@ import javax.annotation.Nullable;
  * @param <T> the record-type
  * @param <V> the value-type
  * @since 0.9
- * @see Optional#orElse(java.lang.Object) 
+ * @see Optional#orElse(java.lang.Object)
  */
 public class Coalesce<T extends ActiveRecord, V> extends ScalarFunction<T, V, V>
 {
 	private final List<SQLFunction<T, V>> columnFunctions;
-			
+
+	/**
+	 * @param column1
+	 *            the first SQL-function
+	 * @param otherColumns
+	 *            the optional further SQL-functions
+	 */
 	@SafeVarargs
 	public Coalesce(@Nonnull final SQLFunction<T, V> column1, @Nullable final SQLFunction<T, V>... otherColumns)
 	{
 		super(JDBCDriver.SCALAR_COALESCE, column1);
-		columnFunctions = createList( column1, otherColumns);
+		columnFunctions = Coalesce.createList( column1, otherColumns);
 	}
-	
+
 	@SafeVarargs
 	static <T> List<T> createList(@Nonnull final T el1, @Nullable final T... els)
 	{
@@ -64,7 +72,7 @@ public class Coalesce<T extends ActiveRecord, V> extends ScalarFunction<T, V, V>
 		{
 			return Collections.singletonList( el1 );
 		}
-		List<T> list = new ArrayList<>(els.length+1);
+		final List<T> list = new ArrayList<>(els.length+1);
 		list.add( el1 );
 		for(final T t : els)
 		{
@@ -72,7 +80,7 @@ public class Coalesce<T extends ActiveRecord, V> extends ScalarFunction<T, V, V>
 		}
 		return list;
 	}
-	
+
 	@Override
 	public V apply( final T t )
 	{
@@ -98,13 +106,13 @@ public class Coalesce<T extends ActiveRecord, V> extends ScalarFunction<T, V, V>
 	}
 
 	@Override
-	protected V applySQLFunction( V columnValue )
+	protected V applySQLFunction( final V columnValue )
 	{
 		throw new UnsupportedOperationException( "Not called." );
 	}
 
 	@Override
-	public String toSQL( JDBCDriver driver, String tableName )
+	public String toSQL( final JDBCDriver driver, final String tableName )
 	{
 		String sql = JDBCDriver.SCALAR_COALESCE;
 		for(int i = 0; i < columnFunctions.size(); i++)

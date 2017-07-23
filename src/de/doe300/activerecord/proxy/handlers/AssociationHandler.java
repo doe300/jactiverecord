@@ -24,6 +24,9 @@
 
 package de.doe300.activerecord.proxy.handlers;
 
+import java.lang.reflect.Method;
+import java.util.function.Consumer;
+
 import de.doe300.activerecord.RecordBase;
 import de.doe300.activerecord.dsl.Condition;
 import de.doe300.activerecord.dsl.Conditions;
@@ -34,8 +37,6 @@ import de.doe300.activerecord.record.association.HasManyAssociationSet;
 import de.doe300.activerecord.record.association.generation.BelongsTo;
 import de.doe300.activerecord.record.association.generation.Has;
 import de.doe300.activerecord.record.association.generation.HasManyThrough;
-import java.lang.reflect.Method;
-import java.util.function.Consumer;
 
 /**
  * Proxy-handler for automatically accessing associations for interface-methods
@@ -44,20 +45,23 @@ import java.util.function.Consumer;
  */
 public class AssociationHandler implements ProxyHandler
 {
+	/**
+	 * Default constructor
+	 */
 	public AssociationHandler()
 	{
 	}
 
 	@Override
-	public boolean handlesMethod( ActiveRecord record, Method method, Object[] args ) throws IllegalArgumentException
+	public boolean handlesMethod( final ActiveRecord record, final Method method, final Object[] args ) throws IllegalArgumentException
 	{
-		return method.isAnnotationPresent( BelongsTo.class) || method.isAnnotationPresent( HasManyThrough.class) || 
-				method.isAnnotationPresent( Has.class);
+		return method.isAnnotationPresent( BelongsTo.class) || method.isAnnotationPresent( HasManyThrough.class) ||
+			method.isAnnotationPresent( Has.class);
 	}
 
 	@Override
-	public <T extends ActiveRecord> Object invoke( ActiveRecord record, RecordHandler<T> handler, Method method,
-			Object[] args ) throws IllegalArgumentException
+	public <T extends ActiveRecord> Object invoke( final ActiveRecord record, final RecordHandler<T> handler, final Method method,
+		final Object[] args ) throws IllegalArgumentException
 	{
 		final RecordBase<?> base = record.getBase();
 		final int primaryKey = record.getPrimaryKey();
@@ -107,13 +111,13 @@ public class AssociationHandler implements ProxyHandler
 				final Object key = base.getStore().getValue( base, primaryKey, columnName );
 				return key == null ? null : otherBase.findFirstFor( belongsTo.associationForeignKey(), key);
 			}
-				
+
 		}
 		if(method.isAnnotationPresent( HasManyThrough.class))
 		{
 			final HasManyThrough hasMany = method.getAnnotation( HasManyThrough.class);
 			return AssociationHelper.getHasManyThroughSet( record, hasMany.associatedType(), hasMany.mappingTable(), hasMany.mappingTableThisKey(),
-					hasMany.mappingTableAssociatedKey() );
+				hasMany.mappingTableAssociatedKey() );
 		}
 		throw new IllegalArgumentException("Method is not handled by this handler");
 	}

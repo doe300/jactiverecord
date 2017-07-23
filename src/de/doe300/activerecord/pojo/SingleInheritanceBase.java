@@ -91,7 +91,7 @@ public class SingleInheritanceBase<T extends ActiveRecord> extends POJOBase<T>
 		if(newRecord && recordData == null)
 		{
 			//can't determine type - maybe super-type can create record
-			return super.createProxy( primaryKey, newRecord, recordData );
+			return super.createProxy( primaryKey, newRecord, null );
 		}
 		Object typeKey = null;
 		if(recordData != null)

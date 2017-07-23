@@ -27,6 +27,7 @@ package de.doe300.activerecord.dsl;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
+
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 
@@ -38,138 +39,264 @@ import javax.annotation.Nullable;
  */
 public final class Conditions
 {
+	/**
+	 * @return a condition which is always true
+	 */
 	@Nonnull
 	public static Condition isTrue()
 	{
 		return new SimpleCondition("", null, Comparison.TRUE);
 	}
-	
+
+	/**
+	 * @param attributeName
+	 * @return a condition whether the attribute-value is null
+	 */
 	@Nonnull
 	public static Condition isNull(@Nonnull final String attributeName)
 	{
 		return new SimpleCondition(attributeName, null, Comparison.IS_NULL);
 	}
-	
+
+	/**
+	 * @param attributeFunc
+	 * @return a condition whether the result of the function is null
+	 */
 	@Nonnull
 	public static Condition isNull(@Nonnull final SQLFunction<?, ?> attributeFunc)
 	{
 		return new SimpleCondition(attributeFunc, null, Comparison.IS_NULL);
 	}
-	
+
+	/**
+	 * @param attributeName
+	 * @return a condition whether the attribute-value is not null
+	 */
 	@Nonnull
 	public static Condition isNotNull(@Nonnull final String attributeName)
 	{
 		return new SimpleCondition(attributeName, null, Comparison.IS_NOT_NULL);
 	}
-	
+
+	/**
+	 * @param attributeFunc
+	 * @return a condition whether the result of the function is not null
+	 */
 	@Nonnull
 	public static Condition isNotNull(@Nonnull final SQLFunction<?, ?> attributeFunc)
 	{
 		return new SimpleCondition(attributeFunc, null, Comparison.IS_NOT_NULL);
 	}
-	
+
+	/**
+	 * @param attributeName
+	 * @param value
+	 * @return a condition whether the attribute-value is the given vale
+	 */
 	@Nonnull
 	public static Condition is(@Nonnull final String attributeName, @Nullable final Object value)
 	{
 		return new SimpleCondition(attributeName, value, Comparison.IS );
 	}
-	
+
+	/**
+	 * @param attributeFunc
+	 * @param value
+	 * @return a condition whether the result of the function is the given value
+	 */
 	@Nonnull
 	public static Condition is(@Nonnull final SQLFunction<?, ?> attributeFunc, @Nullable final Object value)
 	{
 		return new SimpleCondition(attributeFunc, value, Comparison.IS );
 	}
-	
+
+	/**
+	 * @param attributeName
+	 * @param value
+	 * @return a condition whether the attribute-value is not the given value
+	 */
 	@Nonnull
 	public static Condition isNot(@Nonnull final String attributeName, @Nullable final Object value)
 	{
 		return new SimpleCondition(attributeName, value, Comparison.IS_NOT );
 	}
-	
+
+	/**
+	 * @param attributeFunc
+	 * @param value
+	 * @return a condition whether the result of the function is not the given
+	 *         value
+	 */
 	@Nonnull
 	public static Condition isNot(@Nonnull final SQLFunction<?, ?> attributeFunc, @Nullable final Object value)
 	{
 		return new SimpleCondition(attributeFunc, value, Comparison.IS_NOT );
 	}
-	
+
+	/**
+	 * @param attributeName
+	 * @param value
+	 * @return a condition whether the attribute-value is 'LIKE' the given value
+	 *         (according to SQL LIKE method)
+	 */
 	@Nonnull
-	public static Condition isLike(@Nonnull final String attributeName, @Nullable final Object value)
+	public static Condition isLike(@Nonnull final String attributeName, @Nullable final String value)
 	{
 		return new SimpleCondition(attributeName, value, Comparison.LIKE );
 	}
-	
+
+	/**
+	 * @param attributeFunc
+	 * @param value
+	 * @return a condition whether the result of the function is 'LIKE' the
+	 *         given value
+	 */
 	@Nonnull
-	public static Condition isLike(@Nonnull final SQLFunction<?, ?> attributeFunc, @Nullable final Object value)
+	public static Condition isLike(@Nonnull final SQLFunction<?, ?> attributeFunc, @Nullable final String value)
 	{
 		return new SimpleCondition(attributeFunc, value, Comparison.LIKE );
 	}
-	
+
+	/**
+	 * @param attributeName
+	 * @param value
+	 *            The container to check for contents
+	 * @return a condition whether the attribute-value is 'IN' the value
+	 */
 	@Nonnull
 	public static Condition isIn(@Nonnull final String attributeName, @Nullable final Object value)
 	{
 		return new SimpleCondition(attributeName, value, Comparison.IN );
 	}
-	
+
+	/**
+	 * @param attributeFunc
+	 * @param value
+	 *            The container to check for contents
+	 * @return a condition whether the function-value is 'IN' the value
+	 */
 	@Nonnull
 	public static Condition isIn(@Nonnull final SQLFunction<?, ?> attributeFunc, @Nullable final Object value)
 	{
 		return new SimpleCondition(attributeFunc, value, Comparison.IN );
 	}
-	
+
+	/**
+	 * @param attributeName
+	 * @param value
+	 * @return a condition whether the attribute-value is larger than the given
+	 *         value
+	 */
 	@Nonnull
-	public static Condition isLarger(@Nonnull final String attributeName, @Nullable final Object value)
+	public static Condition isLarger(@Nonnull final String attributeName, @Nullable final Comparable<?> value)
 	{
 		return new SimpleCondition(attributeName, value, Comparison.LARGER );
 	}
-	
+
+	/**
+	 * @param attributeFunc
+	 * @param value
+	 * @return a condition whether the function return-value is larger than the
+	 *         given value
+	 */
 	@Nonnull
-	public static <T extends Comparable<? super T>> Condition isLarger(@Nonnull final SQLFunction<?, T> attributeFunc, @Nullable final Object value)
+	public static <T extends Comparable<? super T>> Condition isLarger(@Nonnull final SQLFunction<?, T> attributeFunc, @Nullable final Comparable<?> value)
 	{
 		return new SimpleCondition(attributeFunc, value, Comparison.LARGER );
 	}
-	
+
+	/**
+	 * @param attributeName
+	 * @param value
+	 * @return a condition whether the attribute-value is larger or equals the
+	 *         given value
+	 */
 	@Nonnull
-	public static Condition isLargerEquals(@Nonnull final String attributeName, @Nullable final Object value)
+	public static Condition isLargerEquals(@Nonnull final String attributeName, @Nullable final Comparable<?> value)
 	{
 		return new SimpleCondition(attributeName, value, Comparison.LARGER_EQUALS );
 	}
-	
+
+	/**
+	 * @param attributeFunc
+	 * @param value
+	 * @return a condition whether the function return-value is larger or equals
+	 *         the given value
+	 */
 	@Nonnull
-	public static <T extends Comparable<? super T>> Condition isLargerEquals(@Nonnull final SQLFunction<?, T> attributeFunc, @Nullable final Object value)
+	public static <T extends Comparable<? super T>> Condition isLargerEquals(@Nonnull final SQLFunction<?, T> attributeFunc, @Nullable final Comparable<?> value)
 	{
 		return new SimpleCondition(attributeFunc, value, Comparison.LARGER_EQUALS );
 	}
-	
+
+	/**
+	 * @param attributeName
+	 * @param value
+	 * @return a condition whether the attribute-value is smaller than the given
+	 *         value
+	 */
 	@Nonnull
-	public static Condition isSmaller(@Nonnull final String attributeName, @Nullable final Object value)
+	public static Condition isSmaller(@Nonnull final String attributeName, @Nullable final Comparable<?> value)
 	{
 		return new SimpleCondition(attributeName, value, Comparison.SMALLER );
 	}
-	
+
+	/**
+	 * @param attributeFunc
+	 * @param value
+	 * @return a condition whether the function-value is smaller than the given
+	 *         value
+	 */
 	@Nonnull
-	public static <T extends Comparable<? super T>> Condition isSmaller(@Nonnull final SQLFunction<?, T> attributeFunc, @Nullable final Object value)
+	public static <T extends Comparable<? super T>> Condition isSmaller(@Nonnull final SQLFunction<?, T> attributeFunc, @Nullable final Comparable<?> value)
 	{
 		return new SimpleCondition(attributeFunc, value, Comparison.SMALLER );
 	}
-	
+
+	/**
+	 * @param attributeName
+	 * @param value
+	 * @return a condition whether the attribute-value is smaller or equals the
+	 *         given value
+	 */
 	@Nonnull
-	public static Condition isSmallerEquals(@Nonnull final String attributeName, @Nullable final Object value)
+	public static Condition isSmallerEquals(@Nonnull final String attributeName, @Nullable final Comparable<?> value)
 	{
 		return new SimpleCondition(attributeName, value, Comparison.SMALLER_EQUALS );
 	}
-	
+
+	/**
+	 * @param attributeFunc
+	 * @param value
+	 * @return a condition whether the function-value is smaller or equals the
+	 *         given value
+	 */
 	@Nonnull
-	public static <T extends Comparable<? super T>> Condition isSmallerEquals(@Nonnull final SQLFunction<?, T> attributeFunc, @Nullable final Object value)
+	public static <T extends Comparable<? super T>> Condition isSmallerEquals(@Nonnull final SQLFunction<?, T> attributeFunc, @Nullable final Comparable<?> value)
 	{
 		return new SimpleCondition(attributeFunc, value, Comparison.SMALLER_EQUALS );
 	}
-	
+
+	/**
+	 * @param attributeName
+	 * @param value
+	 * @param comparison
+	 * @return a condition whether the given comparison is true for the
+	 *         attribute-value and the given value
+	 */
 	@Nonnull
 	public static Condition compare(@Nonnull final String attributeName, @Nullable final Object value, @Nonnull final Comparison comparison)
 	{
 		return new SimpleCondition(attributeName, value, comparison );
 	}
-	
+
+	/**
+	 * @param attributeFunc
+	 * @param value
+	 * @param comparison
+	 * @return a condition whether the given comparison is true for the
+	 *         function-value and the given value
+	 */
 	@Nonnull
 	public static Condition compare(@Nonnull final SQLFunction<?, ?> attributeFunc, @Nullable final Object value, @Nonnull final Comparison comparison)
 	{
@@ -180,14 +307,14 @@ public final class Conditions
 	 * Wrapper for {@link #and(java.util.Collection) }
 	 * @param conds
 	 * @return the combined Condition
-	 * @see #and(java.util.Collection) 
+	 * @see #and(java.util.Collection)
 	 */
 	@Nonnull
 	public static Condition and(@Nullable final Condition... conds )
 	{
-		return and( Arrays.asList( conds));
+		return Conditions.and( Arrays.asList( conds));
 	}
-	
+
 	/**
 	 * Combines the <code>conds</code> and optimizes according to the following rules:
 	 * <ul>
@@ -246,17 +373,17 @@ public final class Conditions
 		}
 		return new AndCondition( list.toArray( new Condition[ list.size() ] ) );
 	}
-	
+
 	/**
 	 * Wrapper for {@link #or(java.util.Collection) }
 	 * @param conds
 	 * @return the combined Condition
-	 * @see #or(java.util.Collection) 
+	 * @see #or(java.util.Collection)
 	 */
 	@Nonnull
-	public static Condition or(@Nullable Condition... conds )
+	public static Condition or(@Nullable final Condition... conds )
 	{
-		return or( Arrays.asList( conds));
+		return Conditions.or( Arrays.asList( conds));
 	}
 
 	/**
@@ -280,8 +407,8 @@ public final class Conditions
 		{
 			throw new IllegalArgumentException();
 		}
-		ArrayList<Condition> list = new ArrayList<>( conds.size() );
-		for ( Condition cond : conds )
+		final ArrayList<Condition> list = new ArrayList<>( conds.size() );
+		for ( final Condition cond : conds )
 		{
 			//clears nulls
 			if ( cond == null )
@@ -318,7 +445,7 @@ public final class Conditions
 		}
 		return new OrCondition( list.toArray( new Condition[ list.size() ] ) );
 	}
-	
+
 	/**
 	 * Wrapper for {@link #xor(java.util.Collection) }
 	 * @param conditions
@@ -329,9 +456,9 @@ public final class Conditions
 	@Nonnull
 	public static Condition xor(@Nullable final Condition... conditions)
 	{
-		return xor( Arrays.asList( conditions));
+		return Conditions.xor( Arrays.asList( conditions));
 	}
-	
+
 	/**
 	 * Combines the <code>conditions</code> and optimizes according to the following rules:
 	 * <ul>
@@ -340,7 +467,7 @@ public final class Conditions
 	 * <li>Skips conditions which are already in the list</li>
 	 * <li>Returns the single condition, if only one passes all other tests</li>
 	 * </ul>
-	 * 
+	 *
 	 * @param conditions
 	 * @return the XOR'ed conditions
 	 * @since 0.8
@@ -352,8 +479,8 @@ public final class Conditions
 		{
 			throw new IllegalArgumentException();
 		}
-		ArrayList<Condition> list = new ArrayList<>( conditions.size() );
-		for ( Condition cond : conditions )
+		final ArrayList<Condition> list = new ArrayList<>( conditions.size() );
+		for ( final Condition cond : conditions )
 		{
 			//clears nulls
 			if ( cond == null )
@@ -405,9 +532,9 @@ public final class Conditions
 		}
 		return new InvertedCondition( cond );
 	}
-	
+
 	private Conditions()
 	{
-		
+
 	}
 }

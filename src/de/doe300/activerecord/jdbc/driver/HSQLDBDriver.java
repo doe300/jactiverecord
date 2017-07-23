@@ -24,13 +24,15 @@
  */
 package de.doe300.activerecord.jdbc.driver;
 
+import java.io.Serializable;
+
+import javax.annotation.Nonnull;
+
 import de.doe300.activerecord.jdbc.diagnostics.HSQLDBQuery;
 import de.doe300.activerecord.migration.constraints.IndexType;
 import de.doe300.activerecord.store.JDBCRecordStore;
 import de.doe300.activerecord.store.RecordStore;
 import de.doe300.activerecord.store.diagnostics.Diagnostics;
-import java.io.Serializable;
-import javax.annotation.Nonnull;
 
 /**
  * Vendor-specific driver for the HSQLDB driver, including
@@ -51,12 +53,12 @@ public class HSQLDBDriver extends JDBCDriver
 	}
 
 	@Override
-	public String getIndexKeyword( IndexType indexType )
+	public String getIndexKeyword( final IndexType indexType )
 	{
 		//does not support any special index-types
 		return "";
 	}
-	
+
 	@Override
 	public String getPrimaryKeyKeywords(@Nonnull final String primaryKeyKeywords)
 	{
@@ -70,21 +72,19 @@ public class HSQLDBDriver extends JDBCDriver
 	}
 
 	@Override
-	public String getSQLType(Class<?> javaType ) throws IllegalArgumentException
+	public String getSQLType(final Class<?> javaType ) throws IllegalArgumentException
 	{
 		if(java.sql.SQLXML.class.isAssignableFrom( javaType ))
 		{
 			//see: http://hsqldb.org/doc/src/org/hsqldb/jdbc/JDBCSQLXML.html
 			return "LONGVARCHAR";
 		}
-//		if(java.util.UUID.class.isAssignableFrom( javaType ))
-//		{
-//			//TODO HsqlDB 2.3.4+ supports UUID, but currently type-error on read (a BinaryData is returned)
-//			//will be fixed in the next release - https://sourceforge.net/p/hsqldb/bugs/1446/
-//			return "UUID";
-//		}
-		if(Serializable.class.isAssignableFrom( javaType) && super.getSQLType( javaType ).equals( super.getSQLType( 
-				Serializable.class)))	//makes sure, no special treatments are overridden
+		if (java.util.UUID.class.isAssignableFrom(javaType))
+		{
+			return "UUID";
+		}
+		if(Serializable.class.isAssignableFrom( javaType) && super.getSQLType( javaType ).equals( super.getSQLType(
+			Serializable.class)))	//makes sure, no special treatments are overridden
 		{
 			return "VARBINARY(" + Integer.MAX_VALUE + ")";
 		}
@@ -92,8 +92,8 @@ public class HSQLDBDriver extends JDBCDriver
 	}
 
 	@Override
-	public Diagnostics<String> createDiagnostics( RecordStore store )
+	public Diagnostics<String> createDiagnostics( final RecordStore store )
 	{
-		return new Diagnostics<String>((String t, Long u) -> new HSQLDBQuery(( JDBCRecordStore ) store, t, null, u));
+		return new Diagnostics<String>((final String t, final Long u) -> new HSQLDBQuery(( JDBCRecordStore ) store, t, null, u));
 	}
 }

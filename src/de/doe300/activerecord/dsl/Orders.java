@@ -121,7 +121,7 @@ public final class Orders
 	 * @since 0.8
 	 */
 	@Nonnull
-	public static Order sortAscending(@Nullable final ScalarFunction<?, ?, ?> scalarFunction)
+	public static Order sortAscending(@Nonnull final ScalarFunction<?, ?, ?> scalarFunction)
 	{
 		return new ScalarOrder(scalarFunction.getAttributeName(), scalarFunction, SimpleOrder.OrderType.ASCENDING );
 	}
@@ -145,7 +145,7 @@ public final class Orders
 	 * @since 0.8
 	 */
 	@Nonnull
-	public static Order sortDescending(@Nullable final ScalarFunction<?, ?, ?> scalarFunction)
+	public static Order sortDescending(@Nonnull final ScalarFunction<?, ?, ?> scalarFunction)
 	{
 		return new ScalarOrder(scalarFunction.getAttributeName(), scalarFunction, SimpleOrder.OrderType.DESCENDING );
 	}
